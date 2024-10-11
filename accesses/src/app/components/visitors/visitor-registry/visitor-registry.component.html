@@ -1,1 +1,48 @@
 <p>visitor-registry works!</p>
+    <div class="">
+        <div class="">
+            <h1 style="text-align: center; color: aliceblue;">Movimiento de Visitantes</h1>
+        </div>
+        <div class="">
+            <h4 style="color: aliceblue;">Filtrar por:</h4>
+
+            <div class="container text-center">
+                <div class="row align-items-center">
+                  <div class="col">
+                    <input type="text" class="" placeholder="Documento" onchange="Search()" [(ngModel)]="document">
+                  </div>
+                  <div class="col">
+                    <input type="text" class="" placeholder="Nombre" onchange="Search()" [(ngModel)]="name">
+                  </div>
+                  <!-- <div class="col">
+                    <button type="button" (click)="" class="but1">Buscar</button>
+                  </div> -->
+                </div>
+            </div>
+                <div class="box2">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Nombre</th>
+                                <th scope="col">Documento</th>
+                                <th scope="col">Ver más</th>
+                                <th scope="col">Acción</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @for (v of visitors; track $index) {
+                                    <tr>
+                                        <td>{{v.lastName}} {{v.name}}</td>
+                                        <th>{{v.document}}</th>
+                                        <td><button (click)="MoreInfo(v)" class="but1"> + Informacion</button></td>
+                                        <!-- <td><button (click)="RegisterEntry(v)" class="but1">ingreso</button></td> -->
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                </div>
+                    <div style="text-align: center;">
+                        <button class="but1" (click)="Return()"> Volver </button>
+                    </div>
+        </div>   
+    </div>
