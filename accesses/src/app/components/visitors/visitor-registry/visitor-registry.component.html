@@ -2,42 +2,42 @@
         <div class="m-1">
             <h1 class="text-center">Ingreso/Egreso de Visitantes</h1>
         </div>
-        <div class="container-fluid m-1 p-2 border border-dark">
+        <div class="container-fluid m-1 p-2">
 
-            <div class="row align-items-start text-start p-2">
-                <div class="col-auto me-5"> 
-                    <input type="text" class="form-control" placeholder="Ingrese un Nombre o DNI" onchange="Search()" [(ngModel)]="param">
+            <div class="row p-2 justify-content-center"> 
+                <div class="col-4 text-center d-flex justify-content-center align-items-center"> 
+                  <input type="text" class="form-control border border-dark" placeholder="Ingrese un Nombre o DNI" [(ngModel)]="parameter" (ngModelChange)="Search()">
                 </div>
-            </div>
+              </div>              
 
-                <div class="container-fluid">
-                        <table class="table border border-dark">
-                            <thead>
+            <div class="container-fluid pe-5 ps-5 col-10">
+                <table class="table border border-dark rounded">
+                    <thead class="bg-secondary">
+                        <tr>
+                            <th scope="col" class="border border-dark text-light bg-secondary">Nombre</th>
+                            <th scope="col" class="border border-dark text-light bg-secondary">Documento</th>
+                            <th scope="col" class="border border-dark text-light bg-secondary">Más Información</th>
+                            <th scope="col" class="border border-dark text-light bg-secondary">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (v of showVisitors; track $index) {
                             <tr>
-                                <th scope="col border border-dark">Nombre</th>
-                                <th scope="col border border-dark">Documento</th>
-                                <th scope="col border border-dark">Ver más</th>
-                                <th scope="col border border-dark">Acción</th>
+                                <td class="border border-dark">{{v.lastName}} {{v.name}}</td>
+                                <td class="border border-dark">{{v.document}}</td>
+                                <td class="border border-dark col-2 align-items-center text-center"><button (click)="MoreInfo(v)" class="btn btn-info">Ver más</button></td>
+                                <td class="col-2">
+                                    <select class="form-select border-light" name="" id="">
+                                        <option value="" class="bg-secondary text-white" selected disabled hidden>Seleccionar</option>
+                                        <option (click)="RegisterAccess(v)" class="bg-primary text-light m-0 p-0" value="">Ingreso</option>
+                                        <option (click)="RegisterExit(v)" class="bg-primary text-light m-0 p-0" value="">Egreso</option>
+                                    </select>                                                                                     
+                                </td>
                             </tr>
-                            </thead>
-                            <tbody>
-                                @for (v of visitors; track $index) {
-                                    <tr>
-                                        <td>{{v.lastName}} {{v.name}}</td>
-                                        <th>{{v.document}}</th>
-                                        <td><button (click)="MoreInfo(v)" class="but1">Ver más</button></td>
-                                        <td>
-                                            <select class="form-select" name="" id="">
-                                                <option value="" selected disabled hidden>Seleccionar</option>
-                                                <option (click)="RegisterAccess(v)" class="bg-primary text-light m-0 p-0" value="">Ingreso</option>
-                                                <option (click)="RegisterExit(v)" class="bg-light border border-primary text-primary m-0 p-0" value="">Egreso</option>
-                                              </select>                                        
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                </div>
+                        }
+                    </tbody>
+                </table>
+
                 <div class="row align-items-center">
                     <div class="col text-center">
                         <button class="btn btn-secondary" (click)="Return()">Cancelar</button>
@@ -49,6 +49,8 @@
                         <button class="btn btn-primary" (click)="AddVisitor()">Agregar Visitante</button>
                     </div>
                 </div>
+
+            </div>
                 
         </div>   
     </div>

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders,  } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { NewMovements_EntryDto } from '../../models/visitors/VisitorsModels';
+import { NewMovements_EntryDto, Visitor } from '../../models/visitors/VisitorsModels';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +13,7 @@ export class VisitorsService {
 
   constructor(private http: HttpClient) {
   }
-
-
+  
   // METODO: registerMovementEntry(NewMovements_EntryDto movementsEntryDto)
   registerVisitor(movement: NewMovements_EntryDto): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
