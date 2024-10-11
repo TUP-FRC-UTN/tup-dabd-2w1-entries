@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { VisitorDto } from '../../../models/visitors/VisitorDto';
+import { Visitor } from '../../../models/visitors/VisitorsModels';
 
 @Component({
   selector: 'app-visitor-registry',
@@ -14,16 +14,22 @@ import { VisitorDto } from '../../../models/visitors/VisitorDto';
 export class VisitorRegistryComponent {
 
   // para mostrar visitantes en tabla
-  visitors: VisitorDto[] = [];
+  visitors: Visitor[] = [];
 
   //datos de busqueda/filtrado
   param: string | null = null;
-  startDate: Date | null = null;
-  endDate: Date | null = null;
 
   //buscar vistantes por parametro (Nombre y/o DNI)
-  Search(){
+  Search(param: string | null): Visitor[] {
 
+    if(param != null && param?.length > 2){
+      return this.visitors.filter(v => (v.document === param || 
+        v.name === param || 
+        v.lastName === param) 
+      );
+    }
+
+    return this.visitors;
   }
 
   //volver a pantalla anterior
@@ -32,17 +38,17 @@ export class VisitorRegistryComponent {
   }
 
   //mostrar mas info de un visitante
-  MoreInfo(v : VisitorDto){
+  MoreInfo(v : Visitor){
 
   }
 
   //registrar egreso de un visitante
-  RegisterExit(v :VisitorDto){
+  RegisterExit(v :Visitor){
 
   }
 
   //registrar ingreso de un visitante
-  RegisterAccess(v :VisitorDto){
+  RegisterAccess(v :Visitor){
 
   }
 
