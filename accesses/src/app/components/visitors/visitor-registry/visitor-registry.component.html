@@ -1,19 +1,24 @@
-    <div class="container-fluid mt-2 mb-2">
-        <div class="m-1">
-            <h1 class="text-center">Ingreso/Egreso de Visitantes</h1>
+    <div class="container-fluid p-1 mt-2 mb-2">
+        <div class="m-2 p-1">
+            <h1 class="text-left ps-4">Ingreso/Egreso de Visitantes</h1>
         </div>
-        <div class="container-fluid m-1 p-2">
+        <div class="container-fluid m-1 p-2">           
 
-            <div class="row p-2 justify-content-center"> 
-                <div class="col-4 text-center d-flex justify-content-center align-items-center"> 
-                  <input type="text" class="form-control border border-dark" placeholder="Ingrese un Nombre o DNI" [(ngModel)]="parameter" (ngModelChange)="Search()">
-                </div>
-              </div>              
+            <div class="container-fluid col-10">
 
-            <div class="container-fluid pe-5 ps-5 col-10">
+                <div class="row mb-2 p-2 justify-content-start"> 
+                    <div class="col-4 text-center d-flex border border-dark p-2 rounded justify-content-center align-items-center"> 
+                        <label for="inputParameter" class="m-1 me-2">Buscar</label>
+                        <input type="text" class="form-control border" placeholder="por DNI, Apellido o Nombre" name="inputParameter"
+                                [(ngModel)]="parameter" (ngModelChange)="Search()"
+                        >
+                    </div>
+                </div>   
+
                 <table class="table border border-dark rounded">
                     <thead class="bg-secondary">
                         <tr>
+                            <th scope="col" class="border border-dark text-light bg-secondary">Observaciones</th>
                             <th scope="col" class="border border-dark text-light bg-secondary">Nombre</th>
                             <th scope="col" class="border border-dark text-light bg-secondary">Documento</th>
                             <th scope="col" class="border border-dark text-light bg-secondary">Más Información</th>
@@ -23,11 +28,12 @@
                     <tbody>
                         @for (v of showVisitors; track $index) {
                             <tr>
-                                <td class="border border-dark">{{v.lastName}} {{v.name}}</td>
-                                <td class="border border-dark">{{v.document}}</td>
-                                <td class="border border-dark col-2 align-items-center text-center"><button (click)="MoreInfo(v)" class="btn btn-info">Ver más</button></td>
+                                <td class="col-2 border border-dark"><textarea name="" id=""></textarea></td>
+                                <td class="col-2 border border-dark">{{v.lastName}} {{v.name}}</td>
+                                <td class="col-2 border border-dark">{{v.document}}</td>
+                                <td class="border border-dark col-2 align-items-center text-center"><button (click)="MoreInfo(v)" style="width: 100%;" class="btn btn-info">Ver más</button></td>
                                 <td class="col-2">
-                                    <select class="form-select border-light" name="" id="">
+                                    <select style="width: 100%;" class="form-select" name="" id="">
                                         <option value="" class="bg-secondary text-white" selected disabled hidden>Seleccionar</option>
                                         <option (click)="RegisterAccess(v)" class="bg-primary text-light m-0 p-0" value="">Ingreso</option>
                                         <option (click)="RegisterExit(v)" class="bg-primary text-light m-0 p-0" value="">Egreso</option>
@@ -39,16 +45,14 @@
                 </table>
 
                 <div class="row align-items-center">
-                    <div class="col text-center">
+                    <div class="col text-start">
                         <button class="btn btn-secondary" (click)="Return()">Cancelar</button>
                     </div>
-                    <div class="col text-center">
-                        <button class="btn btn-info" (click)="ScanQR()">Escanear QR</button>
+                    <div class="col text-end">
+                        <button class="btn btn-primary me-2" (click)="AddVisitor()">Agregar Visitante</button>
+                        <button class="btn btn-info ms-2" (click)="ScanQR()">Escanear QR</button>
                     </div>
-                    <div class="col text-center">
-                        <button class="btn btn-primary" (click)="AddVisitor()">Agregar Visitante</button>
-                    </div>
-                </div>
+                </div>                
 
             </div>
                 
