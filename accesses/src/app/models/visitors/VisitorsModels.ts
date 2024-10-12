@@ -37,7 +37,7 @@ export interface RegistryVisitor {
   // METODOS: registerMovementEntry(NewMovements_EntryDto movementsEntryDto) / registerMoventEntryIfNotExistsInvitation(String documento, LocalDate date, NewMovements_EntryDto movementsEntryDto)
   // CLase necesaria: NewMovements_EntryDto
   export interface NewMovements_EntryDto {
-    movementDatetime: Date; // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z")
+    movementDatetime: string; // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z")
     observations: string;
     newUserAllowedDto: NewUserAllowedDto; //interface declarada mas abajo
     authRangesDto: NewAuthRangeDto; //interface declarada mas abajo
@@ -47,12 +47,12 @@ export interface RegistryVisitor {
     // todo lo necesario para NewAuthRangeDto
     export interface NewAuthRangeDto {
       neighbor_id: number;
-      init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
-      end_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+      init_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+      end_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       allowedDaysDtos: Allowed_DaysDto[] ;
     }
     export interface Allowed_DaysDto {
-      day: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+      day: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       init_hour: string; //LocalTime (EJ: "14:30:00" / "hh:mm:ss")
       end_hour: string; //LocalTime (EJ: "14:30:00" / "hh:mm:ss")
     }
@@ -100,8 +100,8 @@ export interface RegistryVisitor {
     }
 
     export interface AuthRangeInfoDto {
-      init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
-      end_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+      init_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+      end_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       allowedDays: Allowed_DaysDto[]; //List<Allowed_DaysDto> 
   }
     //FIN Clase necesaria (para recibir la data): User_AllowedInfoDto

@@ -21,15 +21,26 @@ export class VisitorRegistryComponent implements OnInit {
   private readonly visitorService = inject(VisitorsService);
   constructor(){}
 
+
   //carga TODOS los invitados al iniciar la pantalla
   ngOnInit(): void {
-    this.visitorService.getVisitorsData("Visitor").subscribe((data) => {
-      this.visitors = data;
-    });
+    this.loadVisitorsList();
   }
 
+  loadVisitorsList(){
+    const subscriptionAll=this.visitorService.getVisitorsData().subscribe({
+      next:(data)=>{
+        this.visitors = data;
+        this.showVisitors = this.visitors;
+        //console.log("data en el component: ", data);
+        //console.log("visitors en el component: ", this.visitors);
+      }
+    })
+    this.subscriptions.add(subscriptionAll);
+  }
+
   // lista de Visitors
-  visitors: User_AllowedInfoDto[] = [];
+  visitors: User_AllowedInfoDto[] | null = null;
   // lista de Visitors que se muestran en pantalla
   showVisitors = this.visitors;
 
@@ -39,7 +50,6 @@ export class VisitorRegistryComponent implements OnInit {
   // buscar visitantes por parámetro (Nombre o DNI)
   Search(param: string): void {
     this.showVisitors = this.visitorService.getVisitorByParam(param);
-
   }
 
   // mostrar más info de un visitante

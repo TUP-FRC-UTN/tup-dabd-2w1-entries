@@ -16,17 +16,19 @@ export class VisitorsService {
 
   constructor() {
     this.loadVisitorsData();
-    console.log(this.visitorslist);
   }
 
   //lista de Visitors
-  visitorslist : User_AllowedInfoDto[] = []
+  visitorslist : User_AllowedInfoDto[] = [];
 
   loadVisitorsData(): void {
 
-    this.getVisitorsData("Visitor").subscribe({
+    this.getVisitorsData().subscribe({
       next: (data: User_AllowedInfoDto[]) => {
         this.visitorslist = data; // Asigna los datos una vez que se reciban
+        //console.log("data en el service: ", data);
+        //console.log("visitorslist en el service: ", this.visitorslist);
+
       },
       error: (error) => {
         console.error('Error al cargar los datos:', error);
@@ -59,9 +61,8 @@ export class VisitorsService {
 
   //Llamadas a Metodos:
   // METODO: getAllUserAllowedVisitors(@PathVariable String visitor)
-  getVisitorsData(visitorType: string): Observable<User_AllowedInfoDto[]> {
-    console.log(`${this.URL_GET_ALL_Visitors}/${visitorType}`)
-    return this.http.get<User_AllowedInfoDto[]>(`${this.URL_GET_ALL_Visitors}/${visitorType}`);
+  getVisitorsData(): Observable<User_AllowedInfoDto[]> {
+    return this.http.get<User_AllowedInfoDto[]>(`http://localhost:8090/user_Allowed/visitors/Visitor`);
   }
 
   // METODO: registerMovement_Entry(@RequestBody NewMovements_EntryDto movementsEntryDto)
