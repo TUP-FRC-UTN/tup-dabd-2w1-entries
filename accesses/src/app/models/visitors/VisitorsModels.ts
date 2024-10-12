@@ -37,7 +37,7 @@ export interface RegistryVisitor {
   // METODOS: registerMovementEntry(NewMovements_EntryDto movementsEntryDto) / registerMoventEntryIfNotExistsInvitation(String documento, LocalDate date, NewMovements_EntryDto movementsEntryDto)
   // CLase necesaria: NewMovements_EntryDto
   export interface NewMovements_EntryDto {
-    movementDatetime: string; // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z")
+    movementDatetime: Date; // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z")
     observations: string;
     newUserAllowedDto: NewUserAllowedDto; //interface declarada mas abajo
     authRangesDto: NewAuthRangeDto; //interface declarada mas abajo
@@ -49,7 +49,7 @@ export interface RegistryVisitor {
       neighbor_id: number;
       init_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       end_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
-      allowedDaysDtos: Allowed_DaysDto[] ;
+      allowedDaysDtos: Allowed_DaysDto[];
     }
     export interface Allowed_DaysDto {
       day: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
@@ -65,7 +65,7 @@ export interface RegistryVisitor {
       last_name: string;
       documentType: Document_TypeDto;
       user_allowed_Type: User_allowedTypeDto;
-      vehicle: NewVehicleDto;
+      vehicle?: NewVehicleDto;
       email: string;
     }
 
@@ -97,13 +97,14 @@ export interface RegistryVisitor {
       email: string;
       vehicles: NewVehicleDto[]; //List<NewVehicleDto> 
       authRanges: AuthRangeInfoDto[]; //List<AuthRangeInfoDto>
+      observations?: string; //campo extra (no esta en el back)
     }
 
     export interface AuthRangeInfoDto {
-      init_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
-      end_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+      init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+      end_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       allowedDays: Allowed_DaysDto[]; //List<Allowed_DaysDto> 
-  }
+    }
     //FIN Clase necesaria (para recibir la data): User_AllowedInfoDto
 
 
