@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, inject, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Visitor } from '../../../models/visitors/VisitorsModels';
+import { User_AllowedInfoDto, Visitor } from '../../../models/visitors/VisitorsModels';
 import Swal from 'sweetalert2';
+import { VisitorsService } from '../../../services/visitors/visitors.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-visitor-registry',
@@ -12,60 +14,46 @@ import Swal from 'sweetalert2';
   templateUrl: './visitor-registry.component.html',
   styleUrl: './visitor-registry.component.css'
 })
-export class VisitorRegistryComponent {
+export class VisitorRegistryComponent implements OnInit {
 
-  // lista del QR con los Visitors
-  // (visitors hardcodeados, hasta q se implemente la funcion de escanear QR)
-  visitors: Visitor[] = [
-    { name: 'John', lastName: 'Doe', document: '123456', phoneNumber: '555-1234', email: 'john.doe@example.com', hasVehicle: true, plate: 'ABC123', vehicleType: 'Car' },
-    { name: 'Jane', lastName: 'Smith', document: '789012', phoneNumber: '555-5678', email: 'jane.smith@example.com', hasVehicle: false },
-    { name: 'Alice', lastName: 'Johnson', document: '345678', phoneNumber: '555-8765', email: 'alice.johnson@example.com', hasVehicle: true, plate: 'XYZ987', vehicleType: 'Motorcycle' },
-    // { name: 'Bob', lastName: 'Brown', document: '901234', phoneNumber: '555-5432', email: 'bob.brown@example.com', hasVehicle: true, plate: 'LMN456', vehicleType: 'Truck' },
-    // { name: 'Charlie', lastName: 'White', document: '234567', phoneNumber: '555-6543', email: 'charlie.white@example.com', hasVehicle: false },
-    // { name: 'Eve', lastName: 'Green', document: '567890', phoneNumber: '555-7654', email: 'eve.green@example.com', hasVehicle: true, plate: 'JKL789', vehicleType: 'Car' },
-    // { name: 'Frank', lastName: 'Black', document: '678901', phoneNumber: '555-8765', email: 'frank.black@example.com', hasVehicle: false },
-    // { name: 'Grace', lastName: 'Silver', document: '789012', phoneNumber: '555-9876', email: 'grace.silver@example.com', hasVehicle: true, plate: 'QRS321', vehicleType: 'Bicycle' },
-    // { name: 'Hank', lastName: 'Gold', document: '890123', phoneNumber: '555-1098', email: 'hank.gold@example.com', hasVehicle: true, plate: 'TUV654', vehicleType: 'Scooter' },
-    // { name: 'Ivy', lastName: 'Blue', document: '012345', phoneNumber: '555-2109', email: 'ivy.blue@example.com', hasVehicle: false },
-    // { name: 'Jack', lastName: 'Orange', document: '567891', phoneNumber: '555-3210', email: 'jack.orange@example.com', hasVehicle: true, plate: 'WXY098', vehicleType: 'Van' }
-  ];
+  subscriptions = new Subscription();
 
-  //lista de Visitors que se muestran en pantalla
+  private readonly visitorService = inject(VisitorsService);
+  constructor(){}
+
+  //carga TODOS los invitados al iniciar la pantalla
+  ngOnInit(): void {
+    this.visitorService.getVisitorsData("Visitor").subscribe((data) => {
+      this.visitors = data;
+    });
+  }
+
+  // lista de Visitors
+  visitors: User_AllowedInfoDto[] = [];
+  // lista de Visitors que se muestran en pantalla
   showVisitors = this.visitors;
 
   // datos de búsqueda/filtrado
-  parameter: string | null = null;
+  parameter: string = "";
 
   // buscar visitantes por parámetro (Nombre o DNI)
-  Search(): void {
-    console.log("el cambio: " + this.parameter);
+  Search(param: string): void {
+    this.showVisitors = this.visitorService.getVisitorByParam(param);
 
-    if (this.parameter != null && this.parameter.length > 2) {
-      let param = this.parameter.toLowerCase();
-
-      this.showVisitors = this.visitors.filter(v =>
-        v.document.toLowerCase().includes(param) ||
-        v.name.toLowerCase().includes(param) ||
-        v.lastName.toLowerCase().includes(param)
-      );
-    } else {
-      this.showVisitors = this.visitors;
-    }
   }
 
   // mostrar más info de un visitante
-  MoreInfo(v: Visitor) {
-    const vehicleInfo = v.hasVehicle ? 
-      `<strong>Patente del vehículo: </strong>${v.plate}` : 
+  MoreInfo(visitor: User_AllowedInfoDto) {
+    const vehicleInfo = visitor.vehicles ? 
+      `<strong>Patente del vehículo: </strong>${visitor.vehicles[0].plate}` : 
       '<strong>No tiene vehículo</strong>';
 
     Swal.fire({
       title: 'Información del Visitante',
       html: `
-        <strong>Nombre:</strong> ${v.name} ${v.lastName}<br>
-        <strong>Documento:</strong> ${v.document}<br>
-        <strong>Teléfono:</strong> ${v.phoneNumber}<br>
-        <strong>Email:</strong> ${v.email}<br>
+        <strong>Nombre:</strong> ${visitor.name} ${visitor.last_name}<br>
+        <strong>Documento:</strong> ${visitor.document}<br>
+        <strong>Email:</strong> ${visitor.email}<br>
         ${vehicleInfo}
       `,
       icon: 'info',
@@ -74,12 +62,12 @@ export class VisitorRegistryComponent {
   }
 
   //registrar egreso de un visitante
-  RegisterExit(v :Visitor){
+  RegisterExit(visitor :User_AllowedInfoDto){
 
   }
 
   //registrar ingreso de un visitante
-  RegisterAccess(v :Visitor){
+  RegisterAccess(visitor :User_AllowedInfoDto){
 
   }
 
