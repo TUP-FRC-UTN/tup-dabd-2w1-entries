@@ -1,0 +1,100 @@
+
+
+/* Estilo general para la tabla */
+table.dataTable {
+    border: 2px solid rgb(10, 9, 9); /* Borde alrededor de la tabla */
+    border-collapse: collapse; /* Asegura que los bordes de las celdas estén colapsados */
+}
+
+/* Estilo para las celdas de la tabla */
+table.dataTable thead th {
+    background-color: grey; /* Cambiar el fondo del encabezado a negro */
+    color: white; /* Cambiar el color del texto a blanco para que sea legible */
+}
+/* Estilo para las filas de la tabla */
+table.dataTable tr {
+    border-bottom: 1px solid rgb(245, 240, 240); /* Borde inferior para las filas */
+}
+
+/* Estilo para las filas alternas (opcional) */
+table.dataTable tbody tr:nth-child(odd) {
+    background-color: #f2f2f2; /* Color de fondo para filas impares */
+}
+
+table.dataTable {
+    border: 2px solid rgb(10, 9, 9); /* Borde alrededor de la tabla */
+    border-collapse: collapse; /* Asegura que los bordes de las celdas estén colapsados */
+}
+/* Estilo general para la tabla */
+table.dataTable {/* Cambiar el color de los iconos de ordenación */
+    table.dataTable thead th.sorting:after,
+    table.dataTable thead th.sorting_asc:after,
+    table.dataTable thead th.sorting_desc:after {
+        content: ""; /* Asegúrate de que el contenido se genere */
+        color: #0e0f0f; /* Cambia el color a lo que prefieras */
+    }
+    
+    /* Cambiar el color de los iconos en el hover */
+    table.dataTable thead th.sorting:hover:after,
+    table.dataTable thead th.sorting_asc:hover:after,
+    table.dataTable thead th.sorting_desc:hover:after {
+        color: #191a1b; /* Cambia el color al pasar el mouse */
+    }
+    
+    /* Estilo general para la tabla */
+    table.dataTable {
+        border: 2px solid rgb(10, 9, 9); /* Borde alrededor de la tabla */
+        border-collapse: collapse; /* Asegura que los bordes de las celdas estén colapsados */
+    }
+    
+    /* Estilo para las celdas de la tabla */
+    table.dataTable th,
+    table.dataTable td {
+        border: 1px solid black; /* Borde negro alrededor de las celdas */
+        text-align: center; /* Centrar el texto de las celdas */
+    }
+    
+    /* Estilo para las filas de la tabla */
+    table.dataTable tr {
+        border-bottom: 1px solid rgb(245, 240, 240); /* Borde inferior para las filas */
+    }
+    
+    /* Estilo para las filas alternas (opcional) */
+    table.dataTable tbody tr:nth-child(odd) {
+        background-color: #f2f2f2; /* Color de fondo para filas impares */
+    }
+    
+    border: 2px solid rgb(10, 9, 9); /* Borde alrededor de la tabla */
+    border-collapse: collapse; /* Asegura que los bordes de las celdas estén colapsados */
+}
+
+/* Estilo para las celdas de la tabla */
+table.dataTable th,
+table.dataTable td {
+    border: 1px solid black; /* Borde negro alrededor de las celdas */
+    text-align: center; /* Centrar el texto de las celdas */
+}
+
+/* Estilo para las filas de la tabla */
+table.dataTable tr {
+    border-bottom: 1px solid rgb(245, 240, 240); /* Borde inferior para las filas */
+}
+
+/* Estilo para las filas alternas (opcional) */
+table.dataTable tbody tr:nth-child(odd) {
+    background-color: #f2f2f2; /* Color de fondo para filas impares */
+}
+
+/* Cambiar el color de los iconos de ordenación */
+table.dataTable thead th.sorting:after,
+table.dataTable thead th.sorting_asc:after,
+table.dataTable thead th.sorting_desc:after {
+    color: #161a1a; /* Cambia el color a lo que prefieras */
+}
+
+/* Cambiar el color de los iconos en el hover */
+table.dataTable thead th.sorting:hover:after,
+table.dataTable thead th.sorting_asc:hover:after,
+table.dataTable thead th.sorting_desc:hover:after {
+    color: #191a1b; /* Cambia el color al pasar el mouse */
+}

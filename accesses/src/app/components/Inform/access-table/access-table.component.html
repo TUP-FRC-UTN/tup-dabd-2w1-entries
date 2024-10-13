@@ -1,0 +1,61 @@
+<div class="row mb-3">
+    <div class="col-md-3 mb-2">
+        <label for="tipoIngresanteFilter" class="form-label">Tipo de Ingresante</label>
+        <select id="tipoIngresanteFilter" class="form-control">
+          <option value="">Todos</option>
+          <option value="neighbour">Vecino</option>
+          <option value="Employee">Empleado</option>
+          <option value="Visitor">Visitante</option>
+          <option value="Suplied">Proveedor</option>
+          <option value="Delivery">Delivery</option>
+        </select>
+      </div>
+    <div class="col-md-3 mb-2">
+      <label for="nombreIngresanteFilter" class="form-label">Nombre de Ingresante</label>
+      <input type="text" id="nombreIngresanteFilter" class="form-control" placeholder="Filtrar por Nombre de Ingresante">
+    </div>
+    <div class="col-md-3 mb-2">
+      <label for="documentoFilter" class="form-label">Documento</label>
+      <input type="text" id="documentoFilter" class="form-control" placeholder="Filtrar por Documento">
+    </div>
+    <div class="col-md-3 mb-2">
+      <label for="propietarioFilter" class="form-label">Propietario</label>
+      <input type="text" id="propietarioFilter" class="form-control" placeholder="Filtrar por Propietario">
+    </div>
+  </div>
+  
+  <div class="table-responsive my-4">
+    <table id="myTable" class="table table-striped table-bordered" style="width:100%">
+      <thead class="table-dark">
+        <tr>
+          <th>Tipo de Ingresante</th>
+          <th>Nombre Ingresante</th>
+          <th>Documento</th>
+          <th>Nombre del Propietario</th>
+          <th>Hora</th>
+          <th>Día</th>
+          <th>Mes</th>
+          <th>Año</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- aca van los datos de la tabal -->
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- botones de pdf y excel -->
+  <div class="mb-3">
+    <button (click)="exportToExcel()" 
+            class="btn btn-success" 
+            [disabled]="!exportButtonsEnabled">
+      <i class="fa-solid fa-file-excel"></i> Exportar a Excel
+    </button>
+    <button (click)="exportToPdf()" 
+            class="btn btn-danger" 
+            [disabled]="!exportButtonsEnabled">
+      <i class="fas fa-file-pdf"></i> Exportar a PDF
+    </button>
+  </div>
+  
+
