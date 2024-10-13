@@ -88,6 +88,7 @@ export interface RegistryVisitor {
       //FIN types
     // FIN todo lo necesario para NewUserAllowedDto
 
+    
     //METODO getAllUserAllowedVisitors(@PathVariable String visitor)
     //Clase necesaria (para recibir la data): User_AllowedInfoDto
     export interface User_AllowedInfoDto {

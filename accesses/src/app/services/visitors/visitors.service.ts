@@ -69,7 +69,7 @@ export class VisitorsService {
 
       let visitorVehicle: NewVehicleDto | undefined ;
 
-      //MOMENTANEO 
+      //MOMENTANEO (en el futuro, el guardia debe poder seleccionar el vehiculo con el q entra el Visitor)
       //se verifica si el Visitor tiene un vehiculo
       if(visitorInfoDto.vehicles.length > 0){
         //si lo tiene se asigna
@@ -103,45 +103,46 @@ export class VisitorsService {
     // mapeo de AuthRangeInfoDto[] a NewAuthRangeDto
     mapAuthRangeInfoDtoToNewAuthRangeDto(listAuthRangeInfoDto: AuthRangeInfoDto[]): NewAuthRangeDto{
 
-      //la idea es q nunca se use (pq en el component ya se verifica si el Visitor puede entrar, 
-      // en base a sus AuthRanges, solo se llega a este metodo si el Visitor esta dentro del rango)
+      console.log("mapAuthRangeInfoDtoToNewAuthRangeDto (en visitors.service)")
+      console.log("list de AuthRangeInfoDto del Visitor", listAuthRangeInfoDto);
+
+      //la idea es q nunca se usen (pq en el component ya se verifica si el Visitor puede entrar 
+      // en base a sus AuthRanges, solo se llega a este metodo si el Visitor esta dentro del rango permitido)
       const allowedDaysEmpty: Allowed_DaysDto[] = [];
-      //la idea es q nunca se use
       const emptyAuth: NewAuthRangeDto = {
         neighbor_id: 0,
-        init_date: "", //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
-        end_date: "", //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+        init_date: "", 
+        end_date: "", 
         allowedDaysDtos: allowedDaysEmpty
       };
-
-      //fecha actual, para poder comparar
-      let todayDate: Date = new Date();
-      todayDate.setHours(0, 0, 0, 0); // Establece la hora a 00:00:00
       
-      //agarra un AuthRange (del Visitor) q comprenda la fecha actual
-      for (var i = 0; i < listAuthRangeInfoDto.length; i++) {
-        let initDate = listAuthRangeInfoDto.at(0)?.init_date;
-        let endDate = listAuthRangeInfoDto.at(0)?.end_date;
 
-        if(this.isDateBeforeToday(initDate, todayDate) && this.isDateAfterToday(endDate, todayDate)){
-          //se pasa del objeto Date a un string (con el formato requerido por el endpoint)
-          let stringInit_date: string | undefined = this.datePipe.transform( initDate,'yyyy-MM-dd')?.toString();
-          let stringEnd_date: string | undefined = this.datePipe.transform( endDate,'yyyy-MM-dd')?.toString();
+      //agarra un AuthRange (del Visitor) q comprenda la fecha actual (pq tiene varios, entonces hay q agarrar el actual)
+      let index = this.todayIsInRange(listAuthRangeInfoDto);
+      // si hay uno valido index es mayor a -1 (index es el indice del Range valido, en el array de AuthRangeInfoDto)
+      if(index >= 0){
 
-          //se mapea de AuthRangeInfoDto a NewAuthRangeDto
-          let newAuthRangedto: NewAuthRangeDto = {
-            neighbor_id: 0, //se asigna en el back
-            init_date: stringInit_date || "", 
-            end_date: stringEnd_date  || "", 
-            allowedDaysDtos: listAuthRangeInfoDto.at(0)?.allowedDays || allowedDaysEmpty
-          };
+        //fechas de inicio y fin del AuthRangeInfoDto valido
+        let initDate = listAuthRangeInfoDto.at(index)?.init_date;
+        let endDate = listAuthRangeInfoDto.at(index)?.end_date;
+        //se pasa del objeto Date a un string (con el formato requerido por el endpoint)
+        let stringInit_date: string | undefined = this.datePipe.transform( initDate,'yyyy-MM-dd')?.toString();
+        let stringEnd_date: string | undefined = this.datePipe.transform( endDate,'yyyy-MM-dd')?.toString();
 
-          console.log("array de objs q entra -> AuthRangeInfoDto[]: ", listAuthRangeInfoDto);
-          console.log("obj q sale -> NewUserAllowedDto: ", newAuthRangedto);
-          //devuelve un NewAuthRangeDto con los datos, de un AuthRange del Visitor, validos.
-          return newAuthRangedto;
-        }
+        //se mapea de AuthRangeInfoDto a NewAuthRangeDto
+        let newAuthRangedto: NewAuthRangeDto = {
+          neighbor_id: 0, //se asigna en el back
+          init_date: stringInit_date || "", 
+          end_date: stringEnd_date  || "", 
+          allowedDaysDtos: listAuthRangeInfoDto.at(index)?.allowedDays || allowedDaysEmpty
+        };
+        console.log("FUNCIONAAAAAAAAA")
+        console.log("array de objs q entra -> AuthRangeInfoDto[]: ", listAuthRangeInfoDto);
+        console.log("obj q sale -> NewUserAllowedDto: ", newAuthRangedto);
+        //devuelve un NewAuthRangeDto con los datos, de un AuthRange del Visitor, validos.
+        return newAuthRangedto;
       }
+
       console.log("Algo malio sal...")
       console.log("array de objs q entra -> AuthRangeInfoDto[]: ", listAuthRangeInfoDto);
       console.log("obj (vacio) q sale -> NewAuthRangeDto: ", emptyAuth);
@@ -149,7 +150,26 @@ export class VisitorsService {
       return emptyAuth;
     }
     // FIN mapeo de AuthRangeInfoDto a NewAuthRangeDto
+
+    // creacion de NewMovements_EntryDto 
+    createNewMovements_EntryDto(visitorInfo :User_AllowedInfoDto, 
+      newUserAllowedDto: NewUserAllowedDto, 
+      newAuthRangedto: NewAuthRangeDto): NewMovements_EntryDto{
+
+        let newMovements_EntryDto: NewMovements_EntryDto = {
+          movementDatetime: new Date, // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z"
+          observations: visitorInfo.observations || "",
+          newUserAllowedDto: newUserAllowedDto, //interface declarada mas abajo
+          authRangesDto: newAuthRangedto, //interface declarada mas abajo
+          vehiclesId: 0
+        }
+
+        console.log("createNewMovements_EntryDto (en visitors.service): ", newMovements_EntryDto);
+        return newMovements_EntryDto;
+    }
+    // FIN creacion de User_AllowedInfoDto
   //FIN post del registro de un visitor
+
 
 
   //Llamadas a Metodos:
@@ -180,23 +200,56 @@ export class VisitorsService {
   }  
 
 
-  //funciones para comparar fechas
-  isDateBeforeToday(date: Date | undefined, todayDate: Date): boolean {
-    if (!date) {
-      // Si date es undefined, devolver false
-      return false;
-    }
+  // funciones para comparar fechas
+  // verifica si la fecha actual esta dentro de alguno de los AuthRangeInfoDto del Visitor
+  todayIsInRange(listAuthRangeInfoDto: AuthRangeInfoDto[]): number{
+    for (var i = 0; i < listAuthRangeInfoDto.length; i++) {
+
+      console.log("todayIsInRange (en visitors.service) | ciclo del for: ", i);
+      //console.log("fechas del AuthRange: ", listAuthRangeInfoDto.at(i)?.init_date, " | ", listAuthRangeInfoDto.at(i)?.end_date)
+
+      let initDate: Date | undefined = listAuthRangeInfoDto.at(i)?.init_date;
+      let endDate: Date | undefined  = listAuthRangeInfoDto.at(i)?.end_date;
   
-    // Convertimos ambas fechas a tiempo en milisegundos para compararlas
-    return date.getTime() < todayDate.getTime();
+      //console.log("fechas asignadas para comparar: ", initDate, " | ", endDate)
+
+
+      if(this.isDateBeforeToday(initDate) && this.isDateAfterToday(endDate)){
+        console.log("(Visitor dentro del rango!) index del AuthRange valido: ", i);
+        return i; // devuelve el indice donde esta el AuthRangeInfoDto valido
+      }
+    }
+    return -1; // no hay rango q comprenda la fecha actual
   }
-  isDateAfterToday(date: Date | undefined, todayDate: Date): boolean {
-    if (!date) {
+  
+
+  isDateBeforeToday(date: Date | undefined): boolean {
+    if (date == undefined) {
       // Si date es undefined, devolver false
       return false;
     }
   
-    // Convertimos ambas fechas a tiempo en milisegundos para compararlas
-    return date.getTime() > todayDate.getTime();
+    //fecha actual, para poder comparar
+    let todayDate = new Date();
+    //fecha a comparar
+    let beforeDate = new Date(date);
+    //console.log(beforeDate, " | hoy -> ", todayDate)
+
+    return beforeDate < todayDate;
+  }
+
+  isDateAfterToday(date: Date | undefined): boolean {
+    if (date == undefined) {
+      // Si date es undefined, devolver false
+      return false;
+    }
+
+    //fecha actual, para poder comparar
+    let todayDate = new Date();
+    //fecha a comparar
+    let afterDate = new Date(date);
+    //console.log(afterDate, " | hoy -> ", todayDate)
+
+    return afterDate > todayDate;
   }
 }

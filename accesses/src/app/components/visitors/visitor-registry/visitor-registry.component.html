@@ -28,7 +28,7 @@
                     <tbody>
                         @for (v of showVisitors; track $index) {
                             <tr>
-                                <td class="col-2 border border-dark">{{v.last_name}} {{v.name}}</td>
+                                <td class="col-2 border border-dark">{{v.last_name}}, {{v.name}}</td>
                                 <td class="col-2 border border-dark">{{v.document}}</td>
                                 <td class="border border-dark col-2 align-items-center text-center"><button (click)="MoreInfo(v)" style="width: 100%;" class="btn btn-info">Ver más</button></td>
                                 <td class="col-2">
