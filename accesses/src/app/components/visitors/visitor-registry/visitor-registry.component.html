@@ -38,7 +38,7 @@
                                         <option (click)="RegisterExit(v)" class="bg-primary text-light m-0 p-0" value="">Egreso</option>
                                     </select>                                                                                     
                                 </td>
-                                <td class="col-2 border border-dark"><textarea name="" id=""></textarea></td>
+                                <td class="col-2 border border-dark"><textarea appAutoSizeTextArea [(ngModel)]="v.observations" name="" id=""></textarea></td>
                             </tr>
                         }
                     </tbody>
