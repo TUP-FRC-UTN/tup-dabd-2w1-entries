@@ -156,8 +156,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
       } else {
         Swal.fire({
           icon: 'warning',
-          title: 'ATENCION',
-          text: 'No se encontraron registros',
+          title: '!No se encontraron registros!',
+          
         });
         this.exportButtonsEnabled = false; // Deshabilitar botones si no hay datos
       }
@@ -194,23 +194,5 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
     }
   }
 
-  printTable(): void {
-    const tableElement = document.getElementById('myTable') as HTMLTableElement;
-    const win = window.open('', '_blank');
-
-   
-    if (win) {
-        win.document.write('<html><head><title>Imprimir Tabla</title></head><body>');
-        win.document.write(tableElement.outerHTML);
-        win.document.write('</body></html>');
-        win.document.close();
-        win.print();
-    } else {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Advertencia',
-        text: 'No se pudo abrir la ventana para imprimir.',
-      }); // Manejo de errores
-    }
-  }
+  
 }
