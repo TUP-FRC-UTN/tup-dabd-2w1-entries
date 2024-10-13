@@ -68,28 +68,26 @@ export class AccesGridOwnerRentComponent implements OnInit,AfterViewInit,OnDestr
         info: true,
         autoWidth: false,
         language: {
-          lengthMenu: 'Mostrar MENU registros',
-          zeroRecords: 'No se encontraron registros',
-          info: 'Mostrando de START a END de TOTAL registros',
-          infoEmpty: 'No se encontró ese vecino',
-          infoFiltered: '(filtrado de MAX registros totales)',
-          search: 'Buscar:',
-          emptyTable: 'No se encontró ese vecino',
+          lengthMenu: "Mostrar _MENU_ registros",
+          zeroRecords: "No se encontraron registros",
+          search: "Buscar:",
+       
+          emptyTable: "No hay datos disponibles",
         },
         responsive: true,
       });
-  
-      // Escuchar el evento de keyup para el campo de búsqueda
-      $('#myInput').on('keyup', () => {
-        const searchTerm = $('#myInput').val() as string;
-  
-        // Aplicar filtro solo si hay al menos 3 caracteres
+      $('#dt-search-0').off('keyup').on('keyup', () => {
+        const searchTerm = $('#dt-search-0').val() as string;
+
         if (searchTerm.length >= 3) {
-          this.dataTable.search(searchTerm).draw();
-        } else {
-          this.dataTable.search('').draw(); // Limpiar búsqueda si hay menos de 3 caracteres
+            this.dataTable.search(searchTerm).draw();
+        } else if (searchTerm.length === 0) {
+            this.dataTable.search('').draw(false); 
         }
-      });
+       else{
+        this.dataTable.search('').draw(false); 
+       }
+    });
     });
   }
   ngAfterViewInit(): void {
@@ -212,7 +210,8 @@ export class AccesGridOwnerRentComponent implements OnInit,AfterViewInit,OnDestr
         Swal.fire({
           title: 'Registrar Vehículo',
           html: `
-            <input id="plate" class="swal2-input" placeholder="Placa">
+          <label for="plate">Patente</label>
+            <input id="plate" class="swal2-input" placeholder="Patente">
              <select id="insurance" class="swal2-select">
               <option value="">Seleccione el seguro</option>
               <option value="San Cristobal">San Cristobal</option>
@@ -238,7 +237,10 @@ export class AccesGridOwnerRentComponent implements OnInit,AfterViewInit,OnDestr
             const plates = (document.getElementById('plate') as HTMLInputElement).value;
             const insurance = (document.getElementById('insurance') as HTMLInputElement).value;
             const vehicleType = (document.getElementById('vehicleType') as HTMLSelectElement).value;
-    
+            if (!plates) {
+              Swal.showValidationMessage('La patente es obligatoria');
+              return false; 
+            }
             if (!plates || !insurance || !vehicleType) {
               Swal.showValidationMessage('Por favor completa todos los campos');
             }
