@@ -96,15 +96,15 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
         this.table.draw();
       }
     });
-
+  
     $.fn.dataTable.ext.search.push(
       (settings: any, data: string[], dataIndex: number) => {
         const tipoIngresante = ($('#tipoIngresanteFilter').val() as string || '').toLowerCase();
         const nombreIngresante = ($('#nombreIngresanteFilter').val() as string || '').toLowerCase();
         const documento = ($('#documentoFilter').val() as string || '').toLowerCase();
         const propietario = ($('#propietarioFilter').val() as string || '').toLowerCase();
-
-       
+  
+        // Mapa de tipos de ingresantes
         const tipoIngresanteMap: { [key: string]: string } = {
           'neighbour': 'vecino',
           'employee': 'empleado',
@@ -113,18 +113,22 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
           'suplied': 'proveedor',
           'delivery': 'delivery'
         };
-
+  
+        // Verifica que el filtro solo aplique si se introducen al menos 3 caracteres
         const isTipoIngresanteMatch = tipoIngresante === '' || data[0].toLowerCase() === tipoIngresanteMap[tipoIngresante];
-        
+        const isNombreIngresanteMatch = nombreIngresante.length < 3 || data[1].toLowerCase().includes(nombreIngresante);
+        const isDocumentoMatch = documento.length < 3 || data[2].toLowerCase().includes(documento);
+        const isPropietarioMatch = propietario.length < 3 || data[3].toLowerCase().includes(propietario);
+  
         return (
           isTipoIngresanteMatch &&
-          data[1].toLowerCase().includes(nombreIngresante) &&
-          data[2].toLowerCase().includes(documento) &&
-          data[3].toLowerCase().includes(propietario)
+          isNombreIngresanteMatch &&
+          isDocumentoMatch &&
+          isPropietarioMatch
         );
       }
     );
-
+  
     this.table.on('draw', () => {
       const recordCount = this.table.rows({ filter: 'applied' }).count();
       this.exportButtonsEnabled = recordCount > 0; // Actualiza el estado de los botones
