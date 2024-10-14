@@ -30,6 +30,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
   constructor(){}
 
   //codigo nuevo
+
   dataTable: any;
 
   private readonly ngZone: NgZone = inject(NgZone);
@@ -60,18 +61,22 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
         },
         responsive: true,
       });
-      $('#dt-search-0').off('keyup').on('keyup', () => {
-        const searchTerm = $('#dt-search-0').val() as string;
 
-        if (searchTerm.length >= 3) {
-            this.dataTable.search(searchTerm).draw();
-        } else if (searchTerm.length === 0) {
-            this.dataTable.search('').draw(false); 
+      $('#dt-search-0').off('keyup').on('keyup', () => {
+          const searchTerm = $('#dt-search-0').val() as string;
+
+          if (searchTerm.length >= 3) {
+              this.dataTable.search(searchTerm).draw();
+
+          } else if (searchTerm.length === 0) {
+              this.dataTable.search('').draw(false); 
+
+          }
+        else{
+          this.dataTable.search('').draw(false); 
         }
-       else{
-        this.dataTable.search('').draw(false); 
-       }
-    });
+      });
+
     });
   }
 
@@ -95,7 +100,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
                 <option value="ingreso">Ingreso</option>
                 <option value="egreso">Egreso</option>
               </select>`,
-            `<textarea [(ngModel)]="observations" name="observations" id="observations"></textarea>`
+            `<textarea name="observations${index}" id="observations${index}"></textarea>`
           ];
         });
   
@@ -125,6 +130,14 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
         const index = select.getAttribute('data-index');
         if (index !== null) {
           const selectedOwner = this.visitors[parseInt(index, 10)];
+
+          const textareaElement = document.getElementById('observations'+index) as HTMLTextAreaElement;
+
+          // console.log(textareaElement);
+          // console.log(textareaElement.value);
+
+          selectedOwner.observations = textareaElement.value || "";
+
           this.onSelectionChange(event, selectedOwner);
         }
       });
