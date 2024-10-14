@@ -7,6 +7,12 @@ import Swal from 'sweetalert2';
 import { VisitorsService } from '../../../services/visitors/visitors.service';
 import { Subscription } from 'rxjs';
 import { AutoSizeTextAreaDirective } from '../../../directives/auto-size-text-area.directive';
+//
+import $ from 'jquery';
+import 'datatables.net'
+import 'datatables.net-bs5';
+//import { AlertDirective } from '../alert.directive';
+import { InternalSettings } from 'datatables.net';
 
 @Component({
   selector: 'app-visitor-registry',
