@@ -110,10 +110,11 @@ export class ConsultarComponent implements OnInit,AfterViewInit {
          this.movements.forEach((movement, index) => {
           const userAllowed = movement.user_allowed;
           this.table.row.add([
-            'Visitante',  
+            'Ingreso',  
             `${movement.user_allowed.name} ${movement.user_allowed.last_name}`, 
-            movement.user_allowed.document || '', 
-            movement.vehicle ? movement.vehicle : 'ingreso a pata ', 
+            movement.user_allowed.document || '',
+            movement.observations || '', 
+            movement.vehicle ? movement.vehicle.plate : 'ingreso a pata ', 
             movement.movementDatetime ? new Date(movement.movementDatetime).toLocaleTimeString() : '',
             new Date(movement.movementDatetime).toLocaleDateString(),
             `<button class="btn btn-info btn-sm view-more-btn" data-index="${index}">Ver más</button>`

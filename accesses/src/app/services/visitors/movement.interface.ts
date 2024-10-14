@@ -14,17 +14,19 @@ export  interface UserAllowed {
  
 } 
 export interface VehicleDto {
-    id: bigint | null;
-    vehicleTypeId: bigint | null;
-    vehicle_Type: bigint | null;
     plate: string;
+    vehicle_Type: vehicleTypeDto | null;
     insurance: string;
 }
+export interface vehicleTypeDto {
+    description: string;
+}
+
   export interface Movement {
     movementDatetime: string;
     observations: string;
     user_allowed: UserAllowed;
-    vehicle : any | null;
+    vehicle : VehicleDto | null;
   }
 export interface AllowedDaysDto {
     day: Date;
