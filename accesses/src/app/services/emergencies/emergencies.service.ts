@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NewEmergencyDto } from '../../models/emergencies/NewEmergecyDto';
-import { EmergencyEntryDto } from '../../models/emergencies/EmergencyEntryDto';
+import { NewUserAllowedDto } from '../../models/visitors/VisitorsModels';
 
 @Injectable({
   providedIn: 'root'
@@ -13,10 +13,10 @@ export class EmergenciesService {
 
   constructor() { }
 
-    registerEmergency(emergency: NewEmergencyDto): Observable<EmergencyEntryDto> {
+    registerEmergency(emergency: NewEmergencyDto): Observable<NewUserAllowedDto> {
       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       if (emergency.observations?.length == 0)
         emergency.observations = null;
-      return this.http.post<EmergencyEntryDto>(this.URL_POST_EMERGENCY, emergency, { headers });
+      return this.http.post<NewUserAllowedDto>(this.URL_POST_EMERGENCY, emergency, { headers });
     }
 }

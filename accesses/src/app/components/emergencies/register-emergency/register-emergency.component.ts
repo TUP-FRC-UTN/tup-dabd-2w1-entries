@@ -1,13 +1,13 @@
 import { NgClass } from '@angular/common';
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { NumbersOnlyDirective } from '../../../directives/numbers-only.directive';
 import { EmergenciesService } from '../../../services/emergencies/emergencies.service';
+import { NewEmergencyDto } from '../../../models/emergencies/NewEmergecyDto';
 
 @Component({
   selector: 'app-register-emergency',
   standalone: true,
-  imports: [FormsModule, NgClass, NumbersOnlyDirective],
+  imports: [FormsModule, NgClass],
   templateUrl: './register-emergency.component.html',
   styleUrl: './register-emergency.component.css'
 })
@@ -16,6 +16,7 @@ export class RegisterEmergencyComponent implements OnInit{
 
   @ViewChild('form') form!: NgForm;
   requestStatus: RequestStatus = RequestStatus.None;
+  
 
   public get RequestStatus(): typeof RequestStatus {
     return RequestStatus;
@@ -23,7 +24,7 @@ export class RegisterEmergencyComponent implements OnInit{
 
   ngOnInit(): void {
     const modal = document.getElementById('emergencyModal');
-    modal!.addEventListener('hidden.bs.modal', event => {
+    modal!.addEventListener('show.bs.modal', event => {
       this.form.reset();
       this.requestStatus = RequestStatus.None;
     });
@@ -31,7 +32,21 @@ export class RegisterEmergencyComponent implements OnInit{
   
   registerEntry(form: NgForm) {
     this.requestStatus = RequestStatus.Loading;
-    this.emergenciesService.registerEmergency(form.value).subscribe({
+    console.log(form.value);
+    let emergency: NewEmergencyDto = {
+      dni: form.value.dni,
+      name: form.value.name,
+      lastName: form.value.lastName,
+      observations: form.value.observations,
+      vehicle: {
+        plate: form.value.plate,
+        vehicle_Type: {
+          description: form.value.vehicleType
+        }
+      }
+    }
+
+    this.emergenciesService.registerEmergency(emergency).subscribe({
     next: nv => {
       console.log(nv);
       this.requestStatus = RequestStatus.Success;
