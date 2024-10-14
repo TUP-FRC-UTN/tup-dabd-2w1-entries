@@ -27,7 +27,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
   subscription = new Subscription();
 
   private readonly visitorService = inject(VisitorsService);
-  constructor(){}
+  constructor(private datePipe: DatePipe){}
 
   //codigo nuevo
 
@@ -283,8 +283,8 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
 
       rangesHtml += `
         <p>
-          <strong>Fecha de inicio: </strong> ${range.init_date}<br>
-          <strong>Fecha de fin: </strong> ${range.end_date}
+          <strong>Fecha de inicio: </strong> ${this.datePipe.transform(range.init_date,'dd/MM/yyyy')?.toString()}<br>
+          <strong>Fecha de fin: </strong> ${this.datePipe.transform(range.end_date,'dd/MM/yyyy')?.toString()}
         </p>
       `;
     }
