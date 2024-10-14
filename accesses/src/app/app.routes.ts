@@ -3,10 +3,12 @@ import { VisitorRegistryComponent } from './components/visitors/visitor-registry
 import { VisitorRegisterEntryComponent } from './components/visitors/(no-hace-falta)visitor-register-entry/visitor-register-entry.component';
 import { InformComponent } from './components/Inform/inform/inform.component';
 import { EntryComponent } from './components/Entrys/entry/entry.component';
+import { AccesOwnerRentEntryViewComponent } from './components/owner/acces-owner-rent-entry-view/acces-owner-rent-entry-view.component';
 
 export const routes: Routes = [
     { path: 'Visitors', component: VisitorRegistryComponent },
     { path: 'RegisterVisitorEntry', component: VisitorRegisterEntryComponent },
     { path: 'Inform', component: InformComponent },
-    { path: 'entry', component: EntryComponent }
+    { path: 'entry', component: EntryComponent },
+    {path:'OwnerAccess',component:AccesOwnerRentEntryViewComponent}
 ];
