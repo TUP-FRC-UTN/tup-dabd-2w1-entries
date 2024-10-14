@@ -1,0 +1,54 @@
+<div class="box3">
+    <div class="box1">
+        <h1>Información de {{user?.last_name}} {{user?.name}}</h1>
+    </div>
+    <div class="box1">
+        <div>
+            <div class="container text-center">
+                <div class="row align-items-center">
+                  <div class="col">
+                    <p>documento</p>
+                   <input type="text" class="box2" [ngModel]="user?.document">
+                  </div>
+                  <div class="col">
+                    <p>Nombre</p>
+                    <input type="text" class="box2" [ngModel]="user?.name" placeholder="Nombre"> 
+                  </div>
+                  <div class="col">
+                    <p>Apellido</p>
+                    <input type="text" class="box2" [ngModel]="user?.last_name" placeholder="Apellido">
+                  </div>
+                </div>
+              </div>
+              <div class="container text-center">
+                <div class="row align-items-center">
+                  <div class="col">
+                    <p>Telefono</p>
+                    <input type="text" class="box2" [ngModel]="user?.document" placeholder="Telefono"> 
+                  </div>
+                  <div class="col">
+                    <p>Email</p>
+                    <input type="text" class="box2" [ngModel]="user?.email" placeholder="Email"> 
+                  </div>
+                  <div class="col">   
+                  </div>
+                </div>
+              </div>
+              <div class="container text-center">
+                <div class="row align-items-center">
+                  <div class="col">
+                    <P>Patente</P>
+                    <input type="text"class="box2" [ngModel]="user?.vehicles" placeholder="No existe"> 
+                  </div>
+                  <div class="col">
+                    <P>Tipo de Vehículo</P>
+                    <input type="text" class="box2" [ngModel]="user?.vehicles" placeholder="No existe">
+                  </div>
+                  <div class="col">
+                  </div>
+                </div>
+              </div>            
+            </div>
+    </div>
+    <button class="but1" (click)="ChangeFlag()">Volver</button>
+</div>
