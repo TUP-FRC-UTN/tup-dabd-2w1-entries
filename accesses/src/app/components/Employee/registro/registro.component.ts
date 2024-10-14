@@ -132,7 +132,7 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
         };
         console.log(movement);
         
-        
+        //ALERTS PARA MANEJAR LA VALIDACION
         // Guardar el movimiento en el servicio
         Swal.fire({
           title: 'Confirmar Ingreso',
