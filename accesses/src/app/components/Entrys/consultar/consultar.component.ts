@@ -12,11 +12,12 @@ import 'datatables.net-bs5';
 import Swal from 'sweetalert2';
 import { Movement, UserAllowed } from '../../../services/visitors/movement.interface';
 import { Router } from '@angular/router';
+import { RegisterEmergencyComponent } from "../../emergencies/register-emergency/register-emergency.component";
 
 @Component({
   selector: 'app-consultar',
   standalone: true,
-  imports: [FormsModule,CommonModule,HttpClientModule ],
+  imports: [FormsModule, CommonModule, HttpClientModule, RegisterEmergencyComponent],
   templateUrl: './consultar.component.html',
   styleUrl: './consultar.component.css',
   providers: [DatePipe],

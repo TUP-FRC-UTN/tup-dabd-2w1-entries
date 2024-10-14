@@ -1,7 +1,7 @@
 <div class="container mt-4">
   <!-- Selector (Combo) para cambiar entre componentes -->
   <div class="row mb-3">
-    <div class="col-md-6">
+    <div class="col-md-4">
       <label for="accessOptions" class="form-label">Seleccionar vista:</label>
       <select id="accessOptions" class="form-select" (change)="navigateToComponent($event)">
         <option value="Seleccionar">Seleccionar</option>
@@ -10,8 +10,10 @@
         <option value="Entry">Entrada/Salida de empleados</option>
       </select>
     </div>
+    <div class="col text-end mt-4 pt-2">
+      <app-register-emergency></app-register-emergency>
+    </div>
   </div>
-
   <!-- Filtro de fecha -->
   <div class="row mb-3">
     <div class="col-md-3 mb-2">
