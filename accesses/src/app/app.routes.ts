@@ -8,6 +8,7 @@ import { GeneralDashboardComponent } from './components/Dashboards/general-dashb
 import { RegistroComponent } from './components/Employee/registro/registro.component';
 
 export const routes: Routes = [
+    { path: '', redirectTo: 'entry', pathMatch: 'full' },
     { path: 'Visitors', component: VisitorRegistryComponent },
     { path: 'RegisterVisitorEntry', component: VisitorRegisterEntryComponent },
     { path: 'Inform', component: InformComponent },

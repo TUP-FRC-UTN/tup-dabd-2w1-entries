@@ -11,6 +11,7 @@ import 'datatables.net-bs5';
 
 import Swal from 'sweetalert2';
 import { Movement, UserAllowed } from '../../../services/visitors/movement.interface';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-consultar',
@@ -31,7 +32,12 @@ export class ConsultarComponent implements OnInit,AfterViewInit {
   todayDate: string = '';
   private http = inject(HttpClient);
   popupAbierto = false;
-  constructor(  private datePipe: DatePipe) {}
+  constructor(  private datePipe: DatePipe, private router: Router ) {}
+  
+  navigateToComponent(event: any) {
+    const selectedValue = event.target.value;
+    this.router.navigate([selectedValue]);
+  }
   
   ngAfterViewInit(): void {
     setTimeout(() => {
