@@ -1,12 +1,18 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, inject, OnChanges, OnDestroy, OnInit, SimpleChanges, NgZone, AfterViewInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthRangeInfoDto, NewAuthRangeDto, NewMovements_EntryDto, NewUserAllowedDto, User_AllowedInfoDto, Visitor } from '../../../models/visitors/VisitorsModels';
 import Swal from 'sweetalert2';
 import { VisitorsService } from '../../../services/visitors/visitors.service';
 import { Subscription } from 'rxjs';
 import { AutoSizeTextAreaDirective } from '../../../directives/auto-size-text-area.directive';
+//
+import $ from 'jquery';
+import 'datatables.net'
+import 'datatables.net-bs5';
+//import { AlertDirective } from '../alert.directive';
+import { InternalSettings } from 'datatables.net';
 
 @Component({
   selector: 'app-visitor-registry',
@@ -16,33 +22,169 @@ import { AutoSizeTextAreaDirective } from '../../../directives/auto-size-text-ar
   templateUrl: './visitor-registry.component.html',
   styleUrl: './visitor-registry.component.css'
 })
-export class VisitorRegistryComponent implements OnInit {
+export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  subscriptions = new Subscription();
+  subscription = new Subscription();
 
   private readonly visitorService = inject(VisitorsService);
-  constructor(){}
+  constructor(private datePipe: DatePipe){}
 
+  //codigo nuevo
+
+  dataTable: any;
+
+  private readonly ngZone: NgZone = inject(NgZone);
+
+  ngOnDestroy() {
+    if (this.dataTable) {
+      this.dataTable.destroy();
+    }
+    this.subscription.unsubscribe();
+  }
+
+  initializeDataTable(): void {
+    this.ngZone.runOutsideAngular(() => {
+      this.dataTable = ($('#visitorsTable') as any).DataTable({
+        paging: true,
+        ordering: true,
+        pageLength: 10,
+        lengthChange: true,
+        searching: true,
+        info: true,
+        autoWidth: false,
+        language: {
+          lengthMenu: "Mostrar _MENU_ registros",
+          zeroRecords: "No se encontraron registros",
+          search: "Buscar:",
+       
+          emptyTable: "No hay datos disponibles",
+        },
+        responsive: true,
+      });
+
+      $('#dt-search-0').off('keyup').on('keyup', () => {
+          const searchTerm = $('#dt-search-0').val() as string;
+
+          if (searchTerm.length >= 3) {
+              this.dataTable.search(searchTerm).draw();
+
+          } else if (searchTerm.length === 0) {
+              this.dataTable.search('').draw(false); 
+
+          }
+        else{
+          this.dataTable.search('').draw(false); 
+        }
+      });
+
+    });
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.initializeDataTable();
+    });
+
+  }
+
+  updateDataTable(): void {
+    if (this.dataTable) {
+      this.ngZone.runOutsideAngular(() => {
+        const formattedData = this.visitors.map((visitor, index) => {
+          return [
+            `${visitor.last_name} ${visitor.name}`,
+            visitor.document,
+            `<button class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`, // Cambiar el uso de onclick
+            `<select class="form-select select-action" data-index="${index}">
+                <option value="" selected disabled hidden>Seleccionar</option>
+                <option value="ingreso">Ingreso</option>
+                <option value="egreso">Egreso</option>
+              </select>`,
+            `<textarea name="observations${index}" id="observations${index}"></textarea>`
+          ];
+        });
+  
+        this.dataTable.clear().rows.add(formattedData).draw();
+      });
+  
+         this.addEventListeners()
+    }
+  }
+
+  addEventListeners(): void {
+    const buttons = document.querySelectorAll('.view-more-btn') as NodeListOf<HTMLButtonElement>;
+    const selects = document.querySelectorAll('.form-select') as NodeListOf<HTMLSelectElement>;
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        const index = button.getAttribute('data-index');
+        if (index !== null) {
+          const selectedOwner = this.visitors[parseInt(index, 10)];
+          this.MoreInfo(selectedOwner);
+        }
+      });
+    });
+
+    selects.forEach((select) => {
+      select.addEventListener('change', (event) => {
+        const index = select.getAttribute('data-index');
+        if (index !== null) {
+          const selectedOwner = this.visitors[parseInt(index, 10)];
+
+          const textareaElement = document.getElementById('observations'+index) as HTMLTextAreaElement;
+
+          // console.log(textareaElement);
+          // console.log(textareaElement.value);
+
+          selectedOwner.observations = textareaElement.value || "";
+
+          this.onSelectionChange(event, selectedOwner);
+        }
+      });
+    });
+  }
+
+  onSelectionChange(event: Event, visitor: User_AllowedInfoDto) {
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedValue = selectElement.value;
+    console.log(`Seleccionado: ${selectedValue} para el Visitante: ${visitor.name}`);
+    if (selectedValue === 'ingreso') {
+      this.RegisterAccess(visitor);
+    } else if (selectedValue === 'egreso') {
+      this.RegisterExit(visitor);
+    }
+  
+    // Restablece el valor del selector
+    selectElement.value = '';
+  }
+
+  //FIN codigo nuevo
 
   //carga TODOS los invitados al iniciar la pantalla
   ngOnInit(): void {
     this.loadVisitorsList();
   }
 
+
   loadVisitorsList(){
     const subscriptionAll=this.visitorService.getVisitorsData().subscribe({
       next:(data)=>{
-        this.visitors = data;
-        this.showVisitors = this.visitors;
-        //console.log("data en el component: ", data);
-        console.log("visitors en el component: ", this.visitors);
+
+        this.ngZone.run(() => {
+          this.visitors = data;
+          this.showVisitors = this.visitors;
+          //console.log("data en el component: ", data);
+          console.log("visitors en el component: ", this.visitors);
+          this.updateDataTable();
+        });
+
       }
     })
-    this.subscriptions.add(subscriptionAll);
+    this.subscription.add(subscriptionAll);
   }
 
   // lista de Visitors
-  visitors: User_AllowedInfoDto[] | null = null;
+  visitors: User_AllowedInfoDto[] = [];
   // lista de Visitors que se muestran en pantalla
   showVisitors = this.visitors;
 
@@ -141,8 +283,8 @@ export class VisitorRegistryComponent implements OnInit {
 
       rangesHtml += `
         <p>
-          <strong>Fecha de inicio: </strong> ${range.init_date}<br>
-          <strong>Fecha de fin: </strong> ${range.end_date}
+          <strong>Fecha de inicio: </strong> ${this.datePipe.transform(range.init_date,'dd/MM/yyyy')?.toString()}<br>
+          <strong>Fecha de fin: </strong> ${this.datePipe.transform(range.end_date,'dd/MM/yyyy')?.toString()}
         </p>
       `;
     }
