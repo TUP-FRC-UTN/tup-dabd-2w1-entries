@@ -187,6 +187,7 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
           : 'No existe'
       }<br>
     `,
+      icon : 'info',
       focusConfirm: false,
       showCancelButton: false,
       confirmButtonText: 'Cerrar',

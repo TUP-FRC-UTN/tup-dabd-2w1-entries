@@ -2,12 +2,12 @@
   <!-- Selector (Combo) para cambiar entre componentes -->
   <div class="row mb-3">
     <div class="col-md-4">
-      <label for="accessOptions" class="form-label">Seleccionar vista:</label>
+      <label for="accessOptions" class="form-label">Seleccionar tipo de ingreso/egreso:</label>
       <select id="accessOptions" class="form-select" (change)="navigateToComponent($event)">
         <option value="Seleccionar">Seleccionar</option>
         <option value="Visitors">Ingreso/Egreso de visitantes</option>
-        <option value="OwnerAccess">Registro de ingreso de vecino</option>
-        <option value="Entry">Entrada/Salida de empleados</option>
+        <option value="OwnerAccess">Ingreso/Egreso de vecino</option>
+        <option value="Entry">Ingreso/Egreso de empleados</option>
       </select>
     </div>
     <div class="col text-end mt-4 pt-2">
