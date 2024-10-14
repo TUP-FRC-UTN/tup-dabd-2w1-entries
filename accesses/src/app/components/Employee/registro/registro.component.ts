@@ -71,15 +71,14 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
         {
           data: null,
           render: (data, type, row, meta) =>
-            `<button class="btn btn-primary view-more" data-index="${meta.row}">Ver más</button>`,
+            `<button class="btn btn-info view-more" data-index="${meta.row}">Ver más</button>`,
         },
         {
           data: null,
           render: (data, type, row, meta) => `
-            <select class="form-control action-select btn btn-primary" data-document="${row.document}">
-              <option value="">Seleccione Acción</option>
+            <select class="form-control action-select" data-document="${row.document}">
+              <option value="">Seleccionar</option>
               <option value="ingreso">Ingreso</option>
-              <option value="egreso">Egreso</option>
             </select> 
           `,
         },
@@ -127,36 +126,47 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
         const movement: MovementEntryDto = {
           description: String(observations || ''),
           movementDatetime: new Date().toISOString(), // Usa la fecha actual
+          /* HARDCODEADO */
           vehiclesId: 0, // Puedes ajustar esto según tu lógica
           document: document, // Usar el documento del usuario
         };
         console.log(movement);
         
+        
         // Guardar el movimiento en el servicio
-        this.userService.registerEmpSupp(movement).subscribe({
-          next: (response) => {
-            console.log('Movimiento guardado exitosamente:', response);
-            
-            // Mostrar un SweetAlert de éxito
-            Swal.fire({
-              title: '¡Éxito!',
-              text: 'El movimiento se ha registrado correctamente.',
-              icon: 'success',
-              confirmButtonText: 'Cerrar'
+        Swal.fire({
+          title: 'Confirmar Ingreso',
+          text: '¿Está seguro que desea registrar el ingreso?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, confirmar',
+          cancelButtonText: 'Cancelar'
+        }).then((confirmResult) => {
+          if (confirmResult.isConfirmed) {
+            this.userService.registerEmpSupp(movement).subscribe({
+              next: (response) => {
+                console.log('Movimiento guardado exitosamente:', response);                
+                Swal.fire({
+                  title: '¡Éxito!',
+                  text: 'El movimiento se ha registrado correctamente.',
+                  icon: 'success',
+                  confirmButtonText: 'Cerrar'
+                });
+              },
+              error: (error) => {
+                console.error('Error al guardar el movimiento:', error);
+                
+                Swal.fire({
+                  title: '¡Error!',
+                  text: 'No se pudo registrar el movimiento. Inténtalo de nuevo.',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar'
+                });
+              },
             });
-          },
-          error: (error) => {
-            console.error('Error al guardar el movimiento:', error);
-            
-            // Mostrar un SweetAlert de error
-            Swal.fire({
-              title: '¡Error!',
-              text: 'No se pudo registrar el movimiento. Inténtalo de nuevo.',
-              icon: 'error',
-              confirmButtonText: 'Cerrar'
-            });
-          },
+          }
         });
+        
       }
     });
   }
