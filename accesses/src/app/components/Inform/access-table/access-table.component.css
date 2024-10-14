@@ -37,7 +37,7 @@ table.dataTable {
 }
 
 table.dataTable thead th {
-    background-color: grey; /* Color de fondo del encabezado */
+    background-color: #000; /* Color de fondo del encabezado */
     color: white; /* Color del texto del encabezado */
 }
 
