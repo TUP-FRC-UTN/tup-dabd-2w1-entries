@@ -288,19 +288,21 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
 
   // muestra un modal avisando q el Visitor esta fuera de rango (dia y hora permitido)
   outOfAuthorizedHourRange(visitor: User_AllowedInfoDto, indexAuthRange: number, indexDayAllowed: number){
-    console.log("metodo RegisterAccess (en visitor-registry.component): el Visitor esta fuera de rango autorizado");
+    console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango dia y hora permitido");
 
     let allowedDay = visitor.authRanges.at(indexAuthRange)?.allowedDays.at(indexDayAllowed);
 
-    let rangesHtml = '';
+    let rangesHtml = 'no hay allowedDay';
 
     if(allowedDay != undefined && allowedDay.day != undefined && allowedDay.init_hour != undefined && allowedDay.end_hour != undefined){
 
-        //console.log(dayAllowed);
-        rangesHtml += `
+        // ${this.datePipe.transform(allowedDay.init_hour,'hh:MM:ss')?.toString()}
+        // ${this.datePipe.transform(allowedDay.end_hour,'hh:MM:ss')?.toString()}
+          
+        rangesHtml = `
           <p>
-            <strong>Hora de inicio: </strong> ${this.datePipe.transform(allowedDay.init_hour,'hh:MM:ss')?.toString()}<br>
-            <strong>Hora de fin: </strong> ${this.datePipe.transform(allowedDay.end_hour,'hh:MM:ss')?.toString()}
+            <strong>Hora de inicio: </strong> ${allowedDay.init_hour} <br>
+            <strong>Hora de fin: </strong> ${allowedDay.end_hour}
           </p>
         `;
       
@@ -319,7 +321,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
 
   // muestra un modal avisando q el Visitor esta fuera de rango (fechas permitidas)
   outOfAuthorizedDateRange(visitor: User_AllowedInfoDto){
-    console.log("metodo RegisterAccess (en visitor-registry.component): el Visitor esta fuera de rango autorizado");
+    console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango fecha");
 
     let rangesHtml = '';
     for (const range of visitor.authRanges) {

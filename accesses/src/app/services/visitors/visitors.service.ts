@@ -281,24 +281,27 @@ export class VisitorsService {
         return false;
       }
 
+      let dayAllowed = allowedDayDto.day;
       // DIA permitido con la HORA de inicio 
-      let initDateString = `${allowedDayDto?.day}T${allowedDayDto?.init_hour}`; //Ej: "2024-10-10T14:30:00"
+      let initHourString = allowedDayDto.init_hour; //Ej: "2024-10-10T14:30:00"
       // DIA permitido con la HORA de fin 
-      let endDateString = `${allowedDayDto?.day}T${allowedDayDto?.end_hour}`; //Ej: "2024-10-10T20:30:00"
+      let endHourString = allowedDayDto.end_hour; //Ej: "2024-10-10T20:30:00"
+
+      console.log("day en string: ", dayAllowed);
+      console.log("initHourString en string: ", initHourString);
+      console.log("endHourString en string: ", endHourString);
 
       // DIA y HORA actual
       let todayDateAndHour = new Date();
       console.log("fecha actual: ", todayDateAndHour);
       // DIA permitido con la HORA de inicio (en formato Date para poder comparar)
-      let initDate: Date = new Date(initDateString);
+      let initDate: Date = new Date(initHourString);
       console.log("AllowedDay inicio: ", initDate);
       // DIA permitido con la HORA de fin (en formato Date para poder comparar)
-      let endDate: Date = new Date(endDateString);
+      let endDate: Date = new Date(endHourString);
       console.log("AllowedDay fin: ", endDate);
 
       return initDate <= todayDateAndHour && endDate >= todayDateAndHour;
     }
 // FIN funciones para comparar HORAS
-
-
 }
