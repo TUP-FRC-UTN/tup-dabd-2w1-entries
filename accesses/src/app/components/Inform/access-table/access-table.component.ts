@@ -94,19 +94,22 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
       buttons: [
         {
           extend: 'excel',
-          text: 'Excel',
+          text: '<i class="fas fa-file-excel"></i> Excel',
+          className: 'btn btn-success ms-2', // Aplicando estilo de Bootstrap
           titleAttr: 'Exportar a Excel'
         },
         {
           extend: 'pdf',
-          text: 'PDF',
+          text: '<i class="fas fa-file-pdf"></i> PDF',
+          className: 'btn btn-danger ms-2', // Aplicando estilo de Bootstrap
           titleAttr: 'Exportar a PDF',
           orientation: 'portrait',
           pageSize: 'A4'
         },
         {
           extend: 'print',
-          text: 'Imprimir',
+          text: '<i class="fas fa-print"></i> Imprimir',
+          className: 'btn btn-primary ms-2', // Aplicando estilo de Bootstrap
           titleAttr: 'Imprimir tabla'
         }
       ]
