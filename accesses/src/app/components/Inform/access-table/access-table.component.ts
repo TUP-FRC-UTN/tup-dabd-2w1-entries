@@ -11,7 +11,9 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AfterViewInit, Component, Input, OnInit, SimpleChanges } from '@angular/core';
 import { DataTablesModule } from 'angular-datatables';
 import { AccesPdfGenerateService } from '../../../services/visitors/pdfService/acces-pdf-generate.service';
-
+import 'datatables.net-buttons/js/dataTables.buttons.js';
+import 'datatables.net-buttons/js/buttons.html5.js';
+import 'datatables.net-buttons/js/buttons.print.js';
 
 @Component({
   selector: 'app-access-table',
@@ -85,11 +87,32 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
           next: "Siguiente",
           previous: "Anterior"
         },
-        emptyTable: "No hay datos disponibles"
+        emptyTable: "No hay datos disponibles",
       },
       responsive: true,
+      dom: 'Bfrtip', // Esto habilita los botones en la parte superior
+      buttons: [
+        {
+          extend: 'excel',
+          text: 'Excel',
+          titleAttr: 'Exportar a Excel'
+        },
+        {
+          extend: 'pdf',
+          text: 'PDF',
+          titleAttr: 'Exportar a PDF',
+          orientation: 'portrait',
+          pageSize: 'A4'
+        },
+        {
+          extend: 'print',
+          text: 'Imprimir',
+          titleAttr: 'Imprimir tabla'
+        }
+      ]
     });
   }
+  
   setupFilters(): void {
     $('#tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter, #propietarioFilter').on('change keyup', () => {
       if (this.table) {

@@ -10,7 +10,6 @@
   },
   "private": true,
   "dependencies": {
-    "angular-google-charts": "^16.0.1",
     "5": "^0.0.1",
     "@angular/animations": "^18.2.8",
     "@angular/common": "^18.2.0",
@@ -23,6 +22,7 @@
     "@ng-select/ng-select": "^13.9.0",
     "@types/datatables.net-buttons": "^1.4.10",
     "angular-datatables": "^18.0.0",
+    "angular-google-charts": "^16.0.1",
     "boostrap": "^2.0.0",
     "bootstrap": "^5.3.3",
     "datatables.net": "^2.1.8",
@@ -40,10 +40,10 @@
     "jszip": "^3.10.1",
     "ngx-toastr": "^19.0.0",
     "pdfmake": "^0.2.14",
-    "xlsx": "^0.18.5",
     "rxjs": "~7.8.0",
     "sweetalert2": "^11.14.2",
     "tslib": "^2.3.0",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.14.10"
   },
   "devDependencies": {
