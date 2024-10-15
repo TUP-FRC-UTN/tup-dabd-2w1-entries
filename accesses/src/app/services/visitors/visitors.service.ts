@@ -115,10 +115,9 @@ export class VisitorsService {
         end_date: "", 
         allowedDaysDtos: allowedDaysEmpty
       };
-      
 
       //agarra un AuthRange (del Visitor) q comprenda la fecha actual (pq tiene varios, entonces hay q agarrar el actual)
-      let index = this.todayIsInRange(listAuthRangeInfoDto);
+      let index = this.todayIsInDateRange(listAuthRangeInfoDto);
       // si hay uno valido index es mayor a -1 (index es el indice del Range valido, en el array de AuthRangeInfoDto)
       if(index >= 0){
 
@@ -171,7 +170,6 @@ export class VisitorsService {
   //FIN post del registro de un visitor
 
 
-
   //Llamadas a Metodos:
   // METODO: getAllUserAllowedVisitors(@PathVariable String visitor)
   getVisitorsData(): Observable<User_AllowedInfoDto[]> {
@@ -200,12 +198,12 @@ export class VisitorsService {
   }  
 
 
-  // funciones para comparar FECHAS y HORAS 
+// funciones para comparar FECHAS
   // verifica si la fecha actual esta dentro de alguno de los AuthRangeInfoDto del Visitor
-  todayIsInRange(listAuthRangeInfoDto: AuthRangeInfoDto[]): number{
+  todayIsInDateRange(listAuthRangeInfoDto: AuthRangeInfoDto[]): number{
     for (var i = 0; i < listAuthRangeInfoDto.length; i++) {
 
-      console.log("todayIsInRange (en visitors.service) | ciclo del for: ", i);
+      //console.log("todayIsInDateRange (en visitors.service) | ciclo del for: ", i);
       //console.log("fechas del AuthRange: ", listAuthRangeInfoDto.at(i)?.init_date, " | ", listAuthRangeInfoDto.at(i)?.end_date)
 
       let initDate: Date | undefined = listAuthRangeInfoDto.at(i)?.init_date;
@@ -252,4 +250,55 @@ export class VisitorsService {
 
     return afterDate >= todayDate;
   }
+// FIN funciones para comparar FECHAS
+
+// funciones para comparar HORAS
+    //devuelve el index del AllowedDayDto valido, dentro de la list authRangeInfoDto.allowedDays
+    todayIsAllowedDay(authRangeInfoDto: AuthRangeInfoDto | undefined): number{
+
+      if(authRangeInfoDto != undefined){
+        for (var i = 0; i < authRangeInfoDto.allowedDays.length; i++) {
+    
+          console.log("todayIsInHourRange (en visitors.service) | ciclo del for: ", i);
+    
+          if(this.isTodayAnAllowedDay(authRangeInfoDto.allowedDays.at(i))){
+            console.log("(Visitor dentro del rango horario!) index del AllowedDayDto valido: ", i);
+            return i; // devuelve el indice donde esta el allowedDayDto valido
+          }
+        }
+      }
+
+      return -1; // no hay rango q comprenda el DIA y HORA actual
+    }
+
+    // verifica si el Visitor esta dentro de un DIA permitido, y dentro del rango HORARIO permitido
+    isTodayAnAllowedDay(allowedDayDto: Allowed_DaysDto | undefined): boolean{
+
+      console.log("Metodo isTodayAnAllowedDay")
+
+      if(allowedDayDto?.day == undefined || allowedDayDto?.end_hour == undefined || allowedDayDto?.end_hour == undefined){
+        console.log("AllowedDay es undefined");
+        return false;
+      }
+
+      // DIA permitido con la HORA de inicio 
+      let initDateString = `${allowedDayDto?.day}T${allowedDayDto?.init_hour}`; //Ej: "2024-10-10T14:30:00"
+      // DIA permitido con la HORA de fin 
+      let endDateString = `${allowedDayDto?.day}T${allowedDayDto?.end_hour}`; //Ej: "2024-10-10T20:30:00"
+
+      // DIA y HORA actual
+      let todayDateAndHour = new Date();
+      console.log("fecha actual: ", todayDateAndHour);
+      // DIA permitido con la HORA de inicio (en formato Date para poder comparar)
+      let initDate: Date = new Date(initDateString);
+      console.log("AllowedDay inicio: ", initDate);
+      // DIA permitido con la HORA de fin (en formato Date para poder comparar)
+      let endDate: Date = new Date(endDateString);
+      console.log("AllowedDay fin: ", endDate);
+
+      return initDate <= todayDateAndHour && endDate >= todayDateAndHour;
+    }
+// FIN funciones para comparar HORAS
+
+
 }

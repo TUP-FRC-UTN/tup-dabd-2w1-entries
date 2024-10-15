@@ -13,6 +13,7 @@ import 'datatables.net'
 import 'datatables.net-bs5';
 //import { AlertDirective } from '../alert.directive';
 import { InternalSettings } from 'datatables.net';
+import { AllowedDaysDto } from '../../../services/visitors/movement.interface';
 
 @Component({
   selector: 'app-visitor-registry',
@@ -227,56 +228,99 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
 
   //registrar ingreso de un visitante
   RegisterAccess(visitor :User_AllowedInfoDto): void{
-    //verificar observations
+    //verifica observations
     if(visitor.observations == undefined){
       visitor.observations = "";
     }
 
-    // verificar si esta dentro de rango (fecha y hora)
-    if(this.visitorService.todayIsInRange(visitor.authRanges) >= 0){
+    // verifica si esta dentro de rango (fechas permitidas)
+    let indexAuthRange = this.visitorService.todayIsInDateRange(visitor.authRanges);
+    if(indexAuthRange >= 0){
 
-      // mapeos
-      const newUserAllowedDto: NewUserAllowedDto = 
-        this.visitorService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
-      const newAuthRangeDto: NewAuthRangeDto = 
-        this.visitorService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges);
+      // verifica si esta dentro de rango (dia y horario permitido)
+      let indexDayAllowed = this.visitorService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
+      if(indexDayAllowed >= 0){
+        
+        // mapeos
+        const newUserAllowedDto: NewUserAllowedDto = 
+          this.visitorService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
+        const newAuthRangeDto: NewAuthRangeDto = 
+          this.visitorService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges);
 
-      //se crea el objeto (q se va a pasar por el body en el post)
-      const newMovements_EntryDto: NewMovements_EntryDto = 
-        this.visitorService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+        //se crea el objeto (q se va a pasar por el body en el post)
+        const newMovements_EntryDto: NewMovements_EntryDto = 
+          this.visitorService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
 
-      //post en la URL
-      this.visitorService.postVisitor(newMovements_EntryDto).subscribe({
-        next: (response) => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Ingreso registrado!',
-            text: `¡El Ingreso de "${newMovements_EntryDto.newUserAllowedDto.name} ${newMovements_EntryDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
-            confirmButtonColor: '#28a745',
-          });
-        },
-        error: (error) => {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Error al registrar el Ingreso. Inténtelo de nuevo.',
-            confirmButtonText: 'Cerrar'        
-          });
-        }
-      });
+        //post en la URL
+        this.visitorService.postVisitor(newMovements_EntryDto).subscribe({
+          next: (response) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Ingreso registrado!',
+              text: `¡El Ingreso de "${newMovements_EntryDto.newUserAllowedDto.name} ${newMovements_EntryDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
+              confirmButtonColor: '#28a745',
+            });
+          },
+          error: (error) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Error al registrar el Ingreso. Inténtelo de nuevo.',
+              confirmButtonText: 'Cerrar'        
+            });
+          }
+        });
+
+      } else {
+        //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
+        this.outOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
+        return;
+
+      }
 
     } else {
-      this.visitorIsOutOfAuthorizedRange(visitor);
+      //se dispara si el Visitor esta fuera de rango (fechas permitidas)
+      this.outOfAuthorizedDateRange(visitor);
       return; // se termina la ejecucion del metodo (no se registra el ingreso)
     }
 
   }
 
-  // muestra un modal avisando q el Visitor esta fuera del AuthRange
-  visitorIsOutOfAuthorizedRange(visitor: User_AllowedInfoDto){
+  // muestra un modal avisando q el Visitor esta fuera de rango (dia y hora permitido)
+  outOfAuthorizedHourRange(visitor: User_AllowedInfoDto, indexAuthRange: number, indexDayAllowed: number){
     console.log("metodo RegisterAccess (en visitor-registry.component): el Visitor esta fuera de rango autorizado");
 
-      // Generar HTML dinámicamente
+    let allowedDay = visitor.authRanges.at(indexAuthRange)?.allowedDays.at(indexDayAllowed);
+
+    let rangesHtml = '';
+
+    if(allowedDay != undefined && allowedDay.day != undefined && allowedDay.init_hour != undefined && allowedDay.end_hour != undefined){
+
+        //console.log(dayAllowed);
+        rangesHtml += `
+          <p>
+            <strong>Hora de inicio: </strong> ${this.datePipe.transform(allowedDay.init_hour,'hh:MM:ss')?.toString()}<br>
+            <strong>Hora de fin: </strong> ${this.datePipe.transform(allowedDay.end_hour,'hh:MM:ss')?.toString()}
+          </p>
+        `;
+      
+    }
+
+    Swal.fire({
+      title: 'Denegar ingreso!',
+      html: `
+        <strong>El Visitante está fuera del rango horario permitido!</strong>
+        ${rangesHtml}
+      `,
+      icon: 'error',
+      confirmButtonText: 'Cerrar'
+    });
+  }
+
+  // muestra un modal avisando q el Visitor esta fuera de rango (fechas permitidas)
+  outOfAuthorizedDateRange(visitor: User_AllowedInfoDto){
+    console.log("metodo RegisterAccess (en visitor-registry.component): el Visitor esta fuera de rango autorizado");
+
     let rangesHtml = '';
     for (const range of visitor.authRanges) {
 
@@ -293,7 +337,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
     Swal.fire({
       title: 'Denegar ingreso!',
       html: `
-        <strong>El Visitante está fuera de rango!</strong>
+        <strong>El Visitante está fuera del rango permitido!</strong>
         ${rangesHtml}
       `,
       icon: 'error',
