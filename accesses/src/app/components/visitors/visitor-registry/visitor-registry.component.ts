@@ -93,14 +93,15 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
         const formattedData = this.visitors.map((visitor, index) => {
           return [
             `${visitor.last_name} ${visitor.name}`,
+            //visitor.documentType, //DNI passport etc
             visitor.document,
-            `<button class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`, // Cambiar el uso de onclick
+            `<button style="width: 95%;" class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`, // Cambiar el uso de onclick
             `<select class="form-select select-action" data-index="${index}">
                 <option value="" selected disabled hidden>Seleccionar</option>
                 <option value="ingreso">Ingreso</option>
                 <option value="egreso">Egreso</option>
               </select>`,
-            `<textarea name="observations${index}" id="observations${index}"></textarea>`
+            `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`
           ];
         });
   

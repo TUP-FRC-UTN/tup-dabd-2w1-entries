@@ -200,7 +200,7 @@ export class VisitorsService {
   }  
 
 
-  // funciones para comparar fechas
+  // funciones para comparar FECHAS y HORAS 
   // verifica si la fecha actual esta dentro de alguno de los AuthRangeInfoDto del Visitor
   todayIsInRange(listAuthRangeInfoDto: AuthRangeInfoDto[]): number{
     for (var i = 0; i < listAuthRangeInfoDto.length; i++) {
@@ -235,7 +235,7 @@ export class VisitorsService {
     let beforeDate = new Date(date);
     //console.log(beforeDate, " | hoy -> ", todayDate)
 
-    return beforeDate < todayDate;
+    return beforeDate <= todayDate;
   }
 
   isDateAfterToday(date: Date | undefined): boolean {
@@ -250,6 +250,6 @@ export class VisitorsService {
     let afterDate = new Date(date);
     //console.log(afterDate, " | hoy -> ", todayDate)
 
-    return afterDate > todayDate;
+    return afterDate >= todayDate;
   }
 }
