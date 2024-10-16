@@ -301,8 +301,9 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
           
         rangesHtml = `
           <p>
-            <strong>Hora de inicio: </strong> ${allowedDay.init_hour} <br>
-            <strong>Hora de fin: </strong> ${allowedDay.end_hour}
+            <strong>Rango horario permitido </strong> <br>
+            <strong>Desde: </strong> ${this.visitorService.stringToHour(allowedDay, true).substring(11)} <br>
+            <strong>Hasta: </strong> ${this.visitorService.stringToHour(allowedDay, false).substring(11)}
           </p>
         `;
       

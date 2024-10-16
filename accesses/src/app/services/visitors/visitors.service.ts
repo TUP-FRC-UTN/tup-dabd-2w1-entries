@@ -280,14 +280,10 @@ export class VisitorsService {
         console.log("AllowedDay es undefined");
         return false;
       }
-    
-      // Formato de día (yyyy-MM-dd)
-      let dayWrongFormat = allowedDayDto.day;
-      let day = dayWrongFormat.at(0)+ "-" + dayWrongFormat.at(1)+ "-" + dayWrongFormat.at(2) + "T";
 
       // 
-      let initDateTimeString = this.stringToHour(day, allowedDayDto, true); // 
-      let endDateTimeString = this.stringToHour(day, allowedDayDto, false);
+      let initDateTimeString = this.stringToHour(allowedDayDto, true); // 
+      let endDateTimeString = this.stringToHour(allowedDayDto, false);
       console.log("initDateTimeString: ", initDateTimeString);
       console.log("endDateTimeString: ", endDateTimeString);
 
@@ -314,11 +310,13 @@ export class VisitorsService {
     
 
     //metodo q devuelve strings para crear objetos Date
-    stringToHour(day: string, allowedDayDto: Allowed_DaysDto, x: boolean): string {
-      let response = day;
-      const hours = x ? allowedDayDto.init_hour : allowedDayDto.end_hour;
+    stringToHour(allowedDayDto: Allowed_DaysDto, x: boolean): string {
+      let dayWrongFormat = allowedDayDto.day;
+      let response = dayWrongFormat.at(0)+ "-" + dayWrongFormat.at(1)+ "-" + dayWrongFormat.at(2) + "T";
+
+      const hours = x ? allowedDayDto.init_hour : allowedDayDto.end_hour;      
     
-      // Función auxiliar para formatear la hora
+      // funcion auxiliar para formatear la hora
       const formatHour = (hour: unknown): string => {
         if (typeof hour === 'string') {
           return hour.padStart(2, '0');
@@ -328,11 +326,10 @@ export class VisitorsService {
         return '00';
       };
     
-      // Formatear horas y minutos
+      // formatea horas y minutos
       const formattedHours = formatHour(hours?.[0]);
       const formattedMinutes = formatHour(hours?.[1]);
     
-      // Construir la respuesta
       response += `${formattedHours}:${formattedMinutes}:00`;
     
       return response;
