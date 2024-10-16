@@ -272,36 +272,152 @@ export class VisitorsService {
     }
 
     // verifica si el Visitor esta dentro de un DIA permitido, y dentro del rango HORARIO permitido
-    isTodayAnAllowedDay(allowedDayDto: Allowed_DaysDto | undefined): boolean{
-
-      console.log("Metodo isTodayAnAllowedDay")
-
-      if(allowedDayDto?.day == undefined || allowedDayDto?.end_hour == undefined || allowedDayDto?.end_hour == undefined){
+    isTodayAnAllowedDay(allowedDayDto: Allowed_DaysDto | undefined): boolean {
+      console.log("Metodo isTodayAnAllowedDay...");
+    
+      // Verifica si los datos están definidos
+      if (!allowedDayDto?.day || !allowedDayDto?.init_hour || !allowedDayDto?.end_hour) {
         console.log("AllowedDay es undefined");
         return false;
       }
+    
+      // Formato de día (yyyy-MM-dd)
+      let dayWrongFormat = allowedDayDto.day;
+      let day = dayWrongFormat.at(0)+ "-" + dayWrongFormat.at(1)+ "-" + dayWrongFormat.at(2) + "T";
 
-      let dayAllowed = allowedDayDto.day;
-      // DIA permitido con la HORA de inicio 
-      let initHourString = allowedDayDto.init_hour; //Ej: "2024-10-10T14:30:00"
-      // DIA permitido con la HORA de fin 
-      let endHourString = allowedDayDto.end_hour; //Ej: "2024-10-10T20:30:00"
+      // 
+      let initDateTimeString = this.stringToHour(day, allowedDayDto, true); // 
+      let endDateTimeString = this.stringToHour(day, allowedDayDto, false);
+      console.log("initDateTimeString: ", initDateTimeString);
+      console.log("endDateTimeString: ", endDateTimeString);
 
-      console.log("day en string: ", dayAllowed);
-      console.log("initHourString en string: ", initHourString);
-      console.log("endHourString en string: ", endHourString);
-
-      // DIA y HORA actual
-      let todayDateAndHour = new Date();
-      console.log("fecha actual: ", todayDateAndHour);
-      // DIA permitido con la HORA de inicio (en formato Date para poder comparar)
-      let initDate: Date = new Date(initHourString);
-      console.log("AllowedDay inicio: ", initDate);
-      // DIA permitido con la HORA de fin (en formato Date para poder comparar)
-      let endDate: Date = new Date(endHourString);
-      console.log("AllowedDay fin: ", endDate);
-
-      return initDate <= todayDateAndHour && endDate >= todayDateAndHour;
+      // crea el initHour y endHour en formato Date (para poder comparar)
+      let initDate = new Date(initDateTimeString);
+      let endDate = new Date(endDateTimeString);
+    
+      // valida q las fechas sean validas
+      if (isNaN(initDate.getTime()) || isNaN(endDate.getTime())) {
+        console.log("Fechas inválidas");
+        return false;
+      }
+    
+      // fecha y hora actual para comparar
+      let todayDate = new Date();
+      
+      console.log("Fecha actual:", todayDate);
+      console.log("AllowedDay inicio:", initDate);
+      console.log("AllowedDay fin:", endDate);
+    
+      // compara si la fecha actual esta dentro del rango horario permitido
+      return initDate <= todayDate && endDate >= todayDate;
     }
+    
+
+    //metodo q devuelve strings para crear objetos Date
+    stringToHour(day: string, allowedDayDto: Allowed_DaysDto, x: boolean): string {
+      let response = day;
+      const hours = x ? allowedDayDto.init_hour : allowedDayDto.end_hour;
+    
+      // Función auxiliar para formatear la hora
+      const formatHour = (hour: unknown): string => {
+        if (typeof hour === 'string') {
+          return hour.padStart(2, '0');
+        } else if (typeof hour === 'number') {
+          return hour.toString().padStart(2, '0');
+        }
+        return '00';
+      };
+    
+      // Formatear horas y minutos
+      const formattedHours = formatHour(hours?.[0]);
+      const formattedMinutes = formatHour(hours?.[1]);
+    
+      // Construir la respuesta
+      response += `${formattedHours}:${formattedMinutes}:00`;
+    
+      return response;
+    }
+
 // FIN funciones para comparar HORAS
+
+
+//codigo ineficaz:
+// isTodayAnAllowedDay(allowedDayDto: Allowed_DaysDto | undefined): boolean{
+
+//   console.log("Metodo isTodayAnAllowedDay")
+
+//   if(allowedDayDto?.day == undefined || allowedDayDto?.end_hour == undefined || allowedDayDto?.end_hour == undefined){
+//     console.log("AllowedDay es undefined");
+//     return false;
+//   }
+
+//   // dia en String (yyyy-MM-dd)
+//   let day = allowedDayDto.day;
+//   let dayString = day.at(0) + "-" + day.at(1) + "-" + day.at(2) + "T";
+
+//   // hora y minuto del inicio y fin (del dia permitido / dayAllowedDto)
+//   let initHour = allowedDayDto.init_hour;  
+//   let endHour = allowedDayDto.end_hour;
+
+//   // se crea el string (formato: "2024-10-10T14:30:00") para luego crear el objeto Date a comparar
+//   // DIA permitido con la HORA de inicio //Ej: "2024-10-10"
+//   let initHourString = dayString; 
+//   // DIA permitido con la HORA de fin //Ej: "2024-10-10"
+//   let endHourString = dayString;
+
+//   for (var i = 0; i < initHour.length; i++) {
+//     if(initHour.at(i) == "0"){
+//       initHour += "00";
+//     } else {
+//       initHour += initHour.at(i);
+//     }
+
+//     if(i == 0 || i == 1){
+//       initHour += ":";
+//     }
+//     if(i == 1){
+//       initHour += "00";
+//     }
+//   }
+
+//   for (var i = 0; i < endHour.length; i++) {
+//     if(endHour.at(i) == "0"){
+//       endHour += "00";
+//     } else {
+//       endHour += initHour.at(i);
+//     }
+
+//     if(i == 0 || i == 1){
+//       endHour += ":";
+//     }
+//     if(i == 1){
+//       endHour += "00";
+//     }
+//   }
+
+//   console.log("alloweddayDto.init_hour = ", initHour);
+//   console.log("alloweddayDto.end_hour = ", endHour);
+//   console.log("////////////////////////////////////////////")
+
+
+//   // console.log("Datos del AllowedDayDto...")
+//   // console.log("dia en formato Date: ", day, " = yyyy-MM-dd");
+//   // console.log("initHourString: ", initHourString);
+//   // console.log("endHourString: ", endHourString);
+
+//   console.log("////////////////////////////////////////////")
+//   console.log("Datos procesados...")
+//   // DIA y HORA actual
+//   let todayDateAndHour = new Date();
+//   console.log("fecha actual: ", todayDateAndHour);
+//   // dia con hora inicio y con hora fin, en Date
+//   // DIA permitido con la HORA de inicio (en formato Date para poder comparar)
+//   let initDate: Date = new Date(initHourString);
+//   console.log("AllowedDay inicio: ", initDate);
+//   // DIA permitido con la HORA de fin (en formato Date para poder comparar)
+//   let endDate: Date = new Date(endHourString);
+//   console.log("AllowedDay fin: ", endDate);
+
+//   return initDate <= todayDateAndHour && endDate >= todayDateAndHour;
+// }
 }

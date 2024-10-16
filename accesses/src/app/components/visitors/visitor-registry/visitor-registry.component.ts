@@ -292,7 +292,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
 
     let allowedDay = visitor.authRanges.at(indexAuthRange)?.allowedDays.at(indexDayAllowed);
 
-    let rangesHtml = 'no hay allowedDay';
+    let rangesHtml = 'El Visitante no tiene un rango horario autorizado';
 
     if(allowedDay != undefined && allowedDay.day != undefined && allowedDay.init_hour != undefined && allowedDay.end_hour != undefined){
 
@@ -311,7 +311,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
     Swal.fire({
       title: 'Denegar ingreso!',
       html: `
-        <strong>El Visitante está fuera del rango horario permitido!</strong>
+        <strong>El Visitante está fuera del rango horario permitido!</strong> <br>
         ${rangesHtml}
       `,
       icon: 'error',
