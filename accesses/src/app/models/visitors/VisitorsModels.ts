@@ -1,33 +1,38 @@
 // cosas front de fede
 export interface Vehicle {
   type: string;
-  plat: string;
+  licensePlate: string;
 }
-export interface Day{
-  name: string,
-  value: boolean
-}
-export interface DayAllowed {
-  day: Day;
-  initHour: Date;
-  endHour: Date;
-  throughMidnight: boolean;
-}
-export interface Visitor {
+
+export interface Day {
   name: string;
+  value: boolean;
+}
+
+export interface AllowedDay {
+  day: Day;
+  startTime: Date;
+  endTime: Date;
+  crossesMidnight: boolean;
+}
+
+export interface Visitor {
+  firstName: string;
   lastName: string;
   document: string;
-  phoneNumber: string;
+  phone: string;
   email: string;
   vehicle?: Vehicle;
   hasVehicle: boolean;
-  plate?: string;
-  vehicleType?:string;
+  licensePlate?: string;
+  vehicleType?: string;
 }
-export interface RegistryVisitor {
+
+export interface VisitorRecord {
   visitors: Visitor[];
-  daysAllowed: DayAllowed[];
+  allowedDays: AllowedDay[];
 }
+
 // FIN cosas front de fede
 
 
