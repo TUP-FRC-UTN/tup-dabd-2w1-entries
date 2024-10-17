@@ -194,32 +194,5 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
       this.initializeDataTable(); 
     }
   }
-
-  exportToExcel(): void {
-    const tableElement = document.getElementById('myTable') as HTMLTableElement;
-    if (this.exportButtonsEnabled) {
-      this.pdfService.exportTableToExcel(tableElement, 'Reporte_Access');
-    } else {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Advertencia',
-        text: 'No hay datos disponibles para exportar a Excel.',
-      });
-    }
-  }
-
-  exportToPdf(): void {
-    const tableElement = document.getElementById('myTable') as HTMLTableElement;
-    if (this.exportButtonsEnabled) {
-      this.pdfService.exportTableToPdf(tableElement, 'Reporte_Access');
-    } else {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Advertencia',
-        text: 'No hay datos disponibles para exportar a PDF.',
-      });
-    }
-  }
-
   
 }

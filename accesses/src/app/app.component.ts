@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterModule, RouterOutlet } from '@angular/router';
-import { VisitorRegistryComponent } from './components/visitors/visitor-registry/visitor-registry.component';
-import { VisitorRegisterEntryComponent } from "./components/visitors/(no-hace-falta)visitor-register-entry/visitor-register-entry.component";
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-
-import { RegisterEmergencyComponent } from './components/emergencies/register-emergency/register-emergency.component';
 import { DatePipe } from '@angular/common';
+import { VisitorRegistryComponent } from './components/visitors/visitor-registry/visitor-registry.component';
+import { RegisterEmergencyComponent } from './components/emergencies/register-emergency/register-emergency.component';
+import { VisitorRegisterEntryComponent } from './components/visitors/(no-hace-falta)visitor-register-entry/visitor-register-entry.component';
 
 @Component({
   selector: 'app-root',
