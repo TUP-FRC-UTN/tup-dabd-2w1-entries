@@ -9,48 +9,48 @@ export class AccessVisitorsRegisterServiceService {
   private visitors: Visitor[] = [];
   private visitorsTemporalsSubject = new BehaviorSubject<Visitor[]>([]);
 
-  private diasPermitidos: AllowedDay[] = [];
-  private diasPermitidosSubject = new BehaviorSubject<AllowedDay[]>([]);
+  private allowedDays: AllowedDay[] = [];
+  private allowedDaysSubject = new BehaviorSubject<AllowedDay[]>([]);
 
-  obtenerDiasPermitidos(): Observable<AllowedDay[]> {
-    return this.diasPermitidosSubject.asObservable();
+  getAllowedDays(): Observable<AllowedDay[]> {
+    return this.allowedDaysSubject.asObservable();
   }
 
-  agregarDiasPermitidos(diasPermitidos: AllowedDay[]): void {
-    this.diasPermitidos = [...this.diasPermitidos, ...diasPermitidos];
-    this.diasPermitidosSubject.next(this.diasPermitidos);
+  addAllowedDays(allowedDays: AllowedDay[]): void {
+    this.allowedDays = [...this.allowedDays, ...allowedDays];
+    this.allowedDaysSubject.next(this.allowedDays);
   }
 
-  actualizarDiasPermitidos(diasPermitidos: AllowedDay[]): void {
-    this.diasPermitidos = [...diasPermitidos];
-    this.diasPermitidosSubject.next(this.diasPermitidos);
+  updateAllowedDays(allowedDays: AllowedDay[]): void {
+    this.allowedDays = [...allowedDays];
+    this.allowedDaysSubject.next(this.allowedDays);
   }
 
-  agregarVisitanteTemporal(visitante: Visitor): void {
-    this.visitors.push({ ...visitante });
+  addVisitorsTemporalsSubject(visitor: Visitor): void {
+    this.visitors.push({ ...visitor });
     this.visitorsTemporalsSubject.next(this.visitors);
   }
 
-  eliminarVisitanteTemporal(visitante: Visitor): void {
+  deleteVisitorsTemporalsSubject(visitor: Visitor): void {
     const index = this.visitors.findIndex(v => 
-      v.document === visitante.document && 
-      v.firstName === visitante.firstName && 
-      v.lastName === visitante.lastName
+      v.document === visitor.document && 
+      v.firstName === visitor.firstName && 
+      v.lastName === visitor.lastName
     );
     
     if (index !== -1) {
       this.visitors.splice(index, 1);
       this.visitorsTemporalsSubject.next([...this.visitors]);
     } else {
-      console.log('Visitante no encontrado:', visitante);
+      console.log('Visitante no encontrado:', visitor);
     }
   }
 
-  obtenerVisitantesTemporales(): Observable<Visitor[]> {
+  getVisitorsTemporalsSubject(): Observable<Visitor[]> {
     return this.visitorsTemporalsSubject.asObservable();
   }
 
-  modificarVisitanteTemporal(visitorToUpdated: Visitor): void {
+  updateVisitorsTemporalsSubject(visitorToUpdated: Visitor): void {
     const indice = this.visitors.findIndex(v => v.document === visitorToUpdated.document);
     if (indice !== -1) {
       this.visitors[indice] = { ...visitorToUpdated };

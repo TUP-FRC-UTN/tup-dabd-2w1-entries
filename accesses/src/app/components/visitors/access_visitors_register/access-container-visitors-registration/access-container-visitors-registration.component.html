@@ -1,0 +1,144 @@
+<div class="card mt-5 mx-3 mx-md-5 shadow-lg p-3 mb-5 bg-body-tertiary rounded">
+    <div class="card-header fs-1">
+        Registro visitante
+    </div>
+    <div class="card-body fs-2">
+        <h5 class="card-title">Ingrese aquí los datos:</h5>
+    </div>
+
+    <form #visitorForm="ngForm" class="needs-validation" novalidate>
+
+
+        <div class="row g-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <label for="document" class="form-label">Documento</label>
+                <input type="text" class="form-control" id="document" name="document" [(ngModel)]="visitant.document"
+                    #documentInput="ngModel" required minlength="8" maxlength="8" pattern="^[0-9]{8}$"
+                    (input)="onlyNumbers($event)"
+                    [class.is-valid]="documentInput.valid && (documentInput.dirty || documentInput.touched)"
+                    [class.is-invalid]="documentInput.invalid && (documentInput.dirty || documentInput.touched)">
+                <div class="invalid-feedback">
+                    <div *ngIf="documentInput.errors?.['required']">El documento es requerido.</div>
+                    <div
+                        *ngIf="documentInput.errors?.['minlength'] || documentInput.errors?.['maxlength'] || documentInput.errors?.['pattern']">
+                        El documento debe tener exactamente 8 dígitos.
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <label for="name" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="name" name="name" [(ngModel)]="visitant.firstName"
+                    #nameInput="ngModel" required maxlength="45"
+                    [class.is-valid]="nameInput.valid && (nameInput.dirty || nameInput.touched)"
+                    [class.is-invalid]="nameInput.invalid && (nameInput.dirty || nameInput.touched)">
+                <div class="invalid-feedback">
+                    <div *ngIf="nameInput.errors?.['required']">El nombre es requerido.</div>
+                    <div *ngIf="nameInput.errors?.['maxlength']">El nombre no puede exceder 45 caracteres.</div>
+                </div>
+            </div>
+
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <label for="lastName" class="form-label">Apellido</label>
+                <input type="text" class="form-control" id="lastName" name="lastName" [(ngModel)]="visitant.lastName"
+                    #lastNameInput="ngModel" required maxlength="45"
+                    [class.is-valid]="lastNameInput.valid && (lastNameInput.dirty || lastNameInput.touched)"
+                    [class.is-invalid]="lastNameInput.invalid && (lastNameInput.dirty || lastNameInput.touched)">
+                <div class="invalid-feedback">
+                    <div *ngIf="lastNameInput.errors?.['required']">El apellido es requerido.</div>
+                    <div *ngIf="lastNameInput.errors?.['maxlength']">El apellido no puede exceder 45 caracteres.</div>
+                </div>
+            </div>
+
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <label for="phone" class="form-label">Teléfono</label>
+                <input type="text" class="form-control" id="phone" name="phone" [(ngModel)]="visitant.phone"
+                    #phoneInput="ngModel" required maxlength="30" pattern="^[0-9]*$"
+                    [class.is-valid]="phoneInput.valid && (phoneInput.dirty || phoneInput.touched)"
+                    [class.is-invalid]="phoneInput.invalid && (phoneInput.dirty || phoneInput.touched)">
+                <div class="invalid-feedback">
+                    <div *ngIf="phoneInput.errors?.['required']">El teléfono es requerido.</div>
+                    <div *ngIf="phoneInput.errors?.['maxlength']">El teléfono no puede exceder 30 caracteres.</div>
+                    <div *ngIf="phoneInput.errors?.['pattern']">El teléfono solo debe contener números.</div>
+                </div>
+            </div>
+
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" [(ngModel)]="visitant.email"
+                    #emailInput="ngModel" required maxlength="70" email
+                    [class.is-valid]="emailInput.valid && (emailInput.dirty || emailInput.touched)"
+                    [class.is-invalid]="emailInput.invalid && (emailInput.dirty || emailInput.touched)">
+                <div class="invalid-feedback">
+                    <div *ngIf="emailInput.errors?.['required']">El email es requerido.</div>
+                    <div *ngIf="emailInput.errors?.['email']">Por favor, ingrese un email válido.</div>
+                    <div *ngIf="emailInput.errors?.['maxlength']">El email no puede exceder 70 caracteres.</div>
+                </div>
+            </div>
+
+
+            <div class="col-12 col-md-6 col-lg-4 mt-5">
+                <div class="input-group-text">
+                    <input class="form-check-input w-10" type="checkbox" role="switch" id="hasVehicle"
+                        name="hasVehicle" [(ngModel)]="visitant.hasVehicle" style="transform: scale(1.2);">
+                    <label class="form-check-label w-50 text-end" for="hasVehicle">Vehículo</label>
+                </div>
+            </div>
+
+
+            <ng-container *ngIf="visitant.hasVehicle">
+                <div class="col-12 col-md-6 col-lg-4" *ngIf="visitant.hasVehicle">
+                    <label for="plate" class="form-label">Patente</label>
+                    <input type="text" class="form-control" id="plate" name="plate" [(ngModel)]="visitant.licensePlate"
+                        #plateInput="ngModel" [required]="visitant.hasVehicle" [pattern]="patentePattern"
+                        maxlength="7" (input)="onPatenteInput($event)"
+                        [class.is-valid]="plateInput.valid && (plateInput.dirty || plateInput.touched)"
+                        [class.is-invalid]="plateInput.invalid && (plateInput.dirty || plateInput.touched)">
+                    <div class="invalid-feedback">
+                        <div *ngIf="plateInput.errors?.['required']">La patente es requerida.</div>
+                        <div *ngIf="plateInput.errors?.['pattern']">Formato de patente inválido.</div>
+                        <div *ngIf="plateInput.errors?.['maxlength']">La patente no puede exceder 7 caracteres.</div>
+                    </div>
+                </div>
+
+
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="input-group" style="margin-top: 30px;">
+                        <select class="form-select" id="vehicleType" name="vehicleType"
+                            [(ngModel)]="visitant.tipoVehiculo" #vehicleTypeInput="ngModel" required>
+                            <option *ngFor="let type of vehicleType" [value]="type">{{type}}</option>
+                        </select>
+                        <label class="input-group-text" for="vehicleType">Tipo de Vehículo</label>
+                    </div>
+                    <div class="invalid-feedback"
+                        *ngIf="vehicleTypeInput.errors?.['required'] && (vehicleTypeInput.dirty || vehicleTypeInput.touched)">
+                        Por favor, seleccione un tipo de vehículo.
+                    </div>
+                </div>
+            </ng-container>
+
+
+
+            <div class="col-12 col-md-6 col-lg-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 btn-sm" style="margin-bottom: 2px;"
+                    (click)="enviarVisitanteSinRH(visitorForm)" [disabled]="!visitorForm.form.valid">Registrar</button>
+            </div>
+        </div>
+
+        <!-- <app-grilla-registro-componente (editarVisitante)="editarVisitante($event)"></app-grilla-registro-componente>
+
+        <app-rango-horario-registro></app-rango-horario-registro> -->
+
+        <div class="col-12 mt-5">
+            <div class="d-flex justify-content-end gap-3">
+                <button class="btn btn-secondary btn-lg" type="button">Volver</button>
+                <button class="btn btn-primary btn-lg" type="button">Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
