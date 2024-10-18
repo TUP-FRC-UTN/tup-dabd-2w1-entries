@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { VisitorRegistryComponent } from './components/visitors/visitor-registry/visitor-registry.component';
-import { VisitorRegisterEntryComponent } from './components/visitors/access_visitors_register/visitor-register-entry.component';
 import { InformComponent } from './components/Inform/inform/inform.component';
 import { EntryComponent } from './components/Entrys/entry/entry.component';
 import { AccesOwnerRentEntryViewComponent } from './components/owner/acces-owner-rent-entry-view/acces-owner-rent-entry-view.component';
@@ -10,7 +9,6 @@ import { RegistroComponent } from './components/Employee/registro/registro.compo
 export const routes: Routes = [
     { path: '', redirectTo: 'entry', pathMatch: 'full' },
     { path: 'Visitors', component: VisitorRegistryComponent },
-    { path: 'RegisterVisitorEntry', component: VisitorRegisterEntryComponent },
     { path: 'Inform', component: InformComponent },
     { path: 'entry', component: EntryComponent },
     {path:'OwnerAccess',component:AccesOwnerRentEntryViewComponent},
