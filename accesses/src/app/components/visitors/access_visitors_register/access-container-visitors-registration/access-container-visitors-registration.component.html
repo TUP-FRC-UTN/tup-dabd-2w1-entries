@@ -96,7 +96,7 @@
                     <label for="plate" class="form-label">Patente</label>
                     <input type="text" class="form-control" id="plate" name="plate" [(ngModel)]="visitant.licensePlate"
                         #plateInput="ngModel" [required]="visitant.hasVehicle" [pattern]="patentePattern"
-                        maxlength="7" (input)="onPatenteInput($event)"
+                        maxlength="7" (input)="onLicensePlateInput($event)"
                         [class.is-valid]="plateInput.valid && (plateInput.dirty || plateInput.touched)"
                         [class.is-invalid]="plateInput.invalid && (plateInput.dirty || plateInput.touched)">
                     <div class="invalid-feedback">
@@ -110,7 +110,7 @@
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="input-group" style="margin-top: 30px;">
                         <select class="form-select" id="vehicleType" name="vehicleType"
-                            [(ngModel)]="visitant.tipoVehiculo" #vehicleTypeInput="ngModel" required>
+                            [(ngModel)]="visitant.vehicleType" #vehicleTypeInput="ngModel" required>
                             <option *ngFor="let type of vehicleType" [value]="type">{{type}}</option>
                         </select>
                         <label class="input-group-text" for="vehicleType">Tipo de Vehículo</label>
@@ -126,7 +126,7 @@
 
             <div class="col-12 col-md-6 col-lg-4 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100 btn-sm" style="margin-bottom: 2px;"
-                    (click)="enviarVisitanteSinRH(visitorForm)" [disabled]="!visitorForm.form.valid">Registrar</button>
+                    (click)="sendVisitorWithoutRH(visitorForm)" [disabled]="!visitorForm.form.valid">Agregar</button>
             </div>
         </div>
 

@@ -1,1 +1,27 @@
-<p>access-grid-visitors-registration works!</p>
+<div class="table-container">
+    <table class="table table-striped table-fixed">
+        <thead>
+            <tr>
+                <th scope="col">Documento</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Apellido</th>
+                <th scope="col">Patente</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (visitor of visitors; track visitor) {
+                <tr>
+                    <td>{{ visitor.document }}</td>
+                    <td>{{ visitor.firstName }}</td>
+                    <td>{{ visitor.lastName }}</td>
+                    <td>{{ visitor.licensePlate }}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm me-1" (click)="updateVisitor(visitor)">Modificar</button>
+                        <button class="btn btn-danger btn-sm" (click)="deleteVisitor(visitor)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

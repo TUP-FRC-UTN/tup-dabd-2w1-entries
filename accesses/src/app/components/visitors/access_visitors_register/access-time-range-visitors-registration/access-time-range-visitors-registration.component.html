@@ -1,1 +1,54 @@
-<p>access-time-range-visitors-registration works!</p>
+<div class="card">
+    <div class="card-body">
+    <h5 class="card-title">Días y horarios de visita</h5>
+    <div class="row g-2 align-items-center mb-3">
+        <div class="col-12 col-md-6">
+        <div class="btn-group d-flex flex-wrap" role="group" aria-label="Días de visita">
+            <ng-container *ngFor="let day of days; let i = index">
+            <input type="checkbox" class="btn-check" [id]="'btncheck' + (i + 1)" [(ngModel)]="day.value" 
+                    [disabled]="isAllowedDay(day)" autocomplete="off">
+            <label class="btn" [class.btn-primary]="day.value" [class.btn-outline-primary]="!day.value" 
+                    [class.disabled]="isAllowedDay(day)" [for]="'btncheck' + (i + 1)">
+                {{ day.name }}
+            </label>
+            </ng-container>
+        </div>
+        </div>
+        <div class="col-12 col-md-6">
+        <div class="row g-2">
+            <div class="col-5">
+            <input type="time" class="form-control" id="horaDesde" [(ngModel)]="initHour" placeholder="Desde">
+            </div>
+            <div class="col-5">
+            <input type="time" class="form-control" id="horaHasta" [(ngModel)]="endHour" placeholder="Hasta">
+            </div>
+            <div class="col-2">
+            <button class="btn btn-primary w-100 btn-sm" type="button" (click)="agregarDiasPermitidos()">Agregar</button>
+            </div>
+        </div>
+        </div>
+    </div>
+      <div class="table-responsive" *ngIf="allowedDays.length > 0">
+        <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+            <th>Día</th>
+            <th>Horario</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let schedule of allowedDays">
+            <td>{{ schedule.day.name }}</td>
+            <td>{{ formatHour(schedule) }}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" (click)="deleteAllowedDay(schedule)">
+                Borrar
+                </button>
+            </td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+    </div>
+</div>
