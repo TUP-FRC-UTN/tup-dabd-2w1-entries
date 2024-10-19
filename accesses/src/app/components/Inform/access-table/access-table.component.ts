@@ -117,7 +117,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
   }
   
   setupFilters(): void {
-    $('#tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter, #propietarioFilter').on('change keyup', () => {
+    $('#typeEntryOrExitFilter, #tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter, #propietarioFilter').on('change keyup', () => {
       if (this.table) {
         this.table.draw();
       }
@@ -125,28 +125,43 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
   
     $.fn.dataTable.ext.search.push(
       (settings: any, data: string[], dataIndex: number) => {
+        const entryOrExit = ($('#typeEntryOrExitFilter').val() as string || '').toLowerCase();
         const tipoIngresante = ($('#tipoIngresanteFilter').val() as string || '').toLowerCase();
         const nombreIngresante = ($('#nombreIngresanteFilter').val() as string || '').toLowerCase();
         const documento = ($('#documentoFilter').val() as string || '').toLowerCase();
         const propietario = ($('#propietarioFilter').val() as string || '').toLowerCase();
   
+
+        const entryOrExitmap: { [key: string]: string } = {
+
+          'entry': 'entrada',
+          'exit': 'salida'
+         
+        };
+  
         // Mapa de tipos de ingresantes
         const tipoIngresanteMap: { [key: string]: string } = {
+
           'neighbour': 'vecino',
           'employee': 'empleado',
           'tenant': 'arrendatario',
           'visitor': 'visitante',
           'suplied': 'proveedor',
-          'delivery': 'delivery'
+          'delivery': 'delivery',
+          'constructionWorker': 'obrero'
         };
-  
+
+         // Mapa de tipos de entrada
+      
         // Verifica que el filtro solo aplique si se introducen al menos 3 caracteres
-        const isTipoIngresanteMatch = tipoIngresante === '' || data[0].toLowerCase() === tipoIngresanteMap[tipoIngresante];
-        const isNombreIngresanteMatch = nombreIngresante.length < 3 || data[1].toLowerCase().includes(nombreIngresante);
-        const isDocumentoMatch = documento.length < 3 || data[2].toLowerCase().includes(documento);
-        const isPropietarioMatch = propietario.length < 3 || data[3].toLowerCase().includes(propietario);
+        const isEntryOrExitMatch = entryOrExit === '' || data[0].toLowerCase() === entryOrExitmap[entryOrExit];
+        const isTipoIngresanteMatch = tipoIngresante === '' || data[1].toLowerCase() === tipoIngresanteMap[tipoIngresante];
+        const isNombreIngresanteMatch = nombreIngresante.length < 3 || data[2].toLowerCase().includes(nombreIngresante);
+        const isDocumentoMatch = documento.length < 3 || data[3].toLowerCase().includes(documento);
+        const isPropietarioMatch = propietario.length < 3 || data[4].toLowerCase().includes(propietario);
   
         return (
+          isEntryOrExitMatch &&
           isTipoIngresanteMatch &&
           isNombreIngresanteMatch &&
           isDocumentoMatch &&
@@ -169,14 +184,18 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
       if (Array.isArray(this.movements) && this.movements.length > 0) {
         this.movements.forEach(movement => {
           this.table.row.add([
+            movement.entryOrExit || '',
             movement.entryType || '',
             movement.visitorName || '',
             movement.visitorDocument || '',
+            movement.observations || '',
+            movement.carType || '',
+            movement.plate || '',
             movement.neighborId || '',
+            movement.lateOrNot || '',
             movement.hour || '',
-            movement.day || '',
-            movement.month || '',
-            movement.year || ''
+            movement.day  + '/' +movement.month  + '/' + movement.year ,
+          
           ]);
         });
         this.exportButtonsEnabled = true; // Habilitar botones si hay datos
