@@ -68,7 +68,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
   initializeDataTable(): void {
     this.table = ($('#myTable') as any).DataTable({
       paging: true,
-      ordering: true,
+      ordering: false,
       pageLength: 10,
       lengthChange: true,
       searching: true,
@@ -117,7 +117,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
   }
   
   setupFilters(): void {
-    $('#typeEntryOrExitFilter, #tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter, #propietarioFilter').on('change keyup', () => {
+    $('#typeEntryOrExitFilter, #tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter,#typecarFilter, #late-inRangeFilter, #propietarioFilter').on('change keyup', () => {
       if (this.table) {
         this.table.draw();
       }
@@ -129,11 +129,30 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
         const tipoIngresante = ($('#tipoIngresanteFilter').val() as string || '').toLowerCase();
         const nombreIngresante = ($('#nombreIngresanteFilter').val() as string || '').toLowerCase();
         const documento = ($('#documentoFilter').val() as string || '').toLowerCase();
+        const carType = ($('#typecarFilter').val() as string || '').toLowerCase();
         const propietario = ($('#propietarioFilter').val() as string || '').toLowerCase();
+        const lateInRange = ($('#late-inRangeFilter').val() as string || '').toLowerCase();
   
 
-        const entryOrExitmap: { [key: string]: string } = {
 
+        const lateInRangeMap: { [key: string]: string } = {
+
+          'enhorario': 'en horario',
+          'late': 'tarde',
+          
+  
+        };
+
+
+        const typeCarMap: { [key: string]: string } = {
+          'car': 'auto',
+          'motorcycle': 'moto',
+          'truck': 'camion',
+          'bike': 'bicicleta',
+          'van': 'camioneta',
+          };
+
+        const entryOrExitmap: { [key: string]: string } = {
           'entry': 'entrada',
           'exit': 'salida'
          
@@ -158,21 +177,27 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
         const isTipoIngresanteMatch = tipoIngresante === '' || data[1].toLowerCase() === tipoIngresanteMap[tipoIngresante];
         const isNombreIngresanteMatch = nombreIngresante.length < 3 || data[2].toLowerCase().includes(nombreIngresante);
         const isDocumentoMatch = documento.length < 3 || data[3].toLowerCase().includes(documento);
-        const isPropietarioMatch = propietario.length < 3 || data[4].toLowerCase().includes(propietario);
+        const isTypeCarMatch = carType === '' || data[5].toLowerCase() === typeCarMap[carType];
+        const isPropietarioMatch = propietario.length < 3 || data[7].toLowerCase().includes(propietario);
+        const isLateInRangeMatch = lateInRange === '' || data[8].toLowerCase().includes(lateInRangeMap[lateInRange]);
   
+       
+
         return (
           isEntryOrExitMatch &&
           isTipoIngresanteMatch &&
           isNombreIngresanteMatch &&
           isDocumentoMatch &&
-          isPropietarioMatch
+          isTypeCarMatch &&
+          isPropietarioMatch &&
+          isLateInRangeMatch
         );
       }
     );
   
     this.table.on('draw', () => {
       const recordCount = this.table.rows({ filter: 'applied' }).count();
-      this.exportButtonsEnabled = recordCount > 0; // Actualiza el estado de los botones
+      this.exportButtonsEnabled = recordCount > 0; 
     });
   }
 
@@ -198,14 +223,14 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
           
           ]);
         });
-        this.exportButtonsEnabled = true; // Habilitar botones si hay datos
+        this.exportButtonsEnabled = true; 
       } else {
         Swal.fire({
           icon: 'warning',
           title: '!No se encontraron registros!',
           
         });
-        this.exportButtonsEnabled = false; // Deshabilitar botones si no hay datos
+        this.exportButtonsEnabled = false; 
       }
 
       this.table.draw();
