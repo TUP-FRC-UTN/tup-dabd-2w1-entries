@@ -8,9 +8,9 @@ import 'jszip';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { AfterViewInit, Component, Input, OnInit, SimpleChanges } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { DataTablesModule } from 'angular-datatables';
-import { AccesPdfGenerateService } from '../../../services/visitors/pdfService/acces-pdf-generate.service';
+import { AccesPdfGenerateService } from '../../../../services/visitors/pdfService/acces-pdf-generate.service';
 import 'datatables.net-buttons/js/dataTables.buttons.js';
 import 'datatables.net-buttons/js/buttons.html5.js';
 import 'datatables.net-buttons/js/buttons.print.js';
@@ -22,7 +22,7 @@ import 'datatables.net-buttons/js/buttons.print.js';
   templateUrl: './access-table.component.html',
   styleUrls: ['./access-table.component.css']
 })
-export class AccessTableComponent implements OnInit, AfterViewInit {
+export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() selectedYear: number | null = null;
   @Input() selectedMonth: number | null = null;
 
@@ -35,6 +35,18 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.fetchData();
   }
+  ngOnDestroy() {
+    // Limpiar la tabla y los filtros cuando el componente se destruye
+    if (this.table) {
+      this.table.destroy();
+      // Remover todos los filtros personalizados
+      while ($.fn.dataTable.ext.search.length > 0) {
+        $.fn.dataTable.ext.search.pop();
+      }
+    }
+    // Remover los event listeners
+    $('#typeEntryOrExitFilter, #tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter, #typecarFilter, #late-inRangeFilter').off();
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedYear'] || changes['selectedMonth']) {
@@ -44,7 +56,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
 
   fetchData(): void {
     if (this.selectedYear && this.selectedMonth) {
-      this.http.get<any>(`http://localhost:8090/movements_entry/ByMonth?year=${this.selectedYear}&month=${this.selectedMonth}`)
+      this.http.get<any>(`http://localhost:8090/movements_entryToNeighbor/ByMonth?year=${this.selectedYear}&month=${this.selectedMonth}`)
         .subscribe({
           next: (response) => {
             console.log('API Response:', response);
@@ -117,6 +129,9 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
   }
   
   setupFilters(): void {
+    $('#typeEntryOrExitFilter, #tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter, #typecarFilter, #late-inRangeFilter').off('change keyup');
+    
+
     $('#typeEntryOrExitFilter, #tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter,#typecarFilter, #late-inRangeFilter, #propietarioFilter').on('change keyup', () => {
       if (this.table) {
         this.table.draw();
@@ -137,7 +152,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
 
         const lateInRangeMap: { [key: string]: string } = {
 
-          'enhorario': 'en horario',
+          'inrange': 'en horario',
           'late': 'tarde',
           
   
@@ -179,7 +194,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit {
         const isDocumentoMatch = documento.length < 3 || data[3].toLowerCase().includes(documento);
         const isTypeCarMatch = carType === '' || data[5].toLowerCase() === typeCarMap[carType];
         const isPropietarioMatch = propietario.length < 3 || data[7].toLowerCase().includes(propietario);
-        const isLateInRangeMatch = lateInRange === '' || data[8].toLowerCase().includes(lateInRangeMap[lateInRange]);
+        const isLateInRangeMatch = lateInRange === '' || data[8].toLowerCase() === lateInRangeMap[lateInRange];
   
        
 

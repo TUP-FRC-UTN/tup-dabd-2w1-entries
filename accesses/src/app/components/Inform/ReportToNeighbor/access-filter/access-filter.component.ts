@@ -34,10 +34,10 @@ export class AccessFilterComponent implements OnInit {
   }
 
   onSubmit() {
-    this.formSubmitted = true; // Marca que el formulario fue enviado
+    this.formSubmitted = true; 
     if (this.selectedAnio && this.selectedMes) {
       this.filterSubmitted.emit({ year: this.selectedAnio, month: this.selectedMes });
-      this.formSubmitted = false; // Reinicia el estado del formulario
+      this.formSubmitted = false; 
     } else {
       console.log('Faltan valores de año o mes');
     }
