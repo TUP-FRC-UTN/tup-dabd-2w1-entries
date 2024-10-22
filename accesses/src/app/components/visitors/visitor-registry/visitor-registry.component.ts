@@ -94,7 +94,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
         const formattedData = this.visitors.map((visitor, index) => {
           return [
             `${visitor.last_name} ${visitor.name}`,
-            //visitor.documentType, //DNI passport etc
+            `DNI`, //DNI passport etc (todavia el back no devuelve este dato)
             visitor.document,
             `<button style="width: 95%;" class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`, // Cambiar el uso de onclick
             `<select class="form-select select-action" data-index="${index}">

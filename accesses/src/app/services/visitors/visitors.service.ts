@@ -94,8 +94,8 @@ export class VisitorsService {
         vehicle: visitorVehicle,
         email: visitorInfoDto.email
       }
-      console.log("obj q entra -> User_AllowedInfoDto: ", visitorInfoDto);
-      console.log("obj q sale -> NewUserAllowedDto: ", newUserAllowedDto);
+      //console.log("obj q entra -> User_AllowedInfoDto: ", visitorInfoDto);
+      //console.log("obj q sale -> NewUserAllowedDto: ", newUserAllowedDto);
       return newUserAllowedDto;
     }
     // FIN mapeo de User_AllowedInfoDto a NewUserAllowedDto:
@@ -103,14 +103,14 @@ export class VisitorsService {
     // mapeo de AuthRangeInfoDto[] a NewAuthRangeDto
     mapAuthRangeInfoDtoToNewAuthRangeDto(listAuthRangeInfoDto: AuthRangeInfoDto[]): NewAuthRangeDto{
 
-      console.log("mapAuthRangeInfoDtoToNewAuthRangeDto (en visitors.service)")
-      console.log("list de AuthRangeInfoDto del Visitor", listAuthRangeInfoDto);
+      //console.log("mapAuthRangeInfoDtoToNewAuthRangeDto (en visitors.service)")
+      //console.log("list de AuthRangeInfoDto del Visitor", listAuthRangeInfoDto);
 
       //la idea es q nunca se usen (pq en el component ya se verifica si el Visitor puede entrar 
       // en base a sus AuthRanges, solo se llega a este metodo si el Visitor esta dentro del rango permitido)
       const allowedDaysEmpty: Allowed_DaysDto[] = [];
       const emptyAuth: NewAuthRangeDto = {
-        neighbor_id: 0,
+        neighbor_id: 0, // el back debe proveer este dato
         init_date: "", 
         end_date: "", 
         allowedDaysDtos: allowedDaysEmpty
@@ -135,16 +135,16 @@ export class VisitorsService {
           end_date: stringEnd_date  || "", 
           allowedDaysDtos: listAuthRangeInfoDto.at(index)?.allowedDays || allowedDaysEmpty
         };
-        console.log("FUNCIONAAAAAAAAA")
-        console.log("array de objs q entra -> AuthRangeInfoDto[]: ", listAuthRangeInfoDto);
-        console.log("obj q sale -> NewUserAllowedDto: ", newAuthRangedto);
+        //console.log("FUNCIONAAAAAAAAA")
+        //console.log("array de objs q entra -> AuthRangeInfoDto[]: ", listAuthRangeInfoDto);
+        //console.log("obj q sale -> NewUserAllowedDto: ", newAuthRangedto);
         //devuelve un NewAuthRangeDto con los datos, de un AuthRange del Visitor, validos.
         return newAuthRangedto;
       }
 
-      console.log("Algo malio sal...")
-      console.log("array de objs q entra -> AuthRangeInfoDto[]: ", listAuthRangeInfoDto);
-      console.log("obj (vacio) q sale -> NewAuthRangeDto: ", emptyAuth);
+      //console.log("Algo malio sal...")
+      //console.log("array de objs q entra -> AuthRangeInfoDto[]: ", listAuthRangeInfoDto);
+      //console.log("obj (vacio) q sale -> NewAuthRangeDto: ", emptyAuth);
       //la idea es q nunca se use
       return emptyAuth;
     }
@@ -163,7 +163,7 @@ export class VisitorsService {
           vehiclesId: 0
         }
 
-        console.log("createNewMovements_EntryDto (en visitors.service): ", newMovements_EntryDto);
+        //console.log("createNewMovements_EntryDto (en visitors.service): ", newMovements_EntryDto);
         return newMovements_EntryDto;
     }
     // FIN creacion de User_AllowedInfoDto
@@ -273,40 +273,27 @@ export class VisitorsService {
 
     // verifica si el Visitor esta dentro de un DIA permitido, y dentro del rango HORARIO permitido
     isTodayAnAllowedDay(allowedDayDto: Allowed_DaysDto | undefined): boolean {
-      console.log("Metodo isTodayAnAllowedDay...");
+      //console.log("Metodo isTodayAnAllowedDay...");
     
       // Verifica si los datos estan definidos
       if (!allowedDayDto?.day || !allowedDayDto?.init_hour || !allowedDayDto?.end_hour) {
-        console.log("AllowedDay es undefined");
+        //console.log("AllowedDay es undefined");
         return false;
       }
 
-      //verifica q el dia permitido es hoy
+      //verifica si uno de los dias permitidos es hoy
       if (allowedDayDto.day.toString().toLowerCase() != this.getTodayDayOfWeek().toLowerCase()){
-        return false;
-      }
-
-      // crea el initHour y endHour en formato Date (para poder comparar)
-      let initHourDate = this.getHourInit(allowedDayDto);
-      let endHourDate = this.getHourEnd(allowedDayDto);
-    
-      // valida q las fechas sean validas
-      if (isNaN(initHourDate.getTime()) || isNaN(endHourDate.getTime())) {
-        console.log("Fechas invalidas");
         return false;
       }
     
       // fecha y hora actual para comparar
       let todayDate = new Date();
-      
-      // console.log("Fecha actual:", todayDate);
-      // console.log("AllowedDay inicio:", initHourDate);
-      // console.log("AllowedDay fin:", endHourDate);
     
       // compara si la fecha actual esta dentro del rango horario permitido
-      return initHourDate <= todayDate && endHourDate >= todayDate;
+      return this.getHourInit(allowedDayDto) <= todayDate && this.getHourEnd(allowedDayDto) >= todayDate;
     }
     
+    //devuelve la hora de inicio (de un Allowed_DaysDto) en formato Date 
     getHourInit(allowedDayDto: Allowed_DaysDto): Date{
 
       let response = new Date();
@@ -317,6 +304,7 @@ export class VisitorsService {
       return response;
     }
 
+    //devuelve la hora de find (de un Allowed_DaysDto) en formato Date 
     getHourEnd(allowedDayDto: Allowed_DaysDto): Date{
 
       let response = new Date();
@@ -329,8 +317,7 @@ export class VisitorsService {
     }
 
 
-
-    //metodo q devuelve la hora en formato string para mostrar en el front
+    //metodo q devuelve la hora en formato string (para mostrarla en el front)
     stringToHour(allowedDayDto: Allowed_DaysDto, x: boolean): string {
       
       const hours = x ? allowedDayDto.init_hour : allowedDayDto.end_hour;      
@@ -355,11 +342,11 @@ export class VisitorsService {
     //devuelve el dia de hoy (en el mismo formato q devuelve el back, osea el tipo de dato DayOfWeek en java)
     getTodayDayOfWeek(): string {
       const daysOfWeek = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const today = new Date().getDay(); // Esto devuelve un número entre 0 (Sunday) y 6 (Saturday)
+      const today = new Date().getDay(); // devuelve un numero entre 0 (Sunday) y 6 (Saturday)
 
       console.log("metodo getTodayDayOfWeek(): ", today);
 
-      return daysOfWeek[today]; // Devolvemos el nombre del día correspondiente
+      return daysOfWeek[today]; // devuelve el dia de hoy en formato string
     }
 
 // FIN funciones para comparar HORAS
