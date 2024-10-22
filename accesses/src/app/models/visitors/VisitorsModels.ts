@@ -46,13 +46,13 @@ export interface RegistryVisitor {
 
     // todo lo necesario para NewAuthRangeDto
     export interface NewAuthRangeDto {
-      neighbor_id: number;
+      neighbor_id: number; //me lo tiene q pasar el back (Todavia no esta implementado!!)
       init_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       end_date: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       allowedDaysDtos: Allowed_DaysDto[];
     }
     export interface Allowed_DaysDto {
-      day: string; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+      day: string; // (EJ: "Monday")
       init_hour: string; //LocalTime (EJ: "14:30:00" / "hh:mm:ss")
       end_hour: string; //LocalTime (EJ: "14:30:00" / "hh:mm:ss")
     }
