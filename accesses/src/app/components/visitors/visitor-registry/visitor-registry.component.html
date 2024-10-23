@@ -47,7 +47,7 @@
 
                 <div class="row align-items-center">
                     <div class="col text-start">
-                        <button class="btn btn-secondary" (click)="Return()">Cancelar</button>
+                        <button class="btn btn-secondary" [routerLink]="['/entry']" routerLinkActive="router-link-active">Cancelar</button>
                     </div>
                     <div class="col text-end">
                         <button class="btn btn-primary me-2" (click)="AddVisitor()">Agregar Visitante</button>

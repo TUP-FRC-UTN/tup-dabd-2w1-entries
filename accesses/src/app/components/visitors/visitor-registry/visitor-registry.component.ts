@@ -14,11 +14,12 @@ import 'datatables.net-bs5';
 //import { AlertDirective } from '../alert.directive';
 import { InternalSettings } from 'datatables.net';
 import { AllowedDaysDto } from '../../../services/visitors/movement.interface';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-visitor-registry',
   standalone: true,
-  imports: [CommonModule, FormsModule, AutoSizeTextAreaDirective],
+  imports: [CommonModule, FormsModule, AutoSizeTextAreaDirective, RouterModule],
   providers: [DatePipe, VisitorsService],
   templateUrl: './visitor-registry.component.html',
   styleUrl: './visitor-registry.component.css'
@@ -29,8 +30,6 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
 
   private readonly visitorService = inject(VisitorsService);
   constructor(private datePipe: DatePipe){}
-
-  //codigo nuevo
 
   dataTable: any;
 
@@ -149,7 +148,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
   onSelectionChange(event: Event, visitor: User_AllowedInfoDto) {
     const selectElement = event.target as HTMLSelectElement;
     const selectedValue = selectElement.value;
-    console.log(`Seleccionado: ${selectedValue} para el Visitante: ${visitor.name}`);
+    //console.log(`Seleccionado: ${selectedValue} para el Visitante: ${visitor.name}`);
     if (selectedValue === 'ingreso') {
       this.RegisterAccess(visitor);
     } else if (selectedValue === 'egreso') {
@@ -245,7 +244,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
         const newUserAllowedDto: NewUserAllowedDto = 
           this.visitorService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
         const newAuthRangeDto: NewAuthRangeDto = 
-          this.visitorService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges);
+          this.visitorService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
 
         //se crea el objeto (q se va a pasar por el body en el post)
         const newMovements_EntryDto: NewMovements_EntryDto = 
@@ -288,7 +287,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
 
   // muestra un modal avisando q el Visitor esta fuera de rango (dia y hora permitido)
   outOfAuthorizedHourRange(visitor: User_AllowedInfoDto, indexAuthRange: number, indexDayAllowed: number){
-    console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango dia y hora permitido");
+    //console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango dia y hora permitido");
 
     let allowedDay = visitor.authRanges.at(indexAuthRange)?.allowedDays.at(indexDayAllowed);
 
@@ -322,7 +321,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
 
   // muestra un modal avisando q el Visitor esta fuera de rango (fechas permitidas)
   outOfAuthorizedDateRange(visitor: User_AllowedInfoDto){
-    console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango fecha");
+    //console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango fecha");
 
     let rangesHtml = '';
     for (const range of visitor.authRanges) {
