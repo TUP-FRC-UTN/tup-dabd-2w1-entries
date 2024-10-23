@@ -32,7 +32,7 @@ export class VisitorsService {
 
       },
       error: (error) => {
-        console.error('Error al cargar los datos:', error);
+        console.error('Error al cargar los datos de los Visitors:', error);
       }
     });
   }
@@ -44,7 +44,7 @@ export class VisitorsService {
   //filtra la list de Visitors
   getVisitorByParam(parameter: string): User_AllowedInfoDto[] {
 
-    console.log("el cambio: " + parameter);
+    //console.log("el cambio: " + parameter);
 
     if (parameter != null && parameter.length > 2) {
       let param = parameter.toLowerCase();
@@ -80,28 +80,24 @@ export class VisitorsService {
       }
       //MOMENTANEO 
 
-      // se presuponen al ser un Visitor
-      const typeDni: Document_TypeDto = { description : "DNI"};
-      const allowedTypeVisitor: User_allowedTypeDto = { description : "Visitor"};
-
       //mapeo de los datos
       let newUserAllowedDto: NewUserAllowedDto = {
         document : visitorInfoDto.document,
         name : visitorInfoDto.name,
         last_name : visitorInfoDto.last_name,
-        documentType: typeDni,
-        user_allowed_Type: allowedTypeVisitor,
+        documentType: visitorInfoDto.document_TypeDto,
+        user_allowed_Type: visitorInfoDto.userType,
         vehicle: visitorVehicle,
         email: visitorInfoDto.email
       }
       //console.log("obj q entra -> User_AllowedInfoDto: ", visitorInfoDto);
-      //console.log("obj q sale -> NewUserAllowedDto: ", newUserAllowedDto);
+      //console.log("metodo mapUser_AllowedInfoDtoToNewUserAllowedDto: ", newUserAllowedDto);
       return newUserAllowedDto;
     }
     // FIN mapeo de User_AllowedInfoDto a NewUserAllowedDto:
 
     // mapeo de AuthRangeInfoDto[] a NewAuthRangeDto
-    mapAuthRangeInfoDtoToNewAuthRangeDto(listAuthRangeInfoDto: AuthRangeInfoDto[]): NewAuthRangeDto{
+    mapAuthRangeInfoDtoToNewAuthRangeDto(listAuthRangeInfoDto: AuthRangeInfoDto[], neighborId: number): NewAuthRangeDto{
 
       //console.log("mapAuthRangeInfoDtoToNewAuthRangeDto (en visitors.service)")
       //console.log("list de AuthRangeInfoDto del Visitor", listAuthRangeInfoDto);
@@ -110,7 +106,7 @@ export class VisitorsService {
       // en base a sus AuthRanges, solo se llega a este metodo si el Visitor esta dentro del rango permitido)
       const allowedDaysEmpty: Allowed_DaysDto[] = [];
       const emptyAuth: NewAuthRangeDto = {
-        neighbor_id: 0, // el back debe proveer este dato
+        neighbor_id: 0,
         init_date: "", 
         end_date: "", 
         allowedDaysDtos: allowedDaysEmpty
@@ -130,21 +126,18 @@ export class VisitorsService {
 
         //se mapea de AuthRangeInfoDto a NewAuthRangeDto
         let newAuthRangedto: NewAuthRangeDto = {
-          neighbor_id: 0, //se asigna en el back
+          neighbor_id: neighborId, 
           init_date: stringInit_date || "", 
           end_date: stringEnd_date  || "", 
           allowedDaysDtos: listAuthRangeInfoDto.at(index)?.allowedDays || allowedDaysEmpty
         };
         //console.log("FUNCIONAAAAAAAAA")
-        //console.log("array de objs q entra -> AuthRangeInfoDto[]: ", listAuthRangeInfoDto);
-        //console.log("obj q sale -> NewUserAllowedDto: ", newAuthRangedto);
+        //console.log("metodo mapAuthRangeInfoDtoToNewAuthRangeDto: ", newAuthRangedto);
         //devuelve un NewAuthRangeDto con los datos, de un AuthRange del Visitor, validos.
         return newAuthRangedto;
       }
 
       //console.log("Algo malio sal...")
-      //console.log("array de objs q entra -> AuthRangeInfoDto[]: ", listAuthRangeInfoDto);
-      //console.log("obj (vacio) q sale -> NewAuthRangeDto: ", emptyAuth);
       //la idea es q nunca se use
       return emptyAuth;
     }
@@ -213,7 +206,7 @@ export class VisitorsService {
 
 
       if(this.isDateBeforeToday(initDate) && this.isDateAfterToday(endDate)){
-        console.log("(Visitor dentro del rango!) index del AuthRange valido: ", i);
+        //console.log("(Visitor dentro del rango!) index del AuthRange valido: ", i);
         return i; // devuelve el indice donde esta el AuthRangeInfoDto valido
       }
     }
@@ -262,7 +255,7 @@ export class VisitorsService {
           //console.log("todayIsInHourRange (en visitors.service) | ciclo del for: ", i);
     
           if(this.isTodayAnAllowedDay(authRangeInfoDto.allowedDays.at(i))){
-            console.log("(Visitor dentro del rango horario!) index del AllowedDayDto valido: ", i);
+            //console.log("(Visitor dentro del rango horario!) index del AllowedDayDto valido: ", i);
             return i; // devuelve el indice donde esta el allowedDayDto valido
           }
         }
@@ -344,7 +337,7 @@ export class VisitorsService {
       const daysOfWeek = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const today = new Date().getDay(); // devuelve un numero entre 0 (Sunday) y 6 (Saturday)
 
-      console.log("metodo getTodayDayOfWeek(): ", today);
+      //console.log("metodo getTodayDayOfWeek(): ", today);
 
       return daysOfWeek[today]; // devuelve el dia de hoy en formato string
     }

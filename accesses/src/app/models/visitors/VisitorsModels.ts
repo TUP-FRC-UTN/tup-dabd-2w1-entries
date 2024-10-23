@@ -97,8 +97,12 @@ export interface RegistryVisitor {
       last_name: string;
       email: string;
       vehicles: NewVehicleDto[]; //List<NewVehicleDto> 
+      userType: User_allowedTypeDto;
       authRanges: AuthRangeInfoDto[]; //List<AuthRangeInfoDto>
       observations?: string; //campo extra (no esta en el back)
+
+      document_TypeDto: Document_TypeDto; // tipo de documento q se va a mostrar
+      neighbor_id: number; //se necesita para el post del Visitor
     }
 
     export interface AuthRangeInfoDto {
@@ -106,6 +110,7 @@ export interface RegistryVisitor {
       end_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       allowedDays: Allowed_DaysDto[]; //List<Allowed_DaysDto> 
     }
+
     //FIN Clase necesaria (para recibir la data): User_AllowedInfoDto
 
 
