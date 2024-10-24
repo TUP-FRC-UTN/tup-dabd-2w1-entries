@@ -5,6 +5,7 @@ import { EntryComponent } from './components/Entrys/entry/entry.component';
 import { AccesOwnerRentEntryViewComponent } from './components/owner/acces-owner-rent-entry-view/acces-owner-rent-entry-view.component';
 import { GeneralDashboardComponent } from './components/Dashboards/general-dashboard/general-dashboard.component';
 import { RegistroComponent } from './components/Employee/registro/registro.component';
+import { AccessContainerVisitorsRegistrationComponent } from './components/visitors/access_visitors_register/access-container-visitors-registration/access-container-visitors-registration.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'entry', pathMatch: 'full' },
@@ -13,5 +14,6 @@ export const routes: Routes = [
     { path: 'entry', component: EntryComponent },
     {path:'OwnerAccess',component:AccesOwnerRentEntryViewComponent},
     {path: 'Dashboards',component:GeneralDashboardComponent},
+    { path: 'register-visitor', component: AccessContainerVisitorsRegistrationComponent },
     {path: 'Entry',component:RegistroComponent}
 ];
