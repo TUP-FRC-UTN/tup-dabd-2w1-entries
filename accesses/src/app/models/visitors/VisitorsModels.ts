@@ -1,13 +1,19 @@
 // cosas front de fede
-export interface Vehicle {
-  type: string;
-  licensePlate: string;
-}
 
+export interface AuthRange {
+  initDate: Date;
+  endDate: Date;
+  allowedDays: AllowedDay[];  
+}
 export interface Day {
   name: string;
   value: boolean;
 }
+
+export interface VehicleType {
+  description: string;
+}
+
 
 export interface AllowedDay {
   day: Day;
@@ -20,17 +26,20 @@ export interface Visitor {
   firstName: string;
   lastName: string;
   document: string;
-  phone: string;
+  documentType:number;
   email: string;
-  vehicle?: Vehicle;
   hasVehicle: boolean;
-  licensePlate?: string;
-  vehicleType?: string;
+  vehicle?: Vehicle; 
+  visitDate?: Date;
 }
-
+export interface Vehicle {
+  licensePlate: string; 
+  vehicleType: VehicleType; 
+  insurance: string;
+}
 export interface VisitorRecord {
   visitors: Visitor[];
-  allowedDays: AllowedDay[];
+  authRange: AuthRange | null;
 }
 
 // FIN cosas front de fede
