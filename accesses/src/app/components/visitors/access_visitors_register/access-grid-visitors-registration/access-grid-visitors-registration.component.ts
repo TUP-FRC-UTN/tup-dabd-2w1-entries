@@ -14,7 +14,7 @@ import { AccessVisitorsRegisterServiceService } from '../../../../services/visit
 })
 export class AccessGridVisitorsRegistrationComponent implements OnInit, OnDestroy {
 
-  @Output() editarVisitante = new EventEmitter<Visitor>();
+  @Output() updateVisit = new EventEmitter<Visitor>();
   private unsubscribe$ = new Subject<void>();
   visitors: Visitor[] = [];
   VisitorOnUpdate: Visitor | null = null;
@@ -35,7 +35,7 @@ export class AccessGridVisitorsRegistrationComponent implements OnInit, OnDestro
   updateVisitor(visitor: Visitor) {
   this.VisitorOnUpdate = { ...visitor };
   console.log('Visitante a editar:', this.VisitorOnUpdate); 
-  this.editarVisitante.emit(this.VisitorOnUpdate);
+  this.updateVisit.emit(this.VisitorOnUpdate);
   this.deleteVisitor(visitor);
   }
   saveModification() {
