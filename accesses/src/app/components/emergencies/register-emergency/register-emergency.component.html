@@ -1,0 +1,154 @@
+<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#emergencyModal">
+    Registrar Emergencia
+</button>
+
+<div class="modal fade text-start" id="emergencyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Emergencia</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <form #form="ngForm">
+                <div class="mb-3">
+                    <label for="dniInput" class="col-form-label-sm">
+                        DNI:
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" 
+                    class="form-control" 
+                    [ngClass]="{'is-invalid': dni.touched && dni.invalid}" 
+                    id="dniInput" 
+                    required 
+                    ngModel 
+                    #dni="ngModel" 
+                    name="dni" 
+                    autocomplete="off"
+                    numbersOnly>
+                    <div class="invalid-feedback">
+                        Este campo es obligatorio.
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="nameInput" class="col-form-label">
+                            Nombre:
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                        class="form-control" 
+                        [ngClass]="{'is-invalid': name.touched && name.invalid}" 
+                        id="nameInput" 
+                        required 
+                        ngModel 
+                        #name="ngModel" 
+                        name="name" 
+                        autocomplete="off">
+                        <div class="invalid-feedback">
+                            Este campo es obligatorio.
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label for="lastNameInput" class="col-form-label">
+                            Apellido:
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                        class="form-control" 
+                        [ngClass]="{'is-invalid': lastName.touched && lastName.invalid}" 
+                        id="lastNameInput" 
+                        required 
+                        ngModel 
+                        #lastName="ngModel" 
+                        name="lastName" 
+                        autocomplete="off">
+                        <div class="invalid-feedback">
+                            Este campo es obligatorio.
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="vehicleTypeSelect" class="col-form-label">
+                            Tipo de Vehículo
+                            <span class="text-danger">*</span>
+                        </label>
+                        <select id="vehicleTypeSelect" 
+                            class="form-select"
+                            [ngClass]="{'is-invalid': vehicleType.touched && vehicleType.invalid}"
+                            required
+                            ngModel
+                            #vehicleType="ngModel"
+                            name="vehicleType"
+                            >
+                            <option [value]="null" class="bg-secondary text-white" hidden>Seleccionar</option>
+                            <option value="Car">Auto</option>
+                            <option value="Motorcycle">Motocicleta</option>
+                            <option value="Truck">Camioneta</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Este campo es obligatorio.
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label for="plateInput" class="col-form-label">
+                            Patente:
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                        class="form-control" 
+                        [ngClass]="{'is-invalid': plate.touched && plate.invalid}" 
+                        id="plateInput" 
+                        required 
+                        ngModel 
+                        #plate="ngModel" 
+                        name="plate" 
+                        autocomplete="off">
+                        <div class="invalid-feedback">
+                            Este campo es obligatorio.
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="observations-text" class="col-form-label">Observaciones:</label>
+                    <textarea class="form-control" id="observations-text" ngModel #observation="ngModel" name="observations"></textarea>
+                </div>
+            </form>
+            @switch (requestStatus) {
+                @case (RequestStatus.Loading) {
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border" role="status"></div>
+                    </div>
+                }
+                @case (RequestStatus.Success) {
+                    <div class="alert alert-success d-flex align-items-center" role="alert">
+                        <div>
+                            Éxito al registrar emergencia.
+                        </div>
+                    </div>
+                }
+                @case (RequestStatus.Error) {
+                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                        <div>
+                            Error al registrar emergencia. Intente de nuevo.
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary me-auto" data-bs-dismiss="modal">Volver</button>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" [disabled]="form.invalid">
+                    Registrar
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" role="button" (click)="registerEntry(form)">Ingreso</a></li>
+                    <li><a class="dropdown-item" role="button" (click)="registerExit(form)">Egreso</a></li>
+                </ul>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+<div class="container-fluid m-4 p-4 border border-dark rounded shadow-lg">
+
+    <h1 class="text-left mb-4">Registrando Ingreso de Visitante: <span class="text-primary">{{visitor.lastName}}, {{visitor.name}}</span></h1>
+
+    <div class="form-group mb-3">
+        <label for="observation" class="form-label fw-bold">Observaciones: </label>
+        <textarea class="form-control" id="observation" name="observation" [(ngModel)]="observation" rows="4"></textarea>
+    </div>
+
+    <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-success me-2" (click)="Register()">Aceptar</button>
+        <button class="btn btn-danger" (click)="ChangeFlag()">Cancelar</button>
+    </div>
+
+</div>

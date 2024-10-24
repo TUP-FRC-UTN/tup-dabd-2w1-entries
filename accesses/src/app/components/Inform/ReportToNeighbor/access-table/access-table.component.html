@@ -1,0 +1,79 @@
+<div class="row mb-3">
+  <div class="col-md-3 mb-2">
+    <label for="typeEntryOrExitFilter" class="form-label">Tipo de entrada</label>
+    <select id="typeEntryOrExitFilter" class="form-control">
+      <option value="">Entrada/Salida</option>
+      <option value="entry">Entrada</option>
+      <option value="exit">Salida</option>
+    </select>
+  </div>
+    <div class="col-md-3 mb-2">
+        <label for="tipoIngresanteFilter" class="form-label">Tipo de Ingresante</label>
+        <select id="tipoIngresanteFilter" class="form-control">
+          <option value="">Todos</option>
+          <option value="neighbour">Vecino</option>
+          <option value="Visitor">Visitante</option>
+          <option value="Delivery">Delivery</option>
+          <option value="ConstructionWorker">Obrero</option>
+        </select>
+      </div>
+    <div class="col-md-3 mb-2">
+      <label for="nombreIngresanteFilter" class="form-label">Nombre de Ingresante</label>
+      <input type="text" id="nombreIngresanteFilter" class="form-control" placeholder="Filtrar por Nombre de Ingresante">
+    </div>
+    
+    <div class="col-md-3 mb-2">
+      <label for="documentoFilter" class="form-label">Documento</label>
+      <input type="text" id="documentoFilter" class="form-control" placeholder="Filtrar por Documento">
+    </div>
+    <div class="col-md-3 mb-2">
+      <label for="typecarFilter" class="form-label">Tipo de vehiculo</label>
+      <select id="typecarFilter" class="form-control">
+        <option value="">Todos</option>
+        <option value="car">Auto</option>
+        <option value="van">Camioneta</option>
+        <option value="motorcycle">Moto</option>
+        <option value="truck">Camion</option>
+        <option value="bike">Vicicleta</option>
+      </select>
+    </div>
+    <div class="col-md-3 mb-2">
+      <label for="propietarioFilter" class="form-label">Propietario</label>
+      <input type="text" id="propietarioFilter" class="form-control" placeholder="Filtrar por Propietario">
+    </div>
+    <div class="col-md-3 mb-2">
+      <label for="late-inRangeFilter" class="form-label">Tarde/En horario</label>
+      <select id="late-inRangeFilter" class="form-control">
+        <option value="">Todo</option>
+        <option value="late">Tarde</option>
+        <option value="inrange">En horario</option>
+      </select>
+    </div>  </div>
+  
+  
+  <div class="table-responsive my-4">
+    <table id="myTable" class="table table-striped table-bordered" style="width:100%">
+      <thead class="table-dark">
+        <tr>
+          <th>Entrada/Salida</th>
+          <th>Tipo de Ingresante</th>
+          <th>Nombre Ingresante</th>
+          <th>Documento</th>
+          <th>Observaciones</th>
+          <th>Tipo de vehiculo</th>
+          <th>Patente</th>
+          <th>Nombre del Propietario</th>
+          <th>Tarde/En horario</th>
+          <th>Hora</th>
+          <th>Fecha</th>
+         
+        </tr>
+      </thead>
+      <tbody>
+        <!-- aca van los datos de la tabal -->
+      </tbody>
+    </table>
+  </div>
+
+
+
