@@ -3,6 +3,7 @@ import { MovementEntryDto,SuppEmpDto } from '../../../models/EmployeeAllowed/use
 import { FormsModule } from '@angular/forms';
 import { UserServiceService } from '../../../services/EmployeeService/user-service.service';
 import Swal from 'sweetalert2';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-register-entry',
@@ -61,13 +62,14 @@ export class RegisterEntryComponent {
           confirmButtonColor: '#28a745',
         });
       },
-      error: (error) => {
+      error: (error: HttpErrorResponse) => {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'Error al registrar el movimiento. Inténtelo de nuevo.',
+          text: error.error?.message || 'Error al guardar el movimiento',
           confirmButtonColor: '#d33',
         });
+        console.error("Error en la solicitud POST:", error); // Para depuración
       }
     });
   }

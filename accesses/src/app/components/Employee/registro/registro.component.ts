@@ -14,6 +14,7 @@ import { NgFor, NgIf } from '@angular/common';
 import $ from 'jquery';
 import 'datatables.net';
 import Swal from 'sweetalert2';
+import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-registro',
   standalone: true,
@@ -108,7 +109,8 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
         },
       },
     });
-  
+
+    
     // Manejar el clic en el botón "Ver más"
     $('#myTable tbody').on('click', '.view-more', (event) => {
       const index = $(event.currentTarget).data('index');
@@ -157,15 +159,14 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
                   confirmButtonText: 'Cerrar'
                 });
               },
-              error: (error) => {
-                console.error('Error al guardar el movimiento:', error);
-                
+              error: (error: HttpErrorResponse) => {
                 Swal.fire({
-                  title: '¡Error!',
-                  text: 'No se pudo registrar el movimiento. Inténtalo de nuevo.',
                   icon: 'error',
-                  confirmButtonText: 'Cerrar'
+                  title: 'Oops...',
+                  text: error.error?.message || 'Error al guardar el movimiento',
+                  confirmButtonColor: '#d33',
                 });
+                console.error("Error en la solicitud POST:", error); // Para depuración
               },
             });
           }
