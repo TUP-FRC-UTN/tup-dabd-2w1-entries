@@ -67,7 +67,13 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy{
             this.loadDataIntoTable();
           },
           error: (error) => {
-            console.error('Error fetching data:', error);
+               
+            Swal.fire({
+              icon: 'error',
+              title: '!Error!',
+              text: 'Ocurrió un error al intentar cargar los datos. Por favor, intente nuevamente.',
+            });
+          
           }
         });
     }

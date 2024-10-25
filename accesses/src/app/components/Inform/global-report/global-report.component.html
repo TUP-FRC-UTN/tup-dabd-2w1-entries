@@ -3,20 +3,39 @@
   <div class="text-center mb-4">
     <h1>INFORME DE INGRESOS/EGRESOS MENSUALES</h1>
   </div>
-  
+
   <div class="row mb-3">
     <div class="col-4">
-      <!-- Selector con estilos de Bootstrap -->
+      <!-- Switches para selección del reporte -->
       <div class="form-group">
         <h6 class="mb-2">Selecciona el tipo de reporte</h6>
-        <select 
-          class="form-select" 
-          [(ngModel)]="selectedReport" 
-          (ngChange)="onReportChange()"
-         >
-          <option value="hood">Reporte de ingresos/egresos al barrio</option>
-          <option value="neighbor">Reporte de ingresos/egresos a los lotes</option>
-        </select>
+
+        <!-- Switch estilo Bootstrap -->
+        <div class="form-check form-switch">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            id="hoodSwitch" 
+            [(ngModel)]="selectedHood" 
+            (change)="onCheckboxChange('hood')" 
+            [checked]="selectedReport === 'hood'">
+          <label class="form-check-label" for="hoodSwitch">
+            Reporte de ingresos/egresos al barrio
+          </label>
+        </div>
+
+        <div class="form-check form-switch">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            id="neighborSwitch" 
+            [(ngModel)]="selectedNeighbor" 
+            (change)="onCheckboxChange('neighbor')" 
+            [checked]="selectedReport === 'neighbor'">
+          <label class="form-check-label" for="neighborSwitch">
+            Reporte de ingresos/egresos a los lotes
+          </label>
+        </div>
       </div>
     </div>
   </div>
