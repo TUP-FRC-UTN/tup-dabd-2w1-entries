@@ -67,7 +67,10 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
       data: this.ListaUser,
       columns: [
         { data: 'name' },
-        { data: 'document' },
+        { data: 'document',
+          render: (data) => `DNI ${data}`
+         },
+        { data: 'userType'},
         {
           data: null,
           render: (data, type, row, meta) =>
@@ -79,6 +82,7 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
             <select class="form-control action-select" data-document="${row.document}">
               <option value="">Seleccionar</option>
               <option value="ingreso">Ingreso</option>
+              <option value="egreso">Egreso</option>
             </select> 
           `,
         },
@@ -122,7 +126,7 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
       const observations = $(tr).find('.observation').val(); // Obtener las observaciones de la fila
   
       // Crear el movimiento y enviarlo al servicio solo si se seleccionó una acción
-      if (selectedValue) {
+      if (selectedValue === 'ingreso') {
         const movement: MovementEntryDto = {
           description: String(observations || ''),
           movementDatetime: new Date().toISOString(), // Usa la fecha actual
@@ -143,7 +147,53 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
           cancelButtonText: 'Cancelar'
         }).then((confirmResult) => {
           if (confirmResult.isConfirmed) {
-            this.userService.registerEmpSupp(movement).subscribe({
+            this.userService.registerEmpSuppEntry(movement).subscribe({
+              next: (response) => {
+                console.log('Movimiento guardado exitosamente:', response);                
+                Swal.fire({
+                  title: '¡Éxito!',
+                  text: 'El movimiento se ha registrado correctamente.',
+                  icon: 'success',
+                  confirmButtonText: 'Cerrar'
+                });
+              },
+              error: (error) => {
+                console.error('Error al guardar el movimiento:', error);
+                
+                Swal.fire({
+                  title: '¡Error!',
+                  text: 'No se pudo registrar el movimiento. Inténtalo de nuevo.',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar'
+                });
+              },
+            });
+          }
+        });
+        
+      }
+      if (selectedValue === 'egreso') {
+        const movement: MovementEntryDto = {
+          description: String(observations || ''),
+          movementDatetime: new Date().toISOString(), // Usa la fecha actual
+          /* HARDCODEADO */
+          vehiclesId: 0, // Puedes ajustar esto según tu lógica
+          document: document, // Usar el documento del usuario
+        };
+        console.log(movement);
+        
+        //ALERTS PARA MANEJAR LA VALIDACIONES
+        // Guardar el movimiento en el servicio
+        Swal.fire({
+          title: 'Confirmar Egreso',
+          text: '¿Está seguro que desea registrar el egreso?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, confirmar',
+          cancelButtonText: 'Cancelar'
+        }).then((confirmResult) => {
+          if (confirmResult.isConfirmed) {
+            this.userService.registerEmpSuppExit(movement).subscribe({
               next: (response) => {
                 console.log('Movimiento guardado exitosamente:', response);                
                 Swal.fire({

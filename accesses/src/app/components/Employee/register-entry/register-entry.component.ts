@@ -52,7 +52,7 @@ export class RegisterEntryComponent {
     this.movement.document = this.user.document;
     this.movement.movementDatetime = new Date().toISOString();
   
-    this.movementEntryService.registerEmpSupp(this.movement).subscribe({
+    this.movementEntryService.registerEmpSuppEntry(this.movement).subscribe({
       next: (response) => {
         Swal.fire({
           icon: 'success',

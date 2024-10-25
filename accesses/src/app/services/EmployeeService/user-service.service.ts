@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MovementEntryDto,SuppEmpDto } from '../../models/EmployeeAllowed/user-alowed';
+import { MovementEntryDto,MovementExitDto,SuppEmpDto } from '../../models/EmployeeAllowed/user-alowed';
 import { HttpClient, HttpHeaders,  } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -8,7 +8,8 @@ import { Observable } from 'rxjs';
 })
 export class UserServiceService {
 
-  private apiUrlPost = 'http://localhost:8090/movements_entry/registerEmpSupp';
+  private apiUrlPostEntry = 'http://localhost:8090/movements_entry/registerEmpSupp';
+  private apiUrlPostExit = 'http://localhost:8090/movements_exit/registerEmpSupp'
   private apiUrl = 'http://localhost:8090/GetSuppliesAndEmployeers';
 
   constructor(private http: HttpClient) {
@@ -21,9 +22,14 @@ export class UserServiceService {
     return this.http.get<SuppEmpDto[]>(this.apiUrl);
   }
 
-  registerEmpSupp(movement: MovementEntryDto): Observable<any> {
+  registerEmpSuppEntry(movement: MovementEntryDto): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(this.apiUrlPost, movement, { headers });
+    return this.http.post<any>(this.apiUrlPostEntry, movement, { headers });
+  }
+
+  registerEmpSuppExit(movement: MovementExitDto): Observable<any> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post<any>(this.apiUrlPostExit, movement, { headers });
   }
 
   loadSuppEmpData(): void {

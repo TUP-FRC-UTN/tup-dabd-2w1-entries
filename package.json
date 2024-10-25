@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "sweetalert2": "^11.14.2"
+    "@angular/forms": "^18.2.9",
+    "sweetalert2": "^11.14.2",
+    "tslib": "^2.8.0"
   }
 }

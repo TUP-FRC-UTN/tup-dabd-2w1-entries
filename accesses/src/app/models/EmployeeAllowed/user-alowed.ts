@@ -21,3 +21,9 @@ export interface NewVehicleDto {
     vehiclesId: number;
     document: string;
   }
+  export interface MovementExitDto {
+    description: string;
+    movementDatetime: string; //string reprecenta LocalDateTime
+    vehiclesId: number;
+    document: string;
+  }

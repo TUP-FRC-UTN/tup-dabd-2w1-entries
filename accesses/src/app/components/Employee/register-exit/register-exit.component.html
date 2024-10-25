@@ -1,0 +1,13 @@
+<div class="box3">
+    <div class="box1">
+        <h1>Registrando Egreso de {{user?.last_name}} {{user?.name}}</h1>
+    </div>
+    <div class="box1">
+        <h4>Descripción:</h4>
+        <textarea class="box2" [(ngModel)]="description"></textarea>   
+    </div>
+    <div class="button-container">
+        <button class="btn btn-success" (click)="Register()">Aceptar</button>
+        <button class="btn btn-danger" (click)="ChangeFlag()">Cancelar</button>
+    </div>
+</div>
