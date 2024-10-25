@@ -1,9 +1,9 @@
 import { NgClass } from '@angular/common';
 import { AfterViewChecked, Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { EmergenciesService } from '../../../services/emergencies/emergencies.service';
 import { NewEmergencyDto } from '../../../models/emergencies/NewEmergecyDto';
-import { Subscription } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-register-emergency',
@@ -13,9 +13,12 @@ import { Subscription } from 'rxjs';
   styleUrl: './register-emergency.component.css'
 })
 export class RegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewChecked{
-  private emergenciesService: EmergenciesService = inject(EmergenciesService);
+  private readonly emergenciesService: EmergenciesService = inject(EmergenciesService);
+  private readonly subscription = new Subscription();
+  private readonly personUpdated = new Subject<void>();
+  
+  private peopleSubscriptionsArray: Subscription[] = [];
   private personAdded: boolean = false;
-  subscription = new Subscription();
 
   form = new FormGroup({
     people: new FormArray<FormGroup>([]),
@@ -33,12 +36,15 @@ export class RegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewC
   }
 
   ngOnInit(): void {
+    this.subscription.add(this.personUpdated);
     const modal = document.getElementById('emergencyModal');
     modal!.addEventListener('show.bs.modal', event => {
       this.requestStatus = RequestStatus.None;
       this.form.reset();
       this.form.controls.vehicle.controls.type.setValue('');
       this.form.controls.people.clear();
+      this.peopleSubscriptionsArray.forEach(s => s.unsubscribe());
+      this.peopleSubscriptionsArray = [];
       this.addPersonForm();
     });
   }
@@ -85,18 +91,56 @@ export class RegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewC
   
   addPersonForm() {
     const peopleFormArray = this.form.controls.people;
+    const documentTypeControl = new FormControl('', [Validators.required]);
+    const documentNumberControl = new FormControl('', [Validators.required]);
+    const subscriptions = new Subscription();
+
+    documentNumberControl.addValidators(this.documentUniqueValidator(documentTypeControl));
+
+    const documentTypeSubscription = documentTypeControl.valueChanges.subscribe({
+      next: () => {
+        this.personUpdated.next();
+      }
+    });
+    const personUpdatedSubscription = this.personUpdated.subscribe({
+      next: () => {
+        documentNumberControl.updateValueAndValidity();
+      }
+    });
+
+    subscriptions.add(documentTypeSubscription);
+    subscriptions.add(personUpdatedSubscription);
+
+    this.peopleSubscriptionsArray.push(subscriptions);
+
     const personForm = new FormGroup({
-      documentType: new FormControl('', [Validators.required]),
-      documentNumber: new FormControl('', [Validators.required]),
+      documentType: documentTypeControl,
+      documentNumber: documentNumberControl,
       name: new FormControl('', [Validators.required]),
       lastName: new FormControl('', [Validators.required])
     });
+
     peopleFormArray.push(personForm);
     this.personAdded = true;
   }
-
+  private documentUniqueValidator(documentTypeControl: FormControl): ValidatorFn {
+    return (documentNumberControl: AbstractControl): ValidationErrors | null => {
+      const peopleControlsArray = this.form.controls.people.controls;
+      const peopleSameDocument = peopleControlsArray.filter(
+        p => p.controls['documentType'].value == documentTypeControl.value && p.controls['documentNumber'].value == documentNumberControl.value);
+      if (peopleSameDocument.length <= 1)
+        return null;
+      else 
+        return {
+          'unique': true
+      };
+    } 
+  }
   removePersonForm(index: number) {
     this.form.controls.people.removeAt(index);
+    const subscriptions = this.peopleSubscriptionsArray.splice(index, 1);
+    subscriptions[0].unsubscribe();
+    this.personUpdated.next();
   }
 
   vehicleTypeChanged() {

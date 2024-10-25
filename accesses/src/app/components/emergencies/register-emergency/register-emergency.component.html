@@ -85,9 +85,16 @@
                                         id="documentNumber" 
                                         formControlName="documentNumber"
                                         autocomplete="off">
-                                        <div class="invalid-feedback">
-                                            Este campo es obligatorio.
-                                        </div>
+                                        @if (person.controls['documentNumber']; as documentNumber) {
+                                            <div class="invalid-feedback">
+                                                @if (documentNumber.errors?.['unique']) {
+                                                    El documento ingresado se encuentra repetido.
+                                                }
+                                                @else {
+                                                    Este campo es obligatorio.
+                                                }
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="row mb-3">
