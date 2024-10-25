@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subject, combineLatest } from 'rxjs';
-import { Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AccessVisitorsRegisterServiceService } from '../../../../services/visitors/access-visitors-register-service/access-visitors-register-service/access-visitors-register-service.service';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../../../services/visitors/access-visitors-register-service/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
 import { Visitor, VisitorRecord, AuthRange, Vehicle } from '../../../../models/visitors/VisitorsModels';
@@ -10,7 +10,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AccessTimeRangeVisitorsRegistrationComponent } from '../access-time-range-visitors-registration/access-time-range-visitors-registration.component';
 import { AccessGridVisitorsRegistrationComponent } from '../access-grid-visitors-registration/access-grid-visitors-registration.component';
 import Swal from 'sweetalert2';
-import { takeUntil, take } from 'rxjs/operators';
 @Component({
   selector: 'app-access-container-visitors-registration',
   standalone: true,
@@ -42,23 +41,11 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
           document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
           
-          // Reset everything after successful download
+          // Clear everything after successful download
           this.resetEverything();
-          
-          Swal.fire({
-            icon: 'success',
-            title: 'QR Descargado',
-            text: 'El registro ha sido limpiado. Puede agregar nuevos visitantes.',
-            showConfirmButton: true
-          });
         },
         error: (error) => {
           console.error('Error downloading QR code', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Error al descargar el código QR',
-          });
         }
       });
     }
@@ -71,65 +58,27 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   patentePattern = '^[A-Z]{1,3}\\d{3}[A-Z]{0,3}$';
   private unsubscribe$ = new Subject<void>();
   visitorRecord?:VisitorRecord;
-  private visitorRecordSubscription?: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private visitorService: AccessVisitorsRegisterServiceService,
     private visitorHttpService: AccessVisitorsRegisterServiceHttpClientService,
   ) { }
+  
   private resetEverything(): void {
-    // Verificar y desuscribirse si existe una suscripción
-    if (this.visitorRecordSubscription) {
-      this.visitorRecordSubscription.unsubscribe();
-      this.visitorRecordSubscription = undefined;
-    }
-  
-    // Resetear formulario
+
     this.resetForm();
-  
-    // Limpiar estados
+
     this.qrCodeId = undefined;
     this.isQRCodeAvailable = false;
-    this.visitorRecord = {
-      visitors: [],
-      authRange: null
-    };
-  
-    // Limpiar subjects en los servicios
+    
+    this.visitorRecord = undefined;
+    
+
     this.visitorService.clearVisitorsTemporalsSubject();
     this.visitorService.clearAuthRange();
     this.visitorService.clearAllowedDayTemporalsSubject();
-  
-    // Reiniciar suscripciones después del delay
-    setTimeout(() => {
-      console.log("Reiniciando suscripciones...");
-      this.setupVisitorRecordSubscription();
-    }, 100);
   }
-  
-  private setupVisitorRecordSubscription(): void {
-    
-    if (this.visitorRecordSubscription) {
-      this.visitorRecordSubscription.unsubscribe();
-    }
-
-    
-    this.visitorRecordSubscription = combineLatest([
-      this.visitorService.getVisitorsTemporalsSubject(),
-      this.visitorService.getAuthRange()
-    ]).pipe(
-      takeUntil(this.unsubscribe$)
-    ).subscribe({
-      next: ([visitors, authRange]) => {
-        this.updateVisitorRecord(visitors, authRange);
-      },
-      error: (error) => {
-        console.error('Error en la suscripción del visitor record:', error);
-      }
-    });
-  }
-
   sendVisitorRecord(): void {
     if (this.visitorRecord) {
       if(this.visitorRecord.visitors.length<=0){
@@ -165,9 +114,6 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   
 
   initVisitorRecord(): void {
-    
-    this.unsubscribe$.next();
-    
     combineLatest([
       this.visitorService.getVisitorsTemporalsSubject(),
       this.visitorService.getAuthRange()
@@ -265,68 +211,32 @@ onlyNumbers(event: Event): void {
 }
 
 sendVisitorWithoutRH(): void {
-  if (this.visitorForm.valid) {
-    const visitantData = this.visitorForm.value;
+    if (this.visitorForm.valid) {
+        const visitantData = this.visitorForm.value;
 
-    const vehicle: Vehicle | undefined = visitantData.hasVehicle ? {
-      licensePlate: visitantData.licensePlate,
-      vehicleType: {
-        description: visitantData.vehicleType
-      },
-      insurance: visitantData.insurance,
-    } : undefined;
+        const vehicle: Vehicle | undefined = visitantData.hasVehicle ? {
+            licensePlate: visitantData.licensePlate,
+            vehicleType: {
+                description: visitantData.vehicleType 
+            },
+            insurance: visitantData.insurance,
+        } : undefined;
 
-    const visitor: Visitor = {
-      firstName: visitantData.firstName,
-      lastName: visitantData.lastName,
-      document: visitantData.document,
-      email: visitantData.email,
-      hasVehicle: visitantData.hasVehicle,
-      documentType: visitantData.documentType || undefined,
-      vehicle: vehicle,
-    };
+        const visitor: Visitor = {
+            firstName: visitantData.firstName,
+            lastName: visitantData.lastName,
+            document: visitantData.document,
+            email: visitantData.email,
+            hasVehicle: visitantData.hasVehicle,
+            documentType: visitantData.documentType || undefined,
+            vehicle: vehicle, 
+        };
 
-    this.visitorService.addVisitorsTemporalsSubject(visitor);
-    
-
-    this.visitorService.getVisitorsTemporalsSubject().pipe(
-      take(1)
-    ).subscribe({
-      next: (visitors) => {
-        const visitorAdded = visitors.some(v => v.document === visitor.document);
-        if (visitorAdded) {
-          this.resetForm();
-          Swal.fire({
-            icon: 'success',
-            title: 'Visitante Agregado',
-            text: 'El visitante ha sido agregado exitosamente.',
-            showConfirmButton: false,
-            timer: 1500
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Error al agregar el visitante. Intente nuevamente.',
-          });
-        }
-      },
-      error: (error) => {
-        console.error('Error al verificar visitante:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error al agregar el visitante. Intente nuevamente.',
-        });
-      }
-    });
-  } else {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Por favor, complete todos los campos requeridos correctamente.',
-    });
-  }
+        this.visitorService.addVisitorsTemporalsSubject(visitor);
+        this.resetForm();
+    } else {
+        console.log('El formulario no es válido');
+    }
 }
 
 setFormData(visit: Visitor): void {
@@ -368,9 +278,6 @@ resetForm(): void {
 }
 
 ngOnDestroy(): void {
-  if (this.visitorRecordSubscription) {
-    this.visitorRecordSubscription.unsubscribe();
-  }
   this.unsubscribe$.next();
   this.unsubscribe$.complete();
 }
