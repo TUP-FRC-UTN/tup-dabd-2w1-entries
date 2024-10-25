@@ -8,15 +8,22 @@ import { NewUserAllowedDto } from '../../models/visitors/VisitorsModels';
   providedIn: 'root'
 })
 export class EmergenciesService {
-  private URL_POST_EMERGENCY = "http://localhost:8090/emergency_entry/register";
+  private URL_POST_EMERGENCY = "http://localhost:8090/";
   private readonly http: HttpClient = inject(HttpClient);
 
   constructor() { }
 
-    registerEmergency(emergency: NewEmergencyDto): Observable<NewUserAllowedDto> {
+    registerEmergencyEntry(emergency: NewEmergencyDto): Observable<NewUserAllowedDto> {
       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       if (emergency.observations?.length == 0)
         emergency.observations = null;
-      return this.http.post<NewUserAllowedDto>(this.URL_POST_EMERGENCY, emergency, { headers });
+      return this.http.post<NewUserAllowedDto>(this.URL_POST_EMERGENCY + "emergency_entry/register", emergency, { headers });
+    }
+
+    registerEmergencyExit(emergency: NewEmergencyDto): Observable<NewUserAllowedDto> {
+      const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+      if (emergency.observations?.length == 0)
+        emergency.observations = null;
+      return this.http.post<NewUserAllowedDto>(this.URL_POST_EMERGENCY + "emergency_exit/register", emergency, { headers });
     }
 }

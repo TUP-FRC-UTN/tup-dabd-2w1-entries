@@ -1,14 +1,21 @@
-import { VehicleTypeDto } from "../visitors/VisitorsModels";
+import { VehicleTypeDto, Document_TypeDto } from "../visitors/VisitorsModels";
 
 export interface NewEmergencyDto {
-    dni: String;
-    name: String;
-    lastName: String;
+    people: NewEmergencyPerson[];
     vehicle: NewEmergencyVehicleDto;
     observations: String | null;
 }
 
+export interface NewEmergencyPerson {
+    document: {
+        type: Document_TypeDto,
+        number: string
+    }
+    name: String;
+    lastName: String;
+}
+
 export interface NewEmergencyVehicleDto {
-    plate: string;
-    vehicle_Type: VehicleTypeDto;
+    plate: string | null;
+    vehicleType: VehicleTypeDto;
 }
