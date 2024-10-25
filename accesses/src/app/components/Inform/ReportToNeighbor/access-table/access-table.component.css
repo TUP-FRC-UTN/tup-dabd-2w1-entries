@@ -1,57 +1,36 @@
-/* Sobreescribir estilos predeterminados de DataTables */
-
-/* Estilo de los botones de paginación */
-.dataTables_wrapper .dataTables_paginate .paginate_button:active {
-    background-color: #ffffff !important; /* Cambia el color de fondo al hacer clic */
-    color: #000 !important; /* Cambia el color del texto */
-    border: 1px solid #ccc !important; /* Borde opcional */
+.dropdown-menu .dropdown-item {
+    background-color: white !important;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:focus {
-    background-color: #ffffff !important; /* Cambia el fondo al estar en foco */
-    color: #000 !important;
+.dropdown-menu .dropdown-item:hover {
+    background-color: #a3a3a3 !important;
+}
+.dropdown-menu {
+    max-height: 200px; /* Cambia este valor según tus necesidades */
+    overflow-y: auto; /* Agrega el desplazamiento vertical */
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background-color: #f0f0f0 !important; /* Cambia el color de fondo al pasar el mouse */
-    border: 1px solid transparent !important; /* Ajuste opcional del borde */
-}
 
-/* Para el botón activo */
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background-color: #007bff !important; /* Cambia el color del botón activo */
-    color: #fff !important; /* Cambia el color del texto */
-}
-
-/* Para quitar el fondo negro al hacer clic en "Primero" o "Último" */
-.dataTables_wrapper .dataTables_paginate .paginate_button:active,
-.dataTables_wrapper .dataTables_paginate .paginate_button:focus {
-    background-color: #ffffff !important; /* Color blanco de fondo */
-    color: #000 !important; /* Color del texto */
-}
-
-/* Personalizar la tabla */
-table.dataTable {
-    border: 2px solid rgb(10, 9, 9); /* Borde alrededor de la tabla */
+#myTable {
+    border: 1px solid black; /* Borde negro a toda la tabla */
     border-collapse: collapse;
+     /* Para que los bordes no se dupliquen */ /* Esto evita el espacio extra */
 }
 
-table.dataTable thead th {
-    background-color: #000; /* Color de fondo del encabezado */
-    color: white; /* Color del texto del encabezado */
+#myTable th, #myTable td {
+    border: 1px solid black; /* Borde negro a las celdas */
+    padding: 8px; /* Espaciado interno en las celdas */
+    text-align: left;
+    color: white;
+    background-color: #6c757d; /* Alineación del texto */
+}
+.first-row {
+    background-color: #f0f0f0 !important; /* Gris claro */
+}
+.entrada-cell {
+    background-color: #28a745 !important; /* Fondo verde */
 }
 
-table.dataTable tr {
-    border-bottom: 1px solid rgb(245, 240, 240); /* Borde inferior de las filas */
-}
-
-table.dataTable tbody tr:nth-child(odd) {
-    background-color: #f2f2f2; /* Fondo para las filas impares */
-}
-
-/* Cambiar el color de los iconos de ordenación */
-table.dataTable thead th.sorting:after,
-table.dataTable thead th.sorting_asc:after,
-table.dataTable thead th.sorting_desc:after {
-    color: #161a1a !important; /* Cambiar el color de los iconos de ordenación */
+.salida-cell {
+    background-color: #dc3545 !important; /* Fondo rojo */
 }
