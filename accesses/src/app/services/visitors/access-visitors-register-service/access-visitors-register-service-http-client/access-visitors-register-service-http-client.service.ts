@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map,tap } from 'rxjs/operators';
 import { inject } from '@angular/core';
+import { catchError } from 'rxjs/operators';
 import { VisitorRecord, Visitor, AuthRange, AllowedDay } from '../../../../models/visitors/VisitorsModels';
 
 @Injectable({
@@ -27,8 +28,14 @@ export class AccessVisitorsRegisterServiceHttpClientService {
     });
   }
 
+
+
+
+
   getVehicleTypes(): Observable<string[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/getAll/vehiclesType`).pipe(
+    const url = 'http://localhost:8090/getAll/vehiclesType'; // Corrige la 'v' en vehiclesType
+    return this.http.get<any[]>(url).pipe(
+      tap(response => console.log('Respuesta completa del servidor:', response)),
       map(response => {
         if (Array.isArray(response)) {
           return response.map(item => item.description || 'Descripción no disponible');
@@ -39,12 +46,19 @@ export class AccessVisitorsRegisterServiceHttpClientService {
       })
     );
   }
+  
+  
+  
+  
 
+  
+  
+  
   postVisitorRecord(visitorRecord: VisitorRecord): Observable<any> {
     const transformedData = this.transformVisitorRecord(visitorRecord);
     return this.http.post(`${this.apiUrl}/visitor-qr/generate`, transformedData);
   }
- private transformVisitorRecord(visitorRecord: VisitorRecord): any[] {
+private transformVisitorRecord(visitorRecord: VisitorRecord): any[] {
     return visitorRecord.visitors.map(visitor => ({
         document: visitor.document,
         name: visitor.firstName,

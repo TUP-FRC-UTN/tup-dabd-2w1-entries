@@ -25,34 +25,6 @@ import Swal from 'sweetalert2';
 export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnDestroy {
   qrCodeId?:string;
   isQRCodeAvailable?: boolean;
-
-
-
-  downloadQRCode(): void {
-    if (this.qrCodeId) {
-      this.visitorHttpService.getQRCode(this.qrCodeId).subscribe({
-        next: (blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `VisitanteQrNro${this.qrCodeId}.png`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-          
-          // Clear everything after successful download
-          this.resetEverything();
-        },
-        error: (error) => {
-          console.error('Error downloading QR code', error);
-        }
-      });
-    }
-  }
-
-
-
   visitorForm!: FormGroup; 
   vehicleType: string[] = [];
   patentePattern = '^[A-Z]{1,3}\\d{3}[A-Z]{0,3}$';
@@ -65,20 +37,53 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
     private visitorHttpService: AccessVisitorsRegisterServiceHttpClientService,
   ) { }
   
+
+
+  downloadQRCode(): void {
+    if (this.qrCodeId) {
+        this.visitorHttpService.getQRCode(this.qrCodeId).subscribe({
+            next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `VisitanteQrNro${this.qrCodeId}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                this.resetEverything(); 
+                Swal.fire({
+                    icon: 'success',
+                    title: 'QR Descargado',
+                    text: 'El registro ha sido limpiado. Puede agregar nuevos visitantes.',
+                    showConfirmButton: true
+                });
+            },
+            error: (error) => {
+                console.error('Error downloading QR code', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al descargar el código QR',
+                });
+            }
+        });
+    }
+}
+
+
+
+
   private resetEverything(): void {
-
     this.resetForm();
-
     this.qrCodeId = undefined;
     this.isQRCodeAvailable = false;
-    
     this.visitorRecord = undefined;
-    
-
-    this.visitorService.clearVisitorsTemporalsSubject();
-    this.visitorService.clearAuthRange();
-    this.visitorService.clearAllowedDayTemporalsSubject();
+    this.visitorService.resetAllData();
   }
+
+
   sendVisitorRecord(): void {
     if (this.visitorRecord) {
       if(this.visitorRecord.visitors.length<=0){
@@ -231,8 +236,13 @@ sendVisitorWithoutRH(): void {
             documentType: visitantData.documentType || undefined,
             vehicle: vehicle, 
         };
-
-        this.visitorService.addVisitorsTemporalsSubject(visitor);
+        if(this.visitorService.addVisitorsTemporalsSubject(visitor)){
+          console.log("no sepudo agregar.")
+        }
+        
+        console.log(visitor);
+        console.log(this.visitorForm);
+        console.log(this.visitorForm.valid);
         this.resetForm();
     } else {
         console.log('El formulario no es válido');
@@ -281,4 +291,5 @@ ngOnDestroy(): void {
   this.unsubscribe$.next();
   this.unsubscribe$.complete();
 }
+
 }

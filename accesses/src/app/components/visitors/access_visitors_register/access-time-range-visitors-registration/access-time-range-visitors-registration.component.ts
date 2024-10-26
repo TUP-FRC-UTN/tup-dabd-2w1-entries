@@ -52,30 +52,36 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
   updateAvailableDays(): void {
     const startDate = this.form.get('startDate')?.value;
     const endDate = this.form.get('endDate')?.value;
-
+    
+    // Deshabilitar todos los días si no hay fechas seleccionadas
     if (!startDate || !endDate) {
-  
       this.orderDays.forEach(day => {
         this.form.get(day)?.disable();
       });
-      
       return;
     }
+    //SOLUCION POSIBLE:
+    // Crear fechas con la hora correcta
+    const start = new Date(startDate + 'T00:00:00');
+    const end = new Date(endDate + 'T23:59:59');
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    
+    // Obtener los días disponibles
     const availableDays = this.getDaysBetweenDates(start, end);
 
+    // Primero deshabilitar todos los días
     this.orderDays.forEach(day => {
       const control = this.form.get(day);
-      if (availableDays.includes(day)) {
-        control?.enable();
-      } else {
-        control?.disable();
-        control?.setValue(false);
+      control?.disable();
+      control?.setValue(false);
+    });
+    // Luego habilitar solo los días dentro del rango
+    availableDays.forEach(day => {
+      const control = this.form.get(day);
+      if (control) {
+        control.enable();
       }
     });
+    console.log('Días disponibles:', availableDays);
   }
 
   getDaysBetweenDates(start: Date, end: Date): string[] {
@@ -107,12 +113,13 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
   
 
 
-  get areDatesDisabled(): boolean {
-    return this._allowedDays.length > 0;
-  }
-  get areDatesReadonly(): boolean {
-    return this._allowedDays.length > 0;
-  }
+ get areDatesDisabled(): boolean {
+  return this._allowedDays.length === 0; 
+}
+
+get areDatesReadonly(): boolean {
+  return this._allowedDays.length > 0; 
+}
  disableDateInputs: boolean = false;
 
 
