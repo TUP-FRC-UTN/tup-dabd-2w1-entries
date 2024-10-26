@@ -5,13 +5,13 @@ import { VisitorRegisterEntryComponent } from "./components/visitors/(no-hace-fa
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 import { RegisterEmergencyComponent } from './components/emergencies/register-emergency/register-emergency.component';
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterModule, VisitorRegistryComponent, VisitorRegisterEntryComponent, RegisterEmergencyComponent],
-  providers: [],
+  imports: [RouterOutlet, RouterModule, VisitorRegistryComponent, VisitorRegisterEntryComponent, RegisterEmergencyComponent, CommonModule, DatePipe],
+  providers: [DatePipe, CommonModule],
 
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

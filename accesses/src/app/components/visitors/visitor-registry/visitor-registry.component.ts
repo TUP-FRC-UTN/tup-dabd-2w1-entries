@@ -20,7 +20,7 @@ import { AccessAutosizeTextareaDirective } from '../../../directives/access-auto
   selector: 'app-visitor-registry',
   standalone: true,
   imports: [CommonModule, FormsModule, AccessAutosizeTextareaDirective, RouterModule],
-  providers: [DatePipe, VisitorsService],
+  providers: [DatePipe, VisitorsService, CommonModule],
   templateUrl: './visitor-registry.component.html',
   styleUrl: './visitor-registry.component.css'
 })
@@ -29,7 +29,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
   subscription = new Subscription();
 
   private readonly visitorService = inject(VisitorsService);
-  constructor(private datePipe: DatePipe){}
+  constructor(){}
 
   dataTable: any;
 
@@ -216,189 +216,13 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
     });
   }
 
-  //registrar egreso de un visitante
-  RegisterExit(visitor :User_AllowedInfoDto): void{
-    //verifica observations
-    if(visitor.observations == undefined){
-      visitor.observations = "";
-    }
+  RegisterExit(visitor: User_AllowedInfoDto): void{
+    this.visitorService.RegisterExit(visitor);
+  }  
 
-    // verifica si esta dentro de rango (fechas permitidas)
-    let indexAuthRange = this.visitorService.todayIsInDateRange(visitor.authRanges);
-    if(indexAuthRange >= 0){
-
-      // verifica si esta dentro de rango (dia y horario permitido)
-      let indexDayAllowed = this.visitorService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
-      if(indexDayAllowed >= 0){
-        
-        // mapeos
-        const newUserAllowedDto: NewUserAllowedDto = 
-          this.visitorService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
-        const newAuthRangeDto: NewAuthRangeDto = 
-          this.visitorService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
-
-        //se crea el objeto (q se va a pasar por el body en el post)
-        const newMovement_ExitDto: NewMovement_ExitDto = 
-          this.visitorService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
-
-        //post en la URL
-        this.visitorService.postVisitorExit(newMovement_ExitDto).subscribe({
-          next: (response) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Egreso registrado!',
-              text: `¡El Egreso de "${newMovement_ExitDto.newUserAllowedDto.name} ${newMovement_ExitDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
-              confirmButtonColor: '#28a745',
-            });
-          },
-          error: (error) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Error al registrar el Egreso. Inténtelo de nuevo.',
-              confirmButtonText: 'Cerrar'        
-            });
-          }
-        });
-
-      } else {
-        //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
-        this.outOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
-        return;
-
-      }
-
-    } else {
-      //se dispara si el Visitor esta fuera de rango (fechas permitidas)
-      this.outOfAuthorizedDateRange(visitor);
-      return; // se termina la ejecucion del metodo (no se registra el ingreso)
-    }
-  }
-
-  //registrar ingreso de un visitante
-  RegisterAccess(visitor :User_AllowedInfoDto): void{
-    //verifica observations
-    if(visitor.observations == undefined){
-      visitor.observations = "";
-    }
-
-    // verifica si esta dentro de rango (fechas permitidas)
-    let indexAuthRange = this.visitorService.todayIsInDateRange(visitor.authRanges);
-    if(indexAuthRange >= 0){
-
-      // verifica si esta dentro de rango (dia y horario permitido)
-      let indexDayAllowed = this.visitorService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
-      if(indexDayAllowed >= 0){
-        
-        // mapeos
-        const newUserAllowedDto: NewUserAllowedDto = 
-          this.visitorService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
-        const newAuthRangeDto: NewAuthRangeDto = 
-          this.visitorService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
-
-        //se crea el objeto (q se va a pasar por el body en el post)
-        const newMovements_EntryDto: NewMovements_EntryDto = 
-          this.visitorService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
-
-        //post en la URL
-        this.visitorService.postVisitorEntry(newMovements_EntryDto).subscribe({
-          next: (response) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Ingreso registrado!',
-              text: `¡El Ingreso de "${newMovements_EntryDto.newUserAllowedDto.name} ${newMovements_EntryDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
-              confirmButtonColor: '#28a745',
-            });
-          },
-          error: (error) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Error al registrar el Ingreso. Inténtelo de nuevo.',
-              confirmButtonText: 'Cerrar'        
-            });
-          }
-        });
-
-      } else {
-        //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
-        this.outOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
-        return;
-
-      }
-
-    } else {
-      //se dispara si el Visitor esta fuera de rango (fechas permitidas)
-      this.outOfAuthorizedDateRange(visitor);
-      return; // se termina la ejecucion del metodo (no se registra el ingreso)
-    }
-
-  }
-
-  // muestra un modal avisando q el Visitor esta fuera de rango (dia y hora permitido)
-  outOfAuthorizedHourRange(visitor: User_AllowedInfoDto, indexAuthRange: number, indexDayAllowed: number){
-    //console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango dia y hora permitido");
-
-    let allowedDay = visitor.authRanges.at(indexAuthRange)?.allowedDays.at(indexDayAllowed);
-
-    let rangesHtml = 'El Visitante no tiene un rango horario autorizado';
-
-    if(allowedDay != undefined && allowedDay.day != undefined && allowedDay.init_hour != undefined && allowedDay.end_hour != undefined){
-
-        // ${this.datePipe.transform(allowedDay.init_hour,'hh:MM:ss')?.toString()}
-        // ${this.datePipe.transform(allowedDay.end_hour,'hh:MM:ss')?.toString()}
-          
-        rangesHtml = `
-          <p>
-            <strong>Rango horario permitido </strong> <br>
-            <strong>Desde: </strong> ${this.visitorService.stringToHour(allowedDay, true)} <br>
-            <strong>Hasta: </strong> ${this.visitorService.stringToHour(allowedDay, false)}
-          </p>
-        `;
-      
-    }
-
-    Swal.fire({
-      title: 'Denegar ingreso!',
-      html: `
-        <strong>El Visitante está fuera del rango horario permitido!</strong> <br>
-        ${rangesHtml}
-      `,
-      icon: 'error',
-      confirmButtonText: 'Cerrar'
-    });
-  }
-
-  // muestra un modal avisando q el Visitor esta fuera de rango (fechas permitidas)
-  outOfAuthorizedDateRange(visitor: User_AllowedInfoDto){
-    //console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango fecha");
-
-    let rangesHtml = '';
-    let range = 1;
-    for (const range of visitor.authRanges) {
-
-      //console.log(range);
-
-
-      rangesHtml += `
-        <p>
-          <strong>Rango permitido ${range}</strong>
-          <strong>Fecha de inicio: </strong> ${this.datePipe.transform(range.init_date,'dd/MM/yyyy')?.toString()}<br>
-          <strong>Fecha de fin: </strong> ${this.datePipe.transform(range.end_date,'dd/MM/yyyy')?.toString()}
-        </p>
-      `;
-    }
-
-    Swal.fire({
-      title: 'Denegar ingreso!',
-      html: `
-        <strong>El Visitante está fuera del rango permitido!</strong>
-        ${rangesHtml}
-      `,
-      icon: 'error',
-      confirmButtonText: 'Cerrar'
-    });
-  }
+  RegisterAccess(visitor: User_AllowedInfoDto): void{
+    this.visitorService.RegisterAccess(visitor);
+  }  
 
   // escanear QR de un visitante, guardar la lista de visitantes en el front para registrar Ingreso/Egreso
   ScanQR(){
