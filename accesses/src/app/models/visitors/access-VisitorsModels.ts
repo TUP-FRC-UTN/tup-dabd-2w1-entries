@@ -115,5 +115,14 @@ export interface RegistryVisitor {
 
     //FIN Clase necesaria (para recibir la data): User_AllowedInfoDto
 
+    // METODOS: registerMovementExit(NewMovements_ExitDto movementsExitDto)
+    // CLase necesaria: NewMovements_ExitDto
+    export interface NewMovement_ExitDto {
+      movementDatetime: Date; // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z")
+      observations: string;
+      newUserAllowedDto: NewUserAllowedDto; //interface declarada mas abajo
+      authRangesDto: NewAuthRangeDto; //interface declarada mas abajo
+      vehiclesId: number;
+  }
 
 // FIN CLASES del back necesarias para ciertos METODOS

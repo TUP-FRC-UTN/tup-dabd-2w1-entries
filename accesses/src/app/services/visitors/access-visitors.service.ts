@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders} from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Allowed_DaysDto, AuthRangeInfoDto, Document_TypeDto, NewAuthRangeDto, NewMovements_EntryDto, NewUserAllowedDto, NewVehicleDto, User_AllowedInfoDto, User_allowedTypeDto, VehicleTypeDto, Visitor } from '../../models/visitors/access-VisitorsModels';
+import { Allowed_DaysDto, AuthRangeInfoDto, Document_TypeDto, NewAuthRangeDto, NewMovement_ExitDto, NewMovements_EntryDto, NewUserAllowedDto, NewVehicleDto, User_AllowedInfoDto, User_allowedTypeDto, VehicleTypeDto, Visitor } from '../../models/visitors/access-VisitorsModels';
 import { DatePipe } from '@angular/common';
 
 @Injectable({
@@ -10,8 +10,11 @@ import { DatePipe } from '@angular/common';
 export class VisitorsService {
 
   private URL_GET_ALL_Visitors = "http://localhost:8090/user_Allowed/visitors";
-  private URL_POST_VisitorInList = "http://localhost:8090/movements_entry/register";
-  private URL_POST_VisitorNotInList = "http://localhost:8090/movements_entry/register_if_not_exists";
+  private URL_POST_ENTRY_VisitorInList = "http://localhost:8090/movements_entry/register";
+  private URL_POST_EXIT_VisitorInList = "http://localhost:8090/movements_exit/register";
+
+  //URL para la pantalla (registrar invitado que no esta en la lista)
+  private URL_POST_ENTRY_VisitorNotInList = "http://localhost:8090/movements_entry/register_if_not_exists";
 
   private readonly http: HttpClient = inject(HttpClient);
 
@@ -64,7 +67,7 @@ export class VisitorsService {
     mapUser_AllowedInfoDtoToNewUserAllowedDto(visitorInfoDto: User_AllowedInfoDto): NewUserAllowedDto {
 
       //NewVehicleDto vacio
-      const emptyVehicleTypeDto: VehicleTypeDto = { description : "" };
+      const emptyVehicleTypeDto: VehicleTypeDto = { description : "Car" };
       const emptyVehicleDto: NewVehicleDto = { plate: "", vehicle_Type: emptyVehicleTypeDto, insurance: ""}
 
       let visitorVehicle: NewVehicleDto | undefined ;
@@ -159,7 +162,26 @@ export class VisitorsService {
         //console.log("createNewMovements_EntryDto (en visitors.service): ", newMovements_EntryDto);
         return newMovements_EntryDto;
     }
-    // FIN creacion de User_AllowedInfoDto
+    // FIN creacion de NewMovements_EntryDto 
+
+    // creacion de NewMovement_ExitDto 
+    createNewMovement_ExitDto(visitorInfo :User_AllowedInfoDto, 
+      newUserAllowedDto: NewUserAllowedDto, 
+      newAuthRangedto: NewAuthRangeDto): NewMovement_ExitDto{
+
+        let newMovement_ExitDto: NewMovement_ExitDto = {
+          movementDatetime: new Date, // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z"
+          observations: visitorInfo.observations || "",
+          newUserAllowedDto: newUserAllowedDto, //interface declarada mas abajo
+          authRangesDto: newAuthRangedto, //interface declarada mas abajo
+          vehiclesId: 0
+        }
+
+        //console.log("createNewMovements_EntryDto (en visitors.service): ", newMovements_EntryDto);
+        return newMovement_ExitDto;
+    }
+    // FIN creacion de NewMovement_ExitDto 
+
   //FIN post del registro de un visitor
 
 
@@ -170,21 +192,27 @@ export class VisitorsService {
   }
 
   // METODO: registerMovement_Entry(@RequestBody NewMovements_EntryDto movementsEntryDto)
-  postVisitor(movement: NewMovements_EntryDto): Observable<any> {
+  postVisitorEntry(movement: NewMovements_EntryDto): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(this.URL_POST_VisitorInList, movement, { headers });
+    return this.http.post<any>(this.URL_POST_ENTRY_VisitorInList, movement, { headers });
+  }
+
+  // METODO: registerMovement_Exit(@RequestBody NewMovements_ExitDto movementsExitDto)
+  postVisitorExit(movement: NewMovement_ExitDto): Observable<any> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.post<any>(this.URL_POST_EXIT_VisitorInList, movement, { headers });
   }
 
   //METODO: registerMovementEntryIfNotExists(
     // @RequestParam String documento,
     // @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate date,
     // @RequestBody(required = false) NewMovements_EntryDto movementsEntryDto) {
-  postUnregisteredVisitor(document: string, date: string, movement: NewMovements_EntryDto): Observable<any> {
+  postUnregisteredVisitorEntry(document: string, date: string, movement: NewMovements_EntryDto): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
   
     // los parametros de consulta (documento y date) los pone en la URL
     // ejemplo URL completa: http://localhost:8090/movements_entry/register_if_not_exists?documento=99887766&date=2024-10-11
-    const url = `${this.URL_POST_VisitorNotInList}?documento=${encodeURIComponent(document)}&date=${encodeURIComponent(date)}`;
+    const url = `${this.URL_POST_ENTRY_VisitorNotInList}?documento=${encodeURIComponent(document)}&date=${encodeURIComponent(date)}`;
   
     // hace el POST con movement en el body
     return this.http.post<any>(url, movement, { headers });
