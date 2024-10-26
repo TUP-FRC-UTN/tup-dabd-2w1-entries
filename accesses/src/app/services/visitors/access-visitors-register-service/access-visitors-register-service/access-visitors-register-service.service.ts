@@ -6,86 +6,84 @@ import { Subject } from 'rxjs';
   providedIn: 'root'
 })
 export class AccessVisitorsRegisterServiceService {
+   // Eliminamos las variables locales y solo mantenemos los BehaviorSubjects
+   private visitorsSubject = new BehaviorSubject<Visitor[]>([]);
+   private allowedDaysSubject = new BehaviorSubject<AllowedDay[]>([]);
+   private authRangeSubject = new BehaviorSubject<AuthRange | null>(null);
+ 
+   // Observables públicos
+   readonly visitors$ = this.visitorsSubject.asObservable();
+   readonly allowedDays$ = this.allowedDaysSubject.asObservable();
+   readonly authRange$ = this.authRangeSubject.asObservable();
 
-  private visitors: Visitor[] = [];
-  private visitorsTemporalsSubject = new BehaviorSubject<Visitor[]>([]);
 
-  private allowedDays: AllowedDay[] = [];
-  private allowedDaysSubject = new BehaviorSubject<AllowedDay[]>([]);
 
-  private authRange: AuthRange | null = null;
-  private authRangeSubject = new BehaviorSubject<AuthRange | null>(null);
+  // private visitors: Visitor[] = [];
+  // private visitorsTemporalsSubject = new BehaviorSubject<Visitor[]>([]);
+
+  // private allowedDays: AllowedDay[] = [];
+  // private allowedDaysSubject = new BehaviorSubject<AllowedDay[]>([]);
+
+  // private authRange: AuthRange | null = null;
+  // private authRangeSubject = new BehaviorSubject<AuthRange | null>(null);
   getAuthRange(): Observable<AuthRange | null> {
-    return this.authRangeSubject.asObservable();
+    return this.authRange$;
   }
+
   setAuthRange(authRange: AuthRange): void {
-    this.authRange = authRange;
-    this.authRangeSubject.next(this.authRange);
+    this.authRangeSubject.next(authRange);
   }
 
   getAllowedDays(): Observable<AllowedDay[]> {
-    return this.allowedDaysSubject.asObservable();
+    return this.allowedDays$;
   }
 
   addAllowedDays(allowedDays: AllowedDay[]): void {
-    this.allowedDays = [...this.allowedDays, ...allowedDays];
-    this.allowedDaysSubject.next(this.allowedDays);
+    const currentDays = this.allowedDaysSubject.value;
+    this.allowedDaysSubject.next([...currentDays, ...allowedDays]);
   }
 
   updateAllowedDays(allowedDays: AllowedDay[]): void {
-    this.allowedDays = [...allowedDays];
-    this.allowedDaysSubject.next(this.allowedDays);
+    this.allowedDaysSubject.next(allowedDays);
   }
+
   addVisitorsTemporalsSubject(visitor: Visitor): boolean {
-    const documentExists = this.visitors.some(v => v.document === visitor.document);
-    const licensePlateExists = this.visitors.some(v => v.vehicle?.licensePlate === visitor.vehicle?.licensePlate);
-    
+    const currentVisitors = this.visitorsSubject.value;
+    const documentExists = currentVisitors.some(v => v.document === visitor.document);
+    const licensePlateExists = currentVisitors.some(v => 
+      v.vehicle?.licensePlate === visitor.vehicle?.licensePlate && visitor.vehicle?.licensePlate
+    );
+
     if (documentExists || licensePlateExists) {
-      // Retornar false si ya existe un documento o patente duplicado
       console.log('Documento o patente ya existen:', visitor);
-      // Emitir la lista actualizada incluso si no se agrega el visitante
-      this.visitorsTemporalsSubject.next([...this.visitors]);
       return false;
     }
-    
-    // Agregar el visitante si no existen documentos ni patentes duplicadas
-    this.visitors = [...this.visitors, visitor]; // Crear una nueva referencia
-    this.visitorsTemporalsSubject.next(this.visitors); // Emitir la lista actualizada
-    return true; // Retornar true si se agregó el visitante
+
+    this.visitorsSubject.next([...currentVisitors, visitor]);
+    return true;
   }
-  
+
   deleteVisitorsTemporalsSubject(visitor: Visitor): void {
-    this.visitors = this.visitors.filter(v => v.document !== visitor.document);
-    this.visitorsTemporalsSubject.next([...this.visitors]); // Emitir la lista sin el visitante eliminado
+    const currentVisitors = this.visitorsSubject.value;
+    const updatedVisitors = currentVisitors.filter(v => v.document !== visitor.document);
+    this.visitorsSubject.next(updatedVisitors);
   }
 
   getVisitorsTemporalsSubject(): Observable<Visitor[]> {
-    return this.visitorsTemporalsSubject.asObservable();
+    return this.visitors$;
   }
 
   updateVisitorsTemporalsSubject(visitorToUpdate: Visitor): void {
-    const index = this.visitors.findIndex(v => v.document === visitorToUpdate.document);
-    if (index !== -1) {
-      this.visitors[index] = { ...visitorToUpdate };
-      this.visitorsTemporalsSubject.next([...this.visitors]); 
-    } else {
-      console.log('Visitante no encontrado para modificar:', visitorToUpdate);
-    }
-  }
-  clearVisitorsTemporalsSubject(): void {
-    this.visitorsTemporalsSubject.next([]);
-  }
-  clearAllowedDayTemporalsSubject(): void {
-    this.allowedDaysSubject.next([]);
+    const currentVisitors = this.visitorsSubject.value;
+    const updatedVisitors = currentVisitors.map(visitor => 
+      visitor.document === visitorToUpdate.document ? visitorToUpdate : visitor
+    );
+    this.visitorsSubject.next(updatedVisitors);
   }
 
-  clearAuthRange(): void {
+  resetAllData(): void {
+    this.visitorsSubject.next([]);
+    this.allowedDaysSubject.next([]);
     this.authRangeSubject.next(null);
   }
-  resetAllData() {
-    this.clearVisitorsTemporalsSubject();
-    this.clearAllowedDayTemporalsSubject();
-    this.clearAuthRange();
-  }
-
 }
