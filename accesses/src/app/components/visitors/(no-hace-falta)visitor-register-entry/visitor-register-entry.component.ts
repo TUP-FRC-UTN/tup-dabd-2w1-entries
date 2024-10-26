@@ -12,16 +12,16 @@ import { FormsModule } from '@angular/forms';
 })
 export class VisitorRegisterEntryComponent {
 
-  visitor: Visitor = { name: 'John', lastName: 'Doe', document: '123456', phoneNumber: '555-1234', 
-                       email: 'john.doe@example.com', hasVehicle: true, plate: 'ABC123', vehicleType: 'Car' };
+  // visitor: Visitor = { name: 'John', lastName: 'Doe', document: '123456', phoneNumber: '555-1234', 
+  //                      email: 'john.doe@example.com', hasVehicle: true, plate: 'ABC123', vehicleType: 'Car' };
   
-  observation = "";
+  // observation = "";
 
-  ChangeFlag(){
+  // ChangeFlag(){
 
-  }
+  // }
 
-  Register(){
+  // Register(){
 
-  }
+  // }
 }
