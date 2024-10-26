@@ -2,9 +2,9 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnChanges, OnDestroy, OnInit, SimpleChanges, NgZone, AfterViewInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AuthRangeInfoDto, NewAuthRangeDto, NewMovements_EntryDto, NewUserAllowedDto, User_AllowedInfoDto, Visitor } from '../../../models/visitors/VisitorsModels';
+import { AuthRangeInfoDto, NewAuthRangeDto, NewMovements_EntryDto, NewUserAllowedDto, User_AllowedInfoDto, Visitor } from '../../../models/visitors/access-VisitorsModels';
 import Swal from 'sweetalert2';
-import { VisitorsService } from '../../../services/visitors/visitors.service';
+import { VisitorsService } from '../../../services/visitors/access-visitors.service';
 import { Subscription } from 'rxjs';
 import { AutoSizeTextAreaDirective } from '../../../directives/auto-size-text-area.directive';
 //
@@ -93,7 +93,7 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
         const formattedData = this.visitors.map((visitor, index) => {
           return [
             `${visitor.last_name} ${visitor.name}`,
-            `DNI`, //DNI passport etc (todavia el back no devuelve este dato)
+            visitor.documentTypeDto.description, //DNI passport etc (todavia el back no devuelve este dato)
             visitor.document,
             `<button style="width: 95%;" class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`, // Cambiar el uso de onclick
             `<select class="form-select select-action" data-index="${index}">
@@ -359,11 +359,6 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
   // agregar un visitante que no esta en una lista, pero tiene autorizacion del Propietario/Inquilino
   AddVisitor(){
 
-  }
-
-  //volver a pantalla anterior
-  Return(){
-    
   }
 
 }

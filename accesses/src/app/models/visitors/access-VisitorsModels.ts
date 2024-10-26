@@ -101,7 +101,9 @@ export interface RegistryVisitor {
       authRanges: AuthRangeInfoDto[]; //List<AuthRangeInfoDto>
       observations?: string; //campo extra (no esta en el back)
 
-      document_TypeDto: Document_TypeDto; // tipo de documento q se va a mostrar
+      //ATENCION: documentTypeDto antes se llamaba document_TypeDto 
+      // (no se pq pero si tenia _ no me lo leia y tiraba error, ese cambio lo arreglo)
+      documentTypeDto: Document_TypeDto; // tipo de documento q se va a mostrar
       neighbor_id: number; //se necesita para el post del Visitor
     }
 

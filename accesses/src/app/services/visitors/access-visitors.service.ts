@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders} from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Allowed_DaysDto, AuthRangeInfoDto, Document_TypeDto, NewAuthRangeDto, NewMovements_EntryDto, NewUserAllowedDto, NewVehicleDto, User_AllowedInfoDto, User_allowedTypeDto, VehicleTypeDto, Visitor } from '../../models/visitors/VisitorsModels';
+import { Allowed_DaysDto, AuthRangeInfoDto, Document_TypeDto, NewAuthRangeDto, NewMovements_EntryDto, NewUserAllowedDto, NewVehicleDto, User_AllowedInfoDto, User_allowedTypeDto, VehicleTypeDto, Visitor } from '../../models/visitors/access-VisitorsModels';
 import { DatePipe } from '@angular/common';
 
 @Injectable({
@@ -85,7 +85,7 @@ export class VisitorsService {
         document : visitorInfoDto.document,
         name : visitorInfoDto.name,
         last_name : visitorInfoDto.last_name,
-        documentType: visitorInfoDto.document_TypeDto,
+        documentType: visitorInfoDto.documentTypeDto,
         user_allowed_Type: visitorInfoDto.userType,
         vehicle: visitorVehicle,
         email: visitorInfoDto.email

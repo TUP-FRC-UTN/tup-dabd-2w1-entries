@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Visitor } from '../../../models/visitors/VisitorsModels';
+import { Visitor } from '../../../models/visitors/access-VisitorsModels';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
