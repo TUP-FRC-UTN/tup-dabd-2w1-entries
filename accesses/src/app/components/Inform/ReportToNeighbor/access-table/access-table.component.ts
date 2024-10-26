@@ -169,6 +169,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       searching: true,
       info: true,
       autoWidth: false,
+      
       language: {
           lengthMenu: "Mostrar _MENU_ registros",
           zeroRecords: "No se encontraron registros",
@@ -176,16 +177,11 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           infoEmpty: "No se encontraron resultados",
           infoFiltered: "(filtrado de _MAX_ registros totales)",
           search: "Buscar:",
-          paginate: {
-              first: "Primero",
-              last: "Último",
-              next: "Siguiente",
-              previous: "Anterior"
-          },
+       
           emptyTable: "No se encontraron resultados",
       },
       responsive: true,
-      dom: 'rt<"bottom"lp><"clear">',
+    dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
 
       drawCallback: function(settings: any) {
         const table = this;
@@ -240,7 +236,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           filename: 'movimientos',
           exportOptions: {
             columns: ':visible'
-          }
+          },
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
         },
         {
           extend: 'pdf',
@@ -250,7 +247,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           orientation: 'landscape',
           exportOptions: {
             columns: ':visible'
-          }
+          },
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
         },
         {
           extend: 'print',
@@ -258,7 +256,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           className: 'buttons-print d-none',
           exportOptions: {
             columns: ':visible'
-          }
+          },
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
         }
       ]
     });

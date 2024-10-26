@@ -7,36 +7,44 @@
 }
 
 .dropdown-menu {
-    max-height: 200px; /* Cambia este valor según tus necesidades */
-    overflow-y: auto; /* Agrega el desplazamiento vertical */
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 #myTable {
-    background-color: #f9f9f9; /* Fondo general de la tabla */
+    background-color: #f9f9f9;
     border-collapse: collapse;
+   /* Añadido para fijar el layout de la tabla */
+    width: 100%; /* Asegura que la tabla ocupe todo el ancho disponible */
 }
 
 #myTable th, #myTable td {
     padding: 8px;
     text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 
-/* Alterna un fondo gris en filas impares */
-#myTable tr:nth-child(odd) {
-    background-color: #f0f0f0;
+/* Colores alternados para todas las celdas excepto la primera columna */
+#myTable tr:nth-child(odd) td:not(:first-child) {
+    background-color: #f0f0f0 !important;
 }
 
-/* Fondo ligeramente más claro para filas pares */
-#myTable tr:nth-child(even) {
-    background-color: #ffffff;
+#myTable tr:nth-child(even) td:not(:first-child) {
+    background-color: #ffffff !important;
 }
+
+/* Estilos para la primera columna (entrada/salida) */
 .entrada-cell {
-    background-color: #28a745 !important; /* Fondo verde */
+    background-color: #28a745 !important;
+    color: white;
 }
 
 .salida-cell {
-    background-color: #dc3545 !important; /* Fondo rojo */
+    background-color: #dc3545 !important;
+    color: white;
 }
 
 .filter-section {
