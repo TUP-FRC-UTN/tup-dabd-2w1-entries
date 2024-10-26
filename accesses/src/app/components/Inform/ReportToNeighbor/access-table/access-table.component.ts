@@ -24,6 +24,10 @@ interface FilterValues {
   plate: string;
   days: Set<string>;
 }
+interface DataTableButtons {
+  new (dt: any, config: any): any;
+}
+
 
 @Component({
   selector: 'app-access-table',
@@ -40,6 +44,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   table: any = null;
   exportButtonsEnabled: boolean = false;
   days: number[] = [];
+  showFilters = false;
 
   
   
@@ -112,14 +117,21 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
     this.removeEventListeners();
+    $('#excelBtn, #pdfBtn, #printBtn').off('click');
   }
 
   private removeEventListeners(): void {
     $('.dropdown-menu input[type="checkbox"]').off();
     $('#nombreIngresanteFilter, #documentoFilter, #propietarioFilter, #placaFilter').off();
     $('.dropdown-menu').off();
+    $('#advancedFiltersToggle').off();
   }
-
+  toggleAdvancedFilters(): void {
+    const advancedFilters = document.getElementById('advancedFilters');
+    if (advancedFilters) {
+        advancedFilters.classList.toggle('show');
+    }
+}
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.initializeDataTable();
@@ -158,44 +170,23 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       info: true,
       autoWidth: false,
       language: {
-        lengthMenu: "Mostrar _MENU_ registros",
-        zeroRecords: "No se encontraron registros",
-        info: "Mostrando de _START_ a _END_ de _TOTAL_ registros",
-        infoEmpty: "No hay registros disponibles",
-        infoFiltered: "(filtrado de _MAX_ registros totales)",
-        search: "Buscar:",
-        paginate: {
-          first: "Primero",
-          last: "Último",
-          next: "Siguiente",
-          previous: "Anterior"
-        },
-        emptyTable: "No hay datos disponibles",
+          lengthMenu: "Mostrar _MENU_ registros",
+          zeroRecords: "No se encontraron registros",
+          info: "Mostrando de _START_ a _END_ de _TOTAL_ registros",
+          infoEmpty: "No se encontraron resultados",
+          infoFiltered: "(filtrado de _MAX_ registros totales)",
+          search: "Buscar:",
+          paginate: {
+              first: "Primero",
+              last: "Último",
+              next: "Siguiente",
+              previous: "Anterior"
+          },
+          emptyTable: "No se encontraron resultados",
       },
       responsive: true,
-      dom: 'Bfrtip',
-      buttons: [
-        {
-          extend: 'excel',
-          text: '<i class="fas fa-file-excel"></i> ',
-          className: 'btn btn-success ms-2',
-          titleAttr: 'Exportar a Excel'
-        },
-        {
-          extend: 'pdf',
-          text: '<i class="fas fa-file-pdf"></i> ',
-          className: 'btn btn-danger ms-2',
-          titleAttr: 'Exportar a PDF',
-          filename: 'movimientos',
-          orientation: 'landscape'
-        },
-        {
-          extend: 'print',
-          text: '<i class="fas fa-print"></i> ',
-          className: 'btn btn-primary ms-2',
-          titleAttr: 'Imprimir tabla'
-        }
-      ],
+      dom: 'rt<"bottom"lp><"clear">',
+
       drawCallback: function(settings: any) {
         const table = this;
         setTimeout(function() {
@@ -225,11 +216,83 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
      
       }
     });
+        // Configurar botones externos
+        $('#excelBtn').on('click', () => {
+          if (!this.exportButtonsEnabled) return;
+          this.table.button('.buttons-excel').trigger();
+      });
+
+      $('#pdfBtn').on('click', () => {
+          if (!this.exportButtonsEnabled) return;
+          this.table.button('.buttons-pdf').trigger();
+      });
+      $('#printBtn').on('click', () => {
+        if (!this.exportButtonsEnabled) return;
+        this.table.button('.buttons-print').trigger();
+    });
+    const DataTableButtons = ($.fn.dataTable as any).Buttons as DataTableButtons;
+    const buttons = new DataTableButtons(this.table, {
+      buttons: [
+        {
+          extend: 'excel',
+          text: 'Excel',
+          className: 'buttons-excel d-none',
+          filename: 'movimientos',
+          exportOptions: {
+            columns: ':visible'
+          }
+        },
+        {
+          extend: 'pdf',
+          text: 'PDF',
+          className: 'buttons-pdf d-none',
+          filename: 'movimientos',
+          orientation: 'landscape',
+          exportOptions: {
+            columns: ':visible'
+          }
+        },
+        {
+          extend: 'print',
+          text: 'Print',
+          className: 'buttons-print d-none',
+          exportOptions: {
+            columns: ':visible'
+          }
+        }
+      ]
+    });
+  this.table.buttons().container().appendTo('#myTable_wrapper');
+
+  // Manejar el estado de los botones de exportación
+  this.table.on('draw', () => {
+      const recordCount = this.table.rows({ filter: 'applied' }).count();
+      this.exportButtonsEnabled = recordCount > 0;
+      
+      // Actualizar estado de los botones
+      const buttons = ['#excelBtn', '#pdfBtn', '#printBtn'];
+      buttons.forEach(btn => {
+          if (this.exportButtonsEnabled) {
+              $(btn).prop('disabled', false);
+          } else {
+              $(btn).prop('disabled', true);
+          }
+      });
+  });
     $('#myTable tr:first').css('background-color', '#f0f0f0'); 
+
+
+
+  this.table.buttons().container().appendTo('#myTable_wrapper');
+
 
     this.table.on('draw', () => {
       const recordCount = this.table.rows({ filter: 'applied' }).count();
       this.exportButtonsEnabled = recordCount > 0;
+      const buttons = ['#excelBtn', '#pdfBtn', '#printBtn'];
+      buttons.forEach(btn => {
+        $(btn).prop('disabled', !this.exportButtonsEnabled);
+      });
     });
 }
   setupDropdowns(): void {
@@ -411,12 +474,18 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           ]);
         });
         this.exportButtonsEnabled = true;
+        ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
+          $(btn).prop('disabled', false);
+      });
       } else {
         Swal.fire({
           icon: 'warning',
           title: '¡No se encontraron registros!',
         });
         this.exportButtonsEnabled = false;
+        ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
+          $(btn).prop('disabled', true);
+      });
       }
 
       this.table.draw();
