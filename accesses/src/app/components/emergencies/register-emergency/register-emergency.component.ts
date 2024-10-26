@@ -2,7 +2,7 @@ import { NgClass } from '@angular/common';
 import { AfterViewChecked, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { EmergenciesService } from '../../../services/emergencies/emergencies.service';
-import { NewEmergencyDto } from '../../../models/emergencies/NewEmergecyDto';
+import { NewEmergencyDto, NewEmergencyPerson } from '../../../models/emergencies/NewEmergecyDto';
 import { Subject, Subscription } from 'rxjs';
 
 @Component({
@@ -78,7 +78,7 @@ export class RegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewC
     this.requestStatus = RequestStatus.Loading;
     const emergency: NewEmergencyDto = this.getFormAsDto();
 
-    const newSubscription = this.emergenciesService.registerEmergencyEntry(emergency).subscribe({
+    const newSubscription = this.emergenciesService.registerEmergencyExit(emergency).subscribe({
     next: nv => {
       this.requestStatus = RequestStatus.Success;
     },
@@ -91,7 +91,7 @@ export class RegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewC
   
   addPersonForm() {
     const peopleFormArray = this.form.controls.people;
-    const documentTypeControl = new FormControl('', [Validators.required]);
+    const documentTypeControl = new FormControl('DNI', [Validators.required]);
     const documentNumberControl = new FormControl('', [Validators.required]);
     const subscriptions = new Subscription();
 
@@ -163,7 +163,18 @@ export class RegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewC
     const formValue = this.form.value;
 
     const emergencyDto: NewEmergencyDto = {
-      people: formValue.people ?? [],
+      people: formValue.people?.map<NewEmergencyPerson>(v => {
+        return {
+          name: v.name,
+          lastName: v.lastName,
+          document: {
+            number: v.documentNumber,
+            type: {
+              description: v.documentType
+            }
+          }
+        }
+      }) ?? [],
       vehicle: {
         vehicleType: {
           description: formValue.vehicle?.type ?? null

@@ -15,15 +15,20 @@ export class EmergenciesService {
 
     registerEmergencyEntry(emergency: NewEmergencyDto): Observable<NewUserAllowedDto> {
       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+      console.log(emergency);
       if (emergency.observations?.length == 0)
         emergency.observations = null;
-      return this.http.post<NewUserAllowedDto>(this.URL_POST_EMERGENCY + "emergency_entry/register", emergency, { headers });
+      if ((emergency.vehicle?.vehicleType.description.length ?? 0) < 1)
+        emergency.vehicle = null;
+      return this.http.post<NewUserAllowedDto>(this.URL_POST_EMERGENCY + "emergency/register_entry", emergency, { headers });
     }
 
     registerEmergencyExit(emergency: NewEmergencyDto): Observable<NewUserAllowedDto> {
       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       if (emergency.observations?.length == 0)
         emergency.observations = null;
-      return this.http.post<NewUserAllowedDto>(this.URL_POST_EMERGENCY + "emergency_exit/register", emergency, { headers });
+      if ((emergency.vehicle?.vehicleType.description.length ?? 0) < 1)
+        emergency.vehicle = null;
+      return this.http.post<NewUserAllowedDto>(this.URL_POST_EMERGENCY + "emergency/register_exit", emergency, { headers });
     }
 }

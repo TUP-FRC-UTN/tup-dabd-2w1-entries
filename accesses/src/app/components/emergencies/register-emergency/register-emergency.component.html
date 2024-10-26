@@ -65,10 +65,8 @@
                                             class="form-select"
                                             [ngClass]="{'is-invalid': person.controls['documentType'].touched && person.controls['documentType'].invalid}"
                                             formControlName="documentType">
-                                            <option value="">DNI</option>
-                                            <option value="Car">ETC</option>
-                                            <option value="Motorcycle">ETC</option>
-                                            <option value="Truck">ETC</option>
+                                            <option value="DNI">DNI</option>
+                                            <option value="Passport">Pasaporte</option>
                                         </select>
                                         <div class="invalid-feedback">
                                             Este campo es obligatorio.

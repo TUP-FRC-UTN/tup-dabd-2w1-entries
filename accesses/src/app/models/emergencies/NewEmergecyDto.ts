@@ -2,7 +2,7 @@ import { VehicleTypeDto, Document_TypeDto } from "../visitors/VisitorsModels";
 
 export interface NewEmergencyDto {
     people: NewEmergencyPerson[];
-    vehicle: NewEmergencyVehicleDto;
+    vehicle: NewEmergencyVehicleDto | null;
     observations: String | null;
 }
 
