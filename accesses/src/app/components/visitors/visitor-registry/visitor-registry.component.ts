@@ -6,7 +6,6 @@ import { AuthRangeInfoDto, NewAuthRangeDto, NewMovements_EntryDto, NewUserAllowe
 import Swal from 'sweetalert2';
 import { VisitorsService } from '../../../services/visitors/access-visitors.service';
 import { Subscription } from 'rxjs';
-import { AutoSizeTextAreaDirective } from '../../../directives/auto-size-text-area.directive';
 //
 import $ from 'jquery';
 import 'datatables.net'
@@ -15,11 +14,12 @@ import 'datatables.net-bs5';
 import { InternalSettings } from 'datatables.net';
 import { AllowedDaysDto } from '../../../services/visitors/movement.interface';
 import { RouterModule } from '@angular/router';
+import { AccessAutosizeTextareaDirective } from '../../../directives/access-autosize-textarea.directive';
 
 @Component({
   selector: 'app-visitor-registry',
   standalone: true,
-  imports: [CommonModule, FormsModule, AutoSizeTextAreaDirective, RouterModule],
+  imports: [CommonModule, FormsModule, AccessAutosizeTextareaDirective, RouterModule],
   providers: [DatePipe, VisitorsService],
   templateUrl: './visitor-registry.component.html',
   styleUrl: './visitor-registry.component.css'
