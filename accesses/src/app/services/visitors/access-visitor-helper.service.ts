@@ -1,70 +1,26 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders} from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Allowed_DaysDto, AuthRangeInfoDto, Document_TypeDto, NewAuthRangeDto, NewMovements_EntryDto, NewUserAllowedDto, NewVehicleDto, User_AllowedInfoDto, User_allowedTypeDto, VehicleTypeDto, Visitor } from '../../models/visitors/VisitorsModels';
 import { DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Allowed_DaysDto, AuthRangeInfoDto, NewAuthRangeDto, NewMovement_ExitDto, NewMovements_EntryDto, NewUserAllowedDto, NewVehicleDto, User_AllowedInfoDto, VehicleTypeDto } from '../../models/visitors/access-VisitorsModels';
+import Swal from 'sweetalert2';
 
 @Injectable({
   providedIn: 'root'
 })
-export class VisitorsService {
-
-  private URL_GET_ALL_Visitors = "http://localhost:8090/user_Allowed/visitors";
-  private URL_POST_VisitorInList = "http://localhost:8090/movements_entry/register";
-  private URL_POST_VisitorNotInList = "http://localhost:8090/movements_entry/register_if_not_exists";
-
-  private readonly http: HttpClient = inject(HttpClient);
+export class AccessVisitorHelperService {
 
   constructor(private datePipe: DatePipe) {
-    this.loadVisitorsData();
   }
 
-  //lista de Visitors
-  visitorslist : User_AllowedInfoDto[] = [];
 
-  loadVisitorsData(): void {
-
-    this.getVisitorsData().subscribe({
-      next: (data: User_AllowedInfoDto[]) => {
-        this.visitorslist = data; // Asigna los datos una vez que se reciban
-        //console.log("data en el service: ", data);
-        //console.log("visitorslist en el service: ", this.visitorslist);
-
-      },
-      error: (error) => {
-        console.error('Error al cargar los datos de los Visitors:', error);
-      }
-    });
-  }
-
-  GetVisitorsList(): User_AllowedInfoDto[]{
-    return [...this.visitorslist]
-  }
-
-  //filtra la list de Visitors
-  getVisitorByParam(parameter: string): User_AllowedInfoDto[] {
-
-    //console.log("el cambio: " + parameter);
-
-    if (parameter != null && parameter.length > 2) {
-      let param = parameter.toLowerCase();
-
-      return this.visitorslist.filter(v =>
-        v.document.toLowerCase().includes(param) ||
-        v.name.toLowerCase().includes(param) ||
-        v.last_name.toLowerCase().includes(param)
-      );
-    } else {
-      return this.visitorslist;
-    }
-  }
-
+  //MAPEOS
   //post del registro de un visitor
     // mapeo de User_AllowedInfoDto a NewUserAllowedDto:
     mapUser_AllowedInfoDtoToNewUserAllowedDto(visitorInfoDto: User_AllowedInfoDto): NewUserAllowedDto {
 
       //NewVehicleDto vacio
-      const emptyVehicleTypeDto: VehicleTypeDto = { description : "" };
+      const emptyVehicleTypeDto: VehicleTypeDto = { description : "Car" };
       const emptyVehicleDto: NewVehicleDto = { plate: "", vehicle_Type: emptyVehicleTypeDto, insurance: ""}
 
       let visitorVehicle: NewVehicleDto | undefined ;
@@ -85,7 +41,7 @@ export class VisitorsService {
         document : visitorInfoDto.document,
         name : visitorInfoDto.name,
         last_name : visitorInfoDto.last_name,
-        documentType: visitorInfoDto.document_TypeDto,
+        documentType: visitorInfoDto.documentTypeDto,
         user_allowed_Type: visitorInfoDto.userType,
         vehicle: visitorVehicle,
         email: visitorInfoDto.email
@@ -159,39 +115,38 @@ export class VisitorsService {
         //console.log("createNewMovements_EntryDto (en visitors.service): ", newMovements_EntryDto);
         return newMovements_EntryDto;
     }
-    // FIN creacion de User_AllowedInfoDto
+    // FIN creacion de NewMovements_EntryDto 
+
+    // creacion de NewMovement_ExitDto 
+    createNewMovement_ExitDto(visitorInfo :User_AllowedInfoDto, 
+      newUserAllowedDto: NewUserAllowedDto, 
+      newAuthRangedto: NewAuthRangeDto): NewMovement_ExitDto{
+
+        let newMovement_ExitDto: NewMovement_ExitDto = {
+          movementDatetime: new Date, // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z"
+          observations: visitorInfo.observations || "",
+          newUserAllowedDto: newUserAllowedDto, //interface declarada mas abajo
+          authRangesDto: newAuthRangedto, //interface declarada mas abajo
+          vehiclesId: 0
+        }
+
+        //console.log("createNewMovements_EntryDto (en visitors.service): ", newMovements_EntryDto);
+        return newMovement_ExitDto;
+    }
+    // FIN creacion de NewMovement_ExitDto 
   //FIN post del registro de un visitor
+// FIN MAPEOS
 
 
-  //Llamadas a Metodos:
-  // METODO: getAllUserAllowedVisitors(@PathVariable String visitor)
-  getVisitorsData(): Observable<User_AllowedInfoDto[]> {
-    return this.http.get<User_AllowedInfoDto[]>(`http://localhost:8090/user_Allowed/visitors/Visitor`);
-  }
-
-  // METODO: registerMovement_Entry(@RequestBody NewMovements_EntryDto movementsEntryDto)
-  postVisitor(movement: NewMovements_EntryDto): Observable<any> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(this.URL_POST_VisitorInList, movement, { headers });
-  }
-
-  //METODO: registerMovementEntryIfNotExists(
-    // @RequestParam String documento,
-    // @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate date,
-    // @RequestBody(required = false) NewMovements_EntryDto movementsEntryDto) {
-  postUnregisteredVisitor(document: string, date: string, movement: NewMovements_EntryDto): Observable<any> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  
-    // los parametros de consulta (documento y date) los pone en la URL
-    // ejemplo URL completa: http://localhost:8090/movements_entry/register_if_not_exists?documento=99887766&date=2024-10-11
-    const url = `${this.URL_POST_VisitorNotInList}?documento=${encodeURIComponent(document)}&date=${encodeURIComponent(date)}`;
-  
-    // hace el POST con movement en el body
-    return this.http.post<any>(url, movement, { headers });
-  }  
 
 
-// funciones para comparar FECHAS
+
+
+
+
+
+
+  // funciones para comparar FECHAS
   // verifica si la fecha actual esta dentro de alguno de los AuthRangeInfoDto del Visitor
   todayIsInDateRange(listAuthRangeInfoDto: AuthRangeInfoDto[]): number{
     for (var i = 0; i < listAuthRangeInfoDto.length; i++) {
@@ -244,6 +199,18 @@ export class VisitorsService {
     return afterDate >= todayDate;
   }
 // FIN funciones para comparar FECHAS
+
+
+
+
+
+
+
+
+
+
+
+
 
 // funciones para comparar HORAS
     //devuelve el index del AllowedDayDto valido, dentro de la list authRangeInfoDto.allowedDays
@@ -343,4 +310,86 @@ export class VisitorsService {
     }
 
 // FIN funciones para comparar HORAS
+
+
+
+
+
+
+
+
+
+
+
+// ALERTS de SweetAlert
+  // muestra un modal avisando q el Visitor esta fuera de rango (dia y hora permitido)
+  outOfAuthorizedHourRange(visitor: User_AllowedInfoDto, indexAuthRange: number, indexDayAllowed: number){
+    //console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango dia y hora permitido");
+
+    let allowedDay = visitor.authRanges.at(indexAuthRange)?.allowedDays.at(indexDayAllowed);
+
+    let rangesHtml = 'El Visitante no tiene un rango horario autorizado';
+
+    if(allowedDay != undefined && allowedDay.day != undefined && allowedDay.init_hour != undefined && allowedDay.end_hour != undefined){
+
+        // ${this.datePipe.transform(allowedDay.init_hour,'hh:MM:ss')?.toString()}
+        // ${this.datePipe.transform(allowedDay.end_hour,'hh:MM:ss')?.toString()}
+          
+        rangesHtml = `
+          <p>
+            <strong>Rango horario permitido </strong> <br>
+            <strong>Desde: </strong> ${this.stringToHour(allowedDay, true)} <br>
+            <strong>Hasta: </strong> ${this.stringToHour(allowedDay, false)}
+          </p>
+        `;
+      
+    }
+
+    Swal.fire({
+      title: 'Denegar ingreso!',
+      html: `
+        <strong>El Visitante está fuera del rango horario permitido!</strong> <br>
+        ${rangesHtml}
+      `,
+      icon: 'error',
+      confirmButtonText: 'Cerrar'
+    });
+  }
+
+  // muestra un modal avisando q el Visitor esta fuera de rango (fechas permitidas)
+  outOfAuthorizedDateRange(visitor: User_AllowedInfoDto){
+    //console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango fecha");
+
+    let rangesHtml = '';
+    let range = 1;
+    for (const range of visitor.authRanges) {
+
+      //console.log(range);
+
+
+      rangesHtml += `
+        <p>
+          <strong>Rango permitido ${range}</strong>
+          <strong>Fecha de inicio: </strong> ${this.datePipe.transform(range.init_date,'dd/MM/yyyy')?.toString()}<br>
+          <strong>Fecha de fin: </strong> ${this.datePipe.transform(range.end_date,'dd/MM/yyyy')?.toString()}
+        </p>
+      `;
+    }
+
+    Swal.fire({
+      title: 'Denegar ingreso!',
+      html: `
+        <strong>El Visitante está fuera del rango permitido!</strong>
+        ${rangesHtml}
+      `,
+      icon: 'error',
+      confirmButtonText: 'Cerrar'
+    });
+  }
+// FIN ALERTS de SweetAlert
+
+
+
+
+
 }

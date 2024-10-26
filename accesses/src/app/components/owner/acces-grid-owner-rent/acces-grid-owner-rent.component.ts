@@ -11,7 +11,7 @@ import { InternalSettings } from 'datatables.net';
 
 import { AccessOwnerRenterserviceService } from '../../../services/ownerService/access-owner-renterservice.service';
 import { AuthRangeInfoDto, Document_TypeDto, NewAuthRangeDto, NewMovements_EntryDto, User_AllowedInfoDto, Vehicle } from '../../../models/visitors/interface/owner';
-import {  } from '../../../models/visitors/VisitorsModels';
+import {  } from '../../../models/visitors/access-VisitorsModels';
 
 @Component({
   selector: 'app-acces-grid-owner-rent',

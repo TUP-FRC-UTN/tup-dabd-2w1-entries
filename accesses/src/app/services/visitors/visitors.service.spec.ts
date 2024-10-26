@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { VisitorsService } from './visitors.service';
+import { VisitorsService } from './access-visitors.service';
 
 describe('VisitorsService', () => {
   let service: VisitorsService;

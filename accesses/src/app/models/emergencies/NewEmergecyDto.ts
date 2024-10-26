@@ -1,4 +1,4 @@
-import { VehicleTypeDto } from "../visitors/VisitorsModels";
+import { VehicleTypeDto } from "../visitors/access-VisitorsModels";
 
 export interface NewEmergencyDto {
     dni: String;
