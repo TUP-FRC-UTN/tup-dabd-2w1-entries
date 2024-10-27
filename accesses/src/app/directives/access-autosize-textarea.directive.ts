@@ -1,10 +1,10 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
 
 @Directive({
-  selector: '[appAutoSizeTextArea]',
+  selector: '[appAccessAutosizeTextarea]',
   standalone: true
 })
-export class AutoSizeTextAreaDirective {
+export class AccessAutosizeTextareaDirective {
 
   private initialHeight = '100%'; 
 
@@ -30,5 +30,5 @@ export class AutoSizeTextAreaDirective {
     textarea.style.height = 'auto';
     textarea.style.height = `${textarea.scrollHeight}px`; // ajusta la altura
   }
-}
 
+}

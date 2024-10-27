@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NewEmergencyDto } from '../../models/emergencies/NewEmergecyDto';
-import { NewUserAllowedDto } from '../../models/visitors/VisitorsModels';
+import { NewUserAllowedDto } from '../../models/visitors/access-VisitorsModels';
 
 @Injectable({
   providedIn: 'root'

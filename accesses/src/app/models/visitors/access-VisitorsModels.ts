@@ -101,7 +101,9 @@ export interface RegistryVisitor {
       authRanges: AuthRangeInfoDto[]; //List<AuthRangeInfoDto>
       observations?: string; //campo extra (no esta en el back)
 
-      document_TypeDto: Document_TypeDto; // tipo de documento q se va a mostrar
+      //ATENCION: documentTypeDto antes se llamaba document_TypeDto 
+      // (no se pq pero si tenia _ no me lo leia y tiraba error, ese cambio lo arreglo)
+      documentTypeDto: Document_TypeDto; // tipo de documento q se va a mostrar
       neighbor_id: number; //se necesita para el post del Visitor
     }
 
@@ -113,5 +115,14 @@ export interface RegistryVisitor {
 
     //FIN Clase necesaria (para recibir la data): User_AllowedInfoDto
 
+    // METODOS: registerMovementExit(NewMovements_ExitDto movementsExitDto)
+    // CLase necesaria: NewMovements_ExitDto
+    export interface NewMovement_ExitDto {
+      movementDatetime: Date; // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z")
+      observations: string;
+      newUserAllowedDto: NewUserAllowedDto; //interface declarada mas abajo
+      authRangesDto: NewAuthRangeDto; //interface declarada mas abajo
+      vehiclesId: number;
+  }
 
 // FIN CLASES del back necesarias para ciertos METODOS
