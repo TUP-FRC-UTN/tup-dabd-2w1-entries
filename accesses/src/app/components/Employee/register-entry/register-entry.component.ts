@@ -52,8 +52,8 @@ export class RegisterEntryComponent {
     this.movement.document = this.user.document;
     this.movement.movementDatetime = new Date().toISOString();
   
-    this.movementEntryService.registerEmpSupp(this.movement).subscribe({
-      next: (response) => {
+    this.movementEntryService.registerEmpSuppExit(this.movement).subscribe({
+      next: () => {
         Swal.fire({
           icon: 'success',
           title: 'Movimiento registrado',
@@ -61,7 +61,7 @@ export class RegisterEntryComponent {
           confirmButtonColor: '#28a745',
         });
       },
-      error: (error) => {
+      error: () => {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
