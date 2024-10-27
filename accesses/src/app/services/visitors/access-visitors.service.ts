@@ -17,6 +17,9 @@ export class VisitorsService {
   private URL_POST_EXIT_VisitorInList = "http://localhost:8090/movements_exit/register";
   private URL_GET_LastEntryByDocument = "http://localhost:8090/movements_entry/last_entry_by_document?document=";
   private URL_GET_LastExitByDocument = "http://localhost:8090/movements_exit/last_exit_by_document?document=";
+ 
+ 
+  private URL_POST_VALIDATE_QR = 'http://localhost:8090/visitor-qr';
 
   //URL para la pantalla (registrar invitado que no esta en la lista)
   private URL_POST_ENTRY_VisitorNotInList = "http://localhost:8090/movements_entry/register_if_not_exists";
@@ -29,6 +32,10 @@ export class VisitorsService {
 
   //lista de Visitors
   visitorslist : User_AllowedInfoDto[] = [];
+
+  validateQrCode(qrCode: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.URL_POST_VALIDATE_QR}/validate`, { qrCode });
+  }
 
   loadVisitorsData(): void {
 

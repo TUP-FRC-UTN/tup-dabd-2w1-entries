@@ -12,7 +12,6 @@
                     >
                 </div>
             </div>    -->
-
       <table
         id="visitorsTable"
         class="display table border border-dark rounded"
@@ -47,7 +46,7 @@
                             <td class="border border-dark col-2 align-items-center text-center"><button (click)="MoreInfo(v)" style="width: 100%;" class="btn btn-info">Ver más</button></td>
                             <td class="col-2">
                                 <select style="width: 100%;" class="form-select" name="" id="">
-                                    <option value="" class="bg-secondary text-white" selected disabled hidden>Seleccionar</option>
+                                   <option value="" class="bg-secondary text-white" selected disabled hidden>Seleccionar</option>
                                     <option (click)="RegisterAccess(v)" class="bg-primary text-light m-0 p-0" value="">Ingreso</option>
                                     <option (click)="RegisterExit(v)" class="bg-primary text-light m-0 p-0" value="">Egreso</option>
                                 </select>                                                                                     
@@ -71,10 +70,54 @@
           <button class="btn btn-primary me-2" (click)="AddVisitor()">
             Agregar Visitante
           </button>
-          <button class="btn btn-info ms-2" (click)="ScanQR()">
-            Escanear QR
+          <button
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#qrScannerModal"
+          >
+            <i class="bi bi-qr-code-scan"></i> Escanear QR
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal del escáner QR -->
+<div
+  class="modal fade"
+  id="qrScannerModal"
+  tabindex="-1"
+  aria-labelledby="qrScannerModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="qrScannerModalLabel">Escanear Código QR</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="stopScanner()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <ngx-scanner-qrcode
+          #scanner
+          (event)="handleQrScan($event)"
+        ></ngx-scanner-qrcode>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+          (click)="stopScanner()"
+        >
+          Cerrar
+        </button>
       </div>
     </div>
   </div>
