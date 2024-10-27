@@ -4,14 +4,27 @@
   </div>
   <div class="container-fluid m-1 p-2">
     <div class="container-fluid col-10">
-      <!-- <div class="row mb-2 p-2 justify-content-start"> 
-                <div class="col-4 text-center d-flex border border-dark p-2 rounded justify-content-center align-items-center"> 
-                    <label for="inputParameter" class="m-1 me-2">Buscar</label>
-                    <input type="text" class="form-control border" placeholder="por DNI, Apellido o Nombre" name="inputParameter"
-                            [(ngModel)]="parameter" (ngModelChange)="Search(parameter)"
-                    >
-                </div>
-            </div>    -->
+      <!-- Contenedor para los botones alineados a la derecha -->
+      <div class="d-flex justify-content-end botones">
+        <button
+          class="btn btn-primary me-2"
+          data-bs-toggle="modal"
+          data-bs-target="#qrScannerModal"
+        >
+          <i class="bi bi-qr-code-scan"></i>
+        </button>
+        <!-- Botón para cargar imagen de QR -->
+        <button class="btn btn-primary me-2" (click)="uploadQrImage()">
+          <i class="bi bi-file-earmark-arrow-up"></i>
+        </button>
+        <input
+          type="file"
+          accept="image/*"
+          #qrInput
+          hidden
+          (change)="onFileSelected($event)"
+        />
+      </div>
       <table
         id="visitorsTable"
         class="display table border border-dark rounded"
@@ -22,19 +35,22 @@
               Nombre
             </th>
             <th scope="col" class="border border-dark text-light bg-secondary">
-              Tipo documento
+              Tipo Doc.
             </th>
             <th scope="col" class="border border-dark text-light bg-secondary">
               Documento
             </th>
             <th scope="col" class="border border-dark text-light bg-secondary">
-              Más Información
+              Información
             </th>
             <th scope="col" class="border border-dark text-light bg-secondary">
-              Acción
+              Accion
             </th>
             <th scope="col" class="border border-dark text-light bg-secondary">
               Observaciones
+            </th>
+            <th scope="col" class="border border-dark text-light bg-secondary">
+              Estado
             </th>
           </tr>
         </thead>
@@ -57,25 +73,9 @@
         </tbody>
       </table>
       <div class="row align-items-center">
-        <div class="col text-start">
-          <button
-            class="btn btn-secondary"
-            [routerLink]="['/entry']"
-            routerLinkActive="router-link-active"
-          >
-            Cancelar
-          </button>
-        </div>
         <div class="col text-end">
           <button class="btn btn-primary me-2" (click)="AddVisitor()">
             Agregar Visitante
-          </button>
-          <button
-            class="btn btn-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#qrScannerModal"
-          >
-            <i class="bi bi-qr-code-scan"></i> Escanear QR
           </button>
         </div>
       </div>

@@ -10,6 +10,7 @@ import {
   NgZone,
   AfterViewInit,
   ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -37,6 +38,7 @@ import {
   NgxScannerQrcodeComponent,
   NgxScannerQrcodeModule,
 } from 'ngx-scanner-qrcode';
+import jsQR from 'jsqr';
 
 @Component({
   selector: 'app-visitor-registry',
@@ -55,6 +57,8 @@ import {
 export class VisitorRegistryComponent
   implements OnInit, OnDestroy, AfterViewInit
 {
+  @ViewChild('qrInput') qrInput!: ElementRef;
+
   subscription = new Subscription();
 
   private readonly visitorService = inject(VisitorsService);
@@ -67,8 +71,7 @@ export class VisitorRegistryComponent
 
   private readonly ngZone: NgZone = inject(NgZone);
 
-  modalValid:boolean = false;
-  
+  modalValid: boolean = false;
 
   ngOnDestroy() {
     if (this.dataTable) {
@@ -82,6 +85,65 @@ export class VisitorRegistryComponent
   isScanning = false;
   scannedResult: string = '';
 
+  //Estado del visitante
+  visitorStatus: { [document: string]: string } = {}; // Estado de cada visitante
+
+  uploadQrImage() {
+    // Abre el cuadro de diálogo de selección de archivo
+    this.qrInput.nativeElement.click();
+  }
+
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const reader = new FileReader();
+
+      // Procesa la imagen una vez cargada
+      reader.onload = (e: any) => {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = () => {
+          // Crea un canvas temporal para extraer los datos de la imagen
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+
+          if (context) {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            context.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+
+            // Usa jsQR para procesar la imagen
+            const qrCode = jsQR(
+              imageData.data,
+              imageData.width,
+              imageData.height
+            );
+
+            if (qrCode) {
+              // QR encontrado: procesa el contenido escaneado
+              this.handleQrScan([{ value: qrCode.data }]);
+            } else {
+              // QR no válido: muestra una alerta
+              Swal.fire({
+                icon: 'error',
+                title: 'QR Invalido',
+                text: 'No se ha podido leer un código QR válido en la imagen.',
+              });
+            }
+          }
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
       this.dataTable = ($('#visitorsTable') as any).DataTable({
@@ -93,20 +155,23 @@ export class VisitorRegistryComponent
         info: true,
         autoWidth: false,
         language: {
-          lengthMenu: 'Mostrar _MENU_ registros',
+          lengthMenu: '_MENU_',
           zeroRecords: 'No se encontraron registros',
           search: 'Buscar:',
-
           emptyTable: 'No hay datos disponibles',
+          info: '',            
+          infoEmpty: '',       
+          infoFiltered: ''
         },
         responsive: true,
+        dom: '<"top d-flex justify-content-start mb-2"f>rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"li>p><"clear">',
       });
-
+  
       $('#dt-search-0')
         .off('keyup')
         .on('keyup', () => {
           const searchTerm = $('#dt-search-0').val() as string;
-
+  
           if (searchTerm.length >= 3) {
             this.dataTable.search(searchTerm).draw();
           } else if (searchTerm.length === 0) {
@@ -129,23 +194,45 @@ export class VisitorRegistryComponent
     if (this.dataTable) {
       this.ngZone.runOutsideAngular(() => {
         const formattedData = this.visitors.map((visitor, index) => {
+          const status = this.visitorStatus[visitor.document] || 'En espera'; // Estado por defecto
+
+          let statusButton = '';
+          let actionButtons = '';
+
+          // Determinar el estado y los botones de acción
+          switch (status) {
+            case 'Ingresado':
+              statusButton = `<button class="btn btn-success" disabled>Ingresado</button>`;
+              actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+              break;
+            case 'Egresado':
+              statusButton = `<button class="btn btn-danger" disabled>Egresado</button>`;
+              break;
+            case 'En espera':
+            default:
+              statusButton = `<button class="btn btn-warning" disabled>En espera</button>`;
+              actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+              break;
+          }
+
           return [
             `${visitor.last_name} ${visitor.name}`,
-            visitor.documentTypeDto.description, //DNI passport etc (todavia el back no devuelve este dato)
-            visitor.document,
-            `<button style="width: 95%;" class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`, // Cambiar el uso de onclick
+            visitor.documentTypeDto.description,
+            `<div class="text-start">${visitor.document}</div>`, // Alineado a la izquierda
+            `<button style="width: 95%;" class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`,
             `<select class="form-select select-action" data-index="${index}">
-                <option value="" selected disabled hidden>Seleccionar</option>
-                <option value="ingreso">Ingreso</option>
-                <option value="egreso">Egreso</option>
-              </select>`,
+              <option value="" selected disabled hidden>Seleccionar</option>
+              <option value="ingreso">Ingreso</option>
+              <option value="egreso">Egreso</option>
+            </select>`,
             `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+            statusButton,
+            actionButtons,
           ];
         });
 
         this.dataTable.clear().rows.add(formattedData).draw();
       });
-
       this.addEventListeners();
     }
   }
@@ -192,15 +279,23 @@ export class VisitorRegistryComponent
   onSelectionChange(event: Event, visitor: User_AllowedInfoDto) {
     const selectElement = event.target as HTMLSelectElement;
     const selectedValue = selectElement.value;
-    //console.log(`Seleccionado: ${selectedValue} para el Visitante: ${visitor.name}`);
+
+    // Actualizar el estado del visitante
     if (selectedValue === 'ingreso') {
+      this.visitorStatus[visitor.document] = 'Ingresado'; // Actualizar el estado
       this.RegisterAccess(visitor);
     } else if (selectedValue === 'egreso') {
+      this.visitorStatus[visitor.document] = 'Egresado'; // Actualizar el estado
       this.RegisterExit(visitor);
+    } else {
+      this.visitorStatus[visitor.document] = 'En espera'; // Restablecer a "En espera" si no se selecciona
     }
 
     // Restablece el valor del selector
     selectElement.value = '';
+
+    // Actualizar la tabla para reflejar el nuevo estado
+    this.updateDataTable();
   }
 
   //carga TODOS los invitados al iniciar la pantalla
@@ -258,10 +353,34 @@ export class VisitorRegistryComponent
 
   RegisterExit(visitor: User_AllowedInfoDto): void {
     this.visitorService.RegisterExit(visitor);
+
+    this.updateVisitorStatus(visitor, 'egreso');
   }
 
   RegisterAccess(visitor: User_AllowedInfoDto): void {
     this.visitorService.RegisterAccess(visitor);
+    this.updateVisitorStatus(visitor, 'ingreso');
+  }
+
+  // Función para actualizar el estado del visitante
+  updateVisitorStatus(
+    visitor: User_AllowedInfoDto,
+    action: 'ingreso' | 'egreso'
+  ) {
+    if (action === 'ingreso') {
+      this.visitorStatus[visitor.document] = 'Ingresado';
+    } else if (action === 'egreso') {
+      this.visitorStatus[visitor.document] = 'Egresado';
+    }
+
+    // Cambia a "En espera" si no egresa después de un tiempo
+    setTimeout(
+      () => {
+        if (this.visitorStatus[visitor.document] === 'Ingresado') {
+          this.visitorStatus[visitor.document] = 'En espera';
+        }
+      } /* tiempo en ms */
+    );
   }
 
   openModal(): void {
@@ -323,11 +442,19 @@ export class VisitorRegistryComponent
           this.visitors.push(newVisitor);
           this.updateDataTable();
         } else {
+          Swal.fire({
+            title: 'QR Inválido',
+            text: 'El código QR escaneado no es válido.',
+            icon: 'error',
+            confirmButtonText: 'Cerrar',
+          });
           console.warn('Código QR no válido.');
         }
 
         // Opción 1: Buscar y hacer click en el botón de cierre
-        const closeButton = document.querySelector('[data-bs-dismiss="modal"]') as HTMLElement;
+        const closeButton = document.querySelector(
+          '[data-bs-dismiss="modal"]'
+        ) as HTMLElement;
         closeButton?.click();
 
         // O Opción 2: Agregar la clase modal-backdrop y remover el modal
@@ -345,7 +472,6 @@ export class VisitorRegistryComponent
     }
   }
 
-  
   setupModalEventListeners() {
     const modal = document.getElementById('qrScannerModal');
     modal?.addEventListener('shown.bs.modal', () => {
