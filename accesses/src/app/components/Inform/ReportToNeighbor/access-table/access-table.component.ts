@@ -24,10 +24,10 @@ interface FilterValues {
   plate: string;
   days: Set<string>;
 }
+
 interface DataTableButtons {
   new (dt: any, config: any): any;
 }
-
 
 @Component({
   selector: 'app-access-table',
@@ -46,9 +46,6 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   days: number[] = [];
   showFilters = false;
 
-  
-  
-  
   filterValues: FilterValues = {
     entryOrExit: new Set<string>(),
     tipoIngresante: new Set<string>(),
@@ -57,7 +54,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     typeCar: new Set<string>(),
     propietario: '',
     lateInRange: new Set<string>(),
-    plate : '',
+    plate: '',
     days: new Set<string>()
   };
 
@@ -71,11 +68,9 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     'visitor': 'visitante',
     'delivery': 'delivery',
     'constructionworker': 'obrero',
-    'suplier' : 'proveedor',
+    'suplier': 'proveedor',
     'employee': 'empleado',
     'services': 'servicios',
-    
-    
   };
 
   private readonly typeCarMap: { [key: string]: string } = {
@@ -101,7 +96,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private generateDays(): void {
     this.days = Array.from({ length: 31 }, (_, i) => i + 1);
-}
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedYear'] || changes['selectedMonth']) {
@@ -126,12 +121,14 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     $('.dropdown-menu').off();
     $('#advancedFiltersToggle').off();
   }
+
   toggleAdvancedFilters(): void {
     const advancedFilters = document.getElementById('advancedFilters');
     if (advancedFilters) {
-        advancedFilters.classList.toggle('show');
+      advancedFilters.classList.toggle('show');
     }
-}
+  }
+
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.initializeDataTable();
@@ -169,63 +166,71 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       searching: true,
       info: true,
       autoWidth: false,
-      
       language: {
-          lengthMenu: "Mostrar _MENU_ registros",
-          zeroRecords: "No se encontraron registros",
-          info: "Mostrando de _START_ a _END_ de _TOTAL_ registros",
-          infoEmpty: "No se encontraron resultados",
-          infoFiltered: "(filtrado de _MAX_ registros totales)",
-          search: "Buscar:",
-       
-          emptyTable: "No se encontraron resultados",
+        lengthMenu:  " _MENU_ ",
+        zeroRecords: "No se encontraron registros",
+        info: "Mostrando de _START_ a _END_ de _TOTAL_ registros",
+        infoEmpty: "No se encontraron resultados",
+        infoFiltered: "(filtrado de _MAX_ registros totales)",
+        search: "Buscar:",
+        emptyTable: "No se encontraron resultados",
       },
       responsive: true,
-    dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
-
+      dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
       drawCallback: function(settings: any) {
         const table = this;
         setTimeout(function() {
-            $(table).find('td:first-child').each(function() {
-                const cellText = $(this).text().trim().toLowerCase();
-                
-                if (cellText === 'entrada') {
-                    $(this).css("background-color", "#28a745");
-                } else if (cellText === 'salida') {
-                    $(this).css("background-color", "#dc3545");
-                }
-            });
-            $(table).find('td:nth-child(9)').each(function() { // Cambia el índice según tu estructura de tabla
-              console.log($(this).text());
-              const estadoText = $(this).text().trim();
-  
-              if (estadoText === 'Tarde') {
-                  $(this).css("color", "red"); // Cambia el color de la letra a rojo
-                  $(this).html(`<i class="fa-solid fa-triangle-exclamation"></i> ${estadoText}`); // Agrega el icono de exclamación
-              }else if (estadoText === 'En horario') {
-                $(this).css("color", "green"); // Cambia el color de la letra a verde
-                $(this).html(`<i class="fa-solid fa-circle-check"></i> ${estadoText}`); // Agrega el icono de verificación
+          $(table).find('td:nth-child(3)').each(function() {
+            const cellText = $(this).text().trim().toLowerCase();
+            if (cellText === 'entrada') {
+                $(this).html(`
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn rounded-pill w-75" 
+                            style="background-color: #28a745; color: white; border: none; text-transform: uppercase;">
+                            ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
+                        </button>
+                    </div>
+                `);
+            } else if (cellText === 'salida') {
+                $(this).html(`
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn rounded-pill w-75" 
+                            style="background-color: #dc3545; color: white; border: none; text-transform: uppercase;">
+                            ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
+                        </button>
+                    </div>
+                `);
+            }
+        });
+          $(table).find('td:nth-child(12)').each(function() { // Ajustado para la nueva posición del estado de horario
+            const estadoText = $(this).text().trim();
+            if (estadoText === 'Tarde') {
+              $(this).css("color", "red");
+              $(this).html(`<i class="fa-solid fa-triangle-exclamation"></i> ${estadoText}`);
+            } else if (estadoText === 'En horario') {
+              $(this).css("color", "green");
+              $(this).html(`<i class="fa-solid fa-circle-check"></i> ${estadoText}`);
             }
           });
-           
         }, 0);
-     
       }
     });
-        // Configurar botones externos
-        $('#excelBtn').on('click', () => {
-          if (!this.exportButtonsEnabled) return;
-          this.table.button('.buttons-excel').trigger();
-      });
 
-      $('#pdfBtn').on('click', () => {
-          if (!this.exportButtonsEnabled) return;
-          this.table.button('.buttons-pdf').trigger();
-      });
-      $('#printBtn').on('click', () => {
-        if (!this.exportButtonsEnabled) return;
-        this.table.button('.buttons-print').trigger();
+    $('#excelBtn').on('click', () => {
+      if (!this.exportButtonsEnabled) return;
+      this.table.button('.buttons-excel').trigger();
     });
+
+    $('#pdfBtn').on('click', () => {
+      if (!this.exportButtonsEnabled) return;
+      this.table.button('.buttons-pdf').trigger();
+    });
+
+    $('#printBtn').on('click', () => {
+      if (!this.exportButtonsEnabled) return;
+      this.table.button('.buttons-print').trigger();
+    });
+
     const DataTableButtons = ($.fn.dataTable as any).Buttons as DataTableButtons;
     const buttons = new DataTableButtons(this.table, {
       buttons: [
@@ -261,29 +266,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       ]
     });
-  this.table.buttons().container().appendTo('#myTable_wrapper');
 
-  // Manejar el estado de los botones de exportación
-  this.table.on('draw', () => {
-      const recordCount = this.table.rows({ filter: 'applied' }).count();
-      this.exportButtonsEnabled = recordCount > 0;
-      
-      // Actualizar estado de los botones
-      const buttons = ['#excelBtn', '#pdfBtn', '#printBtn'];
-      buttons.forEach(btn => {
-          if (this.exportButtonsEnabled) {
-              $(btn).prop('disabled', false);
-          } else {
-              $(btn).prop('disabled', true);
-          }
-      });
-  });
-    $('#myTable tr:first').css('background-color', '#f0f0f0'); 
-
-
-
-  this.table.buttons().container().appendTo('#myTable_wrapper');
-
+    this.table.buttons().container().appendTo('#myTable_wrapper');
 
     this.table.on('draw', () => {
       const recordCount = this.table.rows({ filter: 'applied' }).count();
@@ -293,7 +277,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
         $(btn).prop('disabled', !this.exportButtonsEnabled);
       });
     });
-}
+  }
+
   setupDropdowns(): void {
     $('.dropdown-menu input[type="checkbox"]').on('click', (e) => {
       e.stopPropagation();
@@ -356,14 +341,10 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           this.filterValues.documento = '';
         } else if (target.attr('id') === 'propietarioFilter') {
           this.filterValues.propietario = '';
-          
+        } else {
+          this.filterValues.plate = '';
         }
-        else{
-          this.filterValues.plate='';
-        }
-        
-        
-         
+
         if (this.table) {
           this.table.draw();
         }
@@ -374,12 +355,10 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
         this.filterValues.nombreIngresante = inputValue;
       } else if (target.attr('id') === 'documentoFilter') {
         this.filterValues.documento = inputValue;
-      } else if (target.attr('id') === 'propietarioFilter'){
+      } else if (target.attr('id') === 'propietarioFilter') {
         this.filterValues.propietario = inputValue;
-    
-      }
-      else {
-        this.filterValues.plate=inputValue;
+      } else {
+        this.filterValues.plate = inputValue;
       }
 
       if (this.table) {
@@ -395,101 +374,112 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private filterRow(data: string[]): boolean {
+    const fecha = data[0];  // Nueva posición de fecha
+    const hora = data[1];   // Nueva posición de hora
+    const tipoEntrada = data[2];  // Nueva posición de tipo de entrada
+    const tipoIngresante = data[3];
+    const nombre = data[4];
+    const documento = data[5];
+    const tipoVehiculo = data[7];
+    const placa = data[8];
+    const propietario = data[9];
+    const estadoHorario = data[11];
+
     if (this.filterValues.entryOrExit.size > 0 && 
         !Array.from(this.filterValues.entryOrExit).some(value => 
-          data[0].toLowerCase() === this.entryOrExitMap[value])) {
+          tipoEntrada.toLowerCase() === this.entryOrExitMap[value])) {
       return false;
     }
 
     if (this.filterValues.tipoIngresante.size > 0 && 
         !Array.from(this.filterValues.tipoIngresante).some(value => 
-          data[1].toLowerCase() === this.tipoIngresanteMap[value])) {
+          tipoIngresante.toLowerCase() === this.tipoIngresanteMap[value])) {
       return false;
     }
 
     if (this.filterValues.nombreIngresante && 
-        !data[2].toLowerCase().includes(this.filterValues.nombreIngresante.toLowerCase())) {
+        !nombre.toLowerCase().includes(this.filterValues.nombreIngresante.toLowerCase())) {
       return false;
     }
 
     if (this.filterValues.documento && 
-        !data[3].toLowerCase().includes(this.filterValues.documento.toLowerCase())) {
+        !documento.toLowerCase().includes(this.filterValues.documento.toLowerCase())) {
       return false;
     }
 
     if (this.filterValues.typeCar.size > 0 && 
         !Array.from(this.filterValues.typeCar).some(value => 
-          data[5].toLowerCase() === this.typeCarMap[value])) {
+          tipoVehiculo.toLowerCase() === this.typeCarMap[value])) {
       return false;
     }
 
     if (this.filterValues.propietario && 
-        !data[7].toLowerCase().includes(this.filterValues.propietario.toLowerCase())) {
+        !propietario.toLowerCase().includes(this.filterValues.propietario.toLowerCase())) {
       return false;
     }
 
     if (this.filterValues.plate && 
-      !data[6].toLowerCase().includes(this.filterValues.plate.toLowerCase())) {
-    return false;
-  
-  }
-
-    if (this.filterValues.lateInRange.size > 0 && 
-        !Array.from(this.filterValues.lateInRange).some(value => 
-          data[8].toLowerCase() === this.lateInRangeMap[value])) {
+        !placa.toLowerCase().includes(this.filterValues.plate.toLowerCase())) {
       return false;
     }
-   
-    if (this.filterValues.days.size > 0) {
-      // Extrae el día de la fecha (data[10] contiene "DD/MM/YYYY")
-      const dayFromDate = data[10].split('/')[0].replace(/^0+/, ''); // Elimina ceros iniciales
-      
-      if (!Array.from(this.filterValues.days).some(value => 
-          dayFromDate === value)) {
-          return false;
-      }
-     }
-    return true;
+
+    if (this.filterValues.lateInRange.size > 0 && 
+      !Array.from(this.filterValues.lateInRange).some(value => 
+        estadoHorario.toLowerCase() === this.lateInRangeMap[value])) {
+    return false;
   }
 
-  loadDataIntoTable(): void {
-    if (this.table) {
-      this.table.clear();
-
-      if (Array.isArray(this.movements) && this.movements.length > 0) {
-        this.movements.forEach(movement => {
-          this.table.row.add([
-            movement.entryOrExit || '',
-            movement.entryType || '',
-            movement.visitorName || '',
-            movement.visitorDocument || '',
-            movement.observations || '',
-            movement.carType || '',
-            movement.plate || '',
-            movement.neighborId || '',
-            movement.lateOrNot || '',
-            movement.hour || '',
-            movement.day + '/' + movement.month + '/' + movement.year,
-          ]);
-        });
-        this.exportButtonsEnabled = true;
-        ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
-          $(btn).prop('disabled', false);
-      });
-      } else {
-        Swal.fire({
-          icon: 'warning',
-          title: '¡No se encontraron registros!',
-        });
-        this.exportButtonsEnabled = false;
-        ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
-          $(btn).prop('disabled', true);
-      });
-      }
-
-      this.table.draw();
-    } else {
-      this.initializeDataTable();
+  if (this.filterValues.days.size > 0) {
+    const dayFromDate = fecha.split('/')[0].replace(/^0+/, '');
+    if (!Array.from(this.filterValues.days).some(value => 
+        dayFromDate === value)) {
+      return false;
     }
   }
+
+  return true;
+}
+
+loadDataIntoTable(): void {
+  if (this.table) {
+    this.table.clear();
+
+    if (Array.isArray(this.movements) && this.movements.length > 0) {
+      this.movements.forEach(movement => {
+        this.table.row.add([
+          movement.day + '/' + movement.month + '/' + movement.year,  // Fecha
+          movement.hour || '',                                        // Hora
+          movement.entryOrExit || '',                                // Tipo de Entrada
+          movement.entryType || '',                                  // Tipo de Ingresante
+          movement.visitorName || '',                                // Nombre
+          movement.visitorDocument || '',                            // Documento
+          movement.observations || '',                               // Observaciones
+          movement.carType || '',                                    // Tipo de Vehículo
+          movement.plate || '',                                      // Placa
+          movement.neighborId || '',                                 // Propietario
+          'Garcia, ireneg',                                         // Guardia
+          movement.lateOrNot || '',                                 // Estado de horario
+        ]);
+      });
+
+      this.exportButtonsEnabled = true;
+      ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
+        $(btn).prop('disabled', false);
+      });
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: '¡No se encontraron registros!',
+      });
+      this.exportButtonsEnabled = false;
+      ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
+        $(btn).prop('disabled', true);
+      });
+    }
+
+    this.table.draw();
+  } else {
+    this.initializeDataTable();
+  }
+}
 }
