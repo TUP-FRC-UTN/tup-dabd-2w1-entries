@@ -80,16 +80,36 @@
         </div>
 
         <div class="col-md-2 d-flex align-items-center gap-2">
-            <button class="btn btn-secondary filter-toggle" [class.active]="showFilters" (click)="toggleAdvancedFilters()">
+            <button class="btn btn-secondary filter-toggle" 
+                    [class.active]="showFilters" 
+                    (click)="toggleAdvancedFilters()"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="top" 
+                    title="Filtros avanzados">
                 <i class="fa-solid fa-filter"></i>
             </button>
-            <button id="excelBtn" class="export-btn btn btn-success" disabled>
+            <button id="excelBtn" 
+                    class="export-btn btn btn-success" 
+                    disabled
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="top" 
+                    title="Exportar a Excel">
                 <i class="fas fa-file-excel"></i>
             </button>
-            <button id="pdfBtn" class="export-btn btn btn-danger" disabled>
+            <button id="pdfBtn" 
+                    class="export-btn btn btn-danger" 
+                    disabled
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="top" 
+                    title="Exportar a PDF">
                 <i class="fas fa-file-pdf"></i>
             </button>
-            <button id="printBtn" class="export-btn btn btn-primary" disabled>
+            <button id="printBtn" 
+                    class="export-btn btn btn-primary" 
+                    disabled
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="top" 
+                    title="Imprimir">
                 <i class="fas fa-print"></i>
             </button>
         </div>
