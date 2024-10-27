@@ -1,12 +1,4 @@
-export interface Owner {
-    document:string,    
-    name:string,
-    last_name:string,
-    email:string,
-    user_allowed_Type: User_allowedTypeDto,
-    vehicles?:Vehicle[],
-    authRanges:NewAuthRangeDto
-}
+
 export interface Vehicle {
     plate: string;
     vehicle_Type: VehicleTypeDto;
@@ -49,11 +41,13 @@ export interface Vehicle {
     name:string,
     last_name:string,
     email:string,
+    documentTypeDto:Document_TypeDto,
     vehicles?:Vehicle[],
     userType:User_allowedTypeDto,
     authRanges:AuthRangeInfoDto[]
   }
   export interface AuthRangeInfoDto {
+    neighbor_id: number;
     init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
     end_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
     allowedDays: Allowed_DaysDto[]; //List<Allowed_DaysDto> 
