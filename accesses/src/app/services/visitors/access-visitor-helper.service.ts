@@ -469,17 +469,6 @@ export class AccessVisitorHelperService {
       confirmButtonText: 'Cerrar'
     });
   }
-
-  entryNotAllowed(){
-    Swal.fire({
-      title: 'El Visitante tiene un Ingreso previo!',
-      html: `
-        El Visitante debe egresar antes de poder entrar!
-      `,
-      icon: 'error',
-      confirmButtonText: 'Cerrar'
-    });
-  }
   //FIN Alerts para registerExit()
 
 
