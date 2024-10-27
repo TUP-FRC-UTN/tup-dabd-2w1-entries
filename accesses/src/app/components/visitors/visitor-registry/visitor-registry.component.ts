@@ -15,6 +15,7 @@ import { InternalSettings } from 'datatables.net';
 import { AllowedDaysDto } from '../../../services/visitors/movement.interface';
 import { RouterModule } from '@angular/router';
 import { AccessAutosizeTextareaDirective } from '../../../directives/access-autosize-textarea.directive';
+import { NgxScannerQrcodeComponent } from 'ngx-scanner-qrcode';
 
 @Component({
   selector: 'app-visitor-registry',
@@ -34,6 +35,9 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
   dataTable: any;
 
   private readonly ngZone: NgZone = inject(NgZone);
+
+
+  
 
   ngOnDestroy() {
     if (this.dataTable) {
