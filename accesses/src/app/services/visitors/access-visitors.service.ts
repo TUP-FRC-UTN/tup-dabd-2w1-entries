@@ -205,10 +205,11 @@ export class VisitorsService {
                       this.helperService.exitLaterThanAuthorizedDateRange(visitor);
                       return; // se termina la ejecucion del metodo (no se registra el ingreso)
                     }
+                } else {
+
+                  this.helperService.exitNotAllowed();
+                  return;
                 }
-    
-                this.helperService.exitNotAllowed();
-                return;
       
               },
             error: (error) => {
