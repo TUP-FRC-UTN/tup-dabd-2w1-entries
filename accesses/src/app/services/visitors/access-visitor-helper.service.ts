@@ -469,30 +469,6 @@ export class AccessVisitorHelperService {
       confirmButtonText: 'Cerrar'
     });
   }
-  //FIN Alerts para registerExit()
-
-
-
-
-
-
-  registerEntrySuccess(newMovements_EntryDto: NewMovements_EntryDto){
-    Swal.fire({
-      icon: 'success',
-      title: 'Ingreso registrado!',
-      text: `¡El Ingreso de "${newMovements_EntryDto.newUserAllowedDto.name} ${newMovements_EntryDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
-      confirmButtonColor: '#28a745',
-    });
-  }
-
-  registerEntryError(){
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Error al registrar el Ingreso. Inténtelo de nuevo.',
-      confirmButtonText: 'Cerrar'        
-    });
-  }
 
   registerExitSuccess(newMovement_ExitDto: NewMovement_ExitDto){
     Swal.fire({
@@ -520,6 +496,30 @@ export class AccessVisitorHelperService {
       confirmButtonText: 'Cerrar'        
     });
   }
+  //FIN Alerts para registerExit()
+
+
+
+
+
+  // Alerts para registerEntry()
+  registerEntrySuccess(newMovements_EntryDto: NewMovements_EntryDto){
+    Swal.fire({
+      icon: 'success',
+      title: 'Ingreso registrado!',
+      text: `¡El Ingreso de "${newMovements_EntryDto.newUserAllowedDto.name} ${newMovements_EntryDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
+      confirmButtonColor: '#28a745',
+    });
+  }
+
+  registerEntryError(){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al registrar el Ingreso. Inténtelo de nuevo.',
+      confirmButtonText: 'Cerrar'        
+    });
+  }
 
   getLastEntryError(){
     Swal.fire({
@@ -530,6 +530,17 @@ export class AccessVisitorHelperService {
     });
   }
 
+  entryNotAllowed(){
+    Swal.fire({
+      title: 'El Visitante tiene un Ingreso previo!',
+      html: `
+        El Visitante debe egresar antes de poder entrar!
+      `,
+      icon: 'error',
+      confirmButtonText: 'Cerrar'
+    });
+  }
+  //FIN Alerts para registerEntry()
 // FIN ALERTS de SweetAlert
 
 
