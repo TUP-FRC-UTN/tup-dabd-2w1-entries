@@ -198,6 +198,21 @@ export class AccessVisitorHelperService {
 
     return afterDate >= todayDate;
   }
+
+  // procesa un array de numeros (number[]) y devuelve un objeto Date
+  processDate(movementDatetime: number[] | null): Date | null {
+    if (!movementDatetime || movementDatetime.length < 6) {
+      return null; // Retorna null si el arreglo es nulo o tiene menos de 6 elementos
+    }
+  
+    const [year, month, day, hours, minutes, seconds] = movementDatetime;
+  
+    // Restamos 1 al mes para ajustarlo al formato de Date
+    let response = new Date(year, month - 1, day, hours, minutes, seconds);
+    console.log(response);
+
+    return response;
+  };
 // FIN funciones para comparar FECHAS
 
 
@@ -322,22 +337,19 @@ export class AccessVisitorHelperService {
 
 
 // ALERTS de SweetAlert
+
+  //Alerts para registerEntry()
   // muestra un modal avisando q el Visitor esta fuera de rango (dia y hora permitido)
-  outOfAuthorizedHourRange(visitor: User_AllowedInfoDto, indexAuthRange: number, indexDayAllowed: number){
-    //console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango dia y hora permitido");
+  entryOutOfAuthorizedHourRange(visitor: User_AllowedInfoDto, indexAuthRange: number, indexDayAllowed: number){
 
     let allowedDay = visitor.authRanges.at(indexAuthRange)?.allowedDays.at(indexDayAllowed);
-
-    let rangesHtml = 'El Visitante no tiene un rango horario autorizado';
+    let rangesHtml = '';
 
     if(allowedDay != undefined && allowedDay.day != undefined && allowedDay.init_hour != undefined && allowedDay.end_hour != undefined){
-
-        // ${this.datePipe.transform(allowedDay.init_hour,'hh:MM:ss')?.toString()}
-        // ${this.datePipe.transform(allowedDay.end_hour,'hh:MM:ss')?.toString()}
           
         rangesHtml = `
           <p>
-            <strong>Rango horario permitido </strong> <br>
+            <strong>Rango horario permitido: </strong> <br>
             <strong>Desde: </strong> ${this.stringToHour(allowedDay, true)} <br>
             <strong>Hasta: </strong> ${this.stringToHour(allowedDay, false)}
           </p>
@@ -357,19 +369,18 @@ export class AccessVisitorHelperService {
   }
 
   // muestra un modal avisando q el Visitor esta fuera de rango (fechas permitidas)
-  outOfAuthorizedDateRange(visitor: User_AllowedInfoDto){
-    //console.log("metodo outOfAuthorizedDateRange (en visitor-registry.component): el Visitor esta fuera de rango fecha");
+  entryOutOfAuthorizedDateRange(visitor: User_AllowedInfoDto){
 
     let rangesHtml = '';
-    let range = 1;
+    let rangeNumber = 1;
+
     for (const range of visitor.authRanges) {
 
-      //console.log(range);
-
+      rangeNumber++;
 
       rangesHtml += `
         <p>
-          <strong>Rango permitido ${range}</strong>
+          <strong>Rango permitido ${rangeNumber}:</strong>
           <strong>Fecha de inicio: </strong> ${this.datePipe.transform(range.init_date,'dd/MM/yyyy')?.toString()}<br>
           <strong>Fecha de fin: </strong> ${this.datePipe.transform(range.end_date,'dd/MM/yyyy')?.toString()}
         </p>
@@ -386,6 +397,139 @@ export class AccessVisitorHelperService {
       confirmButtonText: 'Cerrar'
     });
   }
+  //FIN Alerts para registerEntry()
+
+  //Alerts para registerExit()
+  // muestra un modal avisando q el Visitor esta SALIENDO TARDE (fecha de egreso mayor q la fecha permitida)
+  exitLaterThanAuthorizedDateRange(visitor: User_AllowedInfoDto){
+
+    let rangesHtml = '';
+    let rangeNumber = 1;
+      
+    for (const range of visitor.authRanges) {
+  
+      rangeNumber++;
+  
+      rangesHtml += `
+        <p>
+          <strong>Rango permitido ${rangeNumber}:</strong>
+          <strong>Fecha de inicio: </strong> ${this.datePipe.transform(range.init_date,'dd/MM/yyyy')?.toString()}<br>
+          <strong>Fecha de fin: </strong> ${this.datePipe.transform(range.end_date,'dd/MM/yyyy')?.toString()}
+        </p>
+      `;
+    }
+  
+    Swal.fire({
+      title: 'El Visitante está saliendo muy tarde!',
+      html: `
+        <strong>El Visitante está fuera del rango permitido!</strong>
+        ${rangesHtml}
+      `,
+      icon: 'warning',
+      confirmButtonText: 'Cerrar'
+    });
+  }
+
+  // muestra un modal avisando q el Visitor esta SALIENDO TARDE (hora de egreso mayor q la hora permitida)
+  exitLaterThanAuthorizedHourRange(visitor: User_AllowedInfoDto, indexAuthRange: number, indexDayAllowed: number){
+
+    let allowedDay = visitor.authRanges.at(indexAuthRange)?.allowedDays.at(indexDayAllowed);
+    let rangesHtml = '';
+
+    if(allowedDay != undefined && allowedDay.day != undefined && allowedDay.init_hour != undefined && allowedDay.end_hour != undefined){
+          
+        rangesHtml = `
+          <p>
+            <strong>Rango horario permitido </strong> <br>
+            <strong>Desde: </strong> ${this.stringToHour(allowedDay, true)} <br>
+            <strong>Hasta: </strong> ${this.stringToHour(allowedDay, false)}
+          </p>
+        `;
+      
+    }
+
+    Swal.fire({
+      title: 'El Visitante está saliendo tarde!',
+      html: `
+        <strong>El Visitante está fuera del rango horario permitido!</strong> <br>
+        ${rangesHtml}
+      `,
+      icon: 'warning',
+      confirmButtonText: 'Cerrar'
+    });
+  }
+
+  exitNotAllowed(){
+    Swal.fire({
+      title: 'El Visitante tiene un Egreso previo!',
+      html: `
+        El Visitante debe ingresar antes de poder salir!
+      `,
+      icon: 'error',
+      confirmButtonText: 'Cerrar'
+    });
+  }
+  //FIN Alerts para registerExit()
+
+
+
+
+
+
+  registerEntrySuccess(newMovements_EntryDto: NewMovements_EntryDto){
+    Swal.fire({
+      icon: 'success',
+      title: 'Ingreso registrado!',
+      text: `¡El Ingreso de "${newMovements_EntryDto.newUserAllowedDto.name} ${newMovements_EntryDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
+      confirmButtonColor: '#28a745',
+    });
+  }
+
+  registerEntryError(){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al registrar el Ingreso. Inténtelo de nuevo.',
+      confirmButtonText: 'Cerrar'        
+    });
+  }
+
+  registerExitSuccess(newMovement_ExitDto: NewMovement_ExitDto){
+    Swal.fire({
+      icon: 'success',
+      title: 'Egreso registrado!',
+      text: `¡El Egreso de "${newMovement_ExitDto.newUserAllowedDto.name} ${newMovement_ExitDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
+      confirmButtonColor: '#28a745',
+    });
+  }
+
+  registerExitError(){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al registrar el Egreso. Inténtelo de nuevo.',
+      confirmButtonText: 'Cerrar'        
+    });
+  }
+
+  getlastExitError(){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error obteniendo el último Egreso del visitante. Inténtelo de nuevo.',
+      confirmButtonText: 'Cerrar'        
+    });
+  }
+
+  getLastEntryError(){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error obteniendo el último Ingreso del visitante. Inténtelo de nuevo.',
+      confirmButtonText: 'Cerrar'        
+    });
+  }
+
 // FIN ALERTS de SweetAlert
 
 

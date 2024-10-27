@@ -2,7 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnChanges, OnDestroy, OnInit, SimpleChanges, NgZone, AfterViewInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AuthRangeInfoDto, NewAuthRangeDto, NewMovement_ExitDto, NewMovements_EntryDto, NewUserAllowedDto, User_AllowedInfoDto, Visitor } from '../../../models/visitors/access-VisitorsModels';
+import { AuthRangeInfoDto, NewAuthRangeDto, NewMovement_ExitDto, NewMovements_EntryDto, NewUserAllowedDto, User_AllowedInfoDto } from '../../../models/visitors/access-VisitorsModels';
 import Swal from 'sweetalert2';
 import { VisitorsService } from '../../../services/visitors/access-visitors.service';
 import { Subscription } from 'rxjs';
@@ -158,8 +158,6 @@ export class VisitorRegistryComponent implements OnInit, OnDestroy, AfterViewIni
     // Restablece el valor del selector
     selectElement.value = '';
   }
-
-  //FIN codigo nuevo
 
   //carga TODOS los invitados al iniciar la pantalla
   ngOnInit(): void {
