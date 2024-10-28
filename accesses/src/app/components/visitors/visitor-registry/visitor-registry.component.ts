@@ -19,6 +19,7 @@ import {
   NewMovement_ExitDto,
   NewMovements_EntryDto,
   NewUserAllowedDto,
+  NewVehicleDto,
   User_AllowedInfoDto,
 } from '../../../models/visitors/access-VisitorsModels';
 import Swal from 'sweetalert2';
@@ -194,23 +195,22 @@ export class VisitorRegistryComponent
     if (this.dataTable) {
       this.ngZone.runOutsideAngular(() => {
         const formattedData = this.visitors.map((visitor, index) => {
-          const status = this.visitorStatus[visitor.document] || 'En espera'; // Estado por defecto
+          const status = this.visitorStatus[visitor.document] || 'En espera';
 
           let statusButton = '';
           let actionButtons = '';
 
-          // Determinar el estado y los botones de acción
           switch (status) {
             case 'Ingresado':
-              statusButton = `<button class="btn btn-success" disabled>Ingresado</button>`;
+              statusButton = `<button class="btn btn-success">Ingresado</button>`;
               actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
               break;
             case 'Egresado':
-              statusButton = `<button class="btn btn-danger" disabled>Egresado</button>`;
+              statusButton = `<button class="btn btn-danger">Egresado</button>`;
               break;
             case 'En espera':
             default:
-              statusButton = `<button class="btn btn-warning" disabled>En espera</button>`;
+              statusButton = `<button class="btn btn-warning">En espera</button>`;
               actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
               break;
           }
@@ -218,17 +218,28 @@ export class VisitorRegistryComponent
           return [
             `${visitor.last_name} ${visitor.name}`,
             visitor.documentTypeDto.description,
-            `<div class="text-start">${visitor.document}</div>`, // Alineado a la izquierda
+            `<div class="text-start">${visitor.document}</div>`,
             `<button style="width: 95%;" class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`,
-            `<select class="form-select select-action" data-index="${index}">
-              <option value="" selected disabled hidden>Seleccionar</option>
-              <option value="ingreso">Ingreso</option>
-              <option value="egreso">Egreso</option>
-            </select>`,
+            `<div class="d-flex justify-content-center">
+              <div class="dropdown">
+                <button class="btn btn-white dropdown-toggle p-0" 
+                        type="button" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false">
+                    <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+                  <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+                  <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+                </ul>
+              </div>
+            </div>`,
             `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
             statusButton,
             actionButtons,
           ];
+          
+          
         });
 
         this.dataTable.clear().rows.add(formattedData).draw();
@@ -237,13 +248,10 @@ export class VisitorRegistryComponent
     }
   }
 
+  // Actualizar el método addEventListeners para manejar los clicks en el nuevo menú
   addEventListeners(): void {
-    const buttons = document.querySelectorAll(
-      '.view-more-btn'
-    ) as NodeListOf<HTMLButtonElement>;
-    const selects = document.querySelectorAll(
-      '.form-select'
-    ) as NodeListOf<HTMLSelectElement>;
+    const buttons = document.querySelectorAll('.view-more-btn') as NodeListOf<HTMLButtonElement>;
+    const actionButtons = document.querySelectorAll('.select-action') as NodeListOf<HTMLButtonElement>;
 
     buttons.forEach((button) => {
       button.addEventListener('click', (event) => {
@@ -255,22 +263,27 @@ export class VisitorRegistryComponent
       });
     });
 
-    selects.forEach((select) => {
-      select.addEventListener('change', (event) => {
-        const index = select.getAttribute('data-index');
+    actionButtons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        const index = button.getAttribute('data-index');
+        const value = button.getAttribute('data-value');
+        
         if (index !== null) {
           const selectedOwner = this.visitors[parseInt(index, 10)];
-
           const textareaElement = document.getElementById(
             'observations' + index
           ) as HTMLTextAreaElement;
 
-          // console.log(textareaElement);
-          // console.log(textareaElement.value);
-
           selectedOwner.observations = textareaElement.value || '';
 
-          this.onSelectionChange(event, selectedOwner);
+          // Simular el evento de cambio
+          const mockEvent = {
+            target: {
+              value: value
+            }
+          } as unknown as Event;
+
+          this.onSelectionChange(mockEvent, selectedOwner);
         }
       });
     });
@@ -332,24 +345,30 @@ export class VisitorRegistryComponent
   }
 
   // mostrar más info de un visitante
-  MoreInfo(visitor: User_AllowedInfoDto) {
-    const vehicleInfo =
-      visitor.vehicles && visitor.vehicles.length > 0
-        ? `<strong>Patente del vehículo: </strong>${visitor.vehicles[0].plate}`
-        : '<strong>No tiene vehículo</strong>';
+  selectedVisitor: User_AllowedInfoDto | null = null; // Información del visitante seleccionado
 
-    Swal.fire({
-      title: 'Información del Visitante',
-      html: `
-        <strong>Nombre:</strong> ${visitor.name} ${visitor.last_name}<br>
-        <strong>Documento:</strong> ${visitor.document}<br>
-        <strong>Email:</strong> ${visitor.email}<br>
-        ${vehicleInfo}
-      `,
-      icon: 'info',
-      confirmButtonText: 'Cerrar',
-    });
+  getDocumentType(visitor: User_AllowedInfoDto): string {
+    return visitor.documentTypeDto?.description === 'PASSPORT' ? 'Pasaporte' : visitor.documentTypeDto?.description || 'Tipo de documento no especificado';
   }
+  
+
+  getVehicles(visitor: User_AllowedInfoDto): NewVehicleDto[] {
+    return visitor.vehicles || []; // Devuelve la lista de vehículos o un array vacío
+  }
+  
+  hasVehicles(visitor: User_AllowedInfoDto): boolean {
+    return visitor.vehicles && visitor.vehicles.length > 0; // Verifica si hay vehículos
+  }
+  
+  
+
+  // Método para abrir el modal y establecer el visitante seleccionado
+  MoreInfo(visitor: User_AllowedInfoDto) {
+    this.selectedVisitor = visitor; // Guardar el visitante seleccionado
+    this.openModal(); // Abrir el modal
+  }
+  
+  
 
   RegisterExit(visitor: User_AllowedInfoDto): void {
     this.visitorService.RegisterExit(visitor);
@@ -415,62 +434,80 @@ export class VisitorRegistryComponent
   }
 
   handleQrScan(data: any): void {
-    const scannedData = data[0]?.value;
+    const scannedData = data[0]?.value; // Obtiene el valor escaneado
     if (scannedData) {
       console.log('Código QR escaneado:', scannedData);
-      this.scannedResult = scannedData;
-
+  
       // Detener el scanner inmediatamente después de escanear
       this.stopScanner();
-
-      // Validar el QR escaneado
-      this.visitorService.validateQrCode(scannedData).subscribe((isValid) => {
-        if (isValid) {
-          const newVisitor: User_AllowedInfoDto = {
-            document: scannedData,
-            name: 'Nombre de ejemplo',
-            last_name: 'Apellido de ejemplo',
-            email: 'email@example.com',
-            vehicles: [],
-            userType: { description: 'Visitante' },
-            authRanges: [],
-            observations: '',
-            documentTypeDto: { description: 'DNI' },
-            neighbor_id: 0,
-          };
-
-          this.visitors.push(newVisitor);
-          this.updateDataTable();
-        } else {
+  
+      try {
+        // Parsear el JSON escaneado
+        const visitorData = JSON.parse(scannedData)[0]; // Asumimos que siempre hay un elemento
+  
+        // Validar el QR escaneado
+        this.visitorService.validateQrCode(visitorData.document).subscribe((isValid) => {
+          if (isValid) {
+            const newVisitor: User_AllowedInfoDto = {
+              document: visitorData.document,
+              name: visitorData.name,
+              last_name: visitorData.lastName,
+              email: 'email@example.com', // Asignar un valor por defecto si no se proporciona
+              vehicles: [], // Aquí podrías llenar la lista de vehículos si se necesita
+              userType: { description: 'Visitante' },
+              authRanges: [{
+                init_date: visitorData.init_date,
+                end_date: visitorData.end_date,
+                allowedDays: [{
+                  day: visitorData.init_hour, // Esto puede necesitar ajustes según tu estructura
+                  init_hour: visitorData.init_hour,
+                  end_hour: visitorData.end_hour,
+                }]
+              }],
+              observations: '', // Asigna observaciones si están disponibles
+              documentTypeDto: { description: visitorData.documentType || 'DNI' }, // Manejar caso sin tipo de documento
+              neighbor_id: visitorData.neighborId || 0, // Asegúrate de manejar neighborId si está presente
+            };
+  
+            this.visitors.push(newVisitor);
+            this.updateDataTable(); // Actualiza la tabla de visitantes
+  
+            // Cerrar el modal
+            this.closeModal();
+          } else {
+            Swal.fire({
+              title: 'QR Inválido',
+              text: 'El código QR escaneado no es válido.',
+              icon: 'error',
+              confirmButtonText: 'Cerrar',
+            });
+            console.warn('Código QR no válido.');
+          }
+        }, (error) => {
+          console.error('Error en la validación del código QR:', error);
           Swal.fire({
-            title: 'QR Inválido',
-            text: 'El código QR escaneado no es válido.',
+            title: 'Error',
+            text: 'Ocurrió un error al validar el código QR.',
             icon: 'error',
             confirmButtonText: 'Cerrar',
           });
-          console.warn('Código QR no válido.');
-        }
-
-        // Opción 1: Buscar y hacer click en el botón de cierre
-        const closeButton = document.querySelector(
-          '[data-bs-dismiss="modal"]'
-        ) as HTMLElement;
-        closeButton?.click();
-
-        // O Opción 2: Agregar la clase modal-backdrop y remover el modal
-        const modalElement = document.getElementById('qrScannerModal');
-        if (modalElement) {
-          modalElement.classList.remove('show');
-          modalElement.style.display = 'none';
-          document.body.classList.remove('modal-open');
-          const backdrop = document.querySelector('.modal-backdrop');
-          backdrop?.remove();
-        }
-      });
+        });
+      } catch (error) {
+        console.error('Error al parsear el código QR:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Ocurrió un error al procesar el código QR.',
+          icon: 'error',
+          confirmButtonText: 'Cerrar',
+        });
+      }
     } else {
       console.warn('No se encontraron datos en el escaneo.');
     }
   }
+  
+
+  
 
   setupModalEventListeners() {
     const modal = document.getElementById('qrScannerModal');
