@@ -282,20 +282,47 @@ export class VisitorRegistryComponent
 
     // Actualizar el estado del visitante
     if (selectedValue === 'ingreso') {
-      this.visitorStatus[visitor.document] = 'Ingresado'; // Actualizar el estado
-      this.RegisterAccess(visitor);
+      this.visitorService.RegisterAccess(visitor).subscribe({
+        next: (success: boolean) => {
+          if (success) {
+            console.log('Se registro el Ingreso correctamente');
+            this.updateVisitorStatus(visitor, 'ingreso');
+            
+            // Actualizar la tabla para reflejar el nuevo estado
+            this.updateDataTable();
+          } else {
+            console.log('Fallo al registrar ingreso');
+            
+          }
+        }
+      });
+
+
     } else if (selectedValue === 'egreso') {
-      this.visitorStatus[visitor.document] = 'Egresado'; // Actualizar el estado
-      this.RegisterExit(visitor);
-    } else {
-      this.visitorStatus[visitor.document] = 'En espera'; // Restablecer a "En espera" si no se selecciona
+
+      this.visitorService.RegisterExit(visitor).subscribe({
+        next: (success: boolean) => {
+          if (success) {
+            console.log('Se registro el Egreso correctamente');
+            this.updateVisitorStatus(visitor, 'egreso');
+
+            // Actualizar la tabla para reflejar el nuevo estado
+            this.updateDataTable();
+          } else {
+            console.log('Fallo al registrar egreso');
+            
+          }
+        }
+      });
     }
 
     // Restablece el valor del selector
     selectElement.value = '';
+  }
 
-    // Actualizar la tabla para reflejar el nuevo estado
-    this.updateDataTable();
+  RegisterAccess(visitor: User_AllowedInfoDto): void {
+    this.visitorService.RegisterAccess(visitor);
+    //this.updateVisitorStatus(visitor, 'ingreso');
   }
 
   //carga TODOS los invitados al iniciar la pantalla
@@ -351,16 +378,6 @@ export class VisitorRegistryComponent
     });
   }
 
-  RegisterExit(visitor: User_AllowedInfoDto): void {
-    this.visitorService.RegisterExit(visitor);
-
-    this.updateVisitorStatus(visitor, 'egreso');
-  }
-
-  RegisterAccess(visitor: User_AllowedInfoDto): void {
-    this.visitorService.RegisterAccess(visitor);
-    this.updateVisitorStatus(visitor, 'ingreso');
-  }
 
   // Función para actualizar el estado del visitante
   updateVisitorStatus(
@@ -374,13 +391,13 @@ export class VisitorRegistryComponent
     }
 
     // Cambia a "En espera" si no egresa después de un tiempo
-    setTimeout(
-      () => {
-        if (this.visitorStatus[visitor.document] === 'Ingresado') {
-          this.visitorStatus[visitor.document] = 'En espera';
-        }
-      } /* tiempo en ms */
-    );
+    //  setTimeout(
+    //    () => {
+    //      if (this.visitorStatus[visitor.document] === 'Ingresado') {
+    //        this.visitorStatus[visitor.document] = 'En espera';
+    //      }
+    //    } /* tiempo en ms */
+    //  );
   }
 
   openModal(): void {
