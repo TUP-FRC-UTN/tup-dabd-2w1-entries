@@ -15,7 +15,7 @@ export  interface UserAllowed {
 } 
 export interface VehicleDto {
     plate: string;
-    vehicle_Type: vehicleTypeDto | null;
+    vehicleType: vehicleTypeDto | null;
     insurance: string;
 }
 export interface vehicleTypeDto {
@@ -23,10 +23,15 @@ export interface vehicleTypeDto {
 }
 
   export interface Movement {
-    movementDatetime: string;
+    movementDatetime: string; 
     observations: string;
-    user_allowed: UserAllowed;
-    vehicle : VehicleDto | null;
+    visitorName: string; 
+    visitorLastName: string;
+    vehiclesDto: VehicleDto | null; 
+    visitorDocument: string; 
+    visitorDocumentType: string; 
+    typeMovement: string | null;
+    neighborId: number; 
   }
 export interface AllowedDaysDto {
     day: Date;
