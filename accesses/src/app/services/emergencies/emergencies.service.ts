@@ -3,20 +3,33 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NewEmergencyDto } from '../../models/emergencies/NewEmergecyDto';
 import { NewUserAllowedDto } from '../../models/visitors/access-VisitorsModels';
+import { EmergencyPersonDto } from '../../models/emergencies/EmergencyPersonDto';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmergenciesService {
-  private URL_POST_EMERGENCY = "http://localhost:8090/emergency_entry/register";
+  private URL_POST_EMERGENCY = "http://localhost:8090/";
   private readonly http: HttpClient = inject(HttpClient);
 
   constructor() { }
 
-    registerEmergency(emergency: NewEmergencyDto): Observable<NewUserAllowedDto> {
+    registerEmergencyEntry(emergency: NewEmergencyDto): Observable<EmergencyPersonDto[]> {
+      const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+      console.log(emergency);
+      if (emergency.observations?.length == 0)
+        emergency.observations = null;
+      if ((emergency.vehicle?.vehicleType.description.length ?? 0) < 1)
+        emergency.vehicle = null;
+      return this.http.post<EmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_entry", emergency, { headers });
+    }
+
+    registerEmergencyExit(emergency: NewEmergencyDto): Observable<EmergencyPersonDto[]> {
       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       if (emergency.observations?.length == 0)
         emergency.observations = null;
-      return this.http.post<NewUserAllowedDto>(this.URL_POST_EMERGENCY, emergency, { headers });
+      if ((emergency.vehicle?.vehicleType.description.length ?? 0) < 1)
+        emergency.vehicle = null;
+      return this.http.post<EmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_exit", emergency, { headers });
     }
 }
