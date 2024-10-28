@@ -4,13 +4,17 @@
 
 <div class="modal fade text-start" id="emergencyModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
+        <div class="modal-content h-100">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar Emergencia</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="emergencyModalBody">
                 <form class="mb-3" [formGroup]="form">
+                    <div class="form-check form-switch form-check-reverse">
+                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" formControlName="onlyExit">
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Solo egreso</label>
+                    </div>
                     <h5>Datos Compartidos</h5>
                     <hr>
                     <div [formGroup]="form.controls.vehicle" class="row mb-3">
@@ -95,42 +99,51 @@
                                         }
                                     </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <div class="col">
-                                        <label for="nameInput" class="col-form-label">
-                                            Nombre
-                                            <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" 
-                                        class="form-control" 
-                                        [ngClass]="{'is-invalid': person.controls['name'].touched && person.controls['name'].invalid}" 
-                                        id="nameInput" 
-                                        formControlName="name"
-                                        autocomplete="off">
-                                        <div class="invalid-feedback">
-                                            Este campo es obligatorio.
+                                @if (!form.controls.onlyExit.value) {
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label for="nameInput" class="col-form-label">
+                                                Nombre
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" 
+                                            class="form-control" 
+                                            [ngClass]="{'is-invalid': person.controls['name'].touched && person.controls['name'].invalid}" 
+                                            id="nameInput" 
+                                            formControlName="name"
+                                            autocomplete="off">
+                                            <div class="invalid-feedback">
+                                                Este campo es obligatorio.
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <label for="lastNameInput" class="col-form-label">
+                                                Apellido
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" 
+                                            class="form-control" 
+                                            [ngClass]="{'is-invalid': person.controls['lastName'].touched && person.controls['lastName'].invalid}" 
+                                            id="lastNameInput" 
+                                            formControlName="lastName"
+                                            autocomplete="off">
+                                            <div class="invalid-feedback">
+                                                Este campo es obligatorio.
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col">
-                                        <label for="lastNameInput" class="col-form-label">
-                                            Apellido
-                                            <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" 
-                                        class="form-control" 
-                                        [ngClass]="{'is-invalid': person.controls['lastName'].touched && person.controls['lastName'].invalid}" 
-                                        id="lastNameInput" 
-                                        formControlName="lastName"
-                                        autocomplete="off">
-                                        <div class="invalid-feedback">
-                                            Este campo es obligatorio.
+                                }
+                                @if (person.controls['state'].value.length > 0) {
+                                    <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                        <div>
+                                            {{person.controls['state'].value}}
                                         </div>
                                     </div>
-                                </div>
+                                }
                                 @if (form.controls.people.length > 1) {
                                     <div class="row text-end">
                                         <div class="col">
-                                            <button type="button" class="btn btn-danger mb-3" (click)="removePersonForm($index)">Eliminar Persona</button>
+                                            <button type="button" class="btn btn-danger mb-3" (click)="removePersonForm($index)">Eliminar</button>
                                         </div>
                                     </div>
                                     <div class="row justify-content-center">
@@ -141,7 +154,7 @@
                                 }
                             </div>              
                         }
-                        <button type="button" class="btn btn-primary" (click)="addPersonForm()">Agregar Persona</button>
+                        <button type="button" class="btn btn-primary" (click)="addPersonForm()">Agregar</button>
                     </div>
                 </form>
                 @switch (requestStatus) {
@@ -168,15 +181,20 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary me-auto" data-bs-dismiss="modal">Volver</button>
-                <div class="dropdown">
-                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" [disabled]="form.invalid">
-                        Registrar
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" role="button" (click)="registerEntry()">Ingreso</a></li>
-                        <li><a class="dropdown-item" role="button" (click)="registerExit()">Egreso</a></li>
-                    </ul>
-                </div>
+                @if (form.controls.onlyExit.value) {
+                    <button class="btn btn-primary" type="button" data-bs-toggle="dropdown" [disabled]="form.invalid" (click)="registerExit()">Registrar Egreso</button>
+                }
+                @else {
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" [disabled]="form.invalid">
+                            Registrar
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" role="button" (click)="registerEntry()">Ingreso</a></li>
+                            <li><a class="dropdown-item" role="button" (click)="registerExit()">Egreso</a></li>
+                        </ul>
+                    </div>
+                }
             </div>
         </div>
     </div>

@@ -8,8 +8,8 @@ export interface NewEmergencyDto {
 
 export interface NewEmergencyPerson {
     document: {
-        type: Document_TypeDto,
-        number: string
+        type: Document_TypeDto;
+        number: string;
     }
     name: String;
     lastName: String;
