@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders} from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Allowed_DaysDto, AuthRangeInfoDto, Document_TypeDto, NewAuthRangeDto, NewMovement_ExitDto, NewMovements_EntryDto, NewUserAllowedDto, NewVehicleDto, User_AllowedInfoDto, User_allowedTypeDto, VehicleTypeDto, Visitor } from '../../models/visitors/access-VisitorsModels';
+import { Allowed_DaysDto, AuthRangeInfoDto, Document_TypeDto, LastEntryUserAllowedDto, LastExitUserAllowedDto, NewAuthRangeDto, NewMovement_ExitDto, NewMovements_EntryDto, NewUserAllowedDto, NewVehicleDto, User_AllowedInfoDto, User_allowedTypeDto, VehicleTypeDto, Visitor } from '../../models/visitors/access-VisitorsModels';
 import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { AccessVisitorHelperService } from './access-visitor-helper.service';
@@ -12,9 +12,14 @@ import Swal from 'sweetalert2';
 })
 export class VisitorsService {
 
-  private URL_GET_ALL_Visitors = "http://localhost:8090/user_Allowed/visitors";
+  private URL_GET_ALL_Visitors = "http://localhost:8090/user_Allowed/visitors/Visitor";
   private URL_POST_ENTRY_VisitorInList = "http://localhost:8090/movements_entry/register";
   private URL_POST_EXIT_VisitorInList = "http://localhost:8090/movements_exit/register";
+  private URL_GET_LastEntryByDocument = "http://localhost:8090/movements_entry/last_entry_by_document?document=";
+  private URL_GET_LastExitByDocument = "http://localhost:8090/movements_exit/last_exit_by_document?document=";
+ 
+ 
+  private URL_POST_VALIDATE_QR = 'http://localhost:8090/visitor-qr';
 
   //URL para la pantalla (registrar invitado que no esta en la lista)
   private URL_POST_ENTRY_VisitorNotInList = "http://localhost:8090/movements_entry/register_if_not_exists";
@@ -27,6 +32,10 @@ export class VisitorsService {
 
   //lista de Visitors
   visitorslist : User_AllowedInfoDto[] = [];
+
+  validateQrCode(qrCode: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.URL_POST_VALIDATE_QR}/validate`, { qrCode });
+  }
 
   loadVisitorsData(): void {
 
@@ -68,7 +77,7 @@ export class VisitorsService {
   //Llamadas a Endpoints de la API:
   // METODO: getAllUserAllowedVisitors(@PathVariable String visitor)
   getVisitorsData(): Observable<User_AllowedInfoDto[]> {
-    return this.http.get<User_AllowedInfoDto[]>(`http://localhost:8090/user_Allowed/visitors/Visitor`);
+    return this.http.get<User_AllowedInfoDto[]>(this.URL_GET_ALL_Visitors);
   }
 
   // METODO: registerMovement_Entry(@RequestBody NewMovements_EntryDto movementsEntryDto)
@@ -83,7 +92,22 @@ export class VisitorsService {
     return this.http.post<any>(this.URL_POST_EXIT_VisitorInList, movement, { headers });
   }
 
-  //METODO: registerMovementEntryIfNotExists(
+  // METODO: getUserAllowedLastEntryByDocument(@RequestParam String document)
+  getVisitorLastEntry(document: string): Observable<any> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    const url = `${this.URL_GET_LastEntryByDocument}${encodeURIComponent(document)}`;
+    return this.http.get<any>(url, { headers });
+  }
+
+    // METODO: getUserAllowedLastExitByDocument(@RequestParam String document)
+    getVisitorLastExit(document: string): Observable<any> {
+      const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+      const url = `${this.URL_GET_LastExitByDocument}${encodeURIComponent(document)}`;
+      return this.http.get<any>(url, { headers });
+    }
+
+
+  // METODO: registerMovementEntryIfNotExists(
     // @RequestParam String documento,
     // @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate date,
     // @RequestBody(required = false) NewMovements_EntryDto movementsEntryDto) {
@@ -104,61 +128,109 @@ export class VisitorsService {
 
   //Registrar EGRESO de un visitante
   RegisterExit(visitor :User_AllowedInfoDto): void{
-    //verifica observations
-    if(visitor.observations == undefined){
-      visitor.observations = "";
-    }
 
-    // verifica si esta dentro de rango (fechas permitidas)
-    let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
-    if(indexAuthRange >= 0){
+    //verifica si su ultimo movimiento fue Ingreso (para poder Egresar correctamente)
+    //post en la URL
+    this.getVisitorLastEntry(visitor.document).subscribe({
+      next: (response) => {
+          //si la API devolvio la info correctamente, sigue el proceso
+          console.log("response de getVisitorLastEntry(): ", response);
+          const lastEntry: LastEntryUserAllowedDto = response;
 
-      // verifica si esta dentro de rango (dia y horario permitido)
-      let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
-      if(indexDayAllowed >= 0){
-        
-        // mapeos
-        const newUserAllowedDto: NewUserAllowedDto = 
-          this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
-        const newAuthRangeDto: NewAuthRangeDto = 
-          this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
+          this.getVisitorLastExit(visitor.document).subscribe({
+            next: (response) => {
+                //si la API devolvio la info correctamente, sigue el proceso
+                console.log("response de getVisitorLastExit(): ", response);
+                const lastExit: LastExitUserAllowedDto = response;
+      
+                //si alguna de las fechas es null (en caso de q no haya un Ingreso y/o Egreso del Visitor), 
+                // se le asigna una nueva fecha de ingreso/egreso, asegurando q el ultimo Egreso es mayor,
+                // fallando la 2da condicion a proposito. (todo esto pq el atributo movementDatetime puede ser Date o null)
 
-        //se crea el objeto (q se va a pasar por el body en el post)
-        const newMovement_ExitDto: NewMovement_ExitDto = 
-          this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+                console.log("lastExitAux: ");
+                const lastExitAux: Date | null = this.helperService.processDate(lastExit.movementDatetime);
+                console.log("lastEntryAux: ");
+                const lastEntryAux: Date | null = this.helperService.processDate(lastEntry.movementDatetime);
 
-        //post en la URL
-        this.postVisitorExit(newMovement_ExitDto).subscribe({
-          next: (response) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Egreso registrado!',
-              text: `¡El Egreso de "${newMovement_ExitDto.newUserAllowedDto.name} ${newMovement_ExitDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
-              confirmButtonColor: '#28a745',
-            });
-          },
-          error: (error) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Error al registrar el Egreso. Inténtelo de nuevo.',
-              confirmButtonText: 'Cerrar'        
-            });
-          }
-        });
+                const lastExitDateTime: Date = lastExitAux || new Date("2001-12-15");
+                const lastEntryDateTime: Date = lastEntryAux || new Date("2000-10-12");
 
-      } else {
-        //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
-        this.helperService.outOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
-        return;
+                const isFirstEntry: boolean = lastEntry.firstEntry;
+                const isFirstExit: boolean = lastExit.firstExit;
 
-      }
+                //1ra condicion: si isFirstEntry es false, ya tiene un ingreso previo, y si isFirstExit es true, es la 1ra vez q 
+                // egresa, por ende tiene permitido el egreso.
+                //2da condicion: si la fecha y hora del ultimo Ingreso es mayor a la del ultimo Egreso, puede salir.
+                if((!isFirstEntry && isFirstExit) 
+                    || (lastEntryDateTime > lastExitDateTime)){
 
-    } else {
-      //se dispara si el Visitor esta fuera de rango (fechas permitidas)
-      this.helperService.outOfAuthorizedDateRange(visitor);
-      return; // se termina la ejecucion del metodo (no se registra el ingreso)
-    }
+                    console.log("Egreso permitido (paso el if de los movements)");
+
+                    //verifica observations
+                    if(visitor.observations == undefined){
+                      visitor.observations = "";
+                    }
+            
+                    // verifica si esta dentro de rango (fechas permitidas)
+                    let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
+                    if(indexAuthRange >= 0){
+                
+                      // verifica si esta dentro de rango (dia y horario permitido)
+                      let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
+                      if(indexDayAllowed >= 0){
+                        
+                        // mapeos
+                        const newUserAllowedDto: NewUserAllowedDto = 
+                          this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
+                        const newAuthRangeDto: NewAuthRangeDto = 
+                          this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
+                
+                        //se crea el objeto (q se va a pasar por el body en el post)
+                        const newMovement_ExitDto: NewMovement_ExitDto = 
+                          this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+                
+                        //post en la URL
+                        this.postVisitorExit(newMovement_ExitDto).subscribe({
+                          next: (response) => {
+                            this.helperService.registerExitSuccess(newMovement_ExitDto);
+                          },
+                          error: (error) => {
+                            this.helperService.registerExitError();
+                            console.log(error);
+                          }
+                        });
+                
+                      } else {
+                        //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
+                        this.helperService.exitLaterThanAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
+                        return;
+                
+                      }
+                
+                    } else {
+                      //se dispara si el Visitor esta fuera de rango (fechas permitidas)
+                      this.helperService.exitLaterThanAuthorizedDateRange(visitor);
+                      return; // se termina la ejecucion del metodo (no se registra el ingreso)
+                    }
+                } else {
+
+                  this.helperService.exitNotAllowed();
+                  return;
+                }
+      
+              },
+            error: (error) => {
+                this.helperService.getlastExitError();
+                console.log(error);
+              }
+          });
+        },
+      error: (error) => {
+          this.helperService.getLastEntryError();
+          console.log(error);
+        }
+    });
+
   }
   //FIN Registrar EGRESO de un visitante
 
@@ -169,66 +241,111 @@ export class VisitorsService {
 
 
 
-  //Registrar INGRESO de un visitante
-  RegisterAccess(visitor: User_AllowedInfoDto): void{
-    //verifica observations
-    if(visitor.observations == undefined){
-      visitor.observations = "";
-    }
+ //Registrar INGRESO de un visitante
+ RegisterAccess(visitor :User_AllowedInfoDto): void{
 
-    // verifica si esta dentro de rango (fechas permitidas)
-    let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
-    if(indexAuthRange >= 0){
+  //verifica si su ultimo movimiento fue Ingreso (para poder Egresar correctamente)
+  //post en la URL
+  this.getVisitorLastEntry(visitor.document).subscribe({
+    next: (response) => {
+        //si la API devolvio la info correctamente, sigue el proceso
+        console.log("response de getVisitorLastEntry(): ", response);
+        const lastEntry: LastEntryUserAllowedDto = response;
 
-      // verifica si esta dentro de rango (dia y horario permitido)
-      let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
-      if(indexDayAllowed >= 0){
-        
-        // mapeos
-        const newUserAllowedDto: NewUserAllowedDto = 
-          this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
-        const newAuthRangeDto: NewAuthRangeDto = 
-          this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
-
-        //se crea el objeto (q se va a pasar por el body en el post)
-        const newMovements_EntryDto: NewMovements_EntryDto = 
-          this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
-
-        //post en la URL
-        this.postVisitorEntry(newMovements_EntryDto).subscribe({
+        this.getVisitorLastExit(visitor.document).subscribe({
           next: (response) => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Ingreso registrado!',
-              text: `¡El Ingreso de "${newMovements_EntryDto.newUserAllowedDto.name} ${newMovements_EntryDto.newUserAllowedDto.last_name}" fue registrado con éxito!`,
-              confirmButtonColor: '#28a745',
-            });
-          },
+              //si la API devolvio la info correctamente, sigue el proceso
+              console.log("response de getVisitorLastExit(): ", response);
+              const lastExit: LastExitUserAllowedDto = response;
+    
+              //si alguna de las fechas es null (en caso de q no haya un Ingreso y/o Egreso del Visitor), 
+              // se le asigna una nueva fecha de ingreso/egreso, asegurando q el ultimo Egreso es mayor,
+              // fallando la 2da condicion a proposito. (todo esto pq el atributo movementDatetime puede ser Date o null)
+
+              console.log("lastExitAux: ");
+              const lastExitAux: Date | null = this.helperService.processDate(lastExit.movementDatetime);
+              console.log("lastEntryAux: ");
+              const lastEntryAux: Date | null = this.helperService.processDate(lastEntry.movementDatetime);
+
+              const lastExitDateTime: Date = lastExitAux || new Date("2001-12-15");
+              const lastEntryDateTime: Date = lastEntryAux || new Date("2000-10-12");
+
+              const isFirstEntry: boolean = lastEntry.firstEntry;
+              const isFirstExit: boolean = lastExit.firstExit;
+
+              //1ra condicion: si isFirstEntry es true, osea es su 1er ingreso, y si isFirstExit es true, osea q todavia no tiene 
+              // ningun egreso regsitrado, se puede registrar el ingreso.
+              //2da condicion: si la fecha y hora del ultimo Egreso es mayor a la del ultimo Ingreso, puede entrar.
+              if((isFirstEntry && isFirstExit) || (lastEntryDateTime < lastExitDateTime)){
+
+                //verifica observations
+                if(visitor.observations == undefined){
+                  visitor.observations = "";
+                }
+
+                // verifica si esta dentro de rango (fechas permitidas)
+                let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
+                if(indexAuthRange >= 0){
+
+                  // verifica si esta dentro de rango (dia y horario permitido)
+                  let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
+                  if(indexDayAllowed >= 0){
+                    
+                    // mapeos
+                    const newUserAllowedDto: NewUserAllowedDto = 
+                      this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
+                    const newAuthRangeDto: NewAuthRangeDto = 
+                      this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
+
+                    //se crea el objeto (q se va a pasar por el body en el post)
+                    const newMovements_EntryDto: NewMovements_EntryDto = 
+                      this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+
+                    //post en la URL
+                    this.postVisitorEntry(newMovements_EntryDto).subscribe({
+                      next: (response) => {
+                        this.helperService.registerEntrySuccess(newMovements_EntryDto);
+                      },
+                      error: (error) => {
+                        this.helperService.registerEntryError();
+                      }
+                    });
+
+                  } else {
+                    //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
+                    this.helperService.entryOutOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
+                    return;
+
+                  }
+
+                } else {
+                  //se dispara si el Visitor esta fuera de rango (fechas permitidas)
+                  this.helperService.entryOutOfAuthorizedDateRange(visitor);
+                  return; 
+                }
+
+                    
+              } else {
+
+                this.helperService.entryNotAllowed();
+                return;
+              }
+    
+            },
           error: (error) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'Error al registrar el Ingreso. Inténtelo de nuevo.',
-              confirmButtonText: 'Cerrar'        
-            });
-          }
+              this.helperService.getlastExitError();
+              console.log(error);
+            }
         });
-
-      } else {
-        //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
-        this.helperService.outOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
-        return;
-
+      },
+    error: (error) => {
+        this.helperService.getLastEntryError();
+        console.log(error);
       }
+  });
 
-    } else {
-      //se dispara si el Visitor esta fuera de rango (fechas permitidas)
-      this.helperService.outOfAuthorizedDateRange(visitor);
-      return; // se termina la ejecucion del metodo (no se registra el ingreso)
-    }
-
-  }
-  // FIN Registrar INGRESO de un visitante
+}
+// FIN Registrar INGRESO de un visitante
   // FIN METODOS (para registrar Ingresos y Egresos)
 
 }

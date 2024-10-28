@@ -1,37 +1,3 @@
-// cosas front de fede
-export interface Vehicle {
-  type: string;
-  plat: string;
-}
-export interface Day{
-  name: string,
-  value: boolean
-}
-export interface DayAllowed {
-  day: Day;
-  initHour: Date;
-  endHour: Date;
-  throughMidnight: boolean;
-}
-export interface Visitor {
-  name: string;
-  lastName: string;
-  document: string;
-  phoneNumber: string;
-  email: string;
-  vehicle?: Vehicle;
-  hasVehicle: boolean;
-  plate?: string;
-  vehicleType?:string;
-}
-export interface RegistryVisitor {
-  visitors: Visitor[];
-  daysAllowed: DayAllowed[];
-}
-// FIN cosas front de fede
-
-
-
 // CLASES del back necesarias para ciertos METODOS
 
   // METODOS: registerMovementEntry(NewMovements_EntryDto movementsEntryDto) / registerMoventEntryIfNotExistsInvitation(String documento, LocalDate date, NewMovements_EntryDto movementsEntryDto)
@@ -115,7 +81,7 @@ export interface RegistryVisitor {
 
     //FIN Clase necesaria (para recibir la data): User_AllowedInfoDto
 
-    // METODOS: registerMovementExit(NewMovements_ExitDto movementsExitDto)
+    // METODO: registerMovementExit(NewMovements_ExitDto movementsExitDto)
     // CLase necesaria: NewMovements_ExitDto
     export interface NewMovement_ExitDto {
       movementDatetime: Date; // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z")
@@ -123,6 +89,74 @@ export interface RegistryVisitor {
       newUserAllowedDto: NewUserAllowedDto; //interface declarada mas abajo
       authRangesDto: NewAuthRangeDto; //interface declarada mas abajo
       vehiclesId: number;
-  }
+    }
+    // FIN METODOS: registerMovementExit(NewMovements_ExitDto movementsExitDto)
+    // FIN CLase necesaria: NewMovements_ExitDto
+
+    //METODO: getUserAllowedLastExitByDocument(@RequestParam String document)
+    //Clase q recibe la info: LastExitUserAllowedDto
+    export interface LastExitUserAllowedDto {
+      //la data q nos importa
+      movementDatetime: number[] | null;
+      firstExit: boolean;
+  
+      //datos del UserAllowed
+      userType: User_allowedTypeDto;
+      name: string;
+      last_name: string;
+      document: string;
+      documentType: Document_TypeDto;
+    }
+    //FIN METODO: getUserAllowedLastExitByDocument(@RequestParam String document)
+
+    //METODO: getUserAllowedLastEntryByDocument(@RequestParam String document)
+    //Clase q recibe la info: LastEntryUserAllowedDto
+    export interface LastEntryUserAllowedDto {
+      //la data q nos importa
+      movementDatetime: number[] | null;
+      firstEntry: boolean;
+  
+      //datos del UserAllowed
+      userType: User_allowedTypeDto;
+      name: string;
+      last_name: string;
+      document: string;
+      documentType: Document_TypeDto;
+    }
+    //FIN METODO: getUserAllowedLastEntryByDocument(@RequestParam String document)
 
 // FIN CLASES del back necesarias para ciertos METODOS
+
+
+
+// cosas front de fede
+export interface Vehicle {
+  type: string;
+  plat: string;
+}
+export interface Day{
+  name: string,
+  value: boolean
+}
+export interface DayAllowed {
+  day: Day;
+  initHour: Date;
+  endHour: Date;
+  throughMidnight: boolean;
+}
+export interface Visitor {
+  name: string;
+  lastName: string;
+  document: string;
+  phoneNumber: string;
+  email: string;
+  vehicle?: Vehicle;
+  hasVehicle: boolean;
+  plate?: string;
+  vehicleType?:string;
+}
+export interface RegistryVisitor {
+  visitors: Visitor[];
+  daysAllowed: DayAllowed[];
+}
+// FIN cosas front de fede
