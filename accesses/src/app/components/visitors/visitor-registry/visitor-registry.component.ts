@@ -231,30 +231,25 @@ export class VisitorRegistryComponent
             visitor.documentTypeDto.description,
             `<div class="text-start">${visitor.document}</div>`,
             `<button style="width: 95%;" class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`,
-            `<select class="form-select select-action" data-index="${index}">
-              <option value="" selected disabled hidden>Seleccionar</option>
-              <option value="ingreso">Ingreso</option>
-              <option value="egreso">Egreso</option>
-            </select>`,
+            `<div class="d-flex justify-content-center">
+              <div class="dropdown">
+                <button class="btn btn-white dropdown-toggle p-0" 
+                        type="button" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false">
+                    <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+                  <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+                  <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+                </ul>
+              </div>
+            </div>`,
             `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
             statusButton,
             actionButtons,
           ];
           
-          //<div class="d-flex justify-content-center">
-            //   <div class="dropdown">
-            //     <button class="btn btn-white dropdown-toggle p-0" 
-            //             type="button" 
-            //             data-bs-toggle="dropdown" 
-            //             aria-expanded="false">
-            //         <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-            //     </button>
-            //     <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-            //       <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-            //       <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-            //     </ul>
-            //   </div>
-            // </div>
           
         });
 
@@ -266,24 +261,27 @@ export class VisitorRegistryComponent
 
   // Actualizar el método addEventListeners para manejar los clicks en el nuevo menú
   addEventListeners(): void {
-    const buttons = document.querySelectorAll('.view-more-btn') as NodeListOf<HTMLButtonElement>;
-    const actionButtons = document.querySelectorAll('.select-action') as NodeListOf<HTMLButtonElement>;
+    const tableBody = document.querySelector('#visitorsTable tbody');
 
-    buttons.forEach((button) => {
-      button.addEventListener('click', (event) => {
-        const index = button.getAttribute('data-index');
+  // Asegúrate de que tableBody no sea null
+  if (tableBody) {
+    tableBody.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+
+      // Manejar el botón "Ver más"
+      if (target.classList.contains('view-more-btn')) {
+        const index = target.getAttribute('data-index');
         if (index !== null) {
           const selectedOwner = this.visitors[parseInt(index, 10)];
           this.MoreInfo(selectedOwner);
         }
-      });
-    });
+      }
 
-    actionButtons.forEach((button) => {
-      button.addEventListener('click', (event) => {
-        const index = button.getAttribute('data-index');
-        const value = button.getAttribute('data-value');
-        
+      // Manejar el botón de acción
+      if (target.classList.contains('select-action')) {
+        const index = target.getAttribute('data-index');
+        const value = target.getAttribute('data-value');
+
         if (index !== null) {
           const selectedOwner = this.visitors[parseInt(index, 10)];
           const textareaElement = document.getElementById(
@@ -291,18 +289,19 @@ export class VisitorRegistryComponent
           ) as HTMLTextAreaElement;
 
           selectedOwner.observations = textareaElement.value || '';
-          this.observations=textareaElement.value;
-          // Simular el evento de cambio
+          this.observations = textareaElement.value;
+
           const mockEvent = {
-            target: {
-              value: value
-            }
+            target: { value: value }
           } as unknown as Event;
 
           this.onSelectionChange(mockEvent, selectedOwner);
         }
-      });
+      }
     });
+  } else {
+    console.error('No se encontró el cuerpo de la tabla.');
+  }
   }
 
   onSelectionChange(event: Event, visitor: User_AllowedInfoDto) {
@@ -315,7 +314,7 @@ if (selectedValue === 'ingreso') {
    // Actualizar el estado
    if(visitor.userType.description==='Owner' ||visitor.userType.description==='Tenant'){
     this.RegisterAccessOwner(visitor);
-   }else if(visitor.userType.description==='Employeed' ||visitor.userType.description==='Supplied'){
+   }else if(visitor.userType.description==='Employeed' ||visitor.userType.description==='Supplier'){
     this.RegisterAccessOwnerEmp(visitor)
    }
    else{
@@ -327,7 +326,7 @@ if (selectedValue === 'ingreso') {
     this.RegisterExitOwner(visitor);
    }
    else if(visitor.userType.description==='Employeed' ||visitor.userType.description==='Supplied'){
-    this.RegisterExitOwnerEmp(visitor)
+    this.RegisterAccessOwnerEmp(visitor)
    }
    else{
   this.RegisterExit(visitor);

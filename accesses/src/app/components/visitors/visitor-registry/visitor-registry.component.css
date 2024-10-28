@@ -1,8 +1,11 @@
 
 .botones{
+ 
     position: relative;
-    top: 35px;
-    left: 7px;
+    top: 36px;
+    left: 456px;
+    width: 600px;
+  
 }
 
 .modal {
