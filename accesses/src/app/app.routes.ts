@@ -11,10 +11,10 @@ import { EditComponent } from './components/visitors/edit/edit.component';
 import { AccessContainerVisitorsRegistrationComponent } from './components/visitors/access_visitors_register/access-container-visitors-registration/access-container-visitors-registration.component';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'entry', pathMatch: 'full' },
+    { path: '', redirectTo: 'Inform', pathMatch: 'full' },
     { path: 'Visitors', component: VisitorRegistryComponent },
     { path: 'Inform', component: GlobalReportComponent },
-    { path: 'entry', component: EntryComponent },
+    //{ path: 'entry', component: EntryComponent },
     { path: 'Dashboards', component: GeneralDashboardComponent },
     { path: 'Entry', component: RegistroComponent },
     { path: 'edit', component: EditComponent },

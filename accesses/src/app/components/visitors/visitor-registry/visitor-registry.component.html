@@ -154,6 +154,15 @@
           <p>
             <strong>Nombre:</strong> {{ selectedVisitor.name }} {{ selectedVisitor.last_name }}
           </p>
+          <p><strong>Tipo de Persona:</strong> 
+            {{ 
+              selectedVisitor.userType.description === 'Emplooyed' ? 'Empleado' : 
+              selectedVisitor.userType.description === 'Visitor' ? 'Visitante' : 
+              selectedVisitor.userType.description === 'Owner' ? 'Propietario' : 
+              selectedVisitor.userType.description === 'Tenant' ? 'Inquilino' : 
+              selectedVisitor.userType.description 
+            }}
+          </p>
           <p>
             <strong>Tipo de documento:</strong> {{ getDocumentType(selectedVisitor) }}
           </p>
@@ -164,7 +173,14 @@
           <div *ngIf="hasVehicles(selectedVisitor); else noVehicle">
             <ul *ngFor="let vehicle of getVehicles(selectedVisitor)">
               <li><strong>Patente:</strong> {{ vehicle.plate }}</li>
-              <li><strong>Tipo:</strong> {{ vehicle.vehicle_Type.description }}</li>
+              <li><strong>Tipo:</strong> 
+                {{ 
+                  vehicle.vehicle_Type.description === 'Car' ? 'Coche' : 
+                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                  vehicle.vehicle_Type.description 
+                }}
+              </li>
             </ul>
           </div>
           <ng-template #noVehicle>

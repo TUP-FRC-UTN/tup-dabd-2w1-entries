@@ -624,7 +624,7 @@ loadAllOwners(): void {
       ) {
         this.RegisterAccessOwner(visitor);
       } else if (
-        visitor.userType.description === 'Employeer' ||
+        visitor.userType.description === 'Emplooyed' ||
         visitor.userType.description === 'Supplier'
       ) {
         this.RegisterAccessOwnerEmp(visitor);
@@ -639,10 +639,10 @@ loadAllOwners(): void {
       ) {
         this.RegisterExitOwner(visitor);
       } else if (
-        visitor.userType.description === 'Employer' ||
-        visitor.userType.description === 'Supplied'
+        visitor.userType.description === 'Emplooyed' ||
+        visitor.userType.description === 'Supplier'
       ) {
-        this.RegisterAccessOwnerEmp(visitor);
+        this.RegisterExitOwnerEmp(visitor);
       } else {
         this.RegisterExit(visitor);
       }
@@ -1207,7 +1207,7 @@ loadAllOwners(): void {
   }
   //Empleados
   private userType: User_allowedTypeDto = {
-    description: '',
+    description: 'Emplooyed',
   };
   private loadDataEmp(): void {
     this.userService.getSuppEmpData().subscribe({
@@ -1217,7 +1217,7 @@ loadAllOwners(): void {
             this.visitors.push({
               document: owner.document,
               name: owner.name,
-              userType: owner.userType,
+              userType: this.userType,
               last_name: owner.last_name,
               documentTypeDto: owner.documentTypeDto,
               authRanges: owner.authRanges,
