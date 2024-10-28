@@ -231,25 +231,30 @@ export class VisitorRegistryComponent
             visitor.documentTypeDto.description,
             `<div class="text-start">${visitor.document}</div>`,
             `<button style="width: 95%;" class="btn btn-info view-more-btn" data-index="${index}">Ver más</button>`,
-            `<div class="d-flex justify-content-center">
-              <div class="dropdown">
-                <button class="btn btn-white dropdown-toggle p-0" 
-                        type="button" 
-                        data-bs-toggle="dropdown" 
-                        aria-expanded="false">
-                    <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-                  <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-                  <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-                </ul>
-              </div>
-            </div>`,
+            `<select class="form-select select-action" data-index="${index}">
+              <option value="" selected disabled hidden>Seleccionar</option>
+              <option value="ingreso">Ingreso</option>
+              <option value="egreso">Egreso</option>
+            </select>`,
             `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
             statusButton,
             actionButtons,
           ];
           
+          //<div class="d-flex justify-content-center">
+            //   <div class="dropdown">
+            //     <button class="btn btn-white dropdown-toggle p-0" 
+            //             type="button" 
+            //             data-bs-toggle="dropdown" 
+            //             aria-expanded="false">
+            //         <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+            //     </button>
+            //     <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+            //       <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+            //       <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+            //     </ul>
+            //   </div>
+            // </div>
           
         });
 
