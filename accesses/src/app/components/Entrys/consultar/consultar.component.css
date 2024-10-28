@@ -20,7 +20,7 @@
 /* Para el botón activo */
 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
   background-color: #007bff !important; /* Cambia el color del botón activo */
-  color: #fff !important; /* Cambia el color del texto */
+  color: #000000 !important; /* Cambia el color del texto */
 }
 
 /* Para quitar el fondo negro al hacer clic en "Primero" o "Último" */
@@ -38,7 +38,7 @@ table.dataTable {
 
 table.dataTable thead th {
   background-color: grey; /* Color de fondo del encabezado */
-  color: white; /* Color del texto del encabezado */
+  color: rgb(0, 0, 0); /* Color del texto del encabezado */
 }
 
 table.dataTable tr {
