@@ -208,8 +208,16 @@ export class VisitorRegistryComponent
     setTimeout(() => {
       this.initializeDataTable();
       this.setupModalEventListeners();
+      
+      // Asegúrate de que el elemento de búsqueda esté disponible
+      const searchInput = $('#dt-search-0');
+      searchInput.on('keyup', () => {
+        const searchTerm = searchInput.val() as string;
+        this.dataTable.search(searchTerm).draw();
+      });
     });
   }
+  
 
   /* Aca carga los visitantes */
   allVisitorsChecked = false;
@@ -410,8 +418,13 @@ export class VisitorRegistryComponent
       },
     });
     this.subscription.add(subscriptionAll);
+
+    
   }
 
+
+
+  
   // lista de Visitors
   visitors: User_AllowedInfoDto[] = [];
   // lista de Visitors que se muestran en pantalla

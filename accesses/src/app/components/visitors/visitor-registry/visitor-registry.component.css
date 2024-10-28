@@ -1,5 +1,9 @@
 
 .botones{
+  position: relative;
+  top: 36px;
+  left: 456px;
+  width: 600px;
  
     position: relative;
     top: 36px;
