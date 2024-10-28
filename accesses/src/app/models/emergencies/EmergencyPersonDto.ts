@@ -1,4 +1,5 @@
-import { User_AllowedInfoDto } from "../visitors/VisitorsModels";
+import { User_AllowedInfoDto } from "../visitors/access-VisitorsModels";
+
 
 export interface EmergencyPersonDto {
     data: User_AllowedInfoDto;
