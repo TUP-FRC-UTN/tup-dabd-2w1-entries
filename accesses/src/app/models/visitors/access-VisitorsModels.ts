@@ -74,6 +74,7 @@
     }
 
     export interface AuthRangeInfoDto {
+      neighbor_id: number;
       init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       end_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       allowedDays: Allowed_DaysDto[]; //List<Allowed_DaysDto> 
