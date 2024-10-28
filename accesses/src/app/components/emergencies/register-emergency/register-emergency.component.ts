@@ -117,9 +117,14 @@ export class RegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewC
       state: new FormControl(this.getStateString(emergencyPerson?.state)),
       documentType: documentTypeControl,
       documentNumber: documentNumberControl,
-      name: new FormControl(emergencyPerson?.data.name ?? '', [Validators.required]),
-      lastName: new FormControl(emergencyPerson?.data.last_name ?? '', [Validators.required])
+      name: new FormControl(emergencyPerson?.data.name ?? ''),
+      lastName: new FormControl(emergencyPerson?.data.last_name ?? '')
     });
+
+    if (this.form.controls.onlyExit) {
+      personForm.controls.name.setValidators([]);
+      personForm.controls.lastName.setValidators([]);
+    }
 
     const onlyExitUpdated = this.form.controls.onlyExit.valueChanges.subscribe({
       next: (value) => {
