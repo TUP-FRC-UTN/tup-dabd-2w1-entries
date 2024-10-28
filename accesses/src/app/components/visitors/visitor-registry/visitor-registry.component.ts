@@ -231,6 +231,10 @@ export class VisitorRegistryComponent
       this.loadVisitorsList();
     } else {
       // Vaciar la lista de visitantes
+      this.owners = [];
+      this.showOwners = [];
+      this.employers = [];
+      this.showEmployers = [];
       this.visitors = [];
       this.showVisitors = [];
       this.updateDataTable();
@@ -266,8 +270,12 @@ export class VisitorRegistryComponent
       this.loadEmployersList();
     } else {
       // Vaciar la lista de visitantes
-      this.employers = [];
-      this.showEmployers = [];
+      this.owners = [];
+    this.showOwners = [];
+    this.employers = [];
+    this.showEmployers = [];
+    this.visitors = [];
+    this.showVisitors = [];
       this.updateDataTable();
     }
   }
@@ -302,6 +310,10 @@ toggleAllOwner(): void {
     // Vaciar la lista de owners
     this.owners = [];
     this.showOwners = [];
+    this.employers = [];
+    this.showEmployers = [];
+    this.visitors = [];
+    this.showVisitors = [];
     this.updateDataTable();
   }
 }
@@ -554,7 +566,23 @@ loadAllOwners(): void {
           const value = target.getAttribute('data-value');
 
           if (index !== null) {
-            const selectedOwner = this.visitors[parseInt(index, 10)];
+
+            let selectedOwner = this.visitors[parseInt(index, 10)];
+
+            if(this.allEmployersChecked){
+              selectedOwner = this.employers[parseInt(index, 10)];
+            }
+            if(this.allVisitorsChecked){
+              selectedOwner = this.visitors[parseInt(index, 10)];
+            }
+            if(this.allOwnersChecked){
+              let selectedOwnerr = this.owners[parseInt(index, 10)];
+              let selectedOwnerWithNeighborId: User_AllowedInfoDto = {
+                ...selectedOwnerr,
+                neighbor_id: 0, // Agregar el neighbor_id
+              };
+              selectedOwner = selectedOwnerWithNeighborId;
+            }
 
             // Aquí se maneja la opción "Ver más"
             if (value === 'verMas') {
