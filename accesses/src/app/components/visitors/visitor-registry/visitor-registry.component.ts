@@ -399,6 +399,7 @@ export class VisitorRegistryComponent
 
   //carga TODOS los invitados al iniciar la pantalla
   ngOnInit(): void {
+    //DATOS
     /*  Comentado para que no cargue de entrada los datos*/
     //this.loadVisitorsList();
     //this.loadOwnerRenter();
