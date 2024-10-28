@@ -1,19 +1,13 @@
-.botones {
-  position: relative;
-  top: 35px;
-  left: 7px;
+
+.botones{
+    position: relative;
+    top: 35px;
+    left: 7px;
 }
 
 .modal {
   display: none; /* Escondido por defecto */
   position: fixed; /* Fijo en la pantalla */
-  z-index: 1; /* Z-index para superponerse a otros elementos */
-  left: 0;
-  top: 0;
-  width: 100%; /* Ancho completo */
-  height: 100%; /* Altura completa */
-  overflow: auto; /* Habilitar desplazamiento si es necesario */
-  background-color: rgb(0, 0, 0); /* Fondo negro */
   background-color: rgba(0, 0, 0, 0.4); /* Fondo negro con opacidad */
 }
 
@@ -23,11 +17,12 @@
 
 .modal-content {
   background-color: #fefefe;
-  margin: 17% auto;
-  padding: 22px;
+  margin: 15% auto; /* 15% desde la parte superior y centrado */
+  padding: 20px;
   border: 1px solid #888;
-  width: 33%;
+  width: 80%; /* Ancho del modal */
 }
+
 .close {
   color: #aaa;
   float: right;
@@ -41,3 +36,4 @@
   text-decoration: none;
   cursor: pointer;
 }
+
