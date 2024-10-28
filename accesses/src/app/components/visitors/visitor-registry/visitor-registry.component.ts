@@ -401,9 +401,9 @@ export class VisitorRegistryComponent
   ngOnInit(): void {
     //DATOS
     /*  Comentado para que no cargue de entrada los datos*/
-    //this.loadVisitorsList();
-    //this.loadOwnerRenter();
-    //this.loadDataEmp();
+    this.loadVisitorsList();
+    this.loadOwnerRenter();
+    this.loadDataEmp();
   }
 
   loadVisitorsList() {
