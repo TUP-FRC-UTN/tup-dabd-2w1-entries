@@ -8,6 +8,7 @@ import { GeneralDashboardComponent } from './components/Dashboards/general-dashb
 import { RegistroComponent } from './components/Employee/registro/registro.component';
 import { GlobalReportComponent } from './components/Inform/global-report/global-report.component';
 import { EditComponent } from './components/visitors/edit/edit.component';
+import { AccessContainerVisitorsRegistrationComponent } from './components/visitors/access_visitors_register/access-container-visitors-registration/access-container-visitors-registration.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'entry', pathMatch: 'full' },
@@ -16,5 +17,7 @@ export const routes: Routes = [
     { path: 'entry', component: EntryComponent },
     { path: 'Dashboards', component: GeneralDashboardComponent },
     { path: 'Entry', component: RegistroComponent },
-    { path: 'edit', component: EditComponent }
+    { path: 'edit', component: EditComponent },
+    { path: 'VisitorRegister', component: AccessContainerVisitorsRegistrationComponent }
+
 ];
