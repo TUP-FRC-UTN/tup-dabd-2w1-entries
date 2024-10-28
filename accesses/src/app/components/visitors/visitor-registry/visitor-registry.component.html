@@ -6,6 +6,15 @@
     <div class="container-fluid col-10">
       <!-- Contenedor para los botones alineados a la derecha -->
       <div class="d-flex justify-content-end botones">
+        <label>
+          <button 
+            class="btn btn-primary  me-2" 
+            (click)="toggleAllVisitors()"
+            [ngClass]="{'active': allVisitorsChecked}">
+            <i class="bi bi-ui-checks"></i> 
+          </button>
+        </label>
+        
         <button
           class="btn btn-primary me-2"
           data-bs-toggle="modal"
@@ -41,9 +50,6 @@
               Documento
             </th>
             <th scope="col" class="border border-dark text-light bg-secondary">
-              Información
-            </th>
-            <th scope="col" class="border border-dark text-light bg-secondary">
               Accion
             </th>
             <th scope="col" class="border border-dark text-light bg-secondary">
@@ -73,11 +79,11 @@
         </tbody>
       </table>
       <div class="row align-items-center">
-        <div class="col text-end">
+<!--         <div class="col text-end">
           <button class="btn btn-primary me-2" (click)="AddVisitor()">
             Agregar Visitante
           </button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -119,12 +125,12 @@
           Cerrar
         </button>
         <button
-        type="button"
-        class="btn btn-secondary"
-        (click)="startScanner()"
-      >
-        Escanear
-      </button>
+          type="button"
+          class="btn btn-secondary"
+          (click)="startScanner()"
+        >
+          Escanear
+        </button>
       </div>
     </div>
   </div>
@@ -133,35 +139,47 @@
 <!-- Modal de Información del Visitante -->
 <div
   class="modal"
-  id="visitorInfoModal" 
-  tabindex="-1" 
-  aria-labelledby="visitorInfoModalLabel" 
+  id="visitorInfoModal"
+  tabindex="-1"
+  aria-labelledby="visitorInfoModalLabel"
   aria-hidden="true"
   [class.show]="isModalOpen"
 >
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="visitorInfoModalLabel">Información de la Persona</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeModal()"></button>
+        <h5 class="modal-title" id="visitorInfoModalLabel">
+          Información de la Persona
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+          (click)="closeModal()"
+        ></button>
       </div>
       <div class="modal-body">
         <div *ngIf="selectedVisitor">
           <p>
-            <strong>Nombre:</strong> {{ selectedVisitor.name }} {{ selectedVisitor.last_name }}
+            <strong>Nombre:</strong> {{ selectedVisitor.name }}
+            {{ selectedVisitor.last_name }}
           </p>
-          <p><strong>Tipo de Persona:</strong> {{ selectedVisitor.userType.description }}</p>
+          <p>
+            <strong>Tipo de documento:</strong>
+            {{ getDocumentType(selectedVisitor) }}
+          </p>
           <p><strong>Documento:</strong> {{ selectedVisitor.document }}</p>
           <p><strong>Email:</strong> {{ selectedVisitor.email }}</p>
-          <p>
-            <strong>Tipo de documento:</strong> {{ getDocumentType(selectedVisitor) }}
-          </p>
 
           <p><strong>Información del vehículo:</strong></p>
           <div *ngIf="hasVehicles(selectedVisitor); else noVehicle">
             <ul *ngFor="let vehicle of getVehicles(selectedVisitor)">
               <li><strong>Patente:</strong> {{ vehicle.plate }}</li>
-              <li><strong>Tipo:</strong> {{ vehicle.vehicle_Type.description }}</li>
+
+              <li>
+                <strong>Tipo:</strong> {{ vehicle.vehicle_Type.description }}
+              </li>
             </ul>
           </div>
           <ng-template #noVehicle>
@@ -172,8 +190,12 @@
           <div *ngIf="selectedVisitor.authRanges.length > 0; else noDays">
             <ul *ngFor="let auth of selectedVisitor.authRanges">
               <li>
-                <strong>Desde:</strong> {{ auth.init_date | date : "dd/MM/yyyy" }}<br />
-                <strong>Hasta:</strong> {{ auth.end_date | date : "dd/MM/yyyy" }}
+                <strong>Desde:</strong>
+                {{ auth.init_date | date : "dd/MM/yyyy" }}
+              </li>
+              <li>
+                <strong>Hasta:</strong>
+                {{ auth.end_date | date : "dd/MM/yyyy" }}
               </li>
             </ul>
           </div>
@@ -185,4 +207,3 @@
     </div>
   </div>
 </div>
-
