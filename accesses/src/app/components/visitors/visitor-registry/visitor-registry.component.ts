@@ -712,7 +712,7 @@ loadAllOwners(): void {
     return visitor.documentTypeDto?.description === 'PASSPORT'
       ? 'Pasaporte'
       : visitor.documentTypeDto?.description ||
-          'Tipo de documento no especificado';
+          'DNI';
   }
 
   getVehicles(visitor: User_AllowedInfoDto): NewVehicleDto[] {
