@@ -1,4 +1,4 @@
-import { VehicleTypeDto, Document_TypeDto } from "../visitors/VisitorsModels";
+import { Document_TypeDto, VehicleTypeDto } from "../visitors/access-VisitorsModels";
 
 export interface NewEmergencyDto {
     people: NewEmergencyPerson[];
