@@ -142,7 +142,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="visitorInfoModalLabel">Información del Visitante</h5>
+        <h5 class="modal-title" id="visitorInfoModalLabel">Información de la Persona</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeModal()"></button>
       </div>
       <div class="modal-body">
@@ -150,6 +150,7 @@
           <p>
             <strong>Nombre:</strong> {{ selectedVisitor.name }} {{ selectedVisitor.last_name }}
           </p>
+          <p><strong>Tipo de Persona:</strong> {{ selectedVisitor.userType.description }}</p>
           <p><strong>Documento:</strong> {{ selectedVisitor.document }}</p>
           <p><strong>Email:</strong> {{ selectedVisitor.email }}</p>
           <p>
