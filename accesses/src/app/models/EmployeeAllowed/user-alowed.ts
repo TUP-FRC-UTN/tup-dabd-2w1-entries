@@ -2,9 +2,9 @@
 
 
 export interface NewVehicleDto {
-  vehicleId: string;
-  vehicleType: string;
-  plateNumber: string;
+  plate: string;
+  vehicle_Type: string;
+  insurance : string;
 }
 
 export interface SuppEmpDto {
@@ -12,9 +12,11 @@ export interface SuppEmpDto {
   name: string;
   last_name: string;
   userType: string;
+  documentTypeDto: string;
   email: string;
   vehicles: NewVehicleDto[];
-  auth_range:AuthRangeInfoDto
+  authRanges:AuthRangeInfoDto;
+  neighbor_id: 0;
 }
 export interface AuthRangeInfoDto {
   neighbor_id: number;

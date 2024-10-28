@@ -224,6 +224,8 @@ export class VisitorRegistryComponent
 
   toggleAllVisitors(): void {
     this.allVisitorsChecked = !this.allVisitorsChecked; // Alternar el estado
+    this.allEmployersChecked = false;
+    this.allOwnersChecked = false;
     if (this.allVisitorsChecked) {
       // Cargar todos los visitantes
       this.loadVisitorsList();
@@ -251,6 +253,75 @@ export class VisitorRegistryComponent
     });
     this.subscription.add(subscriptionAll);
   }
+
+  ////carga empleados
+  allEmployersChecked = false;
+
+  toggleAllEmployers(): void {
+    this.allEmployersChecked = !this.allEmployersChecked;// Alternar el estado
+    this.allVisitorsChecked = false; 
+    this.allOwnersChecked = false;
+    if (this.allEmployersChecked) {
+      // Cargar todos los visitantes
+      this.loadEmployersList();
+    } else {
+      // Vaciar la lista de visitantes
+      this.employers = [];
+      this.showEmployers = [];
+      this.updateDataTable();
+    }
+  }
+
+  loadAllEmployers(): void {
+    const subscriptionAll = this.userService.getSuppEmpData().subscribe({
+      next: (data) => {
+        this.ngZone.run(() => {
+          this.employers = data; // Carga todos los visitantes
+          this.showEmployers = this.employers; // Actualiza la lista de visitantes a mostrar
+          console.log('Empleados en el componente: ', this.employers);
+          this.updateDataTable(); // Actualiza la tabla de visitantes
+        });
+      },
+      error: (error) => {
+        console.error('Error al cargar empleados:', error);
+      },
+    });
+    this.subscription.add(subscriptionAll);
+  }
+//// carga owners
+allOwnersChecked = false;
+
+toggleAllOwner(): void {
+  this.allOwnersChecked = !this.allOwnersChecked; // Alternar el estado
+  this.allEmployersChecked = false;
+  this.allVisitorsChecked = false;
+  if (this.allOwnersChecked) {
+    // Cargar todos los owners
+    this.loadAllOwners();
+  } else {
+    // Vaciar la lista de owners
+    this.owners = [];
+    this.showOwners = [];
+    this.updateDataTable();
+  }
+}
+loadAllOwners(): void {
+  const subscriptionAll = this.ownerService.getAllOwnerRenterList().subscribe({
+    next: (data) => {
+      this.ngZone.run(() => {
+        this.owners = data; // Carga todos los visitantes
+        this.showOwners = this.owners; // Actualiza la lista de visitantes a mostrar
+        console.log('owners en el componente: ', this.owners);
+        this.updateDataTable(); // Actualiza la tabla de visitantes
+      });
+    },
+    error: (error) => {
+      console.error('Error al cargar visitantes:', error);
+    },
+  });
+  this.subscription.add(subscriptionAll);
+}
+
 
   updateDataTable(): void {
     if (this.dataTable) {
@@ -305,6 +376,167 @@ export class VisitorRegistryComponent
         this.dataTable.clear().rows.add(formattedData).draw();
       });
       this.addEventListeners();
+      if(this.allEmployersChecked){
+        this.ngZone.runOutsideAngular(() => {
+          const formattedData = this.employers.map((visitor, index) => {
+            const status = this.visitorStatus[visitor.document] || 'En espera';
+  
+            let statusButton = '';
+            let actionButtons = '';
+  
+            switch (status) {
+              case 'Ingresado':
+                statusButton = `<button class="btn btn-success">Ingresado</button>`;
+                actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+                break;
+              case 'Egresado':
+                statusButton = `<button class="btn btn-danger">Egresado</button>`;
+                break;
+              case 'En espera':
+              default:
+                statusButton = `<button class="btn btn-warning">En espera</button>`;
+                actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+                break;
+            }
+  
+            return [
+              `${visitor.last_name} ${visitor.name}`,
+              'DNI',
+             // this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
+              `<div class="text-start">${visitor.document}</div>`,
+              `<div class="d-flex justify-content-center">
+                <div class="dropdown">
+                  <button class="btn btn-white dropdown-toggle p-0" 
+                          type="button" 
+                          data-bs-toggle="dropdown" 
+                          aria-expanded="false">
+                      <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+                    <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+  
+                    <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+                    <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+                  </ul>
+                </div>
+              </div>`,
+              `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+              statusButton,
+              actionButtons,
+            ];
+          });
+  
+          this.dataTable.clear().rows.add(formattedData).draw();
+        });
+        this.addEventListeners();
+      } 
+      else if(this.allVisitorsChecked){
+        this.ngZone.runOutsideAngular(() => {
+          const formattedData = this.visitors.map((visitor, index) => {
+            const status = this.visitorStatus[visitor.document] || 'En espera';
+  
+            let statusButton = '';
+            let actionButtons = '';
+  
+            switch (status) {
+              case 'Ingresado':
+                statusButton = `<button class="btn btn-success">Ingresado</button>`;
+                actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+                break;
+              case 'Egresado':
+                statusButton = `<button class="btn btn-danger">Egresado</button>`;
+                break;
+              case 'En espera':
+              default:
+                statusButton = `<button class="btn btn-warning">En espera</button>`;
+                actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+                break;
+            }
+  
+            return [
+              `${visitor.last_name} ${visitor.name}`,
+              this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
+              `<div class="text-start">${visitor.document}</div>`,
+              `<div class="d-flex justify-content-center">
+                <div class="dropdown">
+                  <button class="btn btn-white dropdown-toggle p-0" 
+                          type="button" 
+                          data-bs-toggle="dropdown" 
+                          aria-expanded="false">
+                      <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+                    <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+  
+                    <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+                    <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+                  </ul>
+                </div>
+              </div>`,
+              `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+              statusButton,
+              actionButtons,
+            ];
+          });
+  
+          this.dataTable.clear().rows.add(formattedData).draw();
+        });
+        this.addEventListeners();
+      }
+      else if(this.allOwnersChecked){
+        this.ngZone.runOutsideAngular(() => {
+          const formattedData = this.owners.map((visitor, index) => {
+            const status = this.visitorStatus[visitor.document] || 'En espera';
+  
+            let statusButton = '';
+            let actionButtons = '';
+  
+            switch (status) {
+              case 'Ingresado':
+                statusButton = `<button class="btn btn-success">Ingresado</button>`;
+                actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+                break;
+              case 'Egresado':
+                statusButton = `<button class="btn btn-danger">Egresado</button>`;
+                break;
+              case 'En espera':
+              default:
+                statusButton = `<button class="btn btn-warning">En espera</button>`;
+                actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+                break;
+            }
+  
+            return [
+              `${visitor.last_name} ${visitor.name}`,
+              'DNI',
+            //this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
+              `<div class="text-start">${visitor.document}</div>`,
+              `<div class="d-flex justify-content-center">
+                <div class="dropdown">
+                  <button class="btn btn-white dropdown-toggle p-0" 
+                          type="button" 
+                          data-bs-toggle="dropdown" 
+                          aria-expanded="false">
+                      <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+                    <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+  
+                    <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+                    <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+                  </ul>
+                </div>
+              </div>`,
+              `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+              statusButton,
+              actionButtons,
+            ];
+          });
+  
+          this.dataTable.clear().rows.add(formattedData).draw();
+        });
+        this.addEventListeners();
+      }
     }
   }
 
@@ -364,7 +596,7 @@ export class VisitorRegistryComponent
       ) {
         this.RegisterAccessOwner(visitor);
       } else if (
-        visitor.userType.description === 'Employeed' ||
+        visitor.userType.description === 'Employeer' ||
         visitor.userType.description === 'Supplier'
       ) {
         this.RegisterAccessOwnerEmp(visitor);
@@ -379,7 +611,7 @@ export class VisitorRegistryComponent
       ) {
         this.RegisterExitOwner(visitor);
       } else if (
-        visitor.userType.description === 'Employeed' ||
+        visitor.userType.description === 'Employer' ||
         visitor.userType.description === 'Supplied'
       ) {
         this.RegisterAccessOwnerEmp(visitor);
@@ -400,9 +632,9 @@ export class VisitorRegistryComponent
   //carga TODOS los invitados al iniciar la pantalla
   ngOnInit(): void {
     /*  Comentado para que no cargue de entrada los datos*/
-    //this.loadVisitorsList();
-    //this.loadOwnerRenter();
-    //this.loadDataEmp();
+    this.loadVisitorsList();
+    this.loadOwnerRenter();
+    this.loadDataEmp();
   }
 
   loadVisitorsList() {
@@ -419,8 +651,44 @@ export class VisitorRegistryComponent
     });
     this.subscription.add(subscriptionAll);
   }
+  loadEmployersList() {
+    const subscriptionAll = this.userService.getSuppEmpData().subscribe({
+      next: (data) => {
+        this.ngZone.run(() => {
+          this.employers = data;
+          this.showEmployers = this.employers;
+          //console.log("data en el component: ", data);
+          console.log('empleados en el component: ', this.employers);
+          this.updateDataTable();
+        });
+      },
+    });
+    this.subscription.add(subscriptionAll);
+  }
+  loadOwnerList() {
+    const subscriptionAll = this.ownerService.getAllOwnerRenterList().subscribe({
+      next: (data) => {
+        this.ngZone.run(() => {
+          this.owners = data;
+          this.showOwners = this.owners;
+          //console.log("data en el component: ", data);
+          console.log('owners en el component: ', this.visitors);
+          this.updateDataTable();
+        });
+      },
+    });
+    this.subscription.add(subscriptionAll);
+  }
 
+ // lista de empleados
+ employers: User_AllowedInfoDto[] = [];
+ // lista de emplados que se muestran en pantalla
+ showEmployers = this.employers;
 
+  // lista de owners
+  owners: User_AllowedInfoDtoOwner[] = [];
+  // lista de owners que se muestran en pantalla
+  showOwners = this.owners;
 
   
   // lista de Visitors
@@ -914,28 +1182,25 @@ export class VisitorRegistryComponent
   };
   private loadDataEmp(): void {
     this.userService.getSuppEmpData().subscribe({
-      next: (data: SuppEmpDto[]) => {
-        data.forEach((emp) => {
-          const aut: AuthRangeInfoDto[] = [];
-          aut.push(emp.auth_range);
-          this.userType.description = emp.userType;
-          this.visitors.push({
-            name: emp.name,
-            neighbor_id: 0,
-            document: emp.document,
-            documentTypeDto: this.doument,
-            last_name: emp.last_name,
-            email: emp.email,
-            vehicles: [],
-            userType: this.userType,
-            authRanges: aut,
+      next: (ownerList: User_AllowedInfoDtoOwner[]) => {
+        this.ngZone.run(() => {
+          ownerList.forEach((owner) => {
+            this.visitors.push({
+              document: owner.document,
+              name: owner.name,
+              userType: owner.userType,
+              last_name: owner.last_name,
+              documentTypeDto: owner.documentTypeDto,
+              authRanges: owner.authRanges,
+              email: owner.email,
+              vehicles: owner.vehicles,
+              neighbor_id: 0,
+            });
           });
+
+          console.log('Loaded owner/renter list:', this.visitors);
+          this.updateDataTable();
         });
-        console.log(this.visitors);
-        this.updateDataTable();
-      },
-      error: (error: any) => {
-        console.error('Error al cargar los datos:', error);
       },
     });
   }

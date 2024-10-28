@@ -25,4 +25,8 @@ export class AppComponent {
     this.router.navigate([selectedValue]);
   }
   title = 'accesses';
+
+  navigateToVisitor() {
+    this.router.navigate(['/Visitor']);
+  }
 }

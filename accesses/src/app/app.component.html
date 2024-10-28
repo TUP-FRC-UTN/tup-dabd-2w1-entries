@@ -29,7 +29,9 @@
   <div class="container mt-4"> <!-- Contenedor para centrar el contenido -->
     <div class="row mb-3 justify-content-center align-items-center"> <!-- Alinear y centrar -->
       <div class="col-md-4">
-        <label for="accessOptions" class="form-label">
+        <br>
+        <br>
+        <!-- <label for="accessOptions" class="form-label">
           Seleccionar tipo de ingreso/egreso:
         </label>
         <select
@@ -41,7 +43,8 @@
           <option value="Visitors">Ingreso/Egreso de visitantes</option>
           <option value="OwnerAccess">Ingreso/Egreso de vecino</option>
           <option value="Entry">Ingreso/Egreso de empleados</option>
-        </select>
+        </select> -->
+        <button class="btn btn-primary" value="Visitors" (click)="navigateToComponent($event)">Registrar Ingresos/egresos</button>
       </div>
       <div class="col text-end mt-4 pt-2"> <!-- Mantener alineado a la derecha -->
         <app-register-emergency></app-register-emergency>

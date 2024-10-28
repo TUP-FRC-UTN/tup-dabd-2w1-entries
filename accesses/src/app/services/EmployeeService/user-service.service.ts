@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { MovementEntryDto,MovementExitDto,SuppEmpDto } from '../../models/EmployeeAllowed/user-alowed';
 import { HttpClient, HttpHeaders,  } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { User_AllowedInfoDto } from '../../models/visitors/access-VisitorsModels';
 
 @Injectable({
   providedIn: 'root'
@@ -16,10 +17,10 @@ export class UserServiceService {
     this.loadSuppEmpData();
   }
 
- ListaUser : SuppEmpDto[] = []
+ ListaUser : User_AllowedInfoDto[] = []
   
-  getSuppEmpData(): Observable<SuppEmpDto[]> {
-    return this.http.get<SuppEmpDto[]>(this.apiUrl);
+  getSuppEmpData(): Observable<User_AllowedInfoDto[]> {
+    return this.http.get<User_AllowedInfoDto[]>(this.apiUrl);
   }
 
   registerEmpSuppEntry(movement: MovementEntryDto): Observable<any> {
@@ -34,7 +35,7 @@ export class UserServiceService {
 
   loadSuppEmpData(): void {
     this.getSuppEmpData().subscribe({
-      next: (data: SuppEmpDto[]) => {
+      next: (data: User_AllowedInfoDto[]) => {
         this.ListaUser = data; // Asigna los datos una vez que se reciban
       },
       error: (error) => {
@@ -43,19 +44,19 @@ export class UserServiceService {
     });
   }
 
-  GetList(): SuppEmpDto[]{
+  GetList(): User_AllowedInfoDto[]{
     return [...this.ListaUser]
   }
 
-  getUserByDocument(document: string): SuppEmpDto[] {
+  getUserByDocument(document: string): User_AllowedInfoDto[] {
     return this.ListaUser.filter(user => user.document === document);
   }
 
-  getUserByName(name: string): SuppEmpDto[] {
+  getUserByName(name: string): User_AllowedInfoDto[] {
     return this.ListaUser.filter(user => user.name.toLowerCase().includes(name.toLowerCase()));
   }
 
-  getUserByDocumentAndNAme(document: string, name: string): SuppEmpDto[] {
+  getUserByDocumentAndNAme(document: string, name: string): User_AllowedInfoDto[] {
     return this.ListaUser.filter(user => user.document === document && user.name === name);
   }
 

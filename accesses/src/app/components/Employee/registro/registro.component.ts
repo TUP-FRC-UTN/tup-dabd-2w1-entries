@@ -18,6 +18,7 @@ import $ from 'jquery';
 import 'datatables.net';
 import Swal from 'sweetalert2';
 import { HttpErrorResponse } from '@angular/common/http';
+import { User_AllowedInfoDto } from '../../../models/visitors/access-VisitorsModels';
 
 @Component({
   selector: 'app-registro',
@@ -33,7 +34,7 @@ import { HttpErrorResponse } from '@angular/common/http';
   styleUrls: ['./registro.component.css'], // Asegúrate de que el nombre sea correcto
 })
 export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
-  ListaUser: SuppEmpDto[] = [];
+  ListaUser: User_AllowedInfoDto[] = [];
   showRegisterEntry: boolean = false;
   selectedUser: SuppEmpDto | null = null;
   observations: string = '';
@@ -56,7 +57,7 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private loadData(): void {
     this.userService.getSuppEmpData().subscribe({
-      next: (data: SuppEmpDto[]) => {
+      next: (data: User_AllowedInfoDto[]) => {
         this.ListaUser = data;
         console.log(this.ListaUser);
         this.initializeDataTable();
@@ -243,7 +244,7 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
   
   
 
-  private showMoreInfoPopup(user: SuppEmpDto): void {
+  private showMoreInfoPopup(user: User_AllowedInfoDto): void {
     Swal.fire({
       title: `Información de ${user.last_name}, ${user.name}`,
       html: `
@@ -253,7 +254,7 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
       <strong>Email:</strong> ${user.email}<br>
       <strong>Vehículos:</strong> ${
         user.vehicles && user.vehicles.length > 0
-          ? user.vehicles.map((v) => v.vehicleType).join(', ')
+          ? user.vehicles.map((v) => v.vehicle_Type).join(', ')
           : 'No existe'
       }<br>
     `,
