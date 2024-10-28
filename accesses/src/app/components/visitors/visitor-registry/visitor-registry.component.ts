@@ -278,7 +278,7 @@ export class VisitorRegistryComponent
 
           return [
             `${visitor.last_name} ${visitor.name}`,
-            this.getDocumentType(visitor), // Asegurarte de que "PASSPORT" se muestre como "Pasaporte"
+            this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
             `<div class="text-start">${visitor.document}</div>`,
             `<div class="d-flex justify-content-center">
               <div class="dropdown">
@@ -418,8 +418,6 @@ export class VisitorRegistryComponent
       },
     });
     this.subscription.add(subscriptionAll);
-
-    
   }
 
 
@@ -524,6 +522,9 @@ export class VisitorRegistryComponent
       this.isScanning = false;
     }
   }
+
+
+  
 
   handleQrScan(data: any): void {
     const scannedData = data[0]?.value; // Obtiene el valor escaneado
