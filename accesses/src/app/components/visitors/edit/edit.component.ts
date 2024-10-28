@@ -7,7 +7,7 @@ import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs5';
 import Swal from 'sweetalert2';
-import { Modal } from 'bootstrap';
+//import { Modal } from 'bootstrap';
 import { Router } from '@angular/router';
 import { NewUserAllowedDto, NewVehicleDto, User_AllowedInfoDto2,DayOfWeek, FormattedHours } from '../../../models/visitors/access-VisitorsModels';
 
@@ -27,7 +27,7 @@ export class EditComponent implements OnInit, AfterViewInit {
   neighbor_id: Number | null = null;
   table: any = null;
   todayDate: string = '';
-  editModal: Modal | null = null;
+  //editModal: Modal | null = null;
   searchTerm: string = '';
   constructor(private datePipe: DatePipe, private router: Router) {}
 
@@ -55,7 +55,7 @@ export class EditComponent implements OnInit, AfterViewInit {
     email: ''
   };
   ngAfterViewInit(): void {
-    this.editModal = new Modal(document.getElementById('editVisitorModal')!);
+   // this.editModal = new Modal(document.getElementById('editVisitorModal')!);
 
     $('#tablaEdit tbody').on('click', '.view-more-btn', (event: any) => {
       const index = $(event.currentTarget).data('index');
@@ -226,7 +226,7 @@ setTodayDate(): void {
     this.additionalVisitors.splice(index, 1);
   }
 
-  saveAllVisitors(): void {
+/*   saveAllVisitors(): void {
     
     const allVisitors = [
       this.selectedVisitor,
@@ -268,7 +268,7 @@ setTodayDate(): void {
           text: 'Hubo un error al actualizar algunos visitantes'
         });
       });
-  }
+  } */
 
   // Override the existing editVisitor method
   editVisitor(visitor: User_AllowedInfoDto2): void {
@@ -284,7 +284,7 @@ setTodayDate(): void {
       };
     }
 
-    this.editModal?.show();
+    //this.editModal?.show();
   }
   isDayAllowed(day: DayOfWeek): boolean {
     return this.selectedVisitor.authRange.allowedDays

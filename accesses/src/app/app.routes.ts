@@ -12,10 +12,9 @@ import { EditComponent } from './components/visitors/edit/edit.component';
 export const routes: Routes = [
     { path: '', redirectTo: 'entry', pathMatch: 'full' },
     { path: 'Visitors', component: VisitorRegistryComponent },
-    { path: 'RegisterVisitorEntry', component: VisitorRegisterEntryComponent },
     { path: 'Inform', component: GlobalReportComponent },
     { path: 'entry', component: EntryComponent },
-    {path: 'Dashboards',component:GeneralDashboardComponent},
-    {path: 'Entry',component:RegistroComponent},
-    {path: 'edit',component:EditComponent}
+    { path: 'Dashboards', component: GeneralDashboardComponent },
+    { path: 'Entry', component: RegistroComponent },
+    { path: 'edit', component: EditComponent }
 ];
