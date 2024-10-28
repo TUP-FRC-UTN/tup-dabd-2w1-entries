@@ -126,9 +126,9 @@ export class VisitorsService {
 
   //METODOS (para registrar Ingresos y Egresos)
 
-/* PRUEBA */
+/* PROBAR */
 
-RegisterExit(visitor: User_AllowedInfoDto): void {
+/* RegisterExit(visitor: User_AllowedInfoDto): void {
   // Verifica si su último movimiento fue ingreso (para poder egresar correctamente)
   this.getVisitorLastEntry(visitor.document).subscribe({
       next: (response) => {
@@ -221,12 +221,12 @@ RegisterExit(visitor: User_AllowedInfoDto): void {
           console.log(error);
       }
   });
-}
+} */
 
 
 
   //Registrar EGRESO de un visitante
- /*  RegisterExit(visitor :User_AllowedInfoDto): void{
+   RegisterExit(visitor :User_AllowedInfoDto): void{
 
     //verifica si su ultimo movimiento fue Ingreso (para poder Egresar correctamente)
     //post en la URL
@@ -330,7 +330,7 @@ RegisterExit(visitor: User_AllowedInfoDto): void {
         }
     });
 
-  } */
+  } 
   //FIN Registrar EGRESO de un visitante
 
 
@@ -338,9 +338,9 @@ RegisterExit(visitor: User_AllowedInfoDto): void {
 
 
 
-/* PRUEBA */
+/* PROBAR */
 
-RegisterAccess(visitor: User_AllowedInfoDto): void {
+/* RegisterAccess(visitor: User_AllowedInfoDto): void {
   // Verifica si su último movimiento fue ingreso
   this.getVisitorLastEntry(visitor.document).subscribe({
     next: (response) => {
@@ -416,14 +416,14 @@ RegisterAccess(visitor: User_AllowedInfoDto): void {
       console.log(error);
     }
   });
-}
+} */
 
 
 
 
 
  //Registrar INGRESO de un visitante
-/*  RegisterAccess(visitor :User_AllowedInfoDto): void{
+ RegisterAccess(visitor :User_AllowedInfoDto): void{
 
   //verifica si su ultimo movimiento fue Ingreso (para poder Egresar correctamente)
   //post en la URL
@@ -525,7 +525,7 @@ RegisterAccess(visitor: User_AllowedInfoDto): void {
       }
   });
 
-} */
+} 
 // FIN Registrar INGRESO de un visitante
   // FIN METODOS (para registrar Ingresos y Egresos)
 

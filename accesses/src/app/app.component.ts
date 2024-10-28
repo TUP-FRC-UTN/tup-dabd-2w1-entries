@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { VisitorRegistryComponent } from './components/visitors/visitor-registry/visitor-registry.component';
 import { VisitorRegisterEntryComponent } from "./components/visitors/(no-hace-falta)visitor-register-entry/visitor-register-entry.component";
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -17,5 +17,12 @@ import { CommonModule, DatePipe } from '@angular/common';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
+ 
+  constructor(  private datePipe: DatePipe, private router: Router ) {}
+
+  navigateToComponent(event: any) {
+    const selectedValue = event.target.value;
+    this.router.navigate([selectedValue]);
+  }
   title = 'accesses';
 }

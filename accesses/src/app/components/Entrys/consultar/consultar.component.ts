@@ -94,23 +94,45 @@ export class ConsultarComponent implements OnInit,AfterViewInit {
   }
   initializeDataTable(): void {
     this.table = ($('#tablaconsulta') as any).DataTable({
-      paging: true,
-      ordering: true,
-      pageLength: 10,
-      lengthChange: true,
-      searching: true,
-      info: true,
-      autoWidth: false,
-      language: {
-        lengthMenu: " _MENU_ ",
-        zeroRecords: "No se encontraron registros",
-        search: "Buscar:",
-     
-        emptyTable: "No hay datos disponibles"
-      },
-      responsive: true
+        paging: true,
+        ordering: true,
+        pageLength: 10,
+        lengthChange: true,
+        searching: true,
+        info: true,
+        autoWidth: false,
+        language: {
+            lengthMenu: "Mostrar _MENU_ registros",
+            zeroRecords: "No se encontraron resultados",
+            search: "Buscar:",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros en total)",
+            paginate: {
+                first: "Primero",
+                last: "Último",
+                next: ">",
+                previous: "<"
+            }
+        },
+        responsive: true,
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+            '<"row"<"col-sm-12"tr>>' +
+            '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        columnDefs: [
+            { targets: '_all', className: 'text-center' } // Alinear todo al centro
+        ],
+        createdRow: (row: Node, data: any, dataIndex: number) => {
+            // Aquí puedes aplicar estilos a las filas
+            if (data.typeMovement === 'INGRESO') {
+                $(row).addClass('table-success'); // Resaltar filas de ingreso
+            } else if (data.typeMovement === 'EGRESO') {
+                $(row).addClass('table-danger'); // Resaltar filas de egreso
+            }
+        }
     });
-  }
+}
+
   updateDataTable() {
     if ($.fn.dataTable.isDataTable('#tablaconsulta')) {
       $('#tablaconsulta').DataTable().destroy();
@@ -125,14 +147,7 @@ export class ConsultarComponent implements OnInit,AfterViewInit {
       lengthMenu: [10, 25, 50],
       pageLength: 10,
       columnDefs: [
-        { targets: 0, title: 'Tipo de Movimiento' },
-        { targets: 1, title: 'Nombre Ingresante' },
-        { targets: 2, title: 'Documento' },
-        { targets: 3, title: 'Observaciones' },
-        { targets: 4, title: 'Tipo Vehiculo' },
-        { targets: 5, title: 'Hora' },
-        { targets: 6, title: 'Fecha' },
-        { targets: 7, title: 'Acción' }
+        { targets: '_all', className: 'text-center' }
       ],
       data: this.movements,
       columns: [
@@ -141,13 +156,11 @@ export class ConsultarComponent implements OnInit,AfterViewInit {
           className: 'align-middle text-center',
           render: (data: any) => {
             let color;
-            
             switch (data) {
-              case "INGRESO": color = "#28a745"; break; // verde para ingreso
-              case "EGRESO": color = "#dc3545"; break;  // rojo para egreso
-              default: color = "#6c757d"; break;        // gris para cualquier otro caso
+              case "INGRESO": color = "#28a745"; break;
+              case "EGRESO": color = "#dc3545"; break;
+              default: color = "#6c757d"; break;
             }
-            
             return `<button class="btn border rounded-pill w-75" 
               style="background-color: ${color}; color: white;">
               ${data || 'Ingreso'}</button>`;
@@ -155,27 +168,25 @@ export class ConsultarComponent implements OnInit,AfterViewInit {
         },
         { 
           data: null,
-          className: 'align-middle',
+          className: 'align-middle text-center',
           render: (data) => `${data.visitorName || ''} ${data.visitorLastName || ''}`
         },
         { 
           data: 'visitorDocument',
-          className: 'align-middle',
-          defaultContent: ''
+          className: 'align-middle text-center'
         },
         { 
           data: 'observations',
-          className: 'align-middle',
-          defaultContent: ''
+          className: 'align-middle text-center'
         },
         { 
           data: null,
-          className: 'align-middle',
+          className: 'align-middle text-center',
           render: (data) => data.vehiclesDto ? data.vehiclesDto.vehicleType?.description : 'ingreso sin vehiculo'
         },
         { 
           data: 'movementDatetime',
-          className: 'align-middle',
+          className: 'align-middle text-center',
           render: (data) => {
             if (!data) return '';
             const movementDate = new Date(Date.parse(data));
@@ -184,7 +195,7 @@ export class ConsultarComponent implements OnInit,AfterViewInit {
         },
         { 
           data: 'movementDatetime',
-          className: 'align-middle',
+          className: 'align-middle text-center',
           render: (data) => {
             if (!data) return '';
             const movementDate = new Date(Date.parse(data));
@@ -193,23 +204,25 @@ export class ConsultarComponent implements OnInit,AfterViewInit {
         },
         {
           data: null,
-          className: 'align-middle',
+          className: 'align-middle text-center',
           render: (data, type, row, meta) => 
             `<button class="btn btn-info btn-sm view-more-btn" data-index="${meta.row}">Ver más</button>`
         }
       ],
-      dom: '<"mb-3"t><"d-flex justify-content-between"lp>',
       language: {
-        lengthMenu: `<select class="form-select">
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-        </select>`,
+        lengthMenu: "Mostrar _MENU_ registros",
+        search: "Buscar:",
         zeroRecords: "No se encontraron resultados",
-        loadingRecords: "Cargando...",
-        processing: "Procesando..."
-      },
-      
+        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        infoEmpty: "Mostrando 0 a 0 de 0 registros",
+        infoFiltered: "(filtrado de _MAX_ registros en total)",
+        paginate: {
+          first: "Primero",
+          last: "Último",
+          next: ">",
+          previous: "<"
+        }
+      }
     });
   
     if (Array.isArray(this.movements) && this.movements.length > 0) {

@@ -6,7 +6,10 @@ import {
   OnInit,
 } from '@angular/core';
 import { UserServiceService } from '../../../services/EmployeeService/user-service.service';
-import { MovementEntryDto, SuppEmpDto } from '../../../models/EmployeeAllowed/user-alowed';
+import {
+  MovementEntryDto,
+  SuppEmpDto,
+} from '../../../models/EmployeeAllowed/user-alowed';
 import { FormsModule } from '@angular/forms';
 import { MoreInformationComponent } from '../more-information/more-information.component';
 import { RegisterEntryComponent } from '../register-entry/register-entry.component';
@@ -69,11 +72,28 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
       data: this.ListaUser,
       columns: [
         { data: 'name' },
-        { 
-          data: 'document',
-          render: (data) => `DNI ${data}` 
+        {
+          data: null,
+          render: () => 'DNI', // Mostrar 'DNI' como tipo de documento
         },
-        { data: 'userType' },
+        {
+          data: 'document',
+          className: 'text-start', // Alinear a la izquierda
+          render: (data) => data, // Solo mostrar el número de documento
+        },
+        {
+          data: 'userType',
+          render: (data) => {
+            switch (data) {
+              case 'Employeed':
+                return 'Empleado';
+              case 'Supplier':
+                return 'Proveedor';
+              default:
+                return data; // En caso de que no coincida, retorna el valor original
+            }
+          },
+        },
         {
           data: null,
           render: (data, type, row, meta) =>
@@ -97,9 +117,9 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
       ],
       destroy: true,
       language: {
-        lengthMenu: 'Mostrar _MENU_ registros',
+        lengthMenu: '_MENU_ ',
         zeroRecords: 'No se encontraron registros',
-        info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+        info: '',
         infoEmpty: 'No hay registros disponibles',
         infoFiltered: '(filtrado de _MAX_ registros totales)',
         search: 'Buscar:',
@@ -110,48 +130,57 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
           previous: '‹',
         },
       },
+    
     });
-
+  
+    // Manejo de eventos
     $('#myTable tbody').on('click', '.view-more', (event) => {
       const index = $(event.currentTarget).data('index');
       const user = this.ListaUser[index];
       this.showMoreInfoPopup(user);
     });
-
+  
     $('#myTable tbody').on('change', '.action-select', (event) => {
-      const selectedValue = $(event.currentTarget).val(); 
+      const selectedValue = $(event.currentTarget).val();
       console.log(selectedValue);
-      
-      const document = $(event.currentTarget).data('document'); 
+  
+      const document = $(event.currentTarget).data('document');
       const tr = $(event.currentTarget).closest('tr');
-      const observations = $(tr).find('.observation').val(); 
-
+      const observations = $(tr).find('.observation').val();
+  
+      if (selectedValue === 'verMas') {
+        const index = $(event.currentTarget).closest('tr').find('.view-more').data('index');
+        const user = this.ListaUser[index]; // Asegúrate de tener acceso al índice correcto
+        this.showMoreInfoPopup(user); // Llama a la función que muestra la información
+        $(event.currentTarget).val(''); // Restablece el valor del select
+      }
+  
       if (selectedValue === 'ingreso') {
         const movement: MovementEntryDto = {
           description: String(observations || ''),
-          movementDatetime: new Date().toISOString(), 
-          vehiclesId: 0, 
-          document: document, 
+          movementDatetime: new Date().toISOString(),
+          vehiclesId: 0,
+          document: document,
         };
         console.log(movement);
-
+  
         Swal.fire({
           title: 'Confirmar Ingreso',
           text: '¿Está seguro que desea registrar el ingreso?',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Sí, confirmar',
-          cancelButtonText: 'Cancelar'
+          cancelButtonText: 'Cancelar',
         }).then((confirmResult) => {
           if (confirmResult.isConfirmed) {
             this.userService.registerEmpSuppEntry(movement).subscribe({
               next: (response) => {
-                console.log('Movimiento guardado exitosamente:', response);                
+                console.log('Movimiento guardado exitosamente:', response);
                 Swal.fire({
                   title: '¡Éxito!',
                   text: 'El movimiento se ha registrado correctamente.',
                   icon: 'success',
-                  confirmButtonText: 'Cerrar'
+                  confirmButtonText: 'Cerrar',
                 });
               },
               error: (error: HttpErrorResponse) => {
@@ -161,39 +190,39 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
                   text: error.error?.message || 'Error al guardar el movimiento',
                   confirmButtonColor: '#d33',
                 });
-                console.error("Error en la solicitud POST:", error); 
+                console.error('Error en la solicitud POST:', error);
               },
             });
           }
         });
-        
       }
+  
       if (selectedValue === 'egreso') {
         const movement: MovementEntryDto = {
           description: String(observations || ''),
-          movementDatetime: new Date().toISOString(), 
-          vehiclesId: 0, 
-          document: document, 
+          movementDatetime: new Date().toISOString(),
+          vehiclesId: 0,
+          document: document,
         };
         console.log(movement);
-
+  
         Swal.fire({
           title: 'Confirmar Egreso',
           text: '¿Está seguro que desea registrar el egreso?',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Sí, confirmar',
-          cancelButtonText: 'Cancelar'
+          cancelButtonText: 'Cancelar',
         }).then((confirmResult) => {
           if (confirmResult.isConfirmed) {
             this.userService.registerEmpSuppExit(movement).subscribe({
               next: (response) => {
-                console.log('Movimiento guardado exitosamente:', response);                
+                console.log('Movimiento guardado exitosamente:', response);
                 Swal.fire({
                   title: '¡Éxito!',
                   text: 'El movimiento se ha registrado correctamente.',
                   icon: 'success',
-                  confirmButtonText: 'Cerrar'
+                  confirmButtonText: 'Cerrar',
                 });
               },
               error: (error: HttpErrorResponse) => {
@@ -202,7 +231,7 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
                   title: '¡Error!',
                   text: 'No se pudo registrar el movimiento. Inténtalo de nuevo.',
                   icon: 'error',
-                  confirmButtonText: 'Cerrar'
+                  confirmButtonText: 'Cerrar',
                 });
               },
             });
@@ -211,6 +240,8 @@ export class RegistroComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
   }
+  
+  
 
   private showMoreInfoPopup(user: SuppEmpDto): void {
     Swal.fire({
