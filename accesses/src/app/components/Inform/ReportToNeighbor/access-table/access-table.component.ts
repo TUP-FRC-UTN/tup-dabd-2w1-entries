@@ -128,6 +128,34 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       advancedFilters.classList.toggle('show');
     }
   }
+  clearFilters(): void {
+    // Limpiar todos los checkboxes
+    $('.dropdown-menu input[type="checkbox"]').prop('checked', false);
+    
+    // Limpiar los inputs de texto
+    $('#nombreIngresanteFilter, #documentoFilter, #propietarioFilter, #placaFilter').val('');
+    
+    // Limpiar los contadores en los dropdowns
+    $('.dropdown button .selected-count').text('');
+    
+    // Resetear los valores de filtro
+    this.filterValues = {
+      entryOrExit: new Set<string>(),
+      tipoIngresante: new Set<string>(),
+      nombreIngresante: '',
+      documento: '',
+      typeCar: new Set<string>(),
+      propietario: '',
+      lateInRange: new Set<string>(),
+      plate: '',
+      days: new Set<string>()
+    };
+    
+    // Redibujar la tabla
+    if (this.table) {
+      this.table.draw();
+    }
+  }
 
   ngAfterViewInit(): void {
     setTimeout(() => {

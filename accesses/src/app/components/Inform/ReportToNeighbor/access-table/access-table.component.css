@@ -6,7 +6,9 @@
     border: 1px solid black !important;
 }
 
-
+.btn-primary {
+    border: 1px solid black !important;
+}
 
 .dropdown-menu .dropdown-item {
     background-color: white !important;
