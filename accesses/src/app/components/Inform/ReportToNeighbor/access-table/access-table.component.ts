@@ -226,10 +226,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       this.table.button('.buttons-pdf').trigger();
     });
 
-    $('#printBtn').on('click', () => {
-      if (!this.exportButtonsEnabled) return;
-      this.table.button('.buttons-print').trigger();
-    });
+   
 
     const DataTableButtons = ($.fn.dataTable as any).Buttons as DataTableButtons;
     const buttons = new DataTableButtons(this.table, {
@@ -272,7 +269,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.table.on('draw', () => {
       const recordCount = this.table.rows({ filter: 'applied' }).count();
       this.exportButtonsEnabled = recordCount > 0;
-      const buttons = ['#excelBtn', '#pdfBtn', '#printBtn'];
+      const buttons = ['#excelBtn', '#pdfBtn'];
       buttons.forEach(btn => {
         $(btn).prop('disabled', !this.exportButtonsEnabled);
       });
