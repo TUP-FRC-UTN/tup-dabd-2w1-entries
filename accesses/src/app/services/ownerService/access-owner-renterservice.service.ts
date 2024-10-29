@@ -14,7 +14,7 @@ export class AccessOwnerRenterserviceService {
   private URL_POST_OwnerExit="http://localhost:8090/movements_exit/registerOwnerExit"
   private httpClient:HttpClient=inject(HttpClient)
   constructor(){}
-  registerOwnerRenterEntry(movemen:NewMovements_EntryDtoOwner){
+  registerOwnerRenterEntry(movemen:NewMovements_EntryDtoOwner): Observable<any>{
     const headers=new HttpHeaders({'Content-Type': 'application/json'});
     return this.httpClient.post<any>(this.URL_POST_OwnerRenterInList,movemen,{headers})
   }
