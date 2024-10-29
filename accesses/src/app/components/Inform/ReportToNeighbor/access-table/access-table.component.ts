@@ -1,19 +1,33 @@
-/// <reference types="datatables.net" />
+import { Component, Input, OnDestroy, OnInit, AfterViewInit, SimpleChanges } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { DataTablesModule } from 'angular-datatables';
 import $ from 'jquery';
-import 'datatables.net'
+import 'datatables.net';
 import 'datatables.net-bs5';
+import 'datatables.net-buttons/js/dataTables.buttons.js';
+import 'datatables.net-buttons/js/buttons.html5.js';
+import 'datatables.net-buttons/js/buttons.print.js';
 import 'pdfmake/build/pdfmake';
 import 'pdfmake/build/vfs_fonts';
 import 'jszip';
 import Swal from 'sweetalert2';
-import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
-import { DataTablesModule } from 'angular-datatables';
-import { AccesPdfGenerateService } from '../../../../services/visitors/pdfService/acces-pdf-generate.service';
-import 'datatables.net-buttons/js/dataTables.buttons.js';
-import 'datatables.net-buttons/js/buttons.html5.js';
-import 'datatables.net-buttons/js/buttons.print.js';
+
+interface FilterValues {
+  entryOrExit: Set<string>;
+  tipoIngresante: Set<string>;
+  nombreIngresante: string;
+  documento: string;
+  typeCar: Set<string>;
+  propietario: string;
+  lateInRange: Set<string>;
+  plate: string;
+  days: Set<string>;
+}
+
+interface DataTableButtons {
+  new (dt: any, config: any): any;
+}
 
 @Component({
   selector: 'app-access-table',
@@ -28,30 +42,99 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   movements: any[] = [];
   table: any = null;
-  exportButtonsEnabled: boolean = false; // Controla la habilitación de los botones
+  exportButtonsEnabled: boolean = false;
+  days: number[] = [];
+  showFilters = false;
 
-  constructor(private http: HttpClient, private pdfService: AccesPdfGenerateService) {}
+  filterValues: FilterValues = {
+    entryOrExit: new Set<string>(),
+    tipoIngresante: new Set<string>(),
+    nombreIngresante: '',
+    documento: '',
+    typeCar: new Set<string>(),
+    propietario: '',
+    lateInRange: new Set<string>(),
+    plate: '',
+    days: new Set<string>()
+  };
+
+  private readonly entryOrExitMap: { [key: string]: string } = {
+    'entry': 'entrada',
+    'exit': 'salida'
+  };
+
+  private readonly tipoIngresanteMap: { [key: string]: string } = {
+    'neighbour': 'vecino',
+    'visitor': 'visitante',
+    'delivery': 'delivery',
+    'constructionworker': 'obrero',
+    'suplier': 'proveedor',
+    'employee': 'empleado',
+    'services': 'servicios',
+  };
+
+  private readonly typeCarMap: { [key: string]: string } = {
+    'car': 'auto',
+    'motorcycle': 'moto',
+    'truck': 'camion',
+    'bike': 'bicicleta',
+    'van': 'camioneta',
+    'walk': 'sin vehículo',
+  };
+
+  private readonly lateInRangeMap: { [key: string]: string } = {
+    'inrange': 'en horario',
+    'late': 'tarde',
+  };
+
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
+    this.generateDays();
     this.fetchData();
   }
-  ngOnDestroy() {
-    // Limpiar la tabla y los filtros cuando el componente se destruye
-    if (this.table) {
-      this.table.destroy();
-      // Remover todos los filtros personalizados
-      while ($.fn.dataTable.ext.search.length > 0) {
-        $.fn.dataTable.ext.search.pop();
-      }
-    }
-    // Remover los event listeners
-    $('#typeEntryOrExitFilter, #tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter, #typecarFilter, #late-inRangeFilter').off();
+
+  private generateDays(): void {
+    this.days = Array.from({ length: 31 }, (_, i) => i + 1);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedYear'] || changes['selectedMonth']) {
       this.fetchData();
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.table) {
+      this.table.destroy();
+      while ($.fn.dataTable.ext.search.length > 0) {
+        $.fn.dataTable.ext.search.pop();
+      }
+    }
+    this.removeEventListeners();
+    $('#excelBtn, #pdfBtn, #printBtn').off('click');
+  }
+
+  private removeEventListeners(): void {
+    $('.dropdown-menu input[type="checkbox"]').off();
+    $('#nombreIngresanteFilter, #documentoFilter, #propietarioFilter, #placaFilter').off();
+    $('.dropdown-menu').off();
+    $('#advancedFiltersToggle').off();
+  }
+
+  toggleAdvancedFilters(): void {
+    const advancedFilters = document.getElementById('advancedFilters');
+    if (advancedFilters) {
+      advancedFilters.classList.toggle('show');
+    }
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.initializeDataTable();
+      this.setupFilters();
+      this.setupDropdowns();
+    });
   }
 
   fetchData(): void {
@@ -64,17 +147,14 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
             this.loadDataIntoTable();
           },
           error: (error) => {
-            console.error('Error fetching data:', error);
+            Swal.fire({
+              icon: 'error',
+              title: '¡Error!',
+              text: 'Ocurrió un error al intentar cargar los datos. Por favor, intente nuevamente.',
+            });
           }
         });
     }
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.initializeDataTable();
-      this.setupFilters();
-    });
   }
 
   initializeDataTable(): void {
@@ -87,171 +167,319 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       info: true,
       autoWidth: false,
       language: {
-        lengthMenu: "Mostrar _MENU_ registros",
+        lengthMenu:  " _MENU_ ",
         zeroRecords: "No se encontraron registros",
         info: "Mostrando de _START_ a _END_ de _TOTAL_ registros",
-        infoEmpty: "No hay registros disponibles",
+        infoEmpty: "No se encontraron resultados",
         infoFiltered: "(filtrado de _MAX_ registros totales)",
         search: "Buscar:",
-        paginate: {
-          first: "Primero",
-          last: "Último",
-          next: "Siguiente",
-          previous: "Anterior"
-        },
-        emptyTable: "No hay datos disponibles",
+        emptyTable: "No se encontraron resultados",
       },
       responsive: true,
-      dom: 'Bfrtip', // Esto habilita los botones en la parte superior
+      dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
+      drawCallback: function(settings: any) {
+        const table = this;
+        setTimeout(function() {
+          $(table).find('td:nth-child(3)').each(function() {
+            const cellText = $(this).text().trim().toLowerCase();
+            if (cellText === 'entrada') {
+                $(this).html(`
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn rounded-pill w-75" 
+                            style="background-color: #28a745; color: white; border: none; text-transform: uppercase;">
+                            ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
+                        </button>
+                    </div>
+                `);
+            } else if (cellText === 'salida') {
+                $(this).html(`
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn rounded-pill w-75" 
+                            style="background-color: #dc3545; color: white; border: none; text-transform: uppercase;">
+                            ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
+                        </button>
+                    </div>
+                `);
+            }
+        });
+          $(table).find('td:nth-child(12)').each(function() { // Ajustado para la nueva posición del estado de horario
+            const estadoText = $(this).text().trim();
+            if (estadoText === 'Tarde') {
+              $(this).css("color", "red");
+              $(this).html(`<i class="fa-solid fa-triangle-exclamation"></i> ${estadoText}`);
+            } else if (estadoText === 'En horario') {
+              $(this).css("color", "green");
+              $(this).html(`<i class="fa-solid fa-circle-check"></i> ${estadoText}`);
+            }
+          });
+        }, 0);
+      }
+    });
+
+    $('#excelBtn').on('click', () => {
+      if (!this.exportButtonsEnabled) return;
+      this.table.button('.buttons-excel').trigger();
+    });
+
+    $('#pdfBtn').on('click', () => {
+      if (!this.exportButtonsEnabled) return;
+      this.table.button('.buttons-pdf').trigger();
+    });
+
+    $('#printBtn').on('click', () => {
+      if (!this.exportButtonsEnabled) return;
+      this.table.button('.buttons-print').trigger();
+    });
+
+    const DataTableButtons = ($.fn.dataTable as any).Buttons as DataTableButtons;
+    const buttons = new DataTableButtons(this.table, {
       buttons: [
         {
           extend: 'excel',
-          text: '<i class="fas fa-file-excel"></i> Excel',
-          className: 'btn btn-success ms-2', // Aplicando estilo de Bootstrap
-          titleAttr: 'Exportar a Excel'
+          text: 'Excel',
+          className: 'buttons-excel d-none',
+          filename: 'movimientos',
+          exportOptions: {
+            columns: ':visible'
+          },
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
         },
         {
           extend: 'pdf',
-          text: '<i class="fas fa-file-pdf"></i> PDF',
-          className: 'btn btn-danger ms-2', // Aplicando estilo de Bootstrap
-          titleAttr: 'Exportar a PDF',
-          orientation: 'portrait',
-          pageSize: 'A4'
+          text: 'PDF',
+          className: 'buttons-pdf d-none',
+          filename: 'movimientos',
+          orientation: 'landscape',
+          exportOptions: {
+            columns: ':visible'
+          },
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
         },
         {
           extend: 'print',
-          text: '<i class="fas fa-print"></i> Imprimir',
-          className: 'btn btn-primary ms-2', // Aplicando estilo de Bootstrap
-          titleAttr: 'Imprimir tabla'
+          text: 'Print',
+          className: 'buttons-print d-none',
+          exportOptions: {
+            columns: ':visible'
+          },
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
         }
       ]
     });
-  }
-  
-  setupFilters(): void {
-    $('#typeEntryOrExitFilter, #tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter, #typecarFilter, #late-inRangeFilter').off('change keyup');
-    
 
-    $('#typeEntryOrExitFilter, #tipoIngresanteFilter, #nombreIngresanteFilter, #documentoFilter,#typecarFilter, #late-inRangeFilter, #propietarioFilter').on('change keyup', () => {
+    this.table.buttons().container().appendTo('#myTable_wrapper');
+
+    this.table.on('draw', () => {
+      const recordCount = this.table.rows({ filter: 'applied' }).count();
+      this.exportButtonsEnabled = recordCount > 0;
+      const buttons = ['#excelBtn', '#pdfBtn', '#printBtn'];
+      buttons.forEach(btn => {
+        $(btn).prop('disabled', !this.exportButtonsEnabled);
+      });
+    });
+  }
+
+  setupDropdowns(): void {
+    $('.dropdown-menu input[type="checkbox"]').on('click', (e) => {
+      e.stopPropagation();
+      const checkbox = $(e.target);
+      const value = checkbox.val() as string;
+      const isChecked = checkbox.prop('checked');
+      const dropdownId = checkbox.closest('.dropdown').find('button').attr('id');
+
+      switch (dropdownId) {
+        case 'dropdownEntryExit':
+          this.updateFilterSet('entryOrExit', value, isChecked);
+          break;
+        case 'dropdownTipoIngresante':
+          this.updateFilterSet('tipoIngresante', value, isChecked);
+          break;
+        case 'dropdownTypecar':
+          this.updateFilterSet('typeCar', value, isChecked);
+          break;
+        case 'dropdownLateInRange':
+          this.updateFilterSet('lateInRange', value, isChecked);
+          break;
+        case 'dropdownDays':
+          this.updateFilterSet('days', value, isChecked);
+      }
+
+      const dropdown = checkbox.closest('.dropdown');
+      const selectedCount = dropdown.find('input:checked').length;
+      dropdown.find('.selected-count').text(selectedCount > 0 ? `(${selectedCount})` : '');
+
       if (this.table) {
         this.table.draw();
       }
     });
-  
-    $.fn.dataTable.ext.search.push(
-      (settings: any, data: string[], dataIndex: number) => {
-        const entryOrExit = ($('#typeEntryOrExitFilter').val() as string || '').toLowerCase();
-        const tipoIngresante = ($('#tipoIngresanteFilter').val() as string || '').toLowerCase();
-        const nombreIngresante = ($('#nombreIngresanteFilter').val() as string || '').toLowerCase();
-        const documento = ($('#documentoFilter').val() as string || '').toLowerCase();
-        const carType = ($('#typecarFilter').val() as string || '').toLowerCase();
-        const propietario = ($('#propietarioFilter').val() as string || '').toLowerCase();
-        const lateInRange = ($('#late-inRangeFilter').val() as string || '').toLowerCase();
-  
 
-
-        const lateInRangeMap: { [key: string]: string } = {
-
-          'inrange': 'en horario',
-          'late': 'tarde',
-          
-  
-        };
-
-
-        const typeCarMap: { [key: string]: string } = {
-          'car': 'auto',
-          'motorcycle': 'moto',
-          'truck': 'camion',
-          'bike': 'bicicleta',
-          'van': 'camioneta',
-          };
-
-        const entryOrExitmap: { [key: string]: string } = {
-          'entry': 'entrada',
-          'exit': 'salida'
-         
-        };
-  
-        // Mapa de tipos de ingresantes
-        const tipoIngresanteMap: { [key: string]: string } = {
-
-          'neighbour': 'vecino',
-          'employee': 'empleado',
-          'tenant': 'arrendatario',
-          'visitor': 'visitante',
-          'suplied': 'proveedor',
-          'delivery': 'delivery',
-          'constructionWorker': 'obrero'
-        };
-
-         // Mapa de tipos de entrada
-      
-        // Verifica que el filtro solo aplique si se introducen al menos 3 caracteres
-        const isEntryOrExitMatch = entryOrExit === '' || data[0].toLowerCase() === entryOrExitmap[entryOrExit];
-        const isTipoIngresanteMatch = tipoIngresante === '' || data[1].toLowerCase() === tipoIngresanteMap[tipoIngresante];
-        const isNombreIngresanteMatch = nombreIngresante.length < 3 || data[2].toLowerCase().includes(nombreIngresante);
-        const isDocumentoMatch = documento.length < 3 || data[3].toLowerCase().includes(documento);
-        const isTypeCarMatch = carType === '' || data[5].toLowerCase() === typeCarMap[carType];
-        const isPropietarioMatch = propietario.length < 3 || data[7].toLowerCase().includes(propietario);
-        const isLateInRangeMatch = lateInRange === '' || data[8].toLowerCase() === lateInRangeMap[lateInRange];
-  
-       
-
-        return (
-          isEntryOrExitMatch &&
-          isTipoIngresanteMatch &&
-          isNombreIngresanteMatch &&
-          isDocumentoMatch &&
-          isTypeCarMatch &&
-          isPropietarioMatch &&
-          isLateInRangeMatch
-        );
-      }
-    );
-  
-    this.table.on('draw', () => {
-      const recordCount = this.table.rows({ filter: 'applied' }).count();
-      this.exportButtonsEnabled = recordCount > 0; 
+    $('.dropdown-menu').on('click', (e) => {
+      e.stopPropagation();
     });
   }
 
-  loadDataIntoTable(): void {
-    console.log('Movements:', this.movements);
-    if (this.table) {
-      this.table.clear();
-
-      if (Array.isArray(this.movements) && this.movements.length > 0) {
-        this.movements.forEach(movement => {
-          this.table.row.add([
-            movement.entryOrExit || '',
-            movement.entryType || '',
-            movement.visitorName || '',
-            movement.visitorDocument || '',
-            movement.observations || '',
-            movement.carType || '',
-            movement.plate || '',
-            movement.neighborId || '',
-            movement.lateOrNot || '',
-            movement.hour || '',
-            movement.day  + '/' +movement.month  + '/' + movement.year ,
-          
-          ]);
-        });
-        this.exportButtonsEnabled = true; 
+  private updateFilterSet(filterName: keyof FilterValues, value: string, isChecked: boolean): void {
+    const filter = this.filterValues[filterName];
+    if (filter instanceof Set) {
+      if (isChecked) {
+        filter.add(value.toLowerCase());
       } else {
-        Swal.fire({
-          icon: 'warning',
-          title: '!No se encontraron registros!',
-          
-        });
-        this.exportButtonsEnabled = false; 
+        filter.delete(value.toLowerCase());
       }
-
-      this.table.draw();
-    } else {
-      this.initializeDataTable(); 
     }
   }
-  
+
+  setupFilters(): void {
+    $('#nombreIngresanteFilter, #documentoFilter, #propietarioFilter, #placaFilter').on('keyup', (e) => {
+      const target = $(e.target);
+      const inputValue = target.val() as string;
+
+      if (inputValue.length < 3) {
+        if (target.attr('id') === 'nombreIngresanteFilter') {
+          this.filterValues.nombreIngresante = '';
+        } else if (target.attr('id') === 'documentoFilter') {
+          this.filterValues.documento = '';
+        } else if (target.attr('id') === 'propietarioFilter') {
+          this.filterValues.propietario = '';
+        } else {
+          this.filterValues.plate = '';
+        }
+
+        if (this.table) {
+          this.table.draw();
+        }
+        return;
+      }
+
+      if (target.attr('id') === 'nombreIngresanteFilter') {
+        this.filterValues.nombreIngresante = inputValue;
+      } else if (target.attr('id') === 'documentoFilter') {
+        this.filterValues.documento = inputValue;
+      } else if (target.attr('id') === 'propietarioFilter') {
+        this.filterValues.propietario = inputValue;
+      } else {
+        this.filterValues.plate = inputValue;
+      }
+
+      if (this.table) {
+        this.table.draw();
+      }
+    });
+
+    $.fn.dataTable.ext.search.push(
+      (settings: any, data: string[], dataIndex: number) => {
+        return this.filterRow(data);
+      }
+    );
+  }
+
+  private filterRow(data: string[]): boolean {
+    const fecha = data[0];  // Nueva posición de fecha
+    const hora = data[1];   // Nueva posición de hora
+    const tipoEntrada = data[2];  // Nueva posición de tipo de entrada
+    const tipoIngresante = data[3];
+    const nombre = data[4];
+    const documento = data[5];
+    const tipoVehiculo = data[7];
+    const placa = data[8];
+    const propietario = data[9];
+    const estadoHorario = data[11];
+
+    if (this.filterValues.entryOrExit.size > 0 && 
+        !Array.from(this.filterValues.entryOrExit).some(value => 
+          tipoEntrada.toLowerCase() === this.entryOrExitMap[value])) {
+      return false;
+    }
+
+    if (this.filterValues.tipoIngresante.size > 0 && 
+        !Array.from(this.filterValues.tipoIngresante).some(value => 
+          tipoIngresante.toLowerCase() === this.tipoIngresanteMap[value])) {
+      return false;
+    }
+
+    if (this.filterValues.nombreIngresante && 
+        !nombre.toLowerCase().includes(this.filterValues.nombreIngresante.toLowerCase())) {
+      return false;
+    }
+
+    if (this.filterValues.documento && 
+        !documento.toLowerCase().includes(this.filterValues.documento.toLowerCase())) {
+      return false;
+    }
+
+    if (this.filterValues.typeCar.size > 0 && 
+        !Array.from(this.filterValues.typeCar).some(value => 
+          tipoVehiculo.toLowerCase() === this.typeCarMap[value])) {
+      return false;
+    }
+
+    if (this.filterValues.propietario && 
+        !propietario.toLowerCase().includes(this.filterValues.propietario.toLowerCase())) {
+      return false;
+    }
+
+    if (this.filterValues.plate && 
+        !placa.toLowerCase().includes(this.filterValues.plate.toLowerCase())) {
+      return false;
+    }
+
+    if (this.filterValues.lateInRange.size > 0 && 
+      !Array.from(this.filterValues.lateInRange).some(value => 
+        estadoHorario.toLowerCase() === this.lateInRangeMap[value])) {
+    return false;
+  }
+
+  if (this.filterValues.days.size > 0) {
+    const dayFromDate = fecha.split('/')[0].replace(/^0+/, '');
+    if (!Array.from(this.filterValues.days).some(value => 
+        dayFromDate === value)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+loadDataIntoTable(): void {
+  if (this.table) {
+    this.table.clear();
+
+    if (Array.isArray(this.movements) && this.movements.length > 0) {
+      this.movements.forEach(movement => {
+        this.table.row.add([
+          movement.day + '/' + movement.month + '/' + movement.year,  // Fecha
+          movement.hour || '',                                        // Hora
+          movement.entryOrExit || '',                                // Tipo de Entrada
+          movement.entryType || '',                                  // Tipo de Ingresante
+          movement.visitorName || '',                                // Nombre
+          movement.visitorDocument || '',                            // Documento
+          movement.observations || '',                               // Observaciones
+          movement.carType || '',                                    // Tipo de Vehículo
+          movement.plate || '',                                      // Placa
+          movement.neighborId || '',                                 // Propietario
+          'Garcia, ireneg',                                         // Guardia
+          movement.lateOrNot || '',                                 // Estado de horario
+        ]);
+      });
+
+      this.exportButtonsEnabled = true;
+      ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
+        $(btn).prop('disabled', false);
+      });
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: '¡No se encontraron registros!',
+      });
+      this.exportButtonsEnabled = false;
+      ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
+        $(btn).prop('disabled', true);
+      });
+    }
+
+    this.table.draw();
+  } else {
+    this.initializeDataTable();
+  }
+}
 }

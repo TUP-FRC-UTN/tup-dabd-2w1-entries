@@ -461,9 +461,9 @@ export class AccessVisitorHelperService {
 
   exitNotAllowed(){
     Swal.fire({
-      title: 'El Visitante tiene un Egreso previo!',
+      title: 'Tiene un Egreso previo!',
       html: `
-        El Visitante debe ingresar antes de poder salir!
+        La persona debe ingresar antes de poder salir!
       `,
       icon: 'error',
       confirmButtonText: 'Cerrar'
@@ -492,7 +492,7 @@ export class AccessVisitorHelperService {
     Swal.fire({
       icon: 'error',
       title: 'Error',
-      text: 'Error obteniendo el último Egreso del visitante. Inténtelo de nuevo.',
+      text: 'Error obteniendo el último Egreso de la Persona. Inténtelo de nuevo.',
       confirmButtonText: 'Cerrar'        
     });
   }

@@ -74,6 +74,7 @@
     }
 
     export interface AuthRangeInfoDto {
+      neighbor_id: number;
       init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       end_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
       allowedDays: Allowed_DaysDto[]; //List<Allowed_DaysDto> 
@@ -160,3 +161,39 @@ export interface RegistryVisitor {
   daysAllowed: DayAllowed[];
 }
 // FIN cosas front de fede
+
+export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+
+
+export interface ApiAllowedDay {
+  day: string;
+  init_hour: number[];
+  end_hour: number[];
+}
+
+export interface FormattedHours {
+  init_hour: string;
+  end_hour: string;
+}
+
+export interface User_AllowedInfoDto2 {
+  document: string;
+  name: string;
+  last_name: string;
+  email: string;
+  authId : string;
+  authRange: AuthRangeInfoDto2; //List<AuthRangeInfoDto>
+  observations?: string; //campo extra (no esta en el back)
+}
+export interface AuthRangeInfoDto2 {
+  init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+  end_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
+  allowedDays: ApiAllowedDay[]; //List<Allowed_DaysDto> 
+}
+export interface CommonSettings {
+  authRange: {
+    init_date: Date;
+    end_date: Date;
+    allowedDays: any[];
+  };
+}

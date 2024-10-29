@@ -1,57 +1,176 @@
-/* Sobreescribir estilos predeterminados de DataTables */
-
-/* Estilo de los botones de paginación */
-.dataTables_wrapper .dataTables_paginate .paginate_button:active {
-    background-color: #ffffff !important; /* Cambia el color de fondo al hacer clic */
-    color: #000 !important; /* Cambia el color del texto */
-    border: 1px solid #ccc !important; /* Borde opcional */
+.filter-toggle {
+    border: 1px solid black !important;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:focus {
-    background-color: #ffffff !important; /* Cambia el fondo al estar en foco */
-    color: #000 !important;
+.export-btn {
+    border: 1px solid black !important;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background-color: #f0f0f0 !important; /* Cambia el color de fondo al pasar el mouse */
-    border: 1px solid transparent !important; /* Ajuste opcional del borde */
+
+
+.dropdown-menu .dropdown-item {
+    background-color: white !important;
 }
 
-/* Para el botón activo */
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background-color: #007bff !important; /* Cambia el color del botón activo */
-    color: #fff !important; /* Cambia el color del texto */
+.dropdown-menu .dropdown-item:hover {
+    background-color: #a3a3a3 !important;
 }
 
-/* Para quitar el fondo negro al hacer clic en "Primero" o "Último" */
-.dataTables_wrapper .dataTables_paginate .paginate_button:active,
-.dataTables_wrapper .dataTables_paginate .paginate_button:focus {
-    background-color: #ffffff !important; /* Color blanco de fondo */
-    color: #000 !important; /* Color del texto */
+.dropdown-menu {
+    max-height: 200px;
+    overflow-y: auto;
 }
 
-/* Personalizar la tabla */
-table.dataTable {
-    border: 2px solid rgb(10, 9, 9); /* Borde alrededor de la tabla */
+
+
+#myTable th, #myTable td {
+    padding: 8px;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#myTable tr:nth-child(odd) td:not(:first-child) {
+    background-color: #f0f0f0 !important;
+}
+
+#myTable tr:nth-child(even) td:not(:first-child) {
+    background-color: #ffffff !important;
+}
+
+/* Centrado de botones en las celdas */
+#myTable td .btn {
+    min-width: 100px;
+}
+
+.filter-section {
+    margin-bottom: 1rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* Estilos para los botones de acción */
+.export-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.export-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.filter-toggle:hover {
+    background-color: #5a6268;
+}
+
+.advanced-filters {
+    background-color: #c2c9d1;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+    display: none;
+    animation: slideDown 0.3s ease-out;
+}
+
+.advanced-filters.show {
+    display: block;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-control, 
+.btn-secondary {
+    height: 38px;
+}
+
+/* Estilos base de la tabla */
+/* Estilos base de la tabla */
+#myTable {
+    width: auto !important; /* Cambiado de 100% a auto */
+    white-space: nowrap;
+    table-layout: fixed;
+    border-top: 1px solid black !important;
+    background-color: #f9f9f9;
     border-collapse: collapse;
+    width: 100%;
 }
 
-table.dataTable thead th {
-    background-color: #000; /* Color de fondo del encabezado */
-    color: white; /* Color del texto del encabezado */
+#myTable th, #myTable td {
+    padding: 8px;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 120px !important; /* Ancho fijo para todas las columnas */
 }
 
-table.dataTable tr {
-    border-bottom: 1px solid rgb(245, 240, 240); /* Borde inferior de las filas */
+.table-responsive {
+    overflow-x: auto;
+    white-space: nowrap;
+}
+/* Estilos para los botones de estado en la tabla */
+#myTable td .btn.rounded-pill {
+    padding: 4px 15px;
+    font-size: 14px;
+    margin: 0 auto;
+    display: block;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
 }
 
-table.dataTable tbody tr:nth-child(odd) {
-    background-color: #f2f2f2; /* Fondo para las filas impares */
+#myTable td .btn.btn-success.rounded-pill {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
 }
 
-/* Cambiar el color de los iconos de ordenación */
-table.dataTable thead th.sorting:after,
-table.dataTable thead th.sorting_asc:after,
-table.dataTable thead th.sorting_desc:after {
-    color: #161a1a !important; /* Cambiar el color de los iconos de ordenación */
+#myTable td .btn.btn-danger.rounded-pill {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: white;
+}
+
+/* Ajuste de columnas automáticas */
+.col-auto {
+    flex: 0 0 auto;
+    width: auto;
 }
