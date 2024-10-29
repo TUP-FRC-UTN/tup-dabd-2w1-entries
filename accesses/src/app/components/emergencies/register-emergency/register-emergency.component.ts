@@ -235,7 +235,7 @@ export class RegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewC
         }
       }) ?? [],
       vehicle: {
-        vehicleType: {
+        vehicle_Type: {
           description: formValue.vehicle?.type ?? null
         },
         plate: formValue.vehicle?.plate ?? null
