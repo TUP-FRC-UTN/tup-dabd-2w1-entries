@@ -616,37 +616,71 @@ loadAllOwners(): void {
 
     // Actualizar el estado del visitante
     if (selectedValue === 'ingreso') {
-      this.visitorStatus[visitor.document] = 'Ingresado';
+      //this.visitorStatus[visitor.document] = 'Ingresado';
       // Actualizar el estado
       if (
         visitor.userType.description === 'Owner' ||
         visitor.userType.description === 'Tenant'
       ) {
         this.RegisterAccessOwner(visitor);
+
       } else if (
         visitor.userType.description === 'Emplooyed' ||
         visitor.userType.description === 'Supplier'
       ) {
         this.RegisterAccessOwnerEmp(visitor);
+
       } else {
-        this.RegisterAccess(visitor);
+        this.visitorService.RegisterAccess(visitor).subscribe({
+          next: (success: boolean) => {
+            if (success) {
+              console.log('Se registro el Ingreso correctamente');
+              this.updateVisitorStatus(visitor, 'ingreso');
+              
+              // Actualiza la tabla para reflejar el nuevo estado "Ingresado"
+              this.updateDataTable();
+            } else {
+              console.log('Fallo al registrar ingreso');
+            }
+          }
+        });
+
       }
+
     } else if (selectedValue === 'egreso') {
-      this.visitorStatus[visitor.document] = 'Egresado'; // Actualizar el estado
+      //this.visitorStatus[visitor.document] = 'Egresado'; // Actualizar el estado
       if (
         visitor.userType.description === 'Owner' ||
         visitor.userType.description === 'Tenant'
       ) {
+
         this.RegisterExitOwner(visitor);
       } else if (
         visitor.userType.description === 'Emplooyed' ||
         visitor.userType.description === 'Supplier'
       ) {
+
         this.RegisterExitOwnerEmp(visitor);
       } else {
-        this.RegisterExit(visitor);
+
+        this.visitorService.RegisterExit(visitor).subscribe({
+          next: (success: boolean) => {
+            if (success) {
+              console.log('Se registro el Egreso correctamente');
+              this.updateVisitorStatus(visitor, 'egreso');
+  
+              // Actualiza la tabla para reflejar el nuevo estado "Egresado"
+              this.updateDataTable();
+            } else {
+              console.log('Fallo al registrar egreso');
+              
+            }
+          }
+        });
+
       }
     } else {
+
       this.visitorStatus[visitor.document] = 'En espera'; // Restablecer a "En espera" si no se selecciona
     }
 
@@ -654,15 +688,7 @@ loadAllOwners(): void {
     selectElement.value = '';
   }
 
-  RegisterAccess(visitor: User_AllowedInfoDto): void {
-    this.visitorService.RegisterAccess(visitor);
-    //this.updateVisitorStatus(visitor, 'ingreso');
-  }
 
-  RegisterExit(visitor: User_AllowedInfoDto): void {
-    this.visitorService.RegisterExit(visitor);
-    //this.updateVisitorStatus(visitor, 'ingreso');
-  }
 
   //carga TODOS los invitados al iniciar la pantalla
   ngOnInit(): void {
