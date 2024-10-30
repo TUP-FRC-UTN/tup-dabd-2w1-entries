@@ -384,11 +384,13 @@ export class VisitorsService {
                       //post en la URL
                       this.postVisitorEntry(newMovements_EntryDto).subscribe({
                         next: (response) => {
+                          console.log("(access-visitors-service) -> Register Access response: ", response);
                           this.helperService.registerEntrySuccess(newMovements_EntryDto);
                           observer.next(true);
                           observer.complete();
                         },
                         error: (error) => {
+                          console.log("(access-visitors-service) -> Register Access error: ", error);
                           this.helperService.registerEntryError();
                           observer.next(false);
                           observer.complete();
