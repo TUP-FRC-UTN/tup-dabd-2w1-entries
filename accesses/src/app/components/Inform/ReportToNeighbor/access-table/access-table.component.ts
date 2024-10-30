@@ -13,6 +13,7 @@ import 'pdfmake/build/vfs_fonts';
 import 'jszip';
 import Swal from 'sweetalert2';
 
+
 interface FilterValues {
   entryOrExit: Set<string>;
   tipoIngresante: Set<string>;
@@ -128,17 +129,25 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       advancedFilters.classList.toggle('show');
     }
   }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.initializeDataTable();
+      this.setupFilters();
+      this.setupDropdowns();
+    });
+  }
   clearFilters(): void {
-    // Limpiar todos los checkboxes
+   
     $('.dropdown-menu input[type="checkbox"]').prop('checked', false);
     
-    // Limpiar los inputs de texto
+
     $('#nombreIngresanteFilter, #documentoFilter, #propietarioFilter, #placaFilter').val('');
     
-    // Limpiar los contadores en los dropdowns
+  
     $('.dropdown button .selected-count').text('');
     
-    // Resetear los valores de filtro
+
     this.filterValues = {
       entryOrExit: new Set<string>(),
       tipoIngresante: new Set<string>(),
@@ -151,18 +160,10 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       days: new Set<string>()
     };
     
-    // Redibujar la tabla
+  
     if (this.table) {
       this.table.draw();
     }
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.initializeDataTable();
-      this.setupFilters();
-      this.setupDropdowns();
-    });
   }
 
   fetchData(): void {
@@ -182,6 +183,25 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
             });
           }
         });
+    }
+    else {
+      const year = new Date().getFullYear();
+      const month = new Date().getMonth() + 1;
+      this.http.get<any>(`http://localhost:8090/movements_entryToNeighbor/ByMonth?year=${year}&month=${month}`)
+      .subscribe({
+        next: (response) => {
+          console.log('API Response:', response);
+          this.movements = response.data;
+          this.loadDataIntoTable();
+        },
+        error: (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: '¡Error!',
+            text: 'Ocurrió un error al intentar cargar los datos. Por favor, intente nuevamente.',
+          });
+        }
+      });
     }
   }
 
@@ -254,7 +274,10 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       this.table.button('.buttons-pdf').trigger();
     });
 
-   
+    $('#printBtn').on('click', () => {
+      if (!this.exportButtonsEnabled) return;
+      this.table.button('.buttons-print').trigger();
+    });
 
     const DataTableButtons = ($.fn.dataTable as any).Buttons as DataTableButtons;
     const buttons = new DataTableButtons(this.table, {
@@ -297,7 +320,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.table.on('draw', () => {
       const recordCount = this.table.rows({ filter: 'applied' }).count();
       this.exportButtonsEnabled = recordCount > 0;
-      const buttons = ['#excelBtn', '#pdfBtn'];
+      const buttons = ['#excelBtn', '#pdfBtn', '#printBtn'];
       buttons.forEach(btn => {
         $(btn).prop('disabled', !this.exportButtonsEnabled);
       });

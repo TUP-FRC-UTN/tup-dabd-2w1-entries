@@ -17,7 +17,7 @@ export class AccessFilterComponent implements OnInit {
 
   selectedAnio: number | null = null;
   selectedMes: number | null = null;
-  formSubmitted: boolean = false; // Nuevo estado para verificar si el formulario fue enviado
+  formSubmitted: boolean = false; 
 
   ngOnInit() {
     this.initializeYears();

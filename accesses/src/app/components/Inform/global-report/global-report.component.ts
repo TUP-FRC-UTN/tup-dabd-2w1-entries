@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InformComponent } from '../ReportToNeighbor/report-neighboor/inform.component';
-import { ReportHoodComponent } from '../ReportToHood/report-hood/report-hood.component';
+
 
 @Component({
   selector: 'app-global-report',
   standalone: true,
-  imports: [CommonModule, FormsModule, InformComponent, ReportHoodComponent],
+  imports: [CommonModule, FormsModule, InformComponent],
   templateUrl: './global-report.component.html',
   styleUrl: './global-report.component.css'
 })
