@@ -47,6 +47,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   days: number[] = [];
   showFilters = false;
 
+
   filterValues: FilterValues = {
     entryOrExit: new Set<string>(),
     tipoIngresante: new Set<string>(),
@@ -286,32 +287,34 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           extend: 'excel',
           text: 'Excel',
           className: 'buttons-excel d-none',
-          filename: 'movimientos',
+          filename: () => {
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const month = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
+            return `Movimientos de ${month}`;
+          },
           exportOptions: {
             columns: ':visible'
           },
-          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
+          title: `LISTADO MENSUAL DE INGRESOS/EGRESOS - 
+                  Fecha de emisión ${new Date().toLocaleDateString('es-AR')}`,
         },
         {
           extend: 'pdf',
           text: 'PDF',
           className: 'buttons-pdf d-none',
-          filename: 'movimientos',
+          filename: () => {
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const month = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
+            return `Movimientos de ${month}`;
+          },
           orientation: 'landscape',
           exportOptions: {
             columns: ':visible'
           },
-          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
+          title: `LISTADO MENSUAL DE INGRESOS/EGRESOS - 
+                    Fecha de emisión ${new Date().toLocaleDateString('es-AR')}`,
         },
-        {
-          extend: 'print',
-          text: 'Print',
-          className: 'buttons-print d-none',
-          exportOptions: {
-            columns: ':visible'
-          },
-          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
-        }
+       
       ]
     });
 
