@@ -249,72 +249,90 @@ export class VisitorsService {
   RegisterExit(visitor: User_AllowedInfoDto): Observable<boolean> {
     return new Observable<boolean>((observer) => {
 
-                if (visitor.observations == undefined) {
-                  visitor.observations = "";
-                }
+              // Mostrar diálogo de confirmación
+              Swal.fire({
+                title: 'Confirmar Ingreso',
+                text: `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar',
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  // proceso de registro
+                  if (visitor.observations == undefined) {
+                    visitor.observations = "";
+                  }
+    
+                  let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
+                  if (indexAuthRange >= 0) {
   
-                let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
-                if (indexAuthRange >= 0) {
-
-                  let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
-                  if (indexDayAllowed >= 0) {
-
-                    const newUserAllowedDto = this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
-                    const newAuthRangeDto = this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
+                    let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
+                    if (indexDayAllowed >= 0) {
   
-                    const newMovement_ExitDto = this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
-  
-                    this.postVisitorExit(newMovement_ExitDto).subscribe({
-                      next: (response) => {
-                        console.log("RegisterExit response: ", response);
-                        
-                        if(response.status !== 409){
-                          this.helperService.registerExitSuccess(newMovement_ExitDto);
-                          //return true;
-                          observer.next(true);
-                          observer.complete();
-                        } else {
-                          this.helperService.registerExitError();
-                          //return false;
-                          observer.next(false);
-                          observer.complete();
-                        }
-                        
-                      },
-                      error: (error) => {
-                        console.log("RegisterExit error: ", error);
-                        if(error.status != 409){
-                          this.helperService.registerExitError();
-                          //return false;
-                          observer.next(false);
-                          observer.complete();
+                      const newUserAllowedDto = this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
+                      const newAuthRangeDto = this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
+    
+                      const newMovement_ExitDto = this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+    
+                      this.postVisitorExit(newMovement_ExitDto).subscribe({
+                        next: (response) => {
+                          console.log("RegisterExit response: ", response);
                           
-                        } else {
-                          this.helperService.exitNotAllowed();
-                          //return false;
-                          observer.next(false);
-                          observer.complete();
+                          if(response.status !== 409){
+                            this.helperService.registerExitSuccess(newMovement_ExitDto);
+                            //return true;
+                            observer.next(true);
+                            observer.complete();
+                          } else {
+                            this.helperService.registerExitError();
+                            //return false;
+                            observer.next(false);
+                            observer.complete();
+                          }
+                          
+                        },
+                        error: (error) => {
+                          console.log("RegisterExit error: ", error);
+                          if(error.status != 409){
+                            this.helperService.registerExitError();
+                            //return false;
+                            observer.next(false);
+                            observer.complete();
+                            
+                          } else {
+                            this.helperService.exitNotAllowed();
+                            //return false;
+                            observer.next(false);
+                            observer.complete();
+                          }
                         }
-                      }
-                    });
-  
+                      });
+    
+                    } else {
+                      this.helperService.exitLaterThanAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
+                      //return false;
+                      observer.next(false);
+                      observer.complete();
+                    }
+    
                   } else {
-                    this.helperService.exitLaterThanAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
+                    this.helperService.exitLaterThanAuthorizedDateRange(visitor);
                     //return false;
                     observer.next(false);
                     observer.complete();
                   }
-  
+
                 } else {
-                  this.helperService.exitLaterThanAuthorizedDateRange(visitor);
-                  //return false;
+                  // Si se cancela la confirmación
                   observer.next(false);
                   observer.complete();
                 }
-
-                // //return false;
-                // observer.next(false);
-                // observer.complete();
+              }).catch(error => {
+                console.error('Error en el diálogo de confirmación:', error);
+                observer.error(error);
+                observer.complete();
+              });
     });
   }
   
@@ -388,87 +406,103 @@ export class VisitorsService {
  RegisterAccess(visitor :User_AllowedInfoDto): Observable<boolean> {
   return new Observable<boolean>((observer) => {
 
-                  //verifica observations
-                  if(visitor.observations == undefined){
-                    visitor.observations = "";
-                  }
+    // Mostrar diálogo de confirmación
+    Swal.fire({
+      title: 'Confirmar Ingreso',
+      text: `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+          // proceso de registro
+          //verifica observations
+          if(visitor.observations == undefined){
+            visitor.observations = "";
+          }
 
-                  // verifica si esta dentro de rango (fechas permitidas)
-                  let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
-                  if(indexAuthRange >= 0){
+          // verifica si esta dentro de rango (fechas permitidas)
+          let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
+          if(indexAuthRange >= 0){
 
-                    // verifica si esta dentro de rango (dia y horario permitido)
-                    let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
-                    if(indexDayAllowed >= 0){
-                      
-                      // mapeos
-                      const newUserAllowedDto: NewUserAllowedDto = 
-                        this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
-                      const newAuthRangeDto: NewAuthRangeDto = 
-                        this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
+            // verifica si esta dentro de rango (dia y horario permitido)
+            let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
+            if(indexDayAllowed >= 0){
+              
+              // mapeos
+              const newUserAllowedDto: NewUserAllowedDto = 
+                this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
+              const newAuthRangeDto: NewAuthRangeDto = 
+                this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
 
-                      //se crea el objeto (q se va a pasar por el body en el post)
-                      const newMovements_EntryDto: NewMovements_EntryDto = 
-                        this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+              //se crea el objeto (q se va a pasar por el body en el post)
+              const newMovements_EntryDto: NewMovements_EntryDto = 
+                this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
 
-                      //post en la URL
-                      this.postVisitorEntry(newMovements_EntryDto).subscribe({
-                        next: (response) => {
-                          console.log("(access-visitors-service) -> Register Access response: ", response);
-                          
-                          if(response.status !== 409){
-                            this.helperService.registerEntrySuccess(newMovements_EntryDto);
-                            //return true;
-                            observer.next(true);
-                            observer.complete();   
-
-                          } else {
-                            this.helperService.registerEntryError();
-                            //return false;
-                            observer.next(false);
-                            observer.complete();
-                          }
-
-                          
-                        },
-                        error: (error) => {
-                          console.log("(access-visitors-service) -> Register Access error: ", error);
-
-                          if(error.status != 409){
-                            this.helperService.registerEntryError();
-                            //return false;
-                            observer.next(false);
-                            observer.complete();
-
-                          } else {
-                            this.helperService.entryNotAllowed();
-                            //return false;
-                            observer.next(false);
-                            observer.complete();
-                          }
-                        }
-                      });
-
-                    } else {
-                      //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
-                      this.helperService.entryOutOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
-                      //return false;
-                      observer.next(false);
-                      observer.complete();
-
-                    }
+              //post en la URL
+              this.postVisitorEntry(newMovements_EntryDto).subscribe({
+                next: (response) => {
+                  console.log("(access-visitors-service) -> Register Access response: ", response);
+                  
+                  if(response.status !== 409){
+                    this.helperService.registerEntrySuccess(newMovements_EntryDto);
+                    //return true;
+                    observer.next(true);
+                    observer.complete();   
 
                   } else {
-                    //se dispara si el Visitor esta fuera de rango (fechas permitidas)
-                    this.helperService.entryOutOfAuthorizedDateRange(visitor);
+                    this.helperService.registerEntryError();
                     //return false;
                     observer.next(false);
                     observer.complete();
                   }
+                },
+                error: (error) => {
+                  console.log("(access-visitors-service) -> Register Access error: ", error);
 
-                  //return false;
-                  // observer.next(false);
-                  // observer.complete();
+                  if(error.status != 409){
+                    this.helperService.registerEntryError();
+                    //return false;
+                    observer.next(false);
+                    observer.complete();
+
+                  } else {
+                    this.helperService.entryNotAllowed();
+                    //return false;
+                    observer.next(false);
+                    observer.complete();
+                  }
+                }
+              });
+
+            } else {
+              //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
+              this.helperService.entryOutOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
+              //return false;
+              observer.next(false);
+              observer.complete();
+
+            }
+
+          } else {
+            //se dispara si el Visitor esta fuera de rango (fechas permitidas)
+            this.helperService.entryOutOfAuthorizedDateRange(visitor);
+            //return false;
+            observer.next(false);
+            observer.complete();
+          }
+    
+      } else {
+        // Si se cancela la confirmación
+        observer.next(false);
+        observer.complete();
+      }
+    }).catch(error => {
+      console.error('Error en el diálogo de confirmación:', error);
+      observer.error(error);
+      observer.complete();
+    });
   });
 }
  //               } else {

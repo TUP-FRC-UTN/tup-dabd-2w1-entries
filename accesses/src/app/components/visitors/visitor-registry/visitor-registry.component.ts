@@ -622,7 +622,7 @@ loadAllOwners(): void {
       } else if (visitor.userType.description === 'Emplooyed' || visitor.userType.description === 'Supplier') {
         accessObservable = this.prepareEntryMovementEmp(visitor);
       } else {
-        accessObservable = this.RegisterAccessVisitor(visitor);
+        accessObservable = this.visitorService.RegisterAccess(visitor);
       }
 
       if (accessObservable) {
@@ -652,10 +652,10 @@ loadAllOwners(): void {
         
 
       } else if (visitor.userType.description === 'Emplooyed' || visitor.userType.description === 'Supplier') {
-        exitObservable = this.RegisterExitEmp(visitor);
+        exitObservable = this.prepareExitMovementEmp(visitor);
 
       } else {
-        exitObservable = this.RegisterExitVisitor(visitor);
+        exitObservable = this.visitorService.RegisterExit(visitor);
         
       }
 
@@ -683,15 +683,6 @@ loadAllOwners(): void {
 
     selectElement.value = '';
 }
-
-  RegisterAccessVisitor(visitor: User_AllowedInfoDto): Observable<boolean> {
-    return this.visitorService.RegisterAccess(visitor);
-  }
-
-  RegisterExitVisitor(visitor: User_AllowedInfoDto): Observable<boolean>{
-    return this.visitorService.RegisterExit(visitor);
-  }
-
 
   //carga TODOS los invitados al iniciar la pantalla
   ngOnInit(): void {
@@ -1603,12 +1594,12 @@ RegisterExitOwner(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
         }
 
         //return false;
-        observer.next(false);
-        observer.complete(); 
+        // observer.next(false);
+        // observer.complete(); 
       });
       //return false;
-      observer.next(false);
-      observer.complete(); 
+      // observer.next(false);
+      // observer.complete(); 
       
     });
     
