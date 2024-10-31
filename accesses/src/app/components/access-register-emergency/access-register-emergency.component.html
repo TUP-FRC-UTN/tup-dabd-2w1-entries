@@ -43,9 +43,14 @@
                                 class="form-control" 
                                 id="plateInput" 
                                 formControlName="plate" 
-                                autocomplete="off">
+                                autocomplete="off"
+                                (input)="onPlateInput($event)">
                                 <div class="invalid-feedback">
-                                    Este campo es obligatorio.
+                                    @if (form.controls.vehicle.controls.plate; as vehiclePlate) {
+                                        <div *ngIf="vehiclePlate.errors?.['required']">La patente es requerida.</div>
+                                        <div *ngIf="vehiclePlate.errors?.['pattern']">Formato de patente inválido.</div>
+                                        <div *ngIf="vehiclePlate.errors?.['maxlength']">La patente no puede exceder 7 caracteres.</div>
+                                    }
                                 </div>
                             </div>
                         }
@@ -89,12 +94,11 @@
                                         autocomplete="off">
                                         @if (person.controls['documentNumber']; as documentNumber) {
                                             <div class="invalid-feedback">
-                                                @if (documentNumber.errors?.['unique']) {
-                                                    El documento ingresado se encuentra repetido.
-                                                }
-                                                @else {
-                                                    Este campo es obligatorio.
-                                                }
+                                                <div *ngIf="documentNumber.errors?.['unique']">El documento ingresado se encuentra repetido.</div>
+                                                <div *ngIf="documentNumber.errors?.['minlength']">El documento debe tener al menos 8 caracteres.</div>
+                                                <div *ngIf="documentNumber.errors?.['maxlength']">El documento no puede exceder 15 caracteres.</div>
+                                                <div *ngIf="documentNumber.errors?.['pattern']">El documento debe contener solo letras y números.</div>
+                                                <div *ngIf="documentNumber.errors?.['required']">El documento es requerido.</div>
                                             </div>
                                         }
                                     </div>
