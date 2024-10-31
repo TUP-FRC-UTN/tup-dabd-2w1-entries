@@ -19,7 +19,7 @@ export class EmergenciesService {
       console.log(emergency);
       if (emergency.observations?.length == 0)
         emergency.observations = null;
-      if ((emergency.vehicle?.vehicleType.description.length ?? 0) < 1)
+      if ((emergency.vehicle?.vehicle_Type.description.length ?? 0) < 1)
         emergency.vehicle = null;
       return this.http.post<EmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_entry", emergency, { headers });
     }
@@ -28,7 +28,7 @@ export class EmergenciesService {
       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       if (emergency.observations?.length == 0)
         emergency.observations = null;
-      if ((emergency.vehicle?.vehicleType.description.length ?? 0) < 1)
+      if ((emergency.vehicle?.vehicle_Type.description.length ?? 0) < 1)
         emergency.vehicle = null;
       return this.http.post<EmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_exit", emergency, { headers });
     }

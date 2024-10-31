@@ -17,5 +17,5 @@ export interface NewEmergencyPerson {
 
 export interface NewEmergencyVehicleDto {
     plate: string | null;
-    vehicleType: VehicleTypeDto;
+    vehicle_Type: VehicleTypeDto;
 }
