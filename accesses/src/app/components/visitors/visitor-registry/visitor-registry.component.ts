@@ -622,57 +622,47 @@ loadAllOwners(): void {
         visitor.userType.description === 'Tenant'
       ) {
         //ingreso de Vecino (propietario o Inquilino)
-        const sub = this.RegisterAccessOwner(visitor).subscribe({
-          next: (success: boolean) => {
-            if (success) {
-              console.log('Se registro el Ingreso correctamente');
-              this.updateVisitorStatus(visitor, 'ingreso');
-              
-              // Actualiza la tabla para reflejar el nuevo estado "Ingresado"
-              this.updateDataTable();
-            } else {
-              console.log('Fallo al registrar ingreso');
-            }
-          }
-        });
-        this.subscription.add(sub);
+        const success = this.RegisterAccessOwner(visitor);
+        console.log("registro de ingreso de vecino: ",success);
+        if (success) {
+          console.log('Se registro el Ingreso correctamente');
+          this.updateVisitorStatus(visitor, 'ingreso');
+          
+          // Actualiza la tabla para reflejar el nuevo estado "Ingresado"
+          this.updateDataTable();
+        } else {
+          console.log('Fallo al registrar ingreso');
+        }
 
       } else if (
         visitor.userType.description === 'Emplooyed' ||
         visitor.userType.description === 'Supplier'
       ) {
         //ingreso de Empleado (Empleado o Proveedor)
-        const sub = this.RegisterAccessEmp(visitor).subscribe({
-          next: (success: boolean) => {
-            if (success) {
-              console.log('Se registro el Ingreso correctamente');
-              this.updateVisitorStatus(visitor, 'ingreso');
-              
-              // Actualiza la tabla para reflejar el nuevo estado "Ingresado"
-              this.updateDataTable();
-            } else {
-              console.log('Fallo al registrar ingreso');
-            }
-          }
-        });
-        this.subscription.add(sub);
+        const success = this.RegisterAccessEmp(visitor);
+        if (success) {
+          console.log('Se registro el Ingreso correctamente');
+          this.updateVisitorStatus(visitor, 'ingreso');
+          
+          // Actualiza la tabla para reflejar el nuevo estado "Ingresado"
+          this.updateDataTable();
+        } else {
+          console.log('Fallo al registrar ingreso');
+        }
 
       } else {
         //ingreso de Visitante (Visitor)
-        const sub = this.visitorService.RegisterAccess(visitor).subscribe({
-          next: (success: boolean) => {
-            if (success) {
-              console.log('Se registro el Ingreso correctamente');
-              this.updateVisitorStatus(visitor, 'ingreso');
-              
-              // Actualiza la tabla para reflejar el nuevo estado "Ingresado"
-              this.updateDataTable();
-            } else {
-              console.log('Fallo al registrar ingreso');
-            }
-          }
-        });
-        this.subscription.add(sub);
+        const success = this.RegisterAccessVisitor(visitor);
+        if (success) {
+          console.log('Se registro el Ingreso correctamente');
+
+          this.updateVisitorStatus(visitor, 'ingreso');
+          
+          // Actualiza la tabla para reflejar el nuevo estado "Ingresado"
+          this.updateDataTable();
+        } else {
+          console.log('Fallo al registrar ingreso');
+        }
       }
 
       //EGRESOS
@@ -682,59 +672,48 @@ loadAllOwners(): void {
         visitor.userType.description === 'Tenant'
       ) {
         // egreso de Vecino (Propietario o Inquilino)
-        const sub = this.RegisterExitOwner(visitor).subscribe({
-          next: (success: boolean) => {
-            if (success) {
-              console.log('Se registro el Egreso correctamente');
-              this.updateVisitorStatus(visitor, 'egreso');
-  
-              // Actualiza la tabla para reflejar el nuevo estado "Egresado"
-              this.updateDataTable();
-            } else {
-              console.log('Fallo al registrar egreso');
-              
-            }
-          }
-        });
-        this.subscription.add(sub);
+        const success = this.RegisterExitOwner(visitor)
+        if (success) {
+          console.log('Se registro el Egreso correctamente');
+          this.updateVisitorStatus(visitor, 'egreso');
+
+          // Actualiza la tabla para reflejar el nuevo estado "Egresado"
+          this.updateDataTable();
+        } else {
+          console.log('Fallo al registrar egreso');
+          
+        }
 
       } else if (
         visitor.userType.description === 'Emplooyed' ||
         visitor.userType.description === 'Supplier'
       ) {
         // egreso de Empleado (Empleado o Proveedor)
-        const sub = this.RegisterExitEmp(visitor).subscribe({
-          next: (success: boolean) => {
-            if (success) {
-              console.log('Se registro el Egreso correctamente');
-              this.updateVisitorStatus(visitor, 'egreso');
+        const success = this.RegisterExitEmp(visitor);
+        if (success) {
+          console.log('Se registro el Egreso correctamente');
+          this.updateVisitorStatus(visitor, 'egreso');
+
+          // Actualiza la tabla para reflejar el nuevo estado "Egresado"
+          this.updateDataTable();
+        } else {
+          console.log('Fallo al registrar egreso');
+          
+        } 
   
-              // Actualiza la tabla para reflejar el nuevo estado "Egresado"
-              this.updateDataTable();
-            } else {
-              console.log('Fallo al registrar egreso');
-              
-            }
-          }
-        });
-        this.subscription.add(sub);
       } else {
         // egreso de Visitante (Visitor)
-        const sub = this.visitorService.RegisterExit(visitor).subscribe({
-          next: (success: boolean) => {
-            if (success) {
-              console.log('Se registro el Egreso correctamente');
-              this.updateVisitorStatus(visitor, 'egreso');
-  
-              // Actualiza la tabla para reflejar el nuevo estado "Egresado"
-              this.updateDataTable();
-            } else {
-              console.log('Fallo al registrar egreso');
-              
-            }
-          }
-        });
-        this.subscription.add(sub);
+        const success = this.RegisterExitVisitor(visitor);
+        if (success) {
+          console.log('Se registro el Egreso correctamente');
+          this.updateVisitorStatus(visitor, 'egreso');
+
+          // Actualiza la tabla para reflejar el nuevo estado "Egresado"
+          this.updateDataTable();
+        } else {
+          console.log('Fallo al registrar egreso');
+          
+        }
 
       }
     } else {
@@ -746,6 +725,15 @@ loadAllOwners(): void {
     selectElement.value = '';
   }
 
+  RegisterAccessVisitor(visitor: User_AllowedInfoDto){
+    const success = this.visitorService.RegisterAccess(visitor);
+    return success;
+  }
+
+  RegisterExitVisitor(visitor: User_AllowedInfoDto){
+    const success = this.visitorService.RegisterExit(visitor);
+    return success;
+  }
 
 
   //carga TODOS los invitados al iniciar la pantalla
@@ -1035,100 +1023,16 @@ loadAllOwners(): void {
     this.subscription.add(subscriptionAll);
   }
 
-  RegisterAccessOwner(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
+  //quedo obsoleto pq lo q antes se verificaba aca, ahora se hace en el back
+   RegisterAccessOwner(visitor: User_AllowedInfoDtoOwner): boolean {
 
-    return new Observable<boolean>((observer) => {
+     const success = this.prepareEntryMovement(visitor);
+     return success;
 
-      const now = new Date();
+   }
 
-      this.visitorService.getVisitorLastExit(visitor.document).subscribe({
-        next: (lastExitResponse) => {
-          const lastExit: LastExitUserAllowedDto = lastExitResponse;
-          const lastExitDateTime =
-            this.helperService.processDate(lastExit.movementDatetime) ||
-            new Date(0);
-
-          // Si no hay egreso previo o es el primer ingreso, permitir ingreso
-          if (lastExitDateTime <= now) {
-            this.visitorService.getVisitorLastEntry(visitor.document).subscribe({
-              next: (lastEntryResponse) => {
-                const lastEntry: LastEntryUserAllowedDto = lastEntryResponse;
-                const lastEntryDateTime =
-                  this.helperService.processDate(lastEntry.movementDatetime) ||
-                  new Date(0);
-
-                // Permitir ingreso si no hay ingreso previo o si la última salida es posterior
-                if (
-                  lastEntryDateTime <= lastExitDateTime ||
-                  lastEntry.firstEntry
-                ) {
-                  console.log('Ingreso permitido');
-                  const sub = this.prepareEntryMovement(visitor).subscribe({
-                    next: (result) => {
-                      observer.next(result);
-                      observer.complete();
-                    },
-                    error: (error) => {
-                      observer.next(false);
-                      observer.complete();
-                    }
-                  });
-                  this.subscription.add(sub);
-
-                } else {
-                  Swal.fire({
-                    title: 'Error',
-                    text: 'No puede ingresar, debe salir primero antes de hacer un nuevo ingreso.',
-                    icon: 'error',
-                    confirmButtonText: 'Cerrar',
-                  });
-                  observer.next(false);
-                  observer.complete();
-                }
-              },
-              error: (error) => {
-                console.error(error);
-                Swal.fire({
-                  title: 'Error',
-                  text: 'No se pudo verificar el último ingreso.',
-                  icon: 'error',
-                  confirmButtonText: 'Cerrar',
-                });
-                observer.next(false);
-                observer.complete();
-              },
-            });
-          } else {
-            Swal.fire({
-              title: 'Error',
-              text: 'No puede ingresar sin haber salido previamente.',
-              icon: 'error',
-              confirmButtonText: 'Cerrar',
-            });
-            observer.next(false);
-            observer.complete();
-          }
-        },
-        error: (error) => {
-          console.error(error);
-          Swal.fire({
-            title: 'Error',
-            text: 'No se pudo verificar el último egreso.',
-            icon: 'error',
-            confirmButtonText: 'Cerrar',
-          });
-          observer.next(false);
-          observer.complete();
-        },
-      });
-
-    });
-
-  }
-
-  private prepareEntryMovement(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
-
-    return new Observable<boolean>((observer) => {
+  // registra el ingreso de un VECINO (propietario o inquilino)
+  private prepareEntryMovement(visitor: User_AllowedInfoDtoOwner): boolean {
 
       const vehicless =
       visitor.vehicles && visitor.vehicles.length > 0
@@ -1164,7 +1068,7 @@ loadAllOwners(): void {
         cancelButtonText: 'Cancelar',
       }).then((result) => {
         if (result.isConfirmed) {
-          const sub = this.ownerService
+          this.ownerService
             .registerOwnerRenterEntry(this.movement)
             .subscribe({
               next: (response) => {
@@ -1175,122 +1079,131 @@ loadAllOwners(): void {
                   icon: 'success',
                   confirmButtonText: 'Cerrar',
                 });
-
-                observer.next(true);
-                observer.complete();
+                
+                return true;
               },
               error: (err) => {
                 console.error('Error al registrar la entrada:', err);
-                Swal.fire({
-                  title: 'Error',
-                  text: 'Error al cargar los datos. Intenta nuevamente.',
-                  icon: 'error',
-                  confirmButtonText: 'Cerrar',
-                });
-                observer.next(false);
-                observer.complete();
+                if(err.status != 409){
+                  Swal.fire({
+                    title: 'Error',
+                    text: 'Error al cargar los datos. Intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Cerrar',
+                  });
+                  return false;
+
+                } else {
+                  Swal.fire({
+                    title: 'Tiene un Ingreso pendiente de Egreso',
+                    text: 'El último movimiento de la persona fue un Ingreso',
+                    icon: 'error',
+                    confirmButtonText: 'Cerrar',
+                  });
+                  return false;
+                }
+                
               },
             });
+            
+            return false;
 
-          this.subscription.add(sub);
+          } else {
+          return false;
         }
       });
+      return false;
 
-    });
   }
 
-  RegisterExitOwner(visitor: User_AllowedInfoDtoOwner): Observable<any> {
+RegisterExitOwner(visitor: User_AllowedInfoDtoOwner): boolean {
 
-    return new Observable<boolean>((observer) => {
+  //     const now = new Date();
 
-      const now = new Date();
+  //   this.visitorService.getVisitorLastEntry(visitor.document).subscribe({
+  //     next: (lastEntryResponse) => {
+  //       const lastEntry: LastEntryUserAllowedDto = lastEntryResponse;
+  //       const lastEntryDateTime = this.helperService.processDate(
+  //         lastEntry.movementDatetime
+  //       );
 
-    this.visitorService.getVisitorLastEntry(visitor.document).subscribe({
-      next: (lastEntryResponse) => {
-        const lastEntry: LastEntryUserAllowedDto = lastEntryResponse;
-        const lastEntryDateTime = this.helperService.processDate(
-          lastEntry.movementDatetime
-        );
+  //       if (!lastEntryDateTime || lastEntryDateTime > now) {
+  //         Swal.fire({
+  //           title: 'Error',
+  //           text: 'No puede salir sin haber ingresado previamente.',
+  //           icon: 'error',
+  //           confirmButtonText: 'Cerrar',
+  //         });
+  //         observer.next(false);
+  //         observer.complete();
+  //         return;
+  //       }
 
-        if (!lastEntryDateTime || lastEntryDateTime > now) {
-          Swal.fire({
-            title: 'Error',
-            text: 'No puede salir sin haber ingresado previamente.',
-            icon: 'error',
-            confirmButtonText: 'Cerrar',
-          });
-          observer.next(false);
-          observer.complete();
-          return;
-        }
+  //       this.visitorService.getVisitorLastExit(visitor.document).subscribe({
+  //         next: (lastExitResponse) => {
+  //           const lastExit: LastExitUserAllowedDto = lastExitResponse;
+  //           const lastExitDateTime =
+  //             this.helperService.processDate(lastExit.movementDatetime) ||
+  //             new Date(0);
 
-        this.visitorService.getVisitorLastExit(visitor.document).subscribe({
-          next: (lastExitResponse) => {
-            const lastExit: LastExitUserAllowedDto = lastExitResponse;
-            const lastExitDateTime =
-              this.helperService.processDate(lastExit.movementDatetime) ||
-              new Date(0);
-
-            // Permitir egreso si es el primer egreso o si la última entrada es posterior a la última salida
-            if (lastEntryDateTime > lastExitDateTime || lastExit.firstExit) {
-              console.log('Egreso permitido');
-              const sub = this.prepareExitMovement(visitor).subscribe({
-                next: (response) => {
-                  observer.next(response);
-                  observer.complete();
-                },
-                error: (err) => {
-                  observer.next(false);
-                  observer.complete();
-                },
-              });
+  //           // Permitir egreso si es el primer egreso o si la última entrada es posterior a la última salida
+  //           if (lastEntryDateTime > lastExitDateTime || lastExit.firstExit) {
+  //             console.log('Egreso permitido');
+              const success = this.prepareExitMovement(visitor);
+              return success;
+              //.subscribe({
+  //               next: (response) => {
+  //                 observer.next(response);
+  //                 observer.complete();
+  //               },
+  //               error: (err) => {
+  //                 observer.next(false);
+  //                 observer.complete();
+  //               },
+  //             });
   
-            this.subscription.add(sub);
+  //           this.subscription.add(sub);
 
-            } else {
-              Swal.fire({
-                title: 'Error',
-                text: 'No puede egresar, debe salir primero antes de hacer un nuevo ingreso.',
-                icon: 'error',
-                confirmButtonText: 'Cerrar',
-              });
-              observer.next(false);
-              observer.complete();
-            }
-          },
-          error: (error) => {
-            console.error(error);
-            Swal.fire({
-              title: 'Error',
-              text: 'No se pudo verificar el último egreso.',
-              icon: 'error',
-              confirmButtonText: 'Cerrar',
-            });
-            observer.next(false);
-            observer.complete();
-          },
-        });
-      },
-      error: (error) => {
-        console.error(error);
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudo verificar el último ingreso.',
-          icon: 'error',
-          confirmButtonText: 'Cerrar',
-        });
-        observer.next(false);
-        observer.complete();
-      },
-    });
+  //           } else {
+  //             Swal.fire({
+  //               title: 'Error',
+  //               text: 'No puede egresar, debe salir primero antes de hacer un nuevo ingreso.',
+  //               icon: 'error',
+  //               confirmButtonText: 'Cerrar',
+  //             });
+  //             observer.next(false);
+  //             observer.complete();
+  //           }
+  //         },
+  //         error: (error) => {
+  //           console.error(error);
+  //           Swal.fire({
+  //             title: 'Error',
+  //             text: 'No se pudo verificar el último egreso.',
+  //             icon: 'error',
+  //             confirmButtonText: 'Cerrar',
+  //           });
+  //           observer.next(false);
+  //           observer.complete();
+  //         },
+  //       });
+  //     },
+  //     error: (error) => {
+  //       console.error(error);
+  //       Swal.fire({
+  //         title: 'Error',
+  //         text: 'No se pudo verificar el último ingreso.',
+  //         icon: 'error',
+  //         confirmButtonText: 'Cerrar',
+  //       });
+  //       observer.next(false);
+  //       observer.complete();
+  //     },
+  //   });
 
-    });
+   }
 
-  }
-
-  private prepareExitMovement(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
-
-    return new Observable<boolean>((observer) => {
+  private prepareExitMovement(visitor: User_AllowedInfoDtoOwner): boolean {
 
       const vehicless =
       visitor.vehicles && visitor.vehicles.length > 0
@@ -1336,27 +1249,36 @@ loadAllOwners(): void {
                   icon: 'success',
                   confirmButtonText: 'Cerrar',
                 });
-                observer.next(true);
-                observer.complete();
+                return true;
               },
               error: (err) => {
                 console.error('Error al registrar el egreso:', err);
-                Swal.fire({
-                  title: 'Error',
-                  text: 'Error al cargar los datos. Intenta nuevamente.',
-                  icon: 'error',
-                  confirmButtonText: 'Cerrar',
-                });
-                observer.next(false);
-                observer.complete();
+                if(err.status != 409){
+                  Swal.fire({
+                    title: 'Error',
+                    text: 'Error al cargar los datos. Intenta nuevamente.',
+                    icon: 'error',
+                    confirmButtonText: 'Cerrar',
+                  });
+                  return false;
+
+                } else {
+                  Swal.fire({
+                    title: 'Tiene un Egreso pendiente de Ingreso',
+                    text: 'El último movimiento de la persona fue un Egreso',
+                    icon: 'error',
+                    confirmButtonText: 'Cerrar',
+                  });
+                  return false;
+                }
               },
             });
 
           this.subscription.add(sub);
         }
+        return false;
       });
-
-    });
+      return false;
 
   }
   //Empleados
@@ -1388,100 +1310,93 @@ loadAllOwners(): void {
     });
   }
 
-  RegisterAccessEmp(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
+  //QUEDO OBSOLETO, LA VERIFICACION QUE SE HACIA ACA, AHORA SE HACE EN EL BACK
+  RegisterAccessEmp(visitor: User_AllowedInfoDtoOwner): boolean {
 
-    return new Observable<boolean>((observer) => {
+      // const now = new Date();
 
-      const now = new Date();
-
-      this.visitorService.getVisitorLastExit(visitor.document).subscribe({
-        next: (lastExitResponse) => {
-          const lastExit: LastExitUserAllowedDto = lastExitResponse;
-          const lastExitDateTime =
-            this.helperService.processDate(lastExit.movementDatetime) ||
-            new Date(0);
+      // this.visitorService.getVisitorLastExit(visitor.document).subscribe({
+      //   next: (lastExitResponse) => {
+      //     const lastExit: LastExitUserAllowedDto = lastExitResponse;
+      //     const lastExitDateTime =
+      //       this.helperService.processDate(lastExit.movementDatetime) ||
+      //       new Date(0);
   
-          // Si no hay egreso previo o es el primer ingreso, permitir ingreso
-          if (lastExitDateTime <= now) {
-            this.visitorService.getVisitorLastEntry(visitor.document).subscribe({
-              next: (lastEntryResponse) => {
-                const lastEntry: LastEntryUserAllowedDto = lastEntryResponse;
-                const lastEntryDateTime =
-                  this.helperService.processDate(lastEntry.movementDatetime) ||
-                  new Date(0);
+      //     // Si no hay egreso previo o es el primer ingreso, permitir ingreso
+      //     if (lastExitDateTime <= now) {
+      //       this.visitorService.getVisitorLastEntry(visitor.document).subscribe({
+      //         next: (lastEntryResponse) => {
+      //           const lastEntry: LastEntryUserAllowedDto = lastEntryResponse;
+      //           const lastEntryDateTime =
+      //             this.helperService.processDate(lastEntry.movementDatetime) ||
+      //             new Date(0);
   
-                // Permitir ingreso si no hay ingreso previo o si la última salida es posterior
-                if (
-                  lastEntryDateTime <= lastExitDateTime ||
-                  lastEntry.firstEntry
-                ) {
-                  console.log('Ingreso permitido');
-                  const sub = this.prepareEntryMovementEmp(visitor).subscribe({
-                    next: (response) => {
-                      observer.next(response);
-                      observer.complete();
-                    },
-                    error: (err) => {
-                      observer.next(false);
-                      observer.complete();
-                    },
-                  });
+                // // Permitir ingreso si no hay ingreso previo o si la última salida es posterior
+                // if (
+                //   lastEntryDateTime <= lastExitDateTime ||
+                //   lastEntry.firstEntry
+                // ) {
+                //   console.log('Ingreso permitido');
+
+                   const success = this.prepareEntryMovementEmp(visitor);
+                   return success;
+
+                  //.subscribe({
+      //               next: (response) => {
+      //                 return response;
+      //               },
+      //               error: (err) => {
+      //                 return false;
+      //               },
+      //             });
       
-                this.subscription.add(sub);;
-                } else {
-                  Swal.fire({
-                    title: 'Error',
-                    text: 'No puede ingresar, debe salir primero antes de hacer un nuevo ingreso.',
-                    icon: 'error',
-                    confirmButtonText: 'Cerrar',
-                  });
-                  observer.next(false);
-                  observer.complete();
-                }
-              },
-              error: (error) => {
-                console.error(error);
-                Swal.fire({
-                  title: 'Error',
-                  text: 'No se pudo verificar el último ingreso.',
-                  icon: 'error',
-                  confirmButtonText: 'Cerrar',
-                });
-                observer.next(false);
-                observer.complete();
-              },
-            });
-          } else {
-            Swal.fire({
-              title: 'Error',
-              text: 'No puede ingresar sin haber salido previamente.',
-              icon: 'error',
-              confirmButtonText: 'Cerrar',
-            });
-            observer.next(false);
-            observer.complete();
-          }
-        },
-        error: (error) => {
-          console.error(error);
-          Swal.fire({
-            title: 'Error',
-            text: 'No se pudo verificar el último egreso.',
-            icon: 'error',
-            confirmButtonText: 'Cerrar',
-          });
-          observer.next(false);
-          observer.complete();
-        },
-      });
-
-    });
+      //           this.subscription.add(sub);;
+      //           } else {
+      //             Swal.fire({
+      //               title: 'Error',
+      //               text: 'No puede ingresar, debe salir primero antes de hacer un nuevo ingreso.',
+      //               icon: 'error',
+      //               confirmButtonText: 'Cerrar',
+      //             });
+      //             return false;
+      //           }
+      //         },
+      //         error: (error) => {
+      //           console.error(error);
+      //           Swal.fire({
+      //             title: 'Error',
+      //             text: 'No se pudo verificar el último ingreso.',
+      //             icon: 'error',
+      //             confirmButtonText: 'Cerrar',
+      //           });
+      //           return false;
+      //         },
+      //       });
+      //     } else {
+      //       Swal.fire({
+      //         title: 'Error',
+      //         text: 'No puede ingresar sin haber salido previamente.',
+      //         icon: 'error',
+      //         confirmButtonText: 'Cerrar',
+      //       });
+      //       return false;
+      //     }
+      //   },
+      //   error: (error) => {
+      //     console.error(error);
+      //     Swal.fire({
+      //       title: 'Error',
+      //       text: 'No se pudo verificar el último egreso.',
+      //       icon: 'error',
+      //       confirmButtonText: 'Cerrar',
+      //     });
+      //     return false;
+      //   },
+      // });
 
   }
 
-  private prepareEntryMovementEmp(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
-
-    return new Observable<boolean>((observer) => {
+  private prepareEntryMovementEmp(visitor: User_AllowedInfoDtoOwner): boolean {
 
       const movementS: MovementEntryDto = {
         description: String(this.observations || ''),
@@ -1507,116 +1422,130 @@ loadAllOwners(): void {
                 icon: 'success',
                 confirmButtonText: 'Cerrar',
               });
-              observer.next(true);
-              observer.complete();
+              return true;
             },
             error: (err) => {
               console.error('Error al registrar la entrada:', err);
-              Swal.fire({
-                title: 'Error',
-                text: 'Error al cargar los datos. Intenta nuevamente.',
-                icon: 'error',
-                confirmButtonText: 'Cerrar',
-              });
-              observer.next(false);
-              observer.complete();
+              if(err.status != 409){
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Error al cargar los datos. Intenta nuevamente.',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar',
+                });
+                return false;
+
+              } else {
+                Swal.fire({
+                  title: 'Tiene un Ingreso pendiente de Egreso',
+                  text: 'El último movimiento de la persona fue un Ingreso',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar',
+                });
+                return false;
+              }
             },
           });
   
           this.subscription.add(sub);
         }
+        return false;
       });
-    });
-
-  }
-  RegisterExitEmp(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
-
-    return new Observable<boolean>((observer) => {
-
-      const now = new Date();
-
-      this.visitorService.getVisitorLastEntry(visitor.document).subscribe({
-        next: (lastEntryResponse) => {
-          const lastEntry: LastEntryUserAllowedDto = lastEntryResponse;
-          const lastEntryDateTime = this.helperService.processDate(
-            lastEntry.movementDatetime
-          );
-  
-          if (!lastEntryDateTime || lastEntryDateTime > now) {
-            Swal.fire({
-              title: 'Error',
-              text: 'No puede salir sin haber ingresado previamente.',
-              icon: 'error',
-              confirmButtonText: 'Cerrar',
-            });
-            observer.next(false);
-            observer.complete();
-            return;
-          }
-  
-          this.visitorService.getVisitorLastExit(visitor.document).subscribe({
-            next: (lastExitResponse) => {
-              const lastExit: LastExitUserAllowedDto = lastExitResponse;
-              const lastExitDateTime =
-                this.helperService.processDate(lastExit.movementDatetime) ||
-                new Date(0);
-  
-              // Permitir egreso si es el primer egreso o si la última entrada es posterior a la última salida
-              if (lastEntryDateTime > lastExitDateTime || lastExit.firstExit) {
-                console.log('Egreso permitido');
-                const sub = this.prepareExitMovementEmp(visitor).subscribe({
-                  next: (response) => {
-                    observer.next(true);
-                    observer.complete();
-                  },
-                  error: (err) => {
-                    observer.next(false);
-                    observer.complete();
-                  },                
-                });
-              } else {
-                Swal.fire({
-                  title: 'Error',
-                  text: 'No puede egresar, debe salir primero antes de hacer un nuevo ingreso.',
-                  icon: 'error',
-                  confirmButtonText: 'Cerrar',
-                });
-                observer.next(false);
-                observer.complete();
-              }
-            },
-            error: (error) => {
-              console.error(error);
-              Swal.fire({
-                title: 'Error',
-                text: 'No se pudo verificar el último egreso.',
-                icon: 'error',
-                confirmButtonText: 'Cerrar',
-              });
-              observer.next(false);
-              observer.complete();
-            },
-          });
-        },
-        error: (error) => {
-          console.error(error);
-          Swal.fire({
-            title: 'Error',
-            text: 'No se pudo verificar el último ingreso.',
-            icon: 'error',
-            confirmButtonText: 'Cerrar',
-          });
-          observer.next(false);
-          observer.complete();
-        },
-      });
-    });
+      return false;
 
   }
 
-  private prepareExitMovementEmp(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
+  //QUEDO OBSOLETO, LA VERIFICACION AHORA SE HACE EN EL BACK
+   RegisterExitEmp(visitor: User_AllowedInfoDtoOwner): boolean {
 
-    return new Observable<boolean>((observer) => {
+  //   return new Observable<boolean>((observer) => {
+
+  //     const now = new Date();
+
+  //     this.visitorService.getVisitorLastEntry(visitor.document).subscribe({
+  //       next: (lastEntryResponse) => {
+  //         const lastEntry: LastEntryUserAllowedDto = lastEntryResponse;
+  //         const lastEntryDateTime = this.helperService.processDate(
+  //           lastEntry.movementDatetime
+  //         );
+  
+  //         if (!lastEntryDateTime || lastEntryDateTime > now) {
+  //           Swal.fire({
+  //             title: 'Error',
+  //             text: 'No puede salir sin haber ingresado previamente.',
+  //             icon: 'error',
+  //             confirmButtonText: 'Cerrar',
+  //           });
+  //           observer.next(false);
+  //           observer.complete();
+  //           return;
+  //         }
+  
+  //         this.visitorService.getVisitorLastExit(visitor.document).subscribe({
+  //           next: (lastExitResponse) => {
+  //             const lastExit: LastExitUserAllowedDto = lastExitResponse;
+  //             const lastExitDateTime =
+  //               this.helperService.processDate(lastExit.movementDatetime) ||
+  //               new Date(0);
+  
+  //             // Permitir egreso si es el primer egreso o si la última entrada es posterior a la última salida
+  //             if (lastEntryDateTime > lastExitDateTime || lastExit.firstExit) {
+  //               console.log('Egreso permitido');
+
+                 const success = this.prepareExitMovementEmp(visitor);
+                 return success;
+
+  //                .subscribe({
+  //                 next: (response) => {
+  //                   observer.next(true);
+  //                   observer.complete();
+  //                 },
+  //                 error: (err) => {
+  //                   observer.next(false);
+  //                   observer.complete();
+  //                 },                
+  //               });
+  //             } else {
+  //               Swal.fire({
+  //                 title: 'Error',
+  //                 text: 'No puede egresar, debe salir primero antes de hacer un nuevo ingreso.',
+  //                 icon: 'error',
+  //                 confirmButtonText: 'Cerrar',
+  //               });
+  //               observer.next(false);
+  //               observer.complete();
+  //             }
+  //           },
+  //           error: (error) => {
+  //             console.error(error);
+  //             Swal.fire({
+  //               title: 'Error',
+  //               text: 'No se pudo verificar el último egreso.',
+  //               icon: 'error',
+  //               confirmButtonText: 'Cerrar',
+  //             });
+  //             observer.next(false);
+  //             observer.complete();
+  //           },
+  //         });
+  //       },
+  //       error: (error) => {
+  //         console.error(error);
+  //         Swal.fire({
+  //           title: 'Error',
+  //           text: 'No se pudo verificar el último ingreso.',
+  //           icon: 'error',
+  //           confirmButtonText: 'Cerrar',
+  //         });
+  //         observer.next(false);
+  //         observer.complete();
+  //       },
+  //     });
+  //   });
+
+   }
+
+  private prepareExitMovementEmp(visitor: User_AllowedInfoDtoOwner): boolean {
 
       const movementS: MovementEntryDto = {
         description: String(this.observations || ''),
@@ -1643,27 +1572,37 @@ loadAllOwners(): void {
                 icon: 'success',
                 confirmButtonText: 'Cerrar',
               });
-              observer.next(true);
-              observer.complete();
+              return true;
             },
             error: (err) => {
               console.error('Error al registrar el egreso:', err);
-              Swal.fire({
-                title: 'Error',
-                text: 'Error al cargar los datos. Intenta nuevamente.',
-                icon: 'error',
-                confirmButtonText: 'Cerrar',
-              });
-              observer.next(false);
-              observer.complete();
+              if(err.status != 409){
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Error al cargar los datos. Intenta nuevamente.',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar',
+                });
+                return false;
+
+              } else {
+                Swal.fire({
+                  title: 'Tiene un Egreso pendiente de Ingreso',
+                  text: 'El último movimiento de la persona fue un Egreso',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar',
+                });
+                return false;
+              }
             },
           });
   
           this.subscription.add(sub);
         }
-      });
-    });
 
+        return false;
+      });
+      return false;
     
   }
 }

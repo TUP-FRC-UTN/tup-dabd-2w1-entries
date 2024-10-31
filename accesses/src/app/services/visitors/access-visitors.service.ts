@@ -226,8 +226,8 @@ export class VisitorsService {
 
 
   //Registrar EGRESO de un visitante
-  RegisterExit(visitor: User_AllowedInfoDto): Observable<boolean> {
-    return new Observable<boolean>((observer) => {
+  RegisterExit(visitor: User_AllowedInfoDto): boolean {
+    //return new Observable<boolean>((observer) => {
 
       // LA VERFICACION (sobre si su ult. movimiento fue un Ingreso o Egreso) AHORA SE HACE EN EL BACK
 
@@ -269,36 +269,35 @@ export class VisitorsService {
                         console.log("RegisterExit response: ", response);
                         
                         this.helperService.registerExitSuccess(newMovement_ExitDto);
-                        observer.next(true);
-                        observer.complete();
+                        return true;
+                        // observer.next(true);
+                        // observer.complete();
                         
                       },
                       error: (error) => {
                         console.log("RegisterExit error: ", error);
                         if(error.status != 409){
                           this.helperService.registerExitError();
-                          observer.next(false);
-                          observer.complete();
+                          return false;
 
                         } else {
                           this.helperService.exitNotAllowed();
-                          observer.next(false);
-                          observer.complete();
+                          return false;
                         }
                       }
                     });
   
                   } else {
                     this.helperService.exitLaterThanAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
-                    observer.next(false);
-                    observer.complete();
+                    return false;
                   }
   
                 } else {
                   this.helperService.exitLaterThanAuthorizedDateRange(visitor);
-                  observer.next(false);
-                  observer.complete();
+                  return false;
                 }
+
+                return false;
       //         } else {
       //           this.helperService.exitNotAllowed();
       //           observer.next(false);
@@ -320,7 +319,7 @@ export class VisitorsService {
       //     observer.complete();
       //   }
       // });
-    });
+    //});
   }
   
   //FIN Registrar EGRESO de un visitante
@@ -333,8 +332,8 @@ export class VisitorsService {
 
 
  //Registrar INGRESO de un visitante
- RegisterAccess(visitor :User_AllowedInfoDto): Observable<boolean>{
-  return new Observable<boolean>((observer) => {
+ RegisterAccess(visitor :User_AllowedInfoDto): boolean {
+  //return new Observable<boolean>((observer) => {
 
     // LA VERFICACION (sobre si su ult. movimiento fue un Ingreso o Egreso) AHORA SE HACE EN EL BACK
 
@@ -401,8 +400,7 @@ export class VisitorsService {
                           console.log("(access-visitors-service) -> Register Access response: ", response);
                           
                           this.helperService.registerEntrySuccess(newMovements_EntryDto);
-                          observer.next(true);
-                          observer.complete();                          
+                          return true;                          
                           
                         },
                         error: (error) => {
@@ -410,13 +408,13 @@ export class VisitorsService {
 
                           if(error.status != 409){
                             this.helperService.registerEntryError();
-                            observer.next(false);
-                            observer.complete();
+                            return false;
+                            // observer.next(false);
+                            // observer.complete();
 
                           } else {
                             this.helperService.entryNotAllowed();
-                            observer.next(false);
-                            observer.complete();
+                            return false;
                           }
                         }
                       });
@@ -424,17 +422,17 @@ export class VisitorsService {
                     } else {
                       //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
                       this.helperService.entryOutOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
-                      observer.next(false);
-                      observer.complete();
+                      return false;
 
                     }
 
                   } else {
                     //se dispara si el Visitor esta fuera de rango (fechas permitidas)
                     this.helperService.entryOutOfAuthorizedDateRange(visitor);
-                    observer.next(false);
-                    observer.complete();
+                    return false;
                   }
+
+                  return false;
 
                       
   //               } else {
@@ -461,7 +459,7 @@ export class VisitorsService {
   //       }
   //    });
 
-  });
+  //});
 }
 // FIN Registrar INGRESO de un visitante
   // FIN METODOS (para registrar Ingresos y Egresos)
