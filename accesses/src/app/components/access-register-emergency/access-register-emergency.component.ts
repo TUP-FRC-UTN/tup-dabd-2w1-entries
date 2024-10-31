@@ -1,4 +1,4 @@
-import { NgClass } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { AfterViewChecked, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { AccessEmergenciesService } from '../../services/access-emergencies/access-emergencies.service';
@@ -9,7 +9,7 @@ import { AccessEmergencyPersonDto } from '../../models/access-emergencies/access
 @Component({
   selector: 'access-app-register-emergency',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass],
+  imports: [ReactiveFormsModule, NgClass, NgIf],
   templateUrl: './access-register-emergency.component.html',
   styleUrl: './access-register-emergency.component.css'
 })
@@ -95,7 +95,11 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
   addPersonForm(emergencyPerson?: AccessEmergencyPersonDto) {
     const peopleFormArray = this.form.controls.people;
     const documentTypeControl = new FormControl('DNI', [Validators.required]);
-    const documentNumberControl = new FormControl(emergencyPerson?.data.document ?? '', [Validators.required]);
+    const documentNumberControl = new FormControl(emergencyPerson?.data.document ?? '', [
+      Validators.required,
+      Validators.minLength(8),
+      Validators.maxLength(15),
+      Validators.pattern('^[A-Za-z0-9]{8,15}$')]);
     const subscriptions = new Subscription();
 
     documentNumberControl.addValidators(this.documentUniqueValidator(documentTypeControl));
@@ -202,11 +206,22 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
     this.personUpdated.next();
   }
 
+  onPlateInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.toUpperCase();
+    this.form.controls.vehicle.patchValue({ plate: input.value });
+  }
+
   vehicleTypeChanged() {
     const plateControl = this.form.controls.vehicle.controls.plate;
+    const platePattern = '^[A-Z]{1,3}\\d{3}[A-Z]{0,3}$';
+
     if (this.form.value.vehicle?.type != '') {
       setTimeout(() => {
-        plateControl.setValidators([Validators.required]);
+        plateControl.setValidators([
+          Validators.required, 
+          Validators.pattern(platePattern), 
+          Validators.maxLength(7)]);
         plateControl.updateValueAndValidity();
       }, 1);
     }
