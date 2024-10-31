@@ -56,7 +56,7 @@ export class VisitorsService {
     return [...this.visitorslist]
   }
 
-  //filtra la list de Visitors
+  //filtra la list de Visitors (no se usa, datatable ya lo incluye)
   getVisitorByParam(parameter: string): User_AllowedInfoDto[] {
 
     //console.log("el cambio: " + parameter);
@@ -229,24 +229,26 @@ export class VisitorsService {
   RegisterExit(visitor: User_AllowedInfoDto): Observable<boolean> {
     return new Observable<boolean>((observer) => {
 
-      this.getVisitorLastEntry(visitor.document).subscribe({
-        next: (lastEntryResponse) => {
-          const lastEntry: LastEntryUserAllowedDto = lastEntryResponse;
+      // LA VERFICACION (sobre si su ult. movimiento fue un Ingreso o Egreso) AHORA SE HACE EN EL BACK
+
+      // this.getVisitorLastEntry(visitor.document).subscribe({
+      //   next: (lastEntryResponse) => {
+      //     const lastEntry: LastEntryUserAllowedDto = lastEntryResponse;
   
-          this.getVisitorLastExit(visitor.document).subscribe({
-            next: (lastExitResponse) => {
-              const lastExit: LastExitUserAllowedDto = lastExitResponse;
+      //     this.getVisitorLastExit(visitor.document).subscribe({
+      //       next: (lastExitResponse) => {
+      //         const lastExit: LastExitUserAllowedDto = lastExitResponse;
               
-              const lastExitAux: Date | null = this.helperService.processDate(lastExit.movementDatetime);
-              const lastEntryAux: Date | null = this.helperService.processDate(lastEntry.movementDatetime);
+      //         const lastExitAux: Date | null = this.helperService.processDate(lastExit.movementDatetime);
+      //         const lastEntryAux: Date | null = this.helperService.processDate(lastEntry.movementDatetime);
   
-              const lastExitDateTime: Date = lastExitAux || new Date("2001-12-15");
-              const lastEntryDateTime: Date = lastEntryAux || new Date("2000-10-12");
+      //         const lastExitDateTime: Date = lastExitAux || new Date("2001-12-15");
+      //         const lastEntryDateTime: Date = lastEntryAux || new Date("2000-10-12");
   
-              const isFirstEntry: boolean = lastEntry.firstEntry;
-              const isFirstExit: boolean = lastExit.firstExit;
+      //         const isFirstEntry: boolean = lastEntry.firstEntry;
+      //         const isFirstExit: boolean = lastExit.firstExit;
   
-              if ((!isFirstEntry && isFirstExit) || (lastEntryDateTime > lastExitDateTime)) {
+      //         if ((!isFirstEntry && isFirstExit) || (lastEntryDateTime > lastExitDateTime)) {
                 if (visitor.observations == undefined) {
                   visitor.observations = "";
                 }
@@ -263,16 +265,26 @@ export class VisitorsService {
                     const newMovement_ExitDto = this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
   
                     this.postVisitorExit(newMovement_ExitDto).subscribe({
-                      next: () => {
+                      next: (response) => {
+                        console.log("RegisterExit response: ", response);
+                        
                         this.helperService.registerExitSuccess(newMovement_ExitDto);
                         observer.next(true);
                         observer.complete();
+                        
                       },
                       error: (error) => {
-                        this.helperService.registerExitError();
-                        console.log(error);
-                        observer.next(false);
-                        observer.complete();
+                        console.log("RegisterExit error: ", error);
+                        if(error.status != 409){
+                          this.helperService.registerExitError();
+                          observer.next(false);
+                          observer.complete();
+
+                        } else {
+                          this.helperService.exitNotAllowed();
+                          observer.next(false);
+                          observer.complete();
+                        }
                       }
                     });
   
@@ -287,27 +299,27 @@ export class VisitorsService {
                   observer.next(false);
                   observer.complete();
                 }
-              } else {
-                this.helperService.exitNotAllowed();
-                observer.next(false);
-                observer.complete();
-              }
-            },
-            error: (error) => {
-              this.helperService.getlastExitError();
-              console.log(error);
-              observer.next(false);
-              observer.complete();
-            }
-          });
-        },
-        error: (error) => {
-          this.helperService.getLastEntryError();
-          console.log(error);
-          observer.next(false);
-          observer.complete();
-        }
-      });
+      //         } else {
+      //           this.helperService.exitNotAllowed();
+      //           observer.next(false);
+      //           observer.complete();
+      //         }
+      //       },
+      //       error: (error) => {
+      //         this.helperService.getlastExitError();
+      //         console.log(error);
+      //         observer.next(false);
+      //         observer.complete();
+      //       }
+      //     });
+      //   },
+      //   error: (error) => {
+      //     this.helperService.getLastEntryError();
+      //     console.log(error);
+      //     observer.next(false);
+      //     observer.complete();
+      //   }
+      // });
     });
   }
   
@@ -324,39 +336,41 @@ export class VisitorsService {
  RegisterAccess(visitor :User_AllowedInfoDto): Observable<boolean>{
   return new Observable<boolean>((observer) => {
 
+    // LA VERFICACION (sobre si su ult. movimiento fue un Ingreso o Egreso) AHORA SE HACE EN EL BACK
+
     //verifica si su ultimo movimiento fue Ingreso (para poder Egresar correctamente)
     //post en la URL
-    this.getVisitorLastEntry(visitor.document).subscribe({
-      next: (response) => {
-          //si la API devolvio la info correctamente, sigue el proceso
-          console.log("response de getVisitorLastEntry(): ", response);
-          const lastEntry: LastEntryUserAllowedDto = response;
+    // this.getVisitorLastEntry(visitor.document).subscribe({
+    //   next: (response) => {
+    //       //si la API devolvio la info correctamente, sigue el proceso
+    //       console.log("response de getVisitorLastEntry(): ", response);
+    //       const lastEntry: LastEntryUserAllowedDto = response;
 
-          this.getVisitorLastExit(visitor.document).subscribe({
-            next: (response) => {
-                //si la API devolvio la info correctamente, sigue el proceso
-                console.log("response de getVisitorLastExit(): ", response);
-                const lastExit: LastExitUserAllowedDto = response;
+    //       this.getVisitorLastExit(visitor.document).subscribe({
+    //         next: (response) => {
+    //             //si la API devolvio la info correctamente, sigue el proceso
+    //             console.log("response de getVisitorLastExit(): ", response);
+    //             const lastExit: LastExitUserAllowedDto = response;
       
-                //si alguna de las fechas es null (en caso de q no haya un Ingreso y/o Egreso del Visitor), 
-                // se le asigna una nueva fecha de ingreso/egreso, asegurando q el ultimo Egreso es mayor,
-                // fallando la 2da condicion a proposito. (todo esto pq el atributo movementDatetime puede ser Date o null)
+    //             //si alguna de las fechas es null (en caso de q no haya un Ingreso y/o Egreso del Visitor), 
+    //             // se le asigna una nueva fecha de ingreso/egreso, asegurando q el ultimo Egreso es mayor,
+    //             // fallando la 2da condicion a proposito. (todo esto pq el atributo movementDatetime puede ser Date o null)
 
-                console.log("lastExitAux: ");
-                const lastExitAux: Date | null = this.helperService.processDate(lastExit.movementDatetime);
-                console.log("lastEntryAux: ");
-                const lastEntryAux: Date | null = this.helperService.processDate(lastEntry.movementDatetime);
+    //             console.log("lastExitAux: ");
+    //             const lastExitAux: Date | null = this.helperService.processDate(lastExit.movementDatetime);
+    //             console.log("lastEntryAux: ");
+    //             const lastEntryAux: Date | null = this.helperService.processDate(lastEntry.movementDatetime);
 
-                const lastExitDateTime: Date = lastExitAux || new Date("2001-12-15");
-                const lastEntryDateTime: Date = lastEntryAux || new Date("2000-10-12");
+    //             const lastExitDateTime: Date = lastExitAux || new Date("2001-12-15");
+    //             const lastEntryDateTime: Date = lastEntryAux || new Date("2000-10-12");
 
-                const isFirstEntry: boolean = lastEntry.firstEntry;
-                const isFirstExit: boolean = lastExit.firstExit;
+    //             const isFirstEntry: boolean = lastEntry.firstEntry;
+    //             const isFirstExit: boolean = lastExit.firstExit;
 
-                //1ra condicion: si isFirstEntry es true, osea es su 1er ingreso, y si isFirstExit es true, osea q todavia no tiene 
-                // ningun egreso regsitrado, se puede registrar el ingreso.
-                //2da condicion: si la fecha y hora del ultimo Egreso es mayor a la del ultimo Ingreso, puede entrar.
-                if((isFirstEntry && isFirstExit) || (lastEntryDateTime < lastExitDateTime)){
+    //             //1ra condicion: si isFirstEntry es true, osea es su 1er ingreso, y si isFirstExit es true, osea q todavia no tiene 
+    //             // ningun egreso regsitrado, se puede registrar el ingreso.
+    //             //2da condicion: si la fecha y hora del ultimo Egreso es mayor a la del ultimo Ingreso, puede entrar.
+    //             if((isFirstEntry && isFirstExit) || (lastEntryDateTime < lastExitDateTime)){
 
                   //verifica observations
                   if(visitor.observations == undefined){
@@ -385,15 +399,25 @@ export class VisitorsService {
                       this.postVisitorEntry(newMovements_EntryDto).subscribe({
                         next: (response) => {
                           console.log("(access-visitors-service) -> Register Access response: ", response);
+                          
                           this.helperService.registerEntrySuccess(newMovements_EntryDto);
                           observer.next(true);
-                          observer.complete();
+                          observer.complete();                          
+                          
                         },
                         error: (error) => {
                           console.log("(access-visitors-service) -> Register Access error: ", error);
-                          this.helperService.registerEntryError();
-                          observer.next(false);
-                          observer.complete();
+
+                          if(error.status != 409){
+                            this.helperService.registerEntryError();
+                            observer.next(false);
+                            observer.complete();
+
+                          } else {
+                            this.helperService.entryNotAllowed();
+                            observer.next(false);
+                            observer.complete();
+                          }
                         }
                       });
 
@@ -413,32 +437,31 @@ export class VisitorsService {
                   }
 
                       
-                } else {
+  //               } else {
 
-                  this.helperService.entryNotAllowed();
-                  observer.next(false);
-                  observer.complete();
-                }
+  //                 this.helperService.entryNotAllowed();
+  //                 observer.next(false);
+  //                 observer.complete();
+  //               }
       
-              },
-            error: (error) => {
-                this.helperService.getlastExitError();
-                console.log(error);
-                observer.next(false);
-                observer.complete();
-              }
-          });
-        },
-      error: (error) => {
-          this.helperService.getLastEntryError();
-          console.log(error);
-          observer.next(false);
-          observer.complete();
-        }
-    });
+  //             },
+  //           error: (error) => {
+  //               this.helperService.getlastExitError();
+  //               console.log(error);
+  //               observer.next(false);
+  //               observer.complete();
+  //             }
+  //         });
+  //       },
+  //     error: (error) => {
+  //         this.helperService.getLastEntryError();
+  //         console.log(error);
+  //         observer.next(false);
+  //         observer.complete();
+  //       }
+  //    });
 
   });
-  
 }
 // FIN Registrar INGRESO de un visitante
   // FIN METODOS (para registrar Ingresos y Egresos)
