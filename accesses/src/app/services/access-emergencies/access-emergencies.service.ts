@@ -15,10 +15,9 @@ export class AccessEmergenciesService {
 
     registerEmergencyEntry(emergency: AccessNewEmergencyDto): Observable<AccessEmergencyPersonDto[]> {
       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-      console.log(emergency);
       if (emergency.observations?.length == 0)
         emergency.observations = null;
-      if ((emergency.vehicle?.vehicleType.description.length ?? 0) < 1)
+      if ((emergency.vehicle?.vehicle_Type.description.length ?? 0) < 1)
         emergency.vehicle = null;
       return this.http.post<AccessEmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_entry", emergency, { headers });
     }
@@ -27,7 +26,7 @@ export class AccessEmergenciesService {
       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
       if (emergency.observations?.length == 0)
         emergency.observations = null;
-      if ((emergency.vehicle?.vehicleType.description.length ?? 0) < 1)
+      if ((emergency.vehicle?.vehicle_Type.description.length ?? 0) < 1)
         emergency.vehicle = null;
       return this.http.post<AccessEmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_exit", emergency, { headers });
     }
