@@ -13,6 +13,7 @@ import 'pdfmake/build/vfs_fonts';
 import 'jszip';
 import Swal from 'sweetalert2';
 
+
 interface FilterValues {
   entryOrExit: Set<string>;
   tipoIngresante: Set<string>;
@@ -45,6 +46,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   exportButtonsEnabled: boolean = false;
   days: number[] = [];
   showFilters = false;
+
 
   filterValues: FilterValues = {
     entryOrExit: new Set<string>(),
@@ -136,6 +138,34 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setupDropdowns();
     });
   }
+  clearFilters(): void {
+   
+    $('.dropdown-menu input[type="checkbox"]').prop('checked', false);
+    
+
+    $('#nombreIngresanteFilter, #documentoFilter, #propietarioFilter, #placaFilter').val('');
+    
+  
+    $('.dropdown button .selected-count').text('');
+    
+
+    this.filterValues = {
+      entryOrExit: new Set<string>(),
+      tipoIngresante: new Set<string>(),
+      nombreIngresante: '',
+      documento: '',
+      typeCar: new Set<string>(),
+      propietario: '',
+      lateInRange: new Set<string>(),
+      plate: '',
+      days: new Set<string>()
+    };
+    
+  
+    if (this.table) {
+      this.table.draw();
+    }
+  }
 
   fetchData(): void {
     if (this.selectedYear && this.selectedMonth) {
@@ -154,6 +184,25 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
             });
           }
         });
+    }
+    else {
+      const year = new Date().getFullYear();
+      const month = new Date().getMonth() + 1;
+      this.http.get<any>(`http://localhost:8090/movements_entryToNeighbor/ByMonth?year=${year}&month=${month}`)
+      .subscribe({
+        next: (response) => {
+          console.log('API Response:', response);
+          this.movements = response.data;
+          this.loadDataIntoTable();
+        },
+        error: (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: '¡Error!',
+            text: 'Ocurrió un error al intentar cargar los datos. Por favor, intente nuevamente.',
+          });
+        }
+      });
     }
   }
 
@@ -238,32 +287,34 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           extend: 'excel',
           text: 'Excel',
           className: 'buttons-excel d-none',
-          filename: 'movimientos',
+          filename: () => {
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const month = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
+            return `Movimientos de ${month}`;
+          },
           exportOptions: {
             columns: ':visible'
           },
-          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
+          title: `LISTADO MENSUAL DE INGRESOS/EGRESOS - 
+                  Fecha de emisión ${new Date().toLocaleDateString('es-AR')}`,
         },
         {
           extend: 'pdf',
           text: 'PDF',
           className: 'buttons-pdf d-none',
-          filename: 'movimientos',
+          filename: () => {
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const month = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
+            return `Movimientos de ${month}`;
+          },
           orientation: 'landscape',
           exportOptions: {
             columns: ':visible'
           },
-          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
+          title: `LISTADO MENSUAL DE INGRESOS/EGRESOS - 
+                    Fecha de emisión ${new Date().toLocaleDateString('es-AR')}`,
         },
-        {
-          extend: 'print',
-          text: 'Print',
-          className: 'buttons-print d-none',
-          exportOptions: {
-            columns: ':visible'
-          },
-          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
-        }
+       
       ]
     });
 

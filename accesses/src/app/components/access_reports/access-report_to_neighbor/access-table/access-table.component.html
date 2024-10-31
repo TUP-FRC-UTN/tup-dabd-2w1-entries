@@ -88,6 +88,13 @@
                     title="Filtros avanzados">
                 <i class="fa-solid fa-filter"></i>
             </button>
+            <button class="btn btn-primary responsive-btn"
+            (click)="clearFilters()"
+            data-bs-toggle="tooltip" 
+            data-bs-placement="top" 
+            title="Limpiar filtros">
+            <i class="fa-regular fa-trash-can"></i>
+            </button>
             <button id="excelBtn" 
                     class="export-btn btn btn-success" 
                     disabled
@@ -104,14 +111,7 @@
                     title="Exportar a PDF">
                 <i class="fas fa-file-pdf"></i>
             </button>
-            <button id="printBtn" 
-                    class="export-btn btn btn-primary" 
-                    disabled
-                    data-bs-toggle="tooltip" 
-                    data-bs-placement="top" 
-                    title="Imprimir">
-                <i class="fas fa-print"></i>
-            </button>
+          
         </div>
     </div>
 
