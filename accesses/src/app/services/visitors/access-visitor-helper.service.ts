@@ -459,17 +459,6 @@ export class AccessVisitorHelperService {
     });
   }
 
-  exitNotAllowed(){
-    Swal.fire({
-      title: 'Tiene un Egreso previo!',
-      html: `
-        La persona debe ingresar antes de poder salir!
-      `,
-      icon: 'error',
-      confirmButtonText: 'Cerrar'
-    });
-  }
-
   registerExitSuccess(newMovement_ExitDto: NewMovement_ExitDto){
     Swal.fire({
       icon: 'success',
@@ -534,7 +523,17 @@ export class AccessVisitorHelperService {
     Swal.fire({
       title: 'El Visitante tiene un Ingreso previo!',
       html: `
-        El Visitante debe egresar antes de poder entrar!
+        El Visitante debe egresar antes de poder volver a entrar
+      `,
+      icon: 'error',
+      confirmButtonText: 'Cerrar'
+    });
+  }
+  exitNotAllowed(){
+    Swal.fire({
+      title: 'El Visitante tiene un Egreso previo!',
+      html: `
+        El Visitante debe ingresar antes de poder volver a salir
       `,
       icon: 'error',
       confirmButtonText: 'Cerrar'

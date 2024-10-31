@@ -1030,7 +1030,8 @@ loadAllOwners(): void {
                     text: 'Registro de ingreso exitoso.',
                     icon: 'success',
                     confirmButtonText: 'Cerrar',
-                  }).then(() => {
+                  })
+                  .then(() => {
                     observer.next(true);
                     observer.complete();
                   });
@@ -1049,8 +1050,8 @@ loadAllOwners(): void {
                     });
                   } else {
                     Swal.fire({
-                      title: 'Tiene un Ingreso pendiente de Egreso',
-                      text: 'El último movimiento de la persona fue un Ingreso',
+                      title: 'El Vecino tiene un Ingreso previo!',
+                      text: 'El Vecino debe egresar antes de poder volver a entrar',
                       icon: 'error',
                       confirmButtonText: 'Cerrar',
                     }).then(() => {
@@ -1227,8 +1228,8 @@ RegisterExitOwner(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
                   observer.complete();
                 } else {
                   Swal.fire({
-                    title: 'Tiene un Egreso pendiente de Ingreso',
-                    text: 'El último movimiento de la persona fue un Egreso',
+                    title: 'El Vecino tiene un egreso previo!',
+                    text: 'El Vecino debe ingresar antes de poder volver a salir',
                     icon: 'error',
                     confirmButtonText: 'Cerrar',
                   });
@@ -1405,8 +1406,8 @@ RegisterExitOwner(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
                         text: 'Error al cargar los datos. Intenta nuevamente.',
                       }
                     : {
-                        title: 'Tiene un Ingreso pendiente de Egreso',
-                        text: 'El último movimiento de la persona fue un Ingreso',
+                        title: 'La Persona tiene un Ingreso previo!',
+                        text: 'La persona debe egresar antes de poder volver a entrar',
                       };
   
                   Swal.fire({
@@ -1578,8 +1579,8 @@ RegisterExitOwner(visitor: User_AllowedInfoDtoOwner): Observable<boolean> {
 
               } else {
                 Swal.fire({
-                  title: 'Tiene un Egreso pendiente de Ingreso',
-                  text: 'El último movimiento de la persona fue un Egreso',
+                  title: 'El Visitante tiene un Egreso previo!',
+                  text: 'El Visitante debe ingresar antes de poder volver a salir',
                   icon: 'error',
                   confirmButtonText: 'Cerrar',
                 });
