@@ -11,15 +11,15 @@
             <a class="nav-link" routerLink="/entry">Informe de ingresos diarios</a>
           </li> -->
           <li class="nav-item">
-            <a class="nav-link" routerLink="/Inform">Informe mensual de ingresos</a>
+            <a class="nav-link" routerLink="/reports">Informe mensual de ingresos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="/Dashboards">Dashboard</a>
+            <a class="nav-link" routerLink="/dashboards">Dashboard</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="/VisitorRegister">Registro de invitados</a>
+            <a class="nav-link" routerLink="/visitor/register">Registro de invitados</a>
           </li>
- <!--          <li class="nav-item">
+<!--          <li class="nav-item">
             <a class="nav-link" routerLink="/edit">editar</a>
           </li> -->
           
@@ -47,10 +47,10 @@
           <option value="OwnerAccess">Ingreso/Egreso de vecino</option>
           <option value="Entry">Ingreso/Egreso de empleados</option>
         </select> -->
-        <button class="btn btn-primary" value="Visitors" (click)="navigateToComponent($event)">Registrar Ingresos/egresos</button>
+        <button class="btn btn-primary" value="visitors" (click)="navigateToComponent($event)">Registrar Ingresos/egresos</button>
       </div>
       <div class="col text-end mt-4 pt-2"> <!-- Mantener alineado a la derecha -->
-        <app-register-emergency></app-register-emergency>
+        <access-app-register-emergency></access-app-register-emergency>
       </div>
     </div>
   </div>

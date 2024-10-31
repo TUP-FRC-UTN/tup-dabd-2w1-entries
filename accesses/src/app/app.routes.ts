@@ -1,23 +1,19 @@
 import { Routes } from '@angular/router';
-import { VisitorRegistryComponent } from './components/visitors/visitor-registry/visitor-registry.component';
-import { VisitorRegisterEntryComponent } from './components/visitors/(no-hace-falta)visitor-register-entry/visitor-register-entry.component';
-import { InformComponent } from './components/Inform/ReportToNeighbor/report-neighboor/inform.component';
-import { EntryComponent } from './components/Entrys/entry/entry.component';
-
-import { GeneralDashboardComponent } from './components/Dashboards/general-dashboard/general-dashboard.component';
-import { RegistroComponent } from './components/Employee/registro/registro.component';
-import { GlobalReportComponent } from './components/Inform/global-report/global-report.component';
-import { EditComponent } from './components/visitors/edit/edit.component';
-import { AccessContainerVisitorsRegistrationComponent } from './components/visitors/access_visitors_register/access-container-visitors-registration/access-container-visitors-registration.component';
+import { AccessContainerVisitorsRegistrationComponent } from './components/access_visitors/access_visitors_register/access-container-visitors-registration/access-container-visitors-registration.component';
+import { AccessVisitorRegistryComponent } from './components/access_visitors/access-visitor-registry/access-visitor-registry.component';
+import { AccessGlobalReportComponent } from './components/access_reports/access-global-report/access-global-report.component';
+import { AccessGeneralDashboardComponent } from './components/access_dashboards/access-general-dashboard/access-general-dashboard.component';
+import { AccessDailyFetchComponent } from './components/access_entrys/access-daily-fetch/access-daily-fetch.component';
+import { AccessEditComponent } from './components/access_visitors/access-edit/access-edit.component';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'Inform', pathMatch: 'full' },
-    { path: 'Visitors', component: VisitorRegistryComponent },
-    { path: 'Inform', component: GlobalReportComponent },
+    { path: '', redirectTo: 'reports', pathMatch: 'full' },
+    { path: 'visitors', component: AccessVisitorRegistryComponent },
+    { path: 'reports', component: AccessGlobalReportComponent },
     //{ path: 'entry', component: EntryComponent },
-    { path: 'Dashboards', component: GeneralDashboardComponent },
-    { path: 'Entry', component: RegistroComponent },
-    { path: 'edit', component: EditComponent },
-    { path: 'VisitorRegister', component: AccessContainerVisitorsRegistrationComponent }
+    { path: 'dashboards', component: AccessGeneralDashboardComponent },
+    { path: 'entry', component: AccessDailyFetchComponent },
+    { path: 'edit', component: AccessEditComponent },
+    { path: 'visitor/register', component: AccessContainerVisitorsRegistrationComponent }
 
 ];
