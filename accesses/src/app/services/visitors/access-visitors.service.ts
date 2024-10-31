@@ -6,6 +6,7 @@ import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { AccessVisitorHelperService } from './access-visitor-helper.service';
 import Swal from 'sweetalert2';
+import { error } from 'jquery';
 
 @Injectable({
   providedIn: 'root'
@@ -224,11 +225,7 @@ export class VisitorsService {
 } */
 
 
-
-  //Registrar EGRESO de un visitante
-  RegisterExit(visitor: User_AllowedInfoDto): boolean {
-    //return new Observable<boolean>((observer) => {
-
+//Registrar EGRESO de un visitante
       // LA VERFICACION (sobre si su ult. movimiento fue un Ingreso o Egreso) AHORA SE HACE EN EL BACK
 
       // this.getVisitorLastEntry(visitor.document).subscribe({
@@ -249,6 +246,9 @@ export class VisitorsService {
       //         const isFirstExit: boolean = lastExit.firstExit;
   
       //         if ((!isFirstEntry && isFirstExit) || (lastEntryDateTime > lastExitDateTime)) {
+  RegisterExit(visitor: User_AllowedInfoDto): Observable<boolean> {
+    return new Observable<boolean>((observer) => {
+
                 if (visitor.observations == undefined) {
                   visitor.observations = "";
                 }
@@ -268,36 +268,56 @@ export class VisitorsService {
                       next: (response) => {
                         console.log("RegisterExit response: ", response);
                         
-                        this.helperService.registerExitSuccess(newMovement_ExitDto);
-                        return true;
-                        // observer.next(true);
-                        // observer.complete();
+                        if(response.status !== 409){
+                          this.helperService.registerExitSuccess(newMovement_ExitDto);
+                          //return true;
+                          observer.next(true);
+                          observer.complete();
+                        } else {
+                          this.helperService.registerExitError();
+                          //return false;
+                          observer.next(false);
+                          observer.complete();
+                        }
                         
                       },
                       error: (error) => {
                         console.log("RegisterExit error: ", error);
                         if(error.status != 409){
                           this.helperService.registerExitError();
-                          return false;
-
+                          //return false;
+                          observer.next(false);
+                          observer.complete();
+                          
                         } else {
                           this.helperService.exitNotAllowed();
-                          return false;
+                          //return false;
+                          observer.next(false);
+                          observer.complete();
                         }
                       }
                     });
   
                   } else {
                     this.helperService.exitLaterThanAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
-                    return false;
+                    //return false;
+                    observer.next(false);
+                    observer.complete();
                   }
   
                 } else {
                   this.helperService.exitLaterThanAuthorizedDateRange(visitor);
-                  return false;
+                  //return false;
+                  observer.next(false);
+                  observer.complete();
                 }
 
-                return false;
+                // //return false;
+                // observer.next(false);
+                // observer.complete();
+    });
+  }
+  
       //         } else {
       //           this.helperService.exitNotAllowed();
       //           observer.next(false);
@@ -319,8 +339,6 @@ export class VisitorsService {
       //     observer.complete();
       //   }
       // });
-    //});
-  }
   
   //FIN Registrar EGRESO de un visitante
 
@@ -332,10 +350,7 @@ export class VisitorsService {
 
 
  //Registrar INGRESO de un visitante
- RegisterAccess(visitor :User_AllowedInfoDto): boolean {
-  //return new Observable<boolean>((observer) => {
-
-    // LA VERFICACION (sobre si su ult. movimiento fue un Ingreso o Egreso) AHORA SE HACE EN EL BACK
+ // LA VERFICACION (sobre si su ult. movimiento fue un Ingreso o Egreso) AHORA SE HACE EN EL BACK
 
     //verifica si su ultimo movimiento fue Ingreso (para poder Egresar correctamente)
     //post en la URL
@@ -370,6 +385,8 @@ export class VisitorsService {
     //             // ningun egreso regsitrado, se puede registrar el ingreso.
     //             //2da condicion: si la fecha y hora del ultimo Egreso es mayor a la del ultimo Ingreso, puede entrar.
     //             if((isFirstEntry && isFirstExit) || (lastEntryDateTime < lastExitDateTime)){
+ RegisterAccess(visitor :User_AllowedInfoDto): Observable<boolean> {
+  return new Observable<boolean>((observer) => {
 
                   //verifica observations
                   if(visitor.observations == undefined){
@@ -399,8 +416,19 @@ export class VisitorsService {
                         next: (response) => {
                           console.log("(access-visitors-service) -> Register Access response: ", response);
                           
-                          this.helperService.registerEntrySuccess(newMovements_EntryDto);
-                          return true;                          
+                          if(response.status !== 409){
+                            this.helperService.registerEntrySuccess(newMovements_EntryDto);
+                            //return true;
+                            observer.next(true);
+                            observer.complete();   
+
+                          } else {
+                            this.helperService.registerEntryError();
+                            //return false;
+                            observer.next(false);
+                            observer.complete();
+                          }
+
                           
                         },
                         error: (error) => {
@@ -408,13 +436,15 @@ export class VisitorsService {
 
                           if(error.status != 409){
                             this.helperService.registerEntryError();
-                            return false;
-                            // observer.next(false);
-                            // observer.complete();
+                            //return false;
+                            observer.next(false);
+                            observer.complete();
 
                           } else {
                             this.helperService.entryNotAllowed();
-                            return false;
+                            //return false;
+                            observer.next(false);
+                            observer.complete();
                           }
                         }
                       });
@@ -422,20 +452,26 @@ export class VisitorsService {
                     } else {
                       //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
                       this.helperService.entryOutOfAuthorizedHourRange(visitor, indexAuthRange, indexDayAllowed);
-                      return false;
+                      //return false;
+                      observer.next(false);
+                      observer.complete();
 
                     }
 
                   } else {
                     //se dispara si el Visitor esta fuera de rango (fechas permitidas)
                     this.helperService.entryOutOfAuthorizedDateRange(visitor);
-                    return false;
+                    //return false;
+                    observer.next(false);
+                    observer.complete();
                   }
 
-                  return false;
-
-                      
-  //               } else {
+                  //return false;
+                  // observer.next(false);
+                  // observer.complete();
+  });
+}
+ //               } else {
 
   //                 this.helperService.entryNotAllowed();
   //                 observer.next(false);
@@ -458,9 +494,6 @@ export class VisitorsService {
   //         observer.complete();
   //       }
   //    });
-
-  //});
-}
 // FIN Registrar INGRESO de un visitante
   // FIN METODOS (para registrar Ingresos y Egresos)
 
