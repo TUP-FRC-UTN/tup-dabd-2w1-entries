@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { AccessAllowedDay, AccessDay, AccessAuthRange,AccessUser } from '../../../../models/access-visitors/access-visitors-models';
@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import { Subject } from 'rxjs';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
 import { takeUntil } from 'rxjs';
+import { EventEmitter } from '@angular/core';
 @Component({
   selector: 'app-access-time-range-visitors-registration',
   standalone: true,
@@ -17,8 +18,39 @@ import { takeUntil } from 'rxjs';
 export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
   private unsubscribe$ = new Subject<void>();
   users: AccessUser[] = [];
-
-
+  @Output() selectedUser = new EventEmitter<AccessUser>();
+  ngOnInit(): void {
+    this.visitorService.getAllowedDays().subscribe(days => {
+      this._allowedDays = days;
+      this.updateDaysSelected();
+    });
+    this.updateDateFieldsState();
+    this.loadUsers(); // This will handle emitting the selected user now
+  }
+  
+  loadUsers(): void {
+    this.httpService.getUsers()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe({
+        next: (users) => {
+          console.log('Users loaded:', users.length);
+          this.users = users;
+        
+          const selectedUserId = this.handleUsers();
+          if (selectedUserId) {
+            const selectedUser = this.users.find(user => user.id === selectedUserId);
+            if (selectedUser) {
+              this.selectedUser.emit(selectedUser);
+              console.log(selectedUser); 
+            }
+          }
+        },
+        error: (error) => {
+          console.error('Error loading users:', error);
+        },
+      });
+  }
+  
 
   days: AccessDay[] = [
     { name: 'Lun', value: false },
@@ -130,28 +162,7 @@ get areDatesReadonly(): boolean {
  disableDateInputs: boolean = false;
 
 
-  ngOnInit(): void {
-    this.visitorService.getAllowedDays().subscribe(days => {
-      this._allowedDays = days;
-      this.updateDaysSelected();
-    });
-    this.updateDateFieldsState();
-    this.loadUsers();
-  }
-  loadUsers():void{
-    this.httpService.getUsers()
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe({
-        next: (users) => {
-          console.log('Users loaded:', this.users.length);
-          this.users=users;
-        },
-        error: (error) => {
-          console.error('Error loading users:', error);
-        },
-      
-      });
-  }
+
 
   handleUsers(): number {
     for (const user of this.users) {
