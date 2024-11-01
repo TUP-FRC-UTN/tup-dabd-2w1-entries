@@ -1,215 +1,152 @@
-<div class="filter-section">
-    <div class="row align-items-end">
+<!-- Contenedor principal -->
+<div class="filter-section mb-4">
+    <!-- Fila de filtros directos -->
+    <div class="row g-3 mb-3">
+        <!-- Nombre del Ingresante -->
         <div class="col-md-3">
-            <label class="form-label">Tipo de entrada</label>
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="dropdownEntryExit" data-bs-toggle="dropdown" aria-expanded="false">
-                    Seleccionar tipos de entrada
-                    <span class="selected-count"></span>
-                </button>
-                <ul class="dropdown-menu w-100" aria-labelledby="dropdownEntryExit">
-                    <li>
-                        <label class="dropdown-item">
-                            <input type="checkbox" class="form-check-input me-2" value="entry"> Entrada
-                        </label>
-                    </li>
-                    <li>
-                        <label class="dropdown-item">
-                            <input type="checkbox" class="form-check-input me-2" value="exit"> Salida
-                        </label>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <label class="form-label">Tipo de Ingresante</label>
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="dropdownTipoIngresante" data-bs-toggle="dropdown" aria-expanded="false">
-                    Seleccionar tipos de ingresante
-                    <span class="selected-count"></span>
-                </button>
-                <ul class="dropdown-menu w-100" aria-labelledby="dropdownTipoIngresante">
-                    <li>
-                        <label class="dropdown-item">
-                            <input type="checkbox" class="form-check-input me-2" value="neighbour"> Vecino
-                        </label>
-                    </li>
-                    <li>
-                        <label class="dropdown-item">
-                            <input type="checkbox" class="form-check-input me-2" value="visitor"> Visitante
-                        </label>
-                    </li>
-                    <li>
-                        <label class="dropdown-item">
-                            <input type="checkbox" class="form-check-input me-2" value="delivery"> Delivery
-                        </label>
-                    </li>
-                    <li>
-                        <label class="dropdown-item">
-                            <input type="checkbox" class="form-check-input me-2" value="constructionworker"> Obrero
-                        </label>
-                    </li>
-                    <li>
-                        <label class="dropdown-item">
-                            <input type="checkbox" class="form-check-input me-2" value="suplier"> Proveedor
-                        </label>
-                    </li>
-                    <li>
-                        <label class="dropdown-item">
-                            <input type="checkbox" class="form-check-input me-2" value="employee"> Empleado
-                        </label>
-                    </li>
-                    <li>
-                        <label class="dropdown-item">
-                            <input type="checkbox" class="form-check-input me-2" value="services"> Servicios
-                        </label>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-md-2">
             <label class="form-label">Nombre del Ingresante</label>
-            <input type="text" class="form-control" id="nombreIngresanteFilter" placeholder="Buscar por nombre">
+            <div class="input-group">
+                <input type="text" class="form-control" id="nombreIngresanteFilter" placeholder="Buscar por nombre">
+            </div>
         </div>
 
-        <div class="col-md-2">
+        <!-- Documento -->
+        <div class="col-md-3">
             <label class="form-label">Documento</label>
-            <input type="text" class="form-control" id="documentoFilter" placeholder="Buscar por documento">
+            <div class="input-group">
+                <input type="text" class="form-control" id="documentoFilter" placeholder="Buscar por documento">
+            </div>
         </div>
 
-        <div class="col-md-2 d-flex align-items-center gap-2">
-            <button class="btn btn-secondary filter-toggle" 
-                    [class.active]="showFilters" 
-                    (click)="toggleAdvancedFilters()"
+        <!-- Placa -->
+        <div class="col-md-2">
+            <label class="form-label">Placa</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="placaFilter" placeholder="Buscar por placa">
+            </div>
+        </div>
+
+        <!-- Propietario -->
+        <div class="col-md-2">
+            <label class="form-label">Propietario</label>
+            <div class="input-group">
+                <input type="text" class="form-control" id="propietarioFilter" placeholder="Buscar propietario">
+            </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="col-md-2 d-flex align-items-end gap-2">
+            <button class="btn btn-secondary" 
+                    (click)="openModal()"
                     data-bs-toggle="tooltip" 
                     data-bs-placement="top" 
                     title="Filtros avanzados">
                 <i class="fa-solid fa-filter"></i>
             </button>
-            <button class="btn btn-primary responsive-btn"
-            (click)="clearFilters()"
-            data-bs-toggle="tooltip" 
-            data-bs-placement="top" 
-            title="Limpiar filtros">
-            <i class="fa-regular fa-trash-can"></i>
+            <button class="btn btn-primary"
+                    (click)="clearFilters()"
+                    data-bs-toggle="tooltip" 
+                    data-bs-placement="top" 
+                    title="Limpiar filtros">
+                <i class="fa-regular fa-trash-can"></i>
             </button>
             <button id="excelBtn" 
-                    class="export-btn btn btn-success" 
-                    disabled
+                    class="btn btn-success" 
+                    [disabled]="!exportButtonsEnabled"
                     data-bs-toggle="tooltip" 
                     data-bs-placement="top" 
                     title="Exportar a Excel">
                 <i class="fas fa-file-excel"></i>
             </button>
             <button id="pdfBtn" 
-                    class="export-btn btn btn-danger" 
-                    disabled
+                    class="btn btn-danger" 
+                    [disabled]="!exportButtonsEnabled"
                     data-bs-toggle="tooltip" 
                     data-bs-placement="top" 
                     title="Exportar a PDF">
                 <i class="fas fa-file-pdf"></i>
             </button>
-          
         </div>
     </div>
+</div>
 
-    <div id="advancedFilters" class="advanced-filters mt-3">
-        <div class="row">
-            <div class="col-md-3 mb-2">
-                <label class="form-label">Tipo de Vehículo</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="dropdownTypecar" data-bs-toggle="dropdown" aria-expanded="false">
-                        Seleccionar tipo de vehículo
-                        <span class="selected-count"></span>
-                    </button>
-                    <ul class="dropdown-menu w-100" aria-labelledby="dropdownTypecar">
-                        <li>
-                            <label class="dropdown-item">
-                                <input type="checkbox" class="form-check-input me-2" value="car"> Auto
-                            </label>
-                        </li>
-                        <li>
-                            <label class="dropdown-item">
-                                <input type="checkbox" class="form-check-input me-2" value="motorcycle"> Moto
-                            </label>
-                        </li>
-                        <li>
-                            <label class="dropdown-item">
-                                <input type="checkbox" class="form-check-input me-2" value="truck"> Camión
-                            </label>
-                        </li>
-                        <li>
-                            <label class="dropdown-item">
-                                <input type="checkbox" class="form-check-input me-2" value="bike"> Bicicleta
-                            </label>
-                        </li>
-                        <li>
-                            <label class="dropdown-item">
-                                <input type="checkbox" class="form-check-input me-2" value="van"> Camioneta
-                            </label>
-                        </li>
-                        <li>
-                            <label class="dropdown-item">
-                                <input type="checkbox" class="form-check-input me-2" value="walk"> Sin vehículo
-                            </label>
-                        </li>
-                    </ul>
+<!-- Modal de Filtros Avanzados -->
+<div class="modal fade" id="advancedFiltersModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Filtros Avanzados</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <!-- Tipo de Entrada -->
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo de Entrada</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="entry" id="entryCheck">
+                                <label class="form-check-label" for="entryCheck">Entrada</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="exit" id="exitCheck">
+                                <label class="form-check-label" for="exitCheck">Salida</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tipo de Ingresante -->
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo de Ingresante</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="form-check" *ngFor="let tipo of tiposIngresante">
+                                <input class="form-check-input" type="checkbox" [value]="tipo.value" [id]="tipo.value">
+                                <label class="form-check-label" [for]="tipo.value">{{tipo.label}}</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tipo de Vehículo -->
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo de Vehículo</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="form-check" *ngFor="let tipo of tiposVehiculo">
+                                <input class="form-check-input" type="checkbox" [value]="tipo.value" [id]="tipo.value">
+                                <label class="form-check-label" [for]="tipo.value">{{tipo.label}}</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estado de Horario -->
+                    <div class="col-md-6">
+                        <label class="form-label">Estado de Horario</label>
+                        <div class="d-flex flex-column gap-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="inrange" id="inrangeCheck">
+                                <label class="form-check-label" for="inrangeCheck">En horario</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="late" id="lateCheck">
+                                <label class="form-check-label" for="lateCheck">Tarde</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Días -->
+                    <div class="col-12">
+                        <label class="form-label">Día</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <div class="form-check" *ngFor="let day of days">
+                                <input class="form-check-input" type="checkbox" [value]="day" [id]="'day' + day">
+                                <label class="form-check-label" [for]="'day' + day">{{day}}</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="col-md-3 mb-2">
-                <label class="form-label">Estado de Horario</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="dropdownLateInRange" data-bs-toggle="dropdown" aria-expanded="false">
-                        Seleccionar estado
-                        <span class="selected-count"></span>
-                    </button>
-                    <ul class="dropdown-menu w-100" aria-labelledby="dropdownLateInRange">
-                        <li>
-                            <label class="dropdown-item">
-                                <input type="checkbox" class="form-check-input me-2" value="inrange"> En horario
-                            </label>
-                        </li>
-                        <li>
-                            <label class="dropdown-item">
-                                <input type="checkbox" class="form-check-input me-2" value="late"> Tarde
-                            </label>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="col-md-3 mb-2">
-                <label class="form-label">Placa</label>
-                <input type="text" class="form-control" id="placaFilter" placeholder="Buscar por placa">
-            </div>
-
-            <div class="col-md-3 mb-2">
-                <label class="form-label">Propietario</label>
-                <input type="text" class="form-control" id="propietarioFilter" placeholder="Buscar por propietario">
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-3 mb-2">
-                <label class="form-label">Día</label>
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle w-50" type="button" id="dropdownDays" data-bs-toggle="dropdown" aria-expanded="false">
-                        Seleccionar día
-                        <span class="selected-count"></span>
-                    </button>
-                    <ul class="dropdown-menu w-100" aria-labelledby="dropdownDays">
-                        <ng-container *ngFor="let day of days">
-                            <li>
-                                <label class="dropdown-item">
-                                    <input type="checkbox" class="form-check-input me-2" [value]="day"> {{ day }}
-                                </label>
-                            </li>
-                        </ng-container>
-                    </ul>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="clearModalFilters()">Limpiar</button>
+                <button type="button" class="btn btn-primary" (click)="applyModalFilters()">Aplicar</button>
             </div>
         </div>
     </div>
@@ -225,6 +162,7 @@
                 <th>Tipo de Entrada</th>
                 <th>Tipo de Ingresante</th>
                 <th>Nombre</th>
+                <th>Tipo Doc.</th>
                 <th>Documento</th>
                 <th>Observaciones</th>
                 <th>Tipo de Vehículo</th>
