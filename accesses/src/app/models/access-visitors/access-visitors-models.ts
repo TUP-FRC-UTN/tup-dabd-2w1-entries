@@ -15,6 +15,9 @@ export interface AccessVehicleType {
   description: string;
 }
 
+export interface QrDto{
+  uid:string;
+}
 
 export interface AccessAllowedDay {
   day: AccessDay;
@@ -32,6 +35,8 @@ export interface AccessVisitor {
   hasVehicle: boolean;
   vehicle?: AccessVehicle; 
   visitDate?: Date;
+  neighborName?:string;
+  neighborLastName?:string;
 }
 export interface AccessVehicle {
   licensePlate: string; 
