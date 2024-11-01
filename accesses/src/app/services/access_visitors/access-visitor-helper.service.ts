@@ -27,7 +27,7 @@ export class AccessVisitorHelperService {
 
       //MOMENTANEO (en el futuro, el guardia debe poder seleccionar el vehiculo con el q entra el Visitor)
       //se verifica si el Visitor tiene un vehiculo
-      if(visitorInfoDto.vehicles.length > 0){
+      if(visitorInfoDto.vehicles?.length > 0){
         //si lo tiene se asigna
         visitorVehicle = visitorInfoDto.vehicles.at(0);
       } else {
