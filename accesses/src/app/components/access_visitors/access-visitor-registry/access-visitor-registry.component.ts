@@ -974,12 +974,6 @@ loadAllOwners(): void {
     this.subscription.add(subscriptionAll);
   }
 
-  //quedo obsoleto pq lo q antes se verificaba aca, ahora se hace en el back
-  RegisterAccessOwner(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
-
-    return this.prepareEntryMovement(visitor);
-
-  }
 
   // registra el ingreso de un VECINO (propietario o inquilino)
   private prepareEntryMovement(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
