@@ -23,6 +23,12 @@ import Swal from 'sweetalert2';
   ],
 })
 export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnDestroy {
+  user?: AccessUser;
+  handleSelectedUser(user: AccessUser): void {
+    this.user = user; 
+    console.log('Selected user:', this.user);
+  }
+  uid?:string;
   qrCodeId?:string;
   isQRCodeAvailable?: boolean;
   visitorForm!: FormGroup; 
@@ -30,13 +36,12 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   patentePattern = '^[A-Z]{1,3}\\d{3}[A-Z]{0,3}$';
   private unsubscribe$ = new Subject<void>();
   visitorRecord?:AccessVisitorRecord;
-  vehicleTypes: string[] = ['Car', 'Motorbike', 'Truck', 'Van']; // Elimina 'Bus'
+  vehicleTypes: string[] = ['Car', 'Motorbike', 'Truck', 'Van']; 
 
   vehicleTypeMapping: { [key: string]: string } = {
     'Car': 'Auto',
     'Motorbike': 'Moto',
     'Truck': 'Camión',
-    'Bus': 'Autobús',
     'Van': 'Camioneta'
   };
   vehicleOptions: { value: string, label: string }[] = [];
@@ -56,36 +61,58 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
 
 
   downloadQRCode(): void {
-    if (this.qrCodeId) {
-        this.visitorHttpService.getQRCode(this.qrCodeId).subscribe({
-            next: (blob) => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `VisitanteQrNro${this.qrCodeId}.png`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-                
-                this.resetEverything(); 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'QR Descargado',
-                    text: 'El registro ha sido limpiado. Puede agregar nuevos visitantes.',
-                    showConfirmButton: true
-                });
-            },
-            error: (error) => {
-                console.error('Error downloading QR code', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error al descargar el código QR',
-                });
-            }
+    if (!this.qrCodeId) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Advertencia',
+            text: 'No hay un ID de QR disponible.',
         });
+        return;
     }
+
+    this.visitorHttpService.getQRCode(this.qrCodeId).subscribe({
+        next: (blob: Blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Qr_${this.uid || 'default'}.png`; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            this.resetEverything();
+            Swal.fire({
+                icon: 'success',
+                title: 'QR Descargado',
+                text: 'Se descargó correctamente el QR. Puede agregar nuevos visitantes.',
+                showConfirmButton: true
+            });
+        },
+        error: (error) => {
+            console.error('Error downloading QR code', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al descargar el código QR.',
+            });
+        }
+    });
+}
+
+setNameQr(): void {
+  if (this.qrCodeId) {
+    this.visitorHttpService.getUidQrByQrId(this.qrCodeId).subscribe({
+      next: (response) => {
+        console.log('Response:', response); 
+        this.uid = response.uid; 
+        console.log('UID:', this.uid);
+      },
+      error: (error) => {
+        console.error('Error retrieving UID', error);
+      }
+    });
+  }
 }
 
 
@@ -122,13 +149,14 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   
       this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
         next: (response) => {
-          this.qrCodeId = response.qrCodeId || response.id;
+          this.qrCodeId = response.qrCodeId || response.id; 
+          this.setNameQr();
           this.isQRCodeAvailable = !!this.qrCodeId;
-        },
-        error: (error) => {
+      },
+      error: (error) => {
           console.error('Error sending visitor record', error);
           this.isQRCodeAvailable = false;
-        }
+      }
       });
     }
   }
@@ -157,7 +185,6 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
     this.loadVehicleTypes();
     this.listenToHasVehicleChanges();
     this.initVisitorRecord();
-  
   }
   initForm(): void {
     this.visitorForm = this.fb.group({
@@ -253,6 +280,8 @@ sendVisitorWithoutRH(): void {
             hasVehicle: visitantData.hasVehicle,
             documentType: visitantData.documentType || undefined,
             vehicle: vehicle, 
+            neighborLastName:this.user?.lastname,
+            neighborName:this.user?.name
         };
         if(this.visitorService.addVisitorsTemporalsSubject(visitor)){
           console.log("no sepudo agregar.")
