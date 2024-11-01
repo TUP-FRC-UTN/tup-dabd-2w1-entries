@@ -1,21 +1,21 @@
-.filter-toggle {
-    border: 1px solid black !important;
-}
-
+/* Hacer los selectores más específicos y añadir !important donde sea necesario */
+.btn.btn-primary,
+.btn.btn-secondary,
+.btn.btn-success,
+.btn.btn-danger,
+.filter-toggle,
 .export-btn {
     border: 1px solid black !important;
 }
 
-.btn-primary {
+/* Para los botones dentro de la sección de filtros */
+.filter-section .btn {
     border: 1px solid black !important;
 }
 
-.dropdown-menu .dropdown-item {
-    background-color: white !important;
-}
-
-.dropdown-menu .dropdown-item:hover {
-    background-color: #a3a3a3 !important;
+/* Para los botones de acción específicamente */
+.col-md-2 .btn {
+    border: 1px solid black !important;
 }
 
 .dropdown-menu {
