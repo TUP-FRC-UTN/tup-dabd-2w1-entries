@@ -147,6 +147,7 @@ export class VisitorsService {
                   if (indexAuthRange >= 0) {
   
                     let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
+                    console.log(indexDayAllowed);
                     if (indexDayAllowed >= 0) {
   
                       const newUserAllowedDto = this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
@@ -246,6 +247,7 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto): Observable<boolean> {
 
             // verifica si esta dentro de rango (dia y horario permitido)
             let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
+            console.log("(registrando el ingreso) indexDayAllowed:", indexDayAllowed);
             if(indexDayAllowed >= 0){
               
               // mapeos

@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { booleanAttribute, inject, Injectable } from '@angular/core';
 import { AccessAllowedDaysDto, AuthRangeInfoDto, AccessNewAuthRangeDto, AccessNewMovementExitDto, AccessNewMovementsEntryDto, AccessNewUserAllowedDto, AccessNewVehicleDto, AccessUserAllowedInfoDto, VehicleTypeDto } from '../../models/access-visitors/access-VisitorsModels';
 import Swal from 'sweetalert2';
 
@@ -234,10 +234,10 @@ export class AccessVisitorHelperService {
       if(authRangeInfoDto != undefined){
         for (var i = 0; i < authRangeInfoDto.allowedDays.length; i++) {
     
-          //console.log("todayIsInHourRange (en visitors.service) | ciclo del for: ", i);
+          console.log("todayIsInHourRange (en visitors.service) | ciclo del for: ", i);
     
           if(this.isTodayAnAllowedDay(authRangeInfoDto.allowedDays.at(i))){
-            //console.log("(Visitor dentro del rango horario!) index del AllowedDayDto valido: ", i);
+            console.log("(Visitor dentro del rango horario!) index del AllowedDayDto valido: ", i);
             return i; // devuelve el indice donde esta el allowedDayDto valido
           }
         }
@@ -248,24 +248,35 @@ export class AccessVisitorHelperService {
 
     // verifica si el Visitor esta dentro de un DIA permitido, y dentro del rango HORARIO permitido
     isTodayAnAllowedDay(allowedDayDto: AccessAllowedDaysDto | undefined): boolean {
-      //console.log("Metodo isTodayAnAllowedDay...");
+      console.log("Metodo isTodayAnAllowedDay...");
     
       // Verifica si los datos estan definidos
       if (!allowedDayDto?.day || !allowedDayDto?.init_hour || !allowedDayDto?.end_hour) {
-        //console.log("AllowedDay es undefined");
+        console.log("AllowedDay es undefined");
         return false;
       }
 
       //verifica si uno de los dias permitidos es hoy
       if (allowedDayDto.day.toString().toLowerCase() != this.getTodayDayOfWeek().toLowerCase()){
+        //console.log("dia del AllowedDay NO es hoy: ", allowedDayDto.day.toString().toLowerCase(), " | ", this.getTodayDayOfWeek().toLowerCase());
         return false;
       }
+
+      console.log("dia del AllowedDay SI es hoy: ", allowedDayDto.day.toString().toLowerCase(), " | ", this.getTodayDayOfWeek().toLowerCase());
     
       // fecha y hora actual para comparar
-      let todayDate = new Date();
-    
+      const todayDate = new Date();
+      const todayInitHour = this.getHourInit(allowedDayDto);
+      const todayEndHour = this.getHourEnd(allowedDayDto);
+
+      console.log("fecha de hoy, punto de comparacion: ", todayDate);
+      console.log("dia y hora de inicio: ", todayInitHour);
+      console.log("dia y hora de fin: ", todayEndHour);
+
+      const result: boolean = todayInitHour <= todayDate && todayEndHour >= todayDate;
+      console.log("esta dentro del rango horario? ", result);
       // compara si la fecha actual esta dentro del rango horario permitido
-      return this.getHourInit(allowedDayDto) <= todayDate && this.getHourEnd(allowedDayDto) >= todayDate;
+      return result;
     }
     
     //devuelve la hora de inicio (de un Allowed_DaysDto) en formato Date 
@@ -273,8 +284,18 @@ export class AccessVisitorHelperService {
 
       let response = new Date();
 
-      response.setHours(Number(allowedDayDto.init_hour.at(0)));
-      response.setMinutes(Number(allowedDayDto.init_hour.at(1)));
+      const hours: string = allowedDayDto.init_hour.substring(0, 2);
+      const minutes: string = allowedDayDto.init_hour.substring(3, 5);
+      const seconds: string = allowedDayDto.init_hour.substring(6, 8);
+
+      response.setHours(Number(hours));
+      response.setMinutes(Number(minutes));
+      response.setSeconds(Number(seconds));
+
+      // console.log("horas: ", hours);
+      // console.log("minutos: ", minutes);
+      // console.log("segundos: ", seconds);
+      // console.log("fecha resultante: ",response);
 
       return response;
     }
@@ -284,9 +305,18 @@ export class AccessVisitorHelperService {
 
       let response = new Date();
 
-      response.setHours(Number(allowedDayDto.end_hour.at(0)));
-      response.setMinutes(Number(allowedDayDto.end_hour.at(1)));
-      response.setSeconds(0);
+      const hours: string = allowedDayDto.end_hour.substring(0, 2);
+      const minutes: string = allowedDayDto.end_hour.substring(3, 5);
+      const seconds: string = allowedDayDto.end_hour.substring(6, 8);
+
+      response.setHours(Number(hours));
+      response.setMinutes(Number(minutes));
+      response.setSeconds(Number(seconds));
+
+      // console.log("horas: ", hours);
+      // console.log("minutos: ", minutes);
+      // console.log("segundos: ", seconds);
+      // console.log("fecha resultante: ",response);
 
       return response;
     }
@@ -350,8 +380,8 @@ export class AccessVisitorHelperService {
         rangesHtml = `
           <p>
             <strong>Rango horario permitido: </strong> <br>
-            <strong>Desde: </strong> ${this.stringToHour(allowedDay, true)} <br>
-            <strong>Hasta: </strong> ${this.stringToHour(allowedDay, false)}
+            <strong>Desde: </strong> ${allowedDay.init_hour} <br>
+            <strong>Hasta: </strong> ${allowedDay.end_hour}
           </p>
         `;
       
@@ -441,8 +471,8 @@ export class AccessVisitorHelperService {
         rangesHtml = `
           <p>
             <strong>Rango horario permitido </strong> <br>
-            <strong>Desde: </strong> ${this.stringToHour(allowedDay, true)} <br>
-            <strong>Hasta: </strong> ${this.stringToHour(allowedDay, false)}
+            <strong>Desde: </strong> ${allowedDay.init_hour} <br>
+            <strong>Hasta: </strong> ${allowedDay.end_hour}
           </p>
         `;
       
