@@ -1,10 +1,10 @@
 <div class="container mt-4">
-  <div class="row mb-3">
+  <!-- <div class="row mb-3">
     <div class="col-md-3 mb-2">
       <label for="IdFilter" class="form-label">Ingrese El id Del vecino</label>
       <input type="number" id="IdFilter" class="form-control" min="1" (blur)="onIDFilterChange($event)">
     </div>
-  </div>
+  </div> -->
 
   <div class="table-responsive my-4">
     <h3 class="text-center mb-4">Editar visitantes</h3>
@@ -37,150 +37,242 @@
 </div>
 
 
-<div class="modal fade" id="editVisitorModal" tabindex="-1" aria-labelledby="editVisitorModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+<div class="modal-backdrop" *ngIf="isModalVisible" (click)="hideModal()"></div>
+<div class="modal" [class.show]="isModalVisible" [style.display]="isModalVisible ? 'block' : 'none'" tabindex="-1" aria-labelledby="editVisitorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" (click)="$event.stopPropagation()">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="editVisitorModalLabel">Editar Visitante</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" (click)="hideModal()" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="editVisitorForm">
-          <!-- Principal Visitor -->
-          <div class="visitor-section mb-4">
-            <h6>Visitante Principal</h6>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label">Nombre</label>
-                <input type="text" class="form-control" [(ngModel)]="selectedVisitor.name" name="name" required>
+          <div class="row">
+            <!-- Visitors Column -->
+            <div class="col-md-6">
+              <!-- Principal Visitor -->
+              <div class="visitor-section mb-4">
+                <h6>Visitante Principal</h6>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" 
+                           class="form-control" 
+                           [ngClass]="getValidationClass('name')"
+                           [(ngModel)]="selectedVisitor.name" 
+                           (blur)="validateField('name', selectedVisitor.name)"
+                           name="name" 
+                           required>
+                    <div class="invalid-feedback">
+                      {{getErrorMessage('name')}}
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Apellido</label>
+                    <input type="text" 
+                           class="form-control" 
+                           [ngClass]="getValidationClass('last_name')"
+                           [(ngModel)]="selectedVisitor.last_name" 
+                           (blur)="validateField('last_name', selectedVisitor.last_name)"
+                           name="lastName" 
+                           required>
+                    <div class="invalid-feedback">
+                      {{getErrorMessage('last_name')}}
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Documento</label>
+                    <input type="text" 
+                           class="form-control" 
+                           [ngClass]="getValidationClass('document')"
+                           [(ngModel)]="selectedVisitor.document" 
+                           (blur)="validateField('document', selectedVisitor.document)"
+                           name="document" 
+                           readonly>
+                    <div class="invalid-feedback">
+                      {{getErrorMessage('document')}}
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" 
+                           class="form-control" 
+                           [ngClass]="getValidationClass('email')"
+                           [(ngModel)]="selectedVisitor.email" 
+                           (blur)="validateField('email', selectedVisitor.email)"
+                           name="email" 
+                           required>
+                    <div class="invalid-feedback">
+                      {{getErrorMessage('email')}}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label">Apellido</label>
-                <input type="text" class="form-control" [(ngModel)]="selectedVisitor.last_name" name="lastName" required>
-              </div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label">Documento</label>
-                <input type="text" class="form-control" [(ngModel)]="selectedVisitor.document" name="document" readonly>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control" [(ngModel)]="selectedVisitor.email" name="email" required>
-              </div>
-            </div>
-          </div>
 
-          <!-- Additional Visitors -->
-          <div class="additional-visitors-section mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6>Visitantes Adicionales</h6>
-              <button type="button" class="btn btn-sm btn-primary" (click)="addNewVisitor()">
-                Agregar Visitante
-              </button>
-            </div>
-
-            <div *ngFor="let visitor of additionalVisitors; let i = index" class="visitor-card mb-3 p-3 border rounded">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6>Visitante {{i + 2}}</h6>
-                <button type="button" class="btn btn-sm btn-danger" (click)="removeVisitor(i)">
-                  Eliminar
-                </button>
-              </div>
+              <div class="additional-visitors-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6>Visitantes Adicionales</h6>
+                  <button type="button" class="btn btn-sm btn-primary" (click)="addNewVisitor()">
+                    Agregar Visitante
+                  </button>
+                </div>
               
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label class="form-label">Nombre</label>
-                  <input type="text" class="form-control" [(ngModel)]="visitor.name" [name]="'name' + i" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Apellido</label>
-                  <input type="text" class="form-control" [(ngModel)]="visitor.last_name" [name]="'lastName' + i" required>
-                </div>
-              </div>
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label class="form-label">Documento</label>
-                  <select class="form-select" 
-        [(ngModel)]="visitor.document" 
-        [name]="'document' + i"
-        (change)="selectExistingVisitor(visitor.document, i)" 
-        required>
-          <option value="">Seleccionar visitante</option>
-        <option *ngFor="let existingVisitor of getAvailableVisitorsForIndex(i)" 
-          [value]="existingVisitor.document">
-                {{existingVisitor.document}} - {{existingVisitor.name}} {{existingVisitor.last_name}}
-               </option>
-            </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Email</label>
-                  <input type="email" class="form-control" [(ngModel)]="visitor.email" [name]="'email' + i" required>
-                </div>
+                <div *ngFor="let visitor of additionalVisitors; let i = index" class="mb-4">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6>Visitante {{i + 2}}</h6>
+                    <button type="button" class="btn btn-sm btn-danger" (click)="removeVisitor(i)">
+                      Eliminar
+                    </button>
+                  </div>
+                  
+                  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Nombre</label>
+      <input type="text" 
+             class="form-control" 
+             [ngClass]="getValidationClass('name', i)"
+             [(ngModel)]="visitor.name" 
+             (blur)="validateField('name', visitor.name, i)"
+             [name]="'name' + i" 
+             required>
+      <div class="invalid-feedback">
+        {{getErrorMessage('name', i)}}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Apellido</label>
+      <input type="text" 
+             class="form-control" 
+             [ngClass]="getValidationClass('last_name', i)"
+             [(ngModel)]="visitor.last_name" 
+             (blur)="validateField('last_name', visitor.last_name, i)"
+             [name]="'lastName' + i" 
+             required>
+      <div class="invalid-feedback">
+        {{getErrorMessage('last_name', i)}}
+      </div>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Documento</label>
+      <select class="form-select"
+              [ngClass]="getValidationClass('document', i)"
+              [(ngModel)]="visitor.document"
+              (blur)="validateField('document', visitor.document, i)"
+              [name]="'document' + i"
+              (change)="selectExistingVisitor(visitor.document, i)"
+              required>
+        <option value="">Seleccionar visitante</option>
+        <option *ngFor="let existingVisitor of getAvailableVisitorsForIndex(i)"
+                [value]="existingVisitor.document">
+          {{existingVisitor.document}} - {{existingVisitor.name}} {{existingVisitor.last_name}}
+        </option>
+      </select>
+      <div class="invalid-feedback">
+        {{getErrorMessage('document', i)}}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Email</label>
+      <input type="email" 
+             class="form-control" 
+             [ngClass]="getValidationClass('email', i)"
+             [(ngModel)]="visitor.email" 
+             (blur)="validateField('email', visitor.email, i)"
+             [name]="'email' + i" 
+             required>
+      <div class="invalid-feedback">
+        {{getErrorMessage('email', i)}}
+      </div>
+    </div>
+  </div>
+</div>  
               </div>
             </div>
-          </div>
 
-          <!-- Date Range Section -->
-          <div class="date-range-section mb-3">
-            <h5>Rango de Fechas</h5>
-            <div class="row">
-              <div class="col-md-6">
-                <label class="form-label">Fecha Inicio</label>
-                <input type="date" class="form-control" 
-                       [value]="formatDateForInput(selectedVisitor.authRange.init_date)" 
-                       (change)="onInitDateChange($event)" 
-                       name="initDate" readonly>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Fecha Fin</label>
-                <input type="date" class="form-control" 
-                       [value]="formatDateForInput(selectedVisitor.authRange.end_date)"
-                       [min]="todayDate" 
-                       (change)="onEndDateChange($event)" 
-                       name="endDate" required>
+            <!-- Date Range Column -->
+            <div class="col-md-6">
+              <div class="date-range-section">
+                <h6>Rango de Fechas</h6>
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Fecha Inicio</label>
+                    <input type="date" class="form-control" 
+                           [value]="formatDateForInput(selectedVisitor.authRange.init_date)" 
+                           (change)="onInitDateChange($event)" 
+                           name="initDate" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Fecha Fin</label>
+                    <input type="date" 
+                        class="form-control" 
+                        [ngClass]="getValidationClass('end_date')"
+                        [value]="formatDateForInput(selectedVisitor.authRange.end_date)"
+                        [min]="todayDate" 
+                        (change)="onEndDateChange($event); validateDateRange()"
+                        name="endDate" 
+                        required>
+                      <div class="invalid-feedback">
+                      {{getErrorMessage('end_date')}}
+                      </div>
+                  </div>
+                </div>  
+
+                <!-- Allowed Days Section -->
+                <h6 class="mt-4">Días Permitidos</h6>
+<div class="table-responsive">
+  <div *ngIf="validationErrors['allowed_days']" class="alert alert-danger mt-2">
+    {{validationErrors['allowed_days']}}
+  </div>
+  <table class="table table-hover align-middle">
+    <tbody>
+      <tr *ngFor="let day of DAYS_OF_WEEK">
+        <td style="width: 30%">
+          <div class="form-check mb-0">
+            <input class="form-check-input" type="checkbox"
+                   [id]="'check' + day"
+                   [checked]="isDayAllowed(day)"
+                   (change)="toggleDay(day)">
+            <label class="form-check-label ms-2" [for]="'check' + day">
+              {{getDayTranslation(day)}}
+            </label>
+          </div>
+        </td>
+        <td style="width: 70%" colspan="2">
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="input-group input-group-sm" [class.is-invalid]="hasTimeError(day)">
+                <span class="input-group-text">Inicio</span>
+                <input type="time"
+                       class="form-control form-control-sm"
+                       [class.is-invalid]="hasTimeError(day)"
+                       [value]="getAllowedDayHours(day).init_hour"
+                       (change)="updateInitHour(day, $event)"
+                       [disabled]="!isDayAllowed(day)">
               </div>
             </div>
-          </div>
-
-          <div class="allowed-days-section mb-3">
-            <h5>Días Permitidos</h5>
-            <div class="row">
-              <div class="col-md-12">
-                <div class="table-responsive">
-                  <table class="table table-hover align-middle">
-                    <tbody>
-                      <tr *ngFor="let day of DAYS_OF_WEEK">
-                        <td style="width: 30%">
-                          <div class="form-check mb-0">
-                            <input class="form-check-input" type="checkbox"
-                                   [id]="'check' + day"
-                                   [checked]="isDayAllowed(day)"
-                                   (change)="toggleDay(day)">
-                            <label class="form-check-label ms-2" [for]="'check' + day">
-                              {{getDayTranslation(day)}}
-                            </label>
-                          </div>
-                        </td>
-                        <td style="width: 35%">
-                          <div class="input-group input-group-sm">
-                            <span class="input-group-text">Inicio</span>
-                            <input type="time" class="form-control form-control-sm"
-                                   [value]="getAllowedDayHours(day).init_hour"
-                                   (change)="updateInitHour(day, $event)"
-                                   [disabled]="!isDayAllowed(day)">
-                          </div>
-                        </td>
-                        <td style="width: 35%">
-                          <div class="input-group input-group-sm">
-                            <span class="input-group-text">Fin</span>
-                            <input type="time" class="form-control form-control-sm"
-                                   [value]="getAllowedDayHours(day).end_hour"
-                                   (change)="updateEndHour(day, $event)"
-                                   [disabled]="!isDayAllowed(day)">
-                          </div>
-                        </td>
-                      </tr>
+            <div class="col-6">
+              <div class="input-group input-group-sm" [class.is-invalid]="hasTimeError(day)">
+                <span class="input-group-text">Fin</span>
+                <input type="time"
+                       class="form-control form-control-sm"
+                       [class.is-invalid]="hasTimeError(day)"
+                       [value]="getAllowedDayHours(day).end_hour"
+                       (change)="updateEndHour(day, $event)"
+                       [disabled]="!isDayAllowed(day)">
+              </div>
+            </div>
+            <div class="col-12">
+              <div *ngIf="hasTimeError(day)" class="invalid-feedback d-block">
+                {{getTimeErrorMessage(day)}}
+              </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
                     </tbody>
                   </table>
                 </div>
@@ -190,9 +282,11 @@
         </form>
       </div>
       <div class="modal-footer">
-        <!-- <button type="button" class="btn btn-primary" (click)="saveAllVisitors()">Guardar Cambios</button> -->
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        
+        <button type="button" class="btn btn-primary" (click)="saveAllVisitors()">Guardar Cambios</button> 
+        <button type="button" class="btn btn-secondary" (click)="hideModal()">Cancelar</button>
       </div>
     </div>
   </div>
 </div>
+

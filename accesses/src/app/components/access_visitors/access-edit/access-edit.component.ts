@@ -7,9 +7,21 @@ import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs5';
 import Swal from 'sweetalert2';
-//import { Modal } from 'bootstrap';
 import { Router } from '@angular/router';
-import { AccessNewUserAllowedDto, AccessNewVehicleDto, AccessUserAllowedInfoDto2,AccessDayOfWeek, AccessFormattedHours } from '../../../models/access-visitors/access-VisitorsModels';
+import { AccessNewUserAllowedDto, AccessNewVehicleDto, AccessUserAllowedInfoDto2, AccessDayOfWeek, AccessFormattedHours } from '../../../models/access-visitors/access-VisitorsModels';
+interface ValidationErrors {
+  [key: string]: string | TimeRangeErrors;
+}
+
+interface TimeRangeErrors {
+  [key: string]: string;
+}
+
+interface AdditionalVisitorsErrors {
+  [key: number]: {
+    [key: string]: string;
+  };
+}
 
 @Component({
   selector: 'access-app-edit',
@@ -17,9 +29,11 @@ import { AccessNewUserAllowedDto, AccessNewVehicleDto, AccessUserAllowedInfoDto2
   imports: [FormsModule, CommonModule, HttpClientModule],
   templateUrl: './access-edit.component.html',
   styleUrl: './access-edit.component.css',
-  providers: [DatePipe]  // Add DatePipe to providers
+  providers: [DatePipe]
 })
 export class AccessEditComponent implements OnInit, AfterViewInit {
+  public validationErrors: ValidationErrors = {};
+  private additionalVisitorsErrors: AdditionalVisitorsErrors = {};
   private http = inject(HttpClient);
   visitors: AccessUserAllowedInfoDto2[] = [];
   additionalVisitors: AccessUserAllowedInfoDto2[] = [];
@@ -27,10 +41,10 @@ export class AccessEditComponent implements OnInit, AfterViewInit {
   neighbor_id: Number | null = null;
   table: any = null;
   todayDate: string = '';
-  //editModal: Modal | null = null;
   searchTerm: string = '';
+  isModalVisible: boolean = false; // New property to control modal visibility
+  user: any = null;
   constructor(private datePipe: DatePipe, private router: Router) {}
-
   // Selected visitor for editing
   selectedVisitor: AccessUserAllowedInfoDto2 = {
     document: '',
@@ -48,6 +62,26 @@ export class AccessEditComponent implements OnInit, AfterViewInit {
       }]
     }
   };
+
+  fakeuser={
+    id: 11,
+    name: "Carlos",
+    surname: "Fernández",
+    dni: 34567890,
+    cuit_cuil: 20345678901,
+    date_birth: "1975-03-10T00:00:00",
+    contact_id: 1003,
+    business_name: "Fernández Construcciones",
+    active: false,
+    owner_type: {
+      name: "Persona Jurídica"
+    },
+    files: [
+      {
+        file_id: "hty645"
+      }
+    ]
+  }
   newVisitorTemplate: Partial<AccessUserAllowedInfoDto2> = {
     document: '',
     name: '',
@@ -66,8 +100,8 @@ export class AccessEditComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-
-    this.setTodayDate(); 
+    this.setTodayDate();
+    this.fetchUser(); 
   }
 setTodayDate(): void {
     const currentDate = new Date();
@@ -169,9 +203,9 @@ setTodayDate(): void {
       this.table.draw();
     
   }
-
+  //fetchs
   fetchvisitors(): void {
-    const neighbor = this.neighbor_id ? this.neighbor_id : '11';
+    const neighbor = this.user.id;
     this.http.get<any>(`http://localhost:8090/user_Allowed/visitoris/${neighbor}`)
       .subscribe({
         next: (response) => {
@@ -189,7 +223,27 @@ setTodayDate(): void {
         }
       });
   }
-
+  
+  fetchUser(): void {
+    // this.http.get<any>(`api de usuarios`)
+    //   .subscribe({
+    //     next: (response) => {
+    //       this.user = response;
+    //       setTimeout(() => {
+    //         this.fetchvisitors();
+    //       }, 0);
+    //     },
+    //     error: (error) => {
+    //       Swal.fire({
+    //         icon: 'warning',
+    //         title: 'Error al obtener los ingresos',
+    //         text: 'No hay movimientos para ese dia',
+    //       });
+    //     }
+    //   });
+      this.user = this.fakeuser;
+      this.fetchvisitors();
+  }
 
   
   formatDateForInput(date: Date | string | undefined): string {
@@ -201,6 +255,7 @@ setTodayDate(): void {
     'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'
   ];
 
+  // auxiliares del modal 
   getDayTranslation(day: AccessDayOfWeek): string {
     const translations: Record<AccessDayOfWeek, string> = {
       'MONDAY': 'Lunes',
@@ -212,6 +267,15 @@ setTodayDate(): void {
       'SUNDAY': 'Domingo'
     };
     return translations[day];
+  }
+  private formatTimeArrayToString(timeArray: number[]): string {
+    if (!timeArray || timeArray.length !== 2) {
+      return '';
+    }
+    
+    const hours = timeArray[0].toString().padStart(2, '0');
+    const minutes = timeArray[1].toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   }
   addNewVisitor(): void {
     const newVisitor: AccessUserAllowedInfoDto2 = {
@@ -226,57 +290,75 @@ setTodayDate(): void {
     this.additionalVisitors.splice(index, 1);
   }
 
-/*   saveAllVisitors(): void {
-    
-    const allVisitors = [
-      this.selectedVisitor,
-      ...this.additionalVisitors
-    ];
-
-    // Create an array of promises for all the HTTP requests
-    const updatePromises = allVisitors.map(visitor => {
-      console.log("visitor:",visitor);
-      const updatedData: User_AllowedInfoDto2 = {
-        document: visitor.document,
-        name: visitor.name,
-        last_name: visitor.last_name,
-        email: visitor.email,
-        authId: visitor.authId,
-        authRange: visitor.authRange
-      };
-      
-      console.log(updatedData);
-      return this.http.put(`http://localhost:8090/user_Allowed/visitor/update`, updatedData).toPromise();
-    });
-
-    // Execute all requests and handle results
-    Promise.all(updatePromises)
-      .then(() => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Éxito',
-          text: 'Todos los visitantes han sido actualizados correctamente'
-        });
-        this.editModal?.hide();
-        this.additionalVisitors = [];
-        this.fetchvisitors();
-      })
-      .catch(error => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Hubo un error al actualizar algunos visitantes'
-        });
+  saveAllVisitors(): void {
+    if (this.hasValidationErrors()) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de validación',
+        text: 'Por favor corrija los campos marcados en rojo'
       });
-  } */
+      return;
+    }
 
-  // Override the existing editVisitor method
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¿Deseas actualizar estos visitantes?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, actualizar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const allVisitors = [
+          this.selectedVisitor,
+          ...this.additionalVisitors
+        ];
+        
+        const updatePromises = allVisitors.map(visitor => {
+          const updatedData: AccessUserAllowedInfoDto2 = {
+            document: visitor.document,
+            name: visitor.name,
+            last_name: visitor.last_name,
+            email: visitor.email,
+            authId: visitor.authId,
+            authRange: visitor.authRange
+          };
+          
+          return this.http.put(`http://localhost:8090/user_Allowed/visitor/update`, updatedData).toPromise();
+        });
+
+        Promise.all(updatePromises)
+          .then(() => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Éxito',
+              text: 'Todos los visitantes han sido actualizados correctamente'
+            });
+            this.hideModal();
+            this.additionalVisitors = [];
+            this.fetchvisitors();
+          })
+          .catch(error => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Hubo un error al actualizar algunos visitantes'
+            });
+          });
+      }
+    });
+  }
+
+  
+
+
+ 
   editVisitor(visitor: AccessUserAllowedInfoDto2): void {
     this.selectedVisitor = JSON.parse(JSON.stringify(visitor));
-    this.additionalVisitors = []; // Clear any previous additional visitors
-    console.log("selectedVisitor:",this.selectedVisitor);
+    this.additionalVisitors = [];
+    console.log("selectedVisitor:", this.selectedVisitor);
 
-    if (!this.selectedVisitor.authRange ) {
+    if (!this.selectedVisitor.authRange) {
       this.selectedVisitor.authRange = {
         init_date: new Date(),
         end_date: new Date(),
@@ -284,7 +366,7 @@ setTodayDate(): void {
       };
     }
 
-    //this.editModal?.show();
+    this.showModal(); 
   }
   isDayAllowed(day: AccessDayOfWeek): boolean {
     return this.selectedVisitor.authRange.allowedDays
@@ -303,15 +385,7 @@ setTodayDate(): void {
       end_hour: this.formatTimeArrayToString(allowedDay.end_hour)
     };
   }
-  private formatTimeArrayToString(timeArray: number[]): string {
-    if (!timeArray || timeArray.length !== 2) {
-      return '';
-    }
-    
-    const hours = timeArray[0].toString().padStart(2, '0');
-    const minutes = timeArray[1].toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  }
+ 
   // Update all visitors when changing dates or allowed days
   updateAllVisitorsAuthRanges(): void {
     const authRangesCopy = JSON.parse(JSON.stringify(this.selectedVisitor.authRange));
@@ -320,7 +394,7 @@ setTodayDate(): void {
     });
   }
 
-  // Override date change handlers
+
   onInitDateChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     if (target && target.value) {
@@ -346,7 +420,7 @@ setTodayDate(): void {
     }
   }
 
-  // Override toggleDay to update all visitors
+  
   toggleDay(day: AccessDayOfWeek): void {
     const allowedDays = this.selectedVisitor.authRange.allowedDays;
     const index = allowedDays.findIndex(d => d.day === day.toUpperCase());
@@ -364,13 +438,12 @@ setTodayDate(): void {
     this.updateAllVisitorsAuthRanges();
   }
   updateAvailableVisitors(): void {
-    // Get all selected documents including the main visitor
     const selectedDocuments = new Set([
       this.selectedVisitor.document,
       ...this.additionalVisitors.map(v => v.document)
     ]);
 
-    // Filter out already selected visitors
+
     this.availableVisitors = this.visitors.filter(visitor => 
       !selectedDocuments.has(visitor.document)
     );
@@ -386,13 +459,13 @@ setTodayDate(): void {
     return this.visitors.filter(visitor => !selectedDocuments.has(visitor.document));
   }
 
-  // Override hour update methods
   updateInitHour(day: AccessDayOfWeek, event: any): void {
     const allowedDay = this.selectedVisitor.authRange.allowedDays
       .find(d => d.day === day.toUpperCase());
     if (allowedDay) {
       const [hours, minutes] = event.target.value.split(':');
       allowedDay.init_hour = [parseInt(hours, 10), parseInt(minutes, 10)];
+      this.validateDateRange(); // Validar después de actualizar la hora
       this.updateAllVisitorsAuthRanges();
     }
   }
@@ -403,8 +476,174 @@ setTodayDate(): void {
     if (allowedDay) {
       const [hours, minutes] = event.target.value.split(':');
       allowedDay.end_hour = [parseInt(hours, 10), parseInt(minutes, 10)];
+      this.validateDateRange(); // Validar después de actualizar la hora
       this.updateAllVisitorsAuthRanges();
     }
+  }
+  //parte del modal
+  showModal(): void {
+    this.isModalVisible = true;
+    document.body.classList.add('modal-open');
+  }
+
+  hideModal(): void {
+    this.isModalVisible = false;
+    document.body.classList.remove('modal-open');
+  }
+  //validaciones 
+  validateField(fieldName: string, value: string, visitorIndex?: number): void {
+    const errors = this.getFieldError(fieldName, value);
+    
+    if (visitorIndex !== undefined) {
+      if (!this.additionalVisitorsErrors[visitorIndex]) {
+        this.additionalVisitorsErrors[visitorIndex] = {};
+      }
+      if (errors) {
+        this.additionalVisitorsErrors[visitorIndex][fieldName] = errors;
+      } else {
+        delete this.additionalVisitorsErrors[visitorIndex][fieldName];
+      }
+    } else {
+      if (errors) {
+        this.validationErrors[fieldName] = errors;
+      } else {
+        delete this.validationErrors[fieldName];
+      }
+    }
+  }
+
+  private getFieldError(fieldName: string, value: string): string | null {
+    switch (fieldName) {
+      case 'name':
+        return !value?.trim() ? 'El nombre es requerido' : null;
+      case 'last_name':
+        return !value?.trim() ? 'El apellido es requerido' : null;
+      case 'document':
+        return !value?.trim() ? 'El documento es requerido' : null;
+      case 'email':
+        if (!value?.trim()) return 'El email es requerido';
+        return !this.isValidEmail(value) ? 'El formato del email no es válido' : null;
+      default:
+        return null;
+    }
+  }
+
+ 
+  validateDateRange(): void {
+    const initDate = new Date(this.selectedVisitor.authRange.init_date);
+    const endDate = new Date(this.selectedVisitor.authRange.end_date);
+    
+    if (endDate <= initDate) {
+      this.validationErrors['end_date'] = 'La fecha de fin debe ser mayor a la fecha de inicio';
+    } else {
+      delete this.validationErrors['end_date'];
+    }
+  
+    // Validar que al menos un día esté seleccionado
+    if (this.selectedVisitor.authRange.allowedDays.length === 0) {
+      this.validationErrors['allowed_days'] = 'Debe seleccionar al menos un día de la semana';
+    } else {
+      delete this.validationErrors['allowed_days'];
+    }
+  
+    // Validar las horas de cada día seleccionado
+    this.selectedVisitor.authRange.allowedDays.forEach(day => {
+      const initHour = day.init_hour[0] * 60 + day.init_hour[1];
+      const endHour = day.end_hour[0] * 60 + day.end_hour[1];
+  
+      if (endHour <= initHour) {
+        if (!this.validationErrors['time_range']) {
+          this.validationErrors['time_range'] = {} as TimeRangeErrors;
+        }
+        (this.validationErrors['time_range'] as TimeRangeErrors)[day.day] = 'La hora final debe ser mayor a la hora inicial';
+      } else {
+        if (this.validationErrors['time_range']) {
+          delete (this.validationErrors['time_range'] as TimeRangeErrors)[day.day];
+          if (Object.keys(this.validationErrors['time_range'] as TimeRangeErrors).length === 0) {
+            delete this.validationErrors['time_range'];
+          }
+        }
+      }
+    });
+  }
+
+hasValidationErrors(): boolean {
+  // Validaciones existentes
+  Object.keys(this.selectedVisitor).forEach(field => {
+    if (field !== 'authRange' && field !== 'authId') {
+      this.validateField(field, (this.selectedVisitor as any)[field]);
+    }
+  });
+
+  this.additionalVisitors.forEach((visitor, index) => {
+    Object.keys(visitor).forEach(field => {
+      if (field !== 'authRange' && field !== 'authId') {
+        this.validateField(field, (visitor as any)[field], index);
+      }
+    });
+  });
+
+  // Validar fechas, días y horas
+  this.validateDateRange();
+
+  return Object.keys(this.validationErrors).length > 0 ||
+         Object.keys(this.additionalVisitorsErrors).some(index => 
+           Object.keys(this.additionalVisitorsErrors[Number(index)]).length > 0);
+}
+  
+  private getVisitorErrors(visitor: any): { [key: string]: string } {
+    const errors: { [key: string]: string } = {};
+    
+    if (!visitor.name?.trim()) {
+      errors['name'] = 'El nombre es requerido';
+    }
+    
+    if (!visitor.last_name?.trim()) {
+      errors['last_name'] = 'El apellido es requerido';
+    }
+    
+    if (!visitor.document?.trim()) {
+      errors['document'] = 'El documento es requerido';
+    }
+    
+    if (!visitor.email?.trim()) {
+      errors['email'] = 'El email es requerido';
+    } else if (!this.isValidEmail(visitor.email)) {
+      errors['email'] = 'El formato del email no es válido';
+    }
+    
+    return errors;
+  }
+  
+
+  
+getValidationClass(fieldName: string, visitorIndex?: number): string {
+  if (visitorIndex !== undefined) {
+    return this.additionalVisitorsErrors[visitorIndex]?.[fieldName] 
+      ? 'is-invalid' 
+      : '';
+  }
+  return this.validationErrors[fieldName] ? 'is-invalid' : '';
+}
+
+  // Método helper para obtener el mensaje de error
+  getErrorMessage(fieldName: string, visitorIndex?: number): string {
+    if (visitorIndex !== undefined) {
+      return this.additionalVisitorsErrors[visitorIndex]?.[fieldName] || '';
+    }
+    const error = this.validationErrors[fieldName];
+    return typeof error === 'string' ? error : '';
+  }
+  // Helper method to validate email format
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+  getTimeErrorMessage(day: AccessDayOfWeek): string {
+    return ((this.validationErrors['time_range'] as TimeRangeErrors)?.[day] || '') as string;
+  }
+  hasTimeError(day: AccessDayOfWeek): boolean {
+    return !!(this.validationErrors['time_range'] as TimeRangeErrors)?.[day];
   }
   
 }
