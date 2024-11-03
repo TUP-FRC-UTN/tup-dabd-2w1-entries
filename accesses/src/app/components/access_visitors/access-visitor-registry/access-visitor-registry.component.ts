@@ -1169,7 +1169,7 @@ loadAllOwners(): void {
             this.visitors.push({
               document: owner.document,
               name: owner.name,
-              userType: this.userType,
+              userType: owner.userType,
               last_name: owner.last_name,
               documentTypeDto: owner.documentTypeDto,
               authRanges: owner.authRanges,
