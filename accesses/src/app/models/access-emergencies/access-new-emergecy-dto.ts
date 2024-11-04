@@ -4,6 +4,7 @@ export interface AccessNewEmergencyDto {
     people: AccessNewEmergencyPerson[];
     vehicle: AccessNewEmergencyVehicleDto | null;
     observations: String | null;
+    loggedUserId: number;
 }
 
 export interface AccessNewEmergencyPerson {

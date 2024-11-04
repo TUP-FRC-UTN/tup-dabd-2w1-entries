@@ -38,3 +38,4 @@ export interface AllowedDaysDto {
     init_date: Date;
     end_date: Date;
 }
+
