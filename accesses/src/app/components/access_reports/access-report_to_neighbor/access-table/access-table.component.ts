@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit, AfterViewInit, SimpleChanges } fro
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DataTablesModule } from 'angular-datatables';
-import { Modal } from 'bootstrap';
+
 import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs5';
@@ -42,7 +42,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   table: any = null;
   exportButtonsEnabled: boolean = false;
   days: number[] = Array.from({ length: 31 }, (_, i) => i + 1);
-  modal: Modal | null = null;
+
 
   tiposIngresante = [
     { value: 'neighbour', label: 'Vecino' },
@@ -80,27 +80,16 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.fetchData();
-    this.initializeModal();
+    
   }
 
-  private initializeModal(): void {
-    const modalElement = document.getElementById('advancedFiltersModal');
-    if (modalElement) {
-      this.modal = new Modal(modalElement);
-    }
-  }
 
-  openModal(): void {
-    if (this.modal) {
-      this.modal.show();
-    }
-  }
 
   applyModalFilters(): void {
-    if (this.modal) {
-      this.modal.hide();
+   
+    
       this.table.draw();
-    }
+    
   }
 
   clearModalFilters(): void {

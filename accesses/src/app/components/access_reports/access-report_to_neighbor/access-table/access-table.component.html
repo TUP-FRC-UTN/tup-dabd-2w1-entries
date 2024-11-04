@@ -36,13 +36,17 @@
 
         <!-- Botones de acción -->
         <div class="col-md-2 d-flex align-items-end gap-2">
-            <button class="btn btn-secondary" 
-                    (click)="openModal()"
-                    data-bs-toggle="tooltip" 
-                    data-bs-placement="top" 
-                    title="Filtros avanzados">
-                <i class="fa-solid fa-filter"></i>
-            </button>
+            <div data-bs-toggle="tooltip modal" data-bs-placement="top" >
+
+                <button class="btn btn-secondary" 
+                data-bs-target="#advancedFiltersModal"
+                data-bs-toggle="modal"
+                 
+                title="Filtros avanzados">
+            <i class="fa-solid fa-filter"></i>
+        </button>
+
+            </div>
             <button class="btn btn-primary"
                     (click)="clearFilters()"
                     data-bs-toggle="tooltip" 
