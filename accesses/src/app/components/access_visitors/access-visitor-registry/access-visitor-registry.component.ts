@@ -361,12 +361,13 @@ loadAllOwners(): void {
 
           return [
             `${visitor.last_name} ${visitor.name}`,
-            this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
-            `<div class="text-start">${visitor.document}</div>`,
+             // "PASSPORT" se muestre como "Pasaporte"
+            this.getUserTypeIcon(visitor.userType.description),
+            `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
             `<div class="text-start">
             <select class="form-select" id="vehicles${index}" name="vehicles${index}">
                 <option value="" disabled selected>Seleccione un vehículo</option>
-                ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+                ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
                     <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
                     === 'Car' ? 'Coche' : 
                   vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
@@ -426,12 +427,12 @@ loadAllOwners(): void {
   
             return [
               `${visitor.last_name} ${visitor.name}`,
-              this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
-              `<div class="text-start">${visitor.document}</div>`,
+              this.getUserTypeIcon(visitor.userType.description),
+            `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,,
               `<div class="text-start">
               <select class="form-select" id="vehicles${index}" name="vehicles${index}">
                   <option value="" disabled selected>Seleccione un vehículo</option>
-                  ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+                  ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
                       <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
                       === 'Car' ? 'Coche' : 
                   vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
@@ -492,8 +493,8 @@ loadAllOwners(): void {
   
             return [
               `${visitor.last_name} ${visitor.name}`,
-              this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
-              `<div class="text-start">${visitor.document}</div>`,
+              this.getUserTypeIcon(visitor.userType.description),
+            `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
               `<div class="text-start">
               <select class="form-select" id="vehicles${index}" name="vehicles${index}">
                   <option value="" disabled selected>Seleccione un vehículo</option>
@@ -559,8 +560,9 @@ loadAllOwners(): void {
             return [
               `${visitor.last_name} ${visitor.name}`,
               'DNI',
-            //this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
-              `<div class="text-start">${visitor.document}</div>`,
+              this.getUserTypeIcon(visitor.userType.description),
+           //   `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
+           `<div class="text-start">${"D " +visitor.document}</div>`,
               `<div class="text-start">
               <select class="form-select" id="vehicles${index}" name="vehicles${index}">
                   <option value="" disabled selected>Seleccione un vehículo</option>
@@ -662,6 +664,19 @@ loadAllOwners(): void {
       });
     } else {
       console.error('No se encontró el cuerpo de la tabla.');
+    }
+  }
+
+  getUserTypeIcon(descr : string){
+    if(descr === "Employeed" || descr == "Supplier"){
+      
+       return `<i class="bi bi-tools"></i>`
+    }
+    if(descr === "Visitor"){
+      return   `<i class="bi bi-person-raised-hand"></i>  `
+    }
+    else {
+     return  `<i class="bi bi-house-fill"></i>`
     }
   }
 
@@ -820,9 +835,9 @@ loadAllOwners(): void {
 
   getDocumentType(visitor: AccessUserAllowedInfoDto): string {
     return visitor.documentTypeDto?.description === 'PASSPORT'
-      ? 'Pasaporte'
+      ? 'P'
       : visitor.documentTypeDto?.description ||
-          'DNI';
+          'D';
   }
 
   getVehicles(visitor: AccessUserAllowedInfoDto): AccessNewVehicleDto[] {
