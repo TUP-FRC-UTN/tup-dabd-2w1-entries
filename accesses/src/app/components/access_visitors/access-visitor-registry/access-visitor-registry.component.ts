@@ -428,7 +428,7 @@ loadAllOwners(): void {
             return [
               `${visitor.last_name} ${visitor.name}`,
               this.getUserTypeIcon(visitor.userType.description),
-            `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,,
+            `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
               `<div class="text-start">
               <select class="form-select" id="vehicles${index}" name="vehicles${index}">
                   <option value="" disabled selected>Seleccione un vehículo</option>
@@ -559,7 +559,6 @@ loadAllOwners(): void {
   
             return [
               `${visitor.last_name} ${visitor.name}`,
-              'DNI',
               this.getUserTypeIcon(visitor.userType.description),
            //   `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
            `<div class="text-start">${"D " +visitor.document}</div>`,
