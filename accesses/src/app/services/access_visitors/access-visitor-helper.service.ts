@@ -383,27 +383,70 @@ export class AccessVisitorHelperService {
 
   //Alerts para registerEntry()
   // muestra un modal avisando q el Visitor esta fuera de rango (dia y hora permitido)
-  entryOutOfAuthorizedHourRange(authRange: AccessAuthRangeInfoDto | undefined){
-
+  entryOutOfAuthorizedHourRange(authRange: AccessAuthRangeInfoDto | undefined) {
     let rangesHtml = '';
-
-    if(authRange){
-      for(const dayAllowed of authRange.allowedDays){
-        rangesHtml += `
-        <p>
-          <strong>Día ${this.translateDay(dayAllowed.day)}:</strong> <br>
-          <strong>Desde: </strong> ${this.stringToHour(dayAllowed, true)}<br>
-          <strong>Hasta: </strong> ${this.stringToHour(dayAllowed, false)}
-        </p>
+    
+    if (authRange?.allowedDays?.length) {
+      // Dividir los días en dos columnas
+      const midPoint = Math.ceil(authRange.allowedDays.length / 2);
+      const leftColumn = authRange.allowedDays.slice(0, midPoint);
+      const rightColumn = authRange.allowedDays.slice(midPoint);
+  
+      // Crear el HTML para una columna
+      const createColumnHtml = (days: any[]) => days.map(day => `
+        <div class="range-card">
+          <div class="day-title">${this.translateDay(day.day)}</div>
+          <div class="time-range">
+            <span>Desde: ${this.stringToHour(day, true)}</span>
+            <span>Hasta: ${this.stringToHour(day, false)}</span>
+          </div>
+        </div>
+      `).join('');
+  
+      rangesHtml = `
+        <style>
+          .ranges-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            text-align: left;
+          }
+          .range-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+          }
+          .day-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+          }
+          .time-range {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            font-size: 0.9em;
+          }
+        </style>
+        <div class="ranges-container">
+          <div class="column">
+            ${createColumnHtml(leftColumn)}
+          </div>
+          <div class="column">
+            ${createColumnHtml(rightColumn)}
+          </div>
+        </div>
       `;
-      }
     }
-
+  
     Swal.fire({
       title: 'Denegar ingreso!',
       html: `
-        <strong>El Visitante está fuera del rango horario permitido!</strong> <br>
-        ${rangesHtml}
+        <div>
+          <strong>El Visitante está fuera del rango horario permitido!</strong>
+          <br><br>
+          ${rangesHtml}
+        </div>
       `,
       icon: 'error',
       confirmButtonText: 'Cerrar'
@@ -411,29 +454,89 @@ export class AccessVisitorHelperService {
   }
 
   // muestra un modal avisando q el Visitor esta fuera de rango (fechas permitidas)
-  entryOutOfAuthorizedDateRange(visitor: AccessUserAllowedInfoDto){
-
+  entryOutOfAuthorizedDateRange(visitor: AccessUserAllowedInfoDto) {
     let rangesHtml = '';
-    let rangeNumber = 1;
-
-    for (const range of visitor.authRanges) {
-
-      rangeNumber++;
-
-      rangesHtml += `
-        <p>
-          <strong>Rango permitido ${rangeNumber}:</strong>
-          <strong>Fecha de inicio: </strong> ${this.datePipe.transform(range.init_date,'dd/MM/yyyy')?.toString()}<br>
-          <strong>Fecha de fin: </strong> ${this.datePipe.transform(range.end_date,'dd/MM/yyyy')?.toString()}
-        </p>
+    
+    if (visitor.authRanges?.length) {
+      // Dividir los rangos en dos columnas
+      const midPoint = Math.ceil(visitor.authRanges.length / 2);
+      const leftColumn = visitor.authRanges.slice(0, midPoint);
+      const rightColumn = visitor.authRanges.slice(midPoint);
+  
+      // Crear el HTML para una columna
+      const createColumnHtml = (ranges: any[]) => ranges.map((range, index) => `
+        <div class="range-card">
+          <div class="day-title">Rango ${index + 1}</div>
+          <div class="date-range">
+            <div class="date-item">
+              <span class="date-label">Desde:</span>
+              <span class="date-value">${this.datePipe.transform(range.init_date, 'dd/MM/yyyy')?.toString()}</span>
+            </div>
+            <div class="date-item">
+              <span class="date-label">Hasta:</span>
+              <span class="date-value">${this.datePipe.transform(range.end_date, 'dd/MM/yyyy')?.toString()}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+  
+      rangesHtml = `
+        <style>
+          .ranges-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            text-align: left;
+          }
+          .range-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+          }
+          .day-title {
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #2c3e50;
+          }
+          .date-range {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+          .date-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+          .date-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9em;
+          }
+          .date-value {
+            color: #2c3e50;
+          }
+        </style>
+        <div class="ranges-container">
+          <div class="column">
+            ${createColumnHtml(leftColumn)}
+          </div>
+          <div class="column">
+            ${createColumnHtml(rightColumn)}
+          </div>
+        </div>
       `;
     }
-
+  
     Swal.fire({
       title: 'Denegar ingreso!',
       html: `
-        <strong>El Visitante está fuera del rango permitido!</strong>
-        ${rangesHtml}
+        <div>
+          <strong>El Visitante está fuera del rango permitido!</strong>
+          <br><br>
+          ${rangesHtml}
+        </div>
       `,
       icon: 'error',
       confirmButtonText: 'Cerrar'
@@ -443,29 +546,89 @@ export class AccessVisitorHelperService {
 
   //Alerts para registerExit()
   // muestra un modal avisando q el Visitor esta SALIENDO TARDE (fecha de egreso mayor q la fecha permitida)
-  dateLateExitRegistered(visitor: AccessUserAllowedInfoDto){
-
+  dateLateExitRegistered(visitor: AccessUserAllowedInfoDto) {
     let rangesHtml = '';
-    let rangeNumber = 1;
-      
-    for (const range of visitor.authRanges) {
+    
+    if (visitor.authRanges?.length) {
+      // Dividir los rangos en dos columnas
+      const midPoint = Math.ceil(visitor.authRanges.length / 2);
+      const leftColumn = visitor.authRanges.slice(0, midPoint);
+      const rightColumn = visitor.authRanges.slice(midPoint);
   
-      rangeNumber++;
+      // Crear el HTML para una columna
+      const createColumnHtml = (ranges: any[]) => ranges.map((range, index) => `
+        <div class="range-card">
+          <div class="day-title">Rango ${index + 1}</div>
+          <div class="date-range">
+            <div class="date-item">
+              <span class="date-label">Desde:</span>
+              <span class="date-value">${this.datePipe.transform(range.init_date, 'dd/MM/yyyy')?.toString()}</span>
+            </div>
+            <div class="date-item">
+              <span class="date-label">Hasta:</span>
+              <span class="date-value">${this.datePipe.transform(range.end_date, 'dd/MM/yyyy')?.toString()}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
   
-      rangesHtml += `
-        <p>
-          <strong>Rango ${rangeNumber}:</strong> <br>
-          <strong>Desde: </strong> ${this.datePipe.transform(range.init_date,'dd/MM/yyyy')?.toString()}<br>
-          <strong>Hasta: </strong> ${this.datePipe.transform(range.end_date,'dd/MM/yyyy')?.toString()}
-        </p>
+      rangesHtml = `
+        <style>
+          .ranges-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            text-align: left;
+          }
+          .range-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+          }
+          .day-title {
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #2c3e50;
+          }
+          .date-range {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+          .date-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+          .date-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9em;
+          }
+          .date-value {
+            color: #2c3e50;
+          }
+        </style>
+        <div class="ranges-container">
+          <div class="column">
+            ${createColumnHtml(leftColumn)}
+          </div>
+          <div class="column">
+            ${createColumnHtml(rightColumn)}
+          </div>
+        </div>
       `;
     }
   
     Swal.fire({
       title: 'Se registró el Egreso TARDÍO del Visitante!',
       html: `
-        <strong>Notifíquelo sobre sus rangos de fecha autorizados</strong> <br>
-        ${rangesHtml}
+        <div>
+          <strong>Notifíquelo sobre sus rangos de fecha autorizados</strong>
+          <br><br>
+          ${rangesHtml}
+        </div>
       `,
       icon: 'warning',
       confirmButtonText: 'Cerrar'
@@ -473,34 +636,75 @@ export class AccessVisitorHelperService {
   }
 
   // muestra un modal avisando q el Visitor esta SALIENDO TARDE (hora de egreso mayor q la hora permitida)
-  hourLateExitRegistered(authRanges: AuthRangeInfoDto | undefined){
-
+  hourLateExitRegistered(authRanges: AuthRangeInfoDto | undefined) {
     let rangesHtml = '';
-
-    if(authRanges){
-      for(const dayAllowed of authRanges.allowedDays){
-        rangesHtml += `
-        <p>
-          <strong>Rango ${this.translateDay(dayAllowed.day)}:</strong> <br>
-          <strong>Desde: </strong> ${this.stringToHour(dayAllowed, true)}<br>
-          <strong>Hasta: </strong> ${this.stringToHour(dayAllowed, true)}
-        </p>
+    
+    if (authRanges?.allowedDays?.length) {
+      // Dividir los días en dos columnas
+      const midPoint = Math.ceil(authRanges.allowedDays.length / 2);
+      const leftColumn = authRanges.allowedDays.slice(0, midPoint);
+      const rightColumn = authRanges.allowedDays.slice(midPoint);
+  
+      // Crear el HTML para una columna
+      const createColumnHtml = (days: any[]) => days.map(day => `
+        <div class="range-card">
+          <div class="day-title">${this.translateDay(day.day)}</div>
+          <div class="time-range">
+            <span>Desde: ${this.stringToHour(day, true)}</span>
+            <span>Hasta: ${this.stringToHour(day, true)}</span>
+          </div>
+        </div>
+      `).join('');
+  
+      rangesHtml = `
+        <style>
+          .ranges-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            text-align: left;
+          }
+          .range-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+          }
+          .day-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+          }
+          .time-range {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            font-size: 0.9em;
+          }
+        </style>
+        <div class="ranges-container">
+          <div class="column">
+            ${createColumnHtml(leftColumn)}
+          </div>
+          <div class="column">
+            ${createColumnHtml(rightColumn)}
+          </div>
+        </div>
       `;
-      }
     }
-
-
+  
     Swal.fire({
       title: 'Se registró el Egreso TARDÍO del Visitante!',
       html: `
-        <strong>Notifíquelo sobre sus rangos horarios autorizados</strong> <br>
-        ${rangesHtml}
+        <div>
+          <strong>Notifíquelo sobre sus rangos horarios autorizados</strong>
+          <br><br>
+          ${rangesHtml}
+        </div>
       `,
       icon: 'warning',
       confirmButtonText: 'Cerrar'
     });
   }
-  
   registerExitSuccess(newMovement_ExitDto: AccessNewMovementExitDto){
     Swal.fire({
       icon: 'success',
