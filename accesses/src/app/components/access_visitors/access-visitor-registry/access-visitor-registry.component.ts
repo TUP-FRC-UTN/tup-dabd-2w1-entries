@@ -363,6 +363,19 @@ loadAllOwners(): void {
             `${visitor.last_name} ${visitor.name}`,
             this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
             `<div class="text-start">${visitor.document}</div>`,
+            `<div class="text-start">
+            <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+                <option value="" disabled selected>Seleccione un vehículo</option>
+                ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+                    <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
+                    === 'Car' ? 'Coche' : 
+                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                  vehicle.vehicle_Type.description } </option>
+                `).join('') : ''}
+                <option value="sin_vehiculo">Sin vehículo</option>
+            </select>
+         </div>`,
             `<div class="d-flex justify-content-center">
               <div class="dropdown">
                 <button class="btn btn-white dropdown-toggle p-0" 
@@ -415,6 +428,19 @@ loadAllOwners(): void {
               `${visitor.last_name} ${visitor.name}`,
               this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
               `<div class="text-start">${visitor.document}</div>`,
+              `<div class="text-start">
+              <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+                  <option value="" disabled selected>Seleccione un vehículo</option>
+                  ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+                      <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
+                      === 'Car' ? 'Coche' : 
+                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                  vehicle.vehicle_Type.description } </option>
+                  `).join('') : ''}
+                  <option value="sin_vehiculo">Sin vehículo</option>
+              </select>
+           </div>`,
               `<div class="d-flex justify-content-center">
                 <div class="dropdown">
                   <button class="btn btn-white dropdown-toggle p-0" 
@@ -468,6 +494,19 @@ loadAllOwners(): void {
               `${visitor.last_name} ${visitor.name}`,
               this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
               `<div class="text-start">${visitor.document}</div>`,
+              `<div class="text-start">
+              <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+                  <option value="" disabled selected>Seleccione un vehículo</option>
+                  ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+                      <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
+                      === 'Car' ? 'Coche' : 
+                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                  vehicle.vehicle_Type.description } </option>
+                  `).join('') : ''}
+                  <option value="sin_vehiculo">Sin vehículo</option>
+              </select>
+           </div>`,
               `<div class="d-flex justify-content-center">
                 <div class="dropdown">
                   <button class="btn btn-white dropdown-toggle p-0" 
@@ -522,6 +561,19 @@ loadAllOwners(): void {
               'DNI',
             //this.getDocumentType(visitor), // "PASSPORT" se muestre como "Pasaporte"
               `<div class="text-start">${visitor.document}</div>`,
+              `<div class="text-start">
+              <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+                  <option value="" disabled selected>Seleccione un vehículo</option>
+                  ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+                      <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description 
+                      === 'Car' ? 'Coche' : 
+                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                  vehicle.vehicle_Type.description } </option>
+                  `).join('') : ''}
+                  <option value="sin_vehiculo">Sin vehículo</option>
+              </select>
+           </div>`,
               `<div class="d-flex justify-content-center">
                 <div class="dropdown">
                   <button class="btn btn-white dropdown-toggle p-0" 
@@ -563,9 +615,10 @@ loadAllOwners(): void {
         if (target.classList.contains('select-action')) {
           const index = target.getAttribute('data-index');
           const value = target.getAttribute('data-value');
-
+          const selectElement = document.getElementById('vehicles' + index) as HTMLSelectElement;
+          const selectedVehicle = selectElement.value;
           if (index !== null) {
-
+           
             let selectedOwner =  this.visitors[parseInt(index, 10)];
 
             if(this.allEmployersChecked){
@@ -602,7 +655,7 @@ loadAllOwners(): void {
                 target: { value: value },
               } as unknown as Event;
 
-              this.onSelectionChange(mockEvent, selectedOwner);
+              this.onSelectionChange(mockEvent, selectedOwner,selectedVehicle);
             }
           }
         }
@@ -612,15 +665,15 @@ loadAllOwners(): void {
     }
   }
 
-  onSelectionChange(event: Event, visitor: AccessUserAllowedInfoDto) {
+  onSelectionChange(event: Event, visitor: AccessUserAllowedInfoDto,vehiclePlate:string) {
     const selectElement = event.target as HTMLSelectElement;
     const selectedValue = selectElement.value;
-
+    
     if (selectedValue === 'ingreso') {
       let accessObservable: Observable<boolean>;
 
       if (visitor.userType.description === 'Owner' || visitor.userType.description === 'Tenant') {
-        accessObservable = this.prepareEntryMovement(visitor);
+        accessObservable = this.prepareEntryMovement(visitor,vehiclePlate);
       } else if (visitor.userType.description === 'Employeed' || visitor.userType.description === 'Supplier') {
         accessObservable = this.prepareEntryMovementEmp(visitor);
       } else {
@@ -650,7 +703,7 @@ loadAllOwners(): void {
       let exitObservable: Observable<boolean>;
 
       if (visitor.userType.description === 'Owner' || visitor.userType.description === 'Tenant') {
-        exitObservable = this.prepareExitMovement(visitor);
+        exitObservable = this.prepareExitMovement(visitor,vehiclePlate);
         
 
       } else if (visitor.userType.description === 'Employeed' || visitor.userType.description === 'Supplier') {
@@ -975,11 +1028,11 @@ loadAllOwners(): void {
 
 
   // registra el ingreso de un VECINO (propietario o inquilino)
-  private prepareEntryMovement(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
+  private prepareEntryMovement(visitor: AccessUserAllowedInfoDtoOwner,plate:string): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
         // Preparar datos del movimiento
-        const vehicless = visitor.vehicles?.length > 0 ? visitor.vehicles[0] : undefined;
+        const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
         const firstRange = visitor.authRanges[0];
         const now = new Date();
   
@@ -1073,14 +1126,10 @@ loadAllOwners(): void {
     });
   }
   
-  private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
+  private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner,plate:string): Observable<boolean> {
 
     return new Observable<boolean>((observer) => {
-
-      const vehicless =
-      visitor.vehicles && visitor.vehicles.length > 0
-        ? visitor.vehicles[0]
-        : undefined;
+      const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
       const now = new Date();
       this.movement.movementDatetime = now;
       const firstRange = visitor.authRanges[0];
@@ -1191,6 +1240,7 @@ loadAllOwners(): void {
   private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
     return new Observable<boolean>(observer => {
         try {
+          
             // Preparar el objeto de movimiento
             const movementS: AccessMovementEntryDto = {
                 description: String(this.observations || ''),
