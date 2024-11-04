@@ -7,7 +7,7 @@
 .export-btn {
     border: 1px solid black !important;
 }
-
+@import "~@ng-select/ng-select/themes/default.theme.css";
 /* Para los botones dentro de la sección de filtros */
 .filter-section .btn {
     border: 1px solid black !important;
@@ -187,4 +187,64 @@
     border-radius: 0.25rem;
     cursor: pointer;
     transition: opacity 0.2s;
+}
+
+/* Estilos para ng-select */
+::ng-deep .ng-select .ng-select-container {
+    background-color: white !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px;
+    min-height: 36px;
+}
+
+::ng-deep .ng-dropdown-panel {
+    background-color: white !important;
+    border: 1px solid #ced4da !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items {
+    background-color: white !important;
+    max-height: 200px;
+}
+
+::ng-deep .ng-dropdown-panel .ng-option {
+    background-color: white !important;
+    border-bottom: 1px solid #f8f9fa;
+    padding: 8px 10px;
+}
+
+::ng-deep .ng-dropdown-panel .ng-option:hover {
+    background-color: #f8f9fa !important;
+}
+
+::ng-deep .ng-dropdown-panel .ng-option.ng-option-selected {
+    background-color: #e9ecef !important;
+}
+
+::ng-deep .ng-select.ng-select-multiple .ng-select-container .ng-value-container {
+    background-color: white !important;
+    padding: 4px 8px;
+}
+
+::ng-deep .ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-placeholder {
+    color: #6c757d;
+}
+
+::ng-deep .ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value {
+    background-color: #e9ecef !important;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    margin: 2px 4px 2px 0;
+    padding: 2px 8px;
+}
+
+/* Asegurarse que el fondo del dropdown sea opaco */
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+    background-color: white !important;
+}
+
+/* Ajustar el color de hover */
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option:hover {
+    background-color: #f8f9fa !important;
 }

@@ -19,7 +19,7 @@
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
-    "@ng-select/ng-select": "^13.9.0",
+    "@ng-select/ng-select": "^13.9.1",
     "@types/datatables.net-buttons": "^1.4.10",
     "angular-datatables": "^18.0.0",
     "angular-google-charts": "^16.0.1",

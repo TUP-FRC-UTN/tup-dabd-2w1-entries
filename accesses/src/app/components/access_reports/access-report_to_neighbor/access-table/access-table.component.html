@@ -36,38 +36,21 @@
 
         <!-- Botones de acción -->
         <div class="col-md-2 d-flex align-items-end gap-2">
-            <div data-bs-toggle="tooltip modal" data-bs-placement="top" >
-
+            <div data-bs-toggle="tooltip modal" data-bs-placement="top">
                 <button class="btn btn-secondary" 
-                data-bs-target="#advancedFiltersModal"
-                data-bs-toggle="modal"
-                 
-                title="Filtros avanzados">
-            <i class="fa-solid fa-filter"></i>
-        </button>
-
+                        data-bs-target="#advancedFiltersModal"
+                        data-bs-toggle="modal"
+                        title="Filtros avanzados">
+                    <i class="fa-solid fa-filter"></i>
+                </button>
             </div>
-            <button class="btn btn-primary"
-                    (click)="clearFilters()"
-                    data-bs-toggle="tooltip" 
-                    data-bs-placement="top" 
-                    title="Limpiar filtros">
+            <button class="btn btn-primary" (click)="clearFilters()" title="Limpiar filtros">
                 <i class="fa-regular fa-trash-can"></i>
             </button>
-            <button id="excelBtn" 
-                    class="btn btn-success" 
-                    [disabled]="!exportButtonsEnabled"
-                    data-bs-toggle="tooltip" 
-                    data-bs-placement="top" 
-                    title="Exportar a Excel">
+            <button id="excelBtn" class="btn btn-success" [disabled]="!exportButtonsEnabled" title="Exportar a Excel">
                 <i class="fas fa-file-excel"></i>
             </button>
-            <button id="pdfBtn" 
-                    class="btn btn-danger" 
-                    [disabled]="!exportButtonsEnabled"
-                    data-bs-toggle="tooltip" 
-                    data-bs-placement="top" 
-                    title="Exportar a PDF">
+            <button id="pdfBtn" class="btn btn-danger" [disabled]="!exportButtonsEnabled" title="Exportar a PDF">
                 <i class="fas fa-file-pdf"></i>
             </button>
         </div>
@@ -85,72 +68,86 @@
             <div class="modal-body">
                 <div class="row g-3">
                     <!-- Tipo de Entrada -->
+                   <!-- Tipo de Entrada -->
                     <div class="col-md-6">
                         <label class="form-label">Tipo de Entrada</label>
-                        <div class="d-flex flex-column gap-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="entry" id="entryCheck">
-                                <label class="form-check-label" for="entryCheck">Entrada</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="exit" id="exitCheck">
-                                <label class="form-check-label" for="exitCheck">Salida</label>
-                            </div>
-                        </div>
+                        <ng-select
+                        [items]="entryExitOptions"
+                        [multiple]="true"
+                        [closeOnSelect]="false"
+                        bindLabel="label"
+                        bindValue="value"
+                       
+                        [(ngModel)]="filterValues.entryOrExit"
+                        (change)="applyFilters()">
+                    </ng-select>
                     </div>
-
                     <!-- Tipo de Ingresante -->
                     <div class="col-md-6">
                         <label class="form-label">Tipo de Ingresante</label>
-                        <div class="d-flex flex-column gap-2">
-                            <div class="form-check" *ngFor="let tipo of tiposIngresante">
-                                <input class="form-check-input" type="checkbox" [value]="tipo.value" [id]="tipo.value">
-                                <label class="form-check-label" [for]="tipo.value">{{tipo.label}}</label>
-                            </div>
-                        </div>
+                        <ng-select
+                            [items]="tiposIngresante"
+                            [multiple]="true"
+                            [closeOnSelect]="false"
+                            bindLabel="label"
+                            bindValue="value"
+                           
+                            [(ngModel)]="filterValues.tipoIngresante"
+                            (change)="applyFilters()">
+                        </ng-select>
                     </div>
 
                     <!-- Tipo de Vehículo -->
                     <div class="col-md-6">
                         <label class="form-label">Tipo de Vehículo</label>
-                        <div class="d-flex flex-column gap-2">
-                            <div class="form-check" *ngFor="let tipo of tiposVehiculo">
-                                <input class="form-check-input" type="checkbox" [value]="tipo.value" [id]="tipo.value">
-                                <label class="form-check-label" [for]="tipo.value">{{tipo.label}}</label>
-                            </div>
-                        </div>
+                        <ng-select
+                            [items]="tiposVehiculo"
+                            [multiple]="true"
+                            [closeOnSelect]="false"
+                            bindLabel="label"
+                            bindValue="value"
+                           
+                            [(ngModel)]="filterValues.typeCar"
+                            (change)="applyFilters()">
+                        </ng-select>
                     </div>
 
                     <!-- Estado de Horario -->
                     <div class="col-md-6">
                         <label class="form-label">Estado de Horario</label>
-                        <div class="d-flex flex-column gap-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="inrange" id="inrangeCheck">
-                                <label class="form-check-label" for="inrangeCheck">En horario</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="late" id="lateCheck">
-                                <label class="form-check-label" for="lateCheck">Tarde</label>
-                            </div>
-                        </div>
+                        <ng-select
+                            [items]="estadoHorarioOptions"
+                            [multiple]="true"
+                            [closeOnSelect]="false"
+                            [searchable]="false"
+                            bindLabel="label"
+                            bindValue="value"
+                           
+                            [(ngModel)]="filterValues.lateInRange"
+                            (change)="applyFilters()">
+                        </ng-select>
                     </div>
 
                     <!-- Días -->
                     <div class="col-12">
-                        <label class="form-label">Día</label>
-                        <div class="d-flex flex-wrap gap-2">
-                            <div class="form-check" *ngFor="let day of days">
-                                <input class="form-check-input" type="checkbox" [value]="day" [id]="'day' + day">
-                                <label class="form-check-label" [for]="'day' + day">{{day}}</label>
-                            </div>
-                        </div>
+                        <label class="form-label">Días</label>
+                        <ng-select
+                            [items]="daysOptions"
+                            [multiple]="true"
+                            [closeOnSelect]="false"
+                            bindLabel="label"
+                            bindValue="value"
+                          
+                            [(ngModel)]="filterValues.days"
+                            (change)="applyFilters()">
+                        </ng-select>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="clearModalFilters()">Limpiar</button>
-                <button type="button" class="btn btn-primary" (click)="applyModalFilters()">Aplicar</button>
+              
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="applyFilters()">Aplicar</button>
+                <button type="button" class="btn btn-primary"  (click)="clearFilters()" > <i class="fa-regular fa-trash-can"></i></button>
             </div>
         </div>
     </div>
