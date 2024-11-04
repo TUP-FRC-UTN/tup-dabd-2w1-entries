@@ -6,15 +6,17 @@ import { AccessGeneralDashboardComponent } from './components/access_dashboards/
 import { AccessDailyFetchComponent } from './components/access_entrys/access-daily-fetch/access-daily-fetch.component';
 import { AccessEditComponent } from './components/access_visitors/access-edit/access-edit.component';
 import { AccessEntryComponent } from './components/access_entrys/access-entry/access-entry.component';
+import { AccessEmergenciesService } from './services/access-emergencies/access-emergencies.service';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'reports', pathMatch: 'full' },
+    { path: '', redirectTo: '', pathMatch: 'full' },
     { path: 'visitors', component: AccessVisitorRegistryComponent },
     { path: 'reports', component: AccessGlobalReportComponent },
     { path: 'entry', component: AccessEntryComponent },
     { path: 'dashboards', component: AccessGeneralDashboardComponent },
-    { path: 'entry', component: AccessDailyFetchComponent },
+    { path: 'entryDaily', component: AccessDailyFetchComponent },
     { path: 'edit', component: AccessEditComponent },
-    { path: 'visitor/register', component: AccessContainerVisitorsRegistrationComponent }
+    { path: 'visitor/register', component: AccessContainerVisitorsRegistrationComponent },
+    {path:"emergency",component:AccessEmergenciesService}
 
 ];

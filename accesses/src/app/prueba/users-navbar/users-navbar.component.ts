@@ -1,0 +1,122 @@
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { SideButton } from '../SideButton';
+import { UsersSideButtonComponent } from '../users-side-button/users-side-button.component';
+
+@Component({
+  selector: 'app-users-navbar',
+  standalone: true,
+  imports: [ UsersSideButtonComponent],
+  templateUrl: './users-navbar.component.html',
+  styleUrl: './users-navbar.component.css'
+})
+export class UsersNavbarComponent {
+  //Expande el side
+  expand: boolean = false;
+  pageTitle: string = "Página Principal"
+
+  constructor(private router: Router) { }
+  // private readonly authService = inject(AuthService);
+
+  // userRoles: string[] =  this.authService.getUser().roles!; 
+  userRoles: string[] = ["Gerente", "Propietario"]
+
+  //Traer con el authService
+  actualRole : string = "Gerente"
+  //Lista de botones
+  buttonsList: SideButton[] = [];
+
+  // setName(){
+  //   return this.authService.getUser().name + " " + this.authService.getUser().lastname;
+  // }
+
+  async ngOnInit(): Promise<void> {
+    this.buttonsList = [
+      // {
+      //   icon: "bi-person",
+      //   title: "Perfil",
+      //   route: "home/profile",
+      //   roles: ["SuperAdmin", "Admin", "Security", "Owner", "Spouse", "FamilyOld", "FamilyYoung", "Tenant"] //ver
+      // },
+      {
+        icon: "bi bi-shield-fill-exclamation",
+        title: "Accesos",
+        roles: ["SuperAdmin", "Gerente","Propietario"],
+        childButtons: [
+          {
+            icon: "bi bi-person-lines-fill",
+            title: "Registro de Ingreso/Egreso",
+            route: "visitors",
+            roles: ["SuperAdmin", "Gerente","Security"]
+          },
+          {
+            icon: "bi bi-list-check",
+            title: "Informe de ingresos/egresos mensuales",
+            route: "reports",
+            roles: ["SuperAdmin", "Gerente"]
+          },
+          {
+            icon: "bi bi-door-open-fill",
+            title: "Añadir visitante",
+            route: "visitor/register",
+            roles: ["SuperAdmin", "Gerente","Propietario","Security"]
+          },
+          {
+            icon: "bi bi-pencil-square",
+            title: "Editar visitante",
+            route: "edit",
+            roles: ["SuperAdmin", "Gerente","Propietario"]
+          },
+          {
+            icon: "bi bi-calendar-date-fill",
+            title: "Entradas Diarias",
+            route: "entry",
+            roles: ["SuperAdmin", "Gerente","Security"]
+          },
+          /* ACA ESTO de abajo es temporal, es para ubicar temporalmente al dashboar */
+          {
+            icon: "bi bi-question-diamond-fill",
+            title: "Entradas Diarias",
+            route: "dashboards",
+            roles: ["SuperAdmin", "Gerente","Security"]
+          },
+          /* DEFINIR COMO HACER CON EL INGRESO DE EMERGENCIA */
+         /*  {
+            icon: "bi bi-hospital-fill",
+            title: "Añadir visitante",
+            route: "visitor/register",
+            roles: ["Security"]
+          }, */
+        ]
+      },
+
+      
+
+
+    ];
+  }
+
+  //Expandir y contraer el sidebar
+  changeState() {
+    this.expand = !this.expand;
+  }
+
+  redirect(path: string) {
+    // if(path === '/login'){
+    //   this.authService.logOut();
+    //   this.router.navigate([path]);
+    // }
+    // else{
+    //   this.router.navigate([path]);
+    // }
+    this.router.navigate([path]);
+  }
+
+  setTitle(title: string) {
+    this.pageTitle = title;
+  }
+
+  selectRole(role : string){
+    this.actualRole = role;
+  }
+}
