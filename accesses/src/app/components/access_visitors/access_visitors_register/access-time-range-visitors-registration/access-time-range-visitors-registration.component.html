@@ -26,13 +26,47 @@
         <div class="col-12 col-md-6">
           <div class="row g-2">
             <div class="col-5">
-              <input type="time" class="form-control" id="initHour" formControlName="initHour" placeholder="Desde" required>
+              <input 
+                type="time" 
+                class="form-control" 
+                id="initHour" 
+                formControlName="initHour" 
+                placeholder="Desde"
+                [class.is-invalid]="form.get('initHour')?.touched && form.get('initHour')?.invalid"
+                required
+              >
+              <div class="invalid-feedback" *ngIf="form.get('initHour')?.touched && form.get('initHour')?.errors?.['required']">
+                La hora de inicio es requerida
+              </div>
             </div>
             <div class="col-5">
-              <input type="time" class="form-control" id="endHour" formControlName="endHour" placeholder="Hasta" required>
+              <input 
+                type="time" 
+                class="form-control" 
+                id="endHour" 
+                formControlName="endHour" 
+                placeholder="Hasta"
+                [class.is-invalid]="form.get('endHour')?.touched && form.get('endHour')?.invalid"
+                required
+              >
+              <div class="invalid-feedback" *ngIf="form.get('endHour')?.touched">
+                <span *ngIf="form.get('endHour')?.errors?.['required']">
+                  La hora de fin es requerida
+                </span>
+                <span *ngIf="form.get('endHour')?.errors?.['invalidTimeRange']">
+                  La hora de fin debe ser posterior a la hora de inicio
+                </span>
+              </div>
             </div>
             <div class="col-2">
-              <button class="btn btn-primary w-100 btn-sm" type="button" (click)="agregarDiasPermitidos()">+</button>
+              <button 
+                class="btn btn-primary w-100 btn-sm" 
+                type="button" 
+                (click)="agregarDiasPermitidos()"
+                [disabled]="form.get('initHour')?.invalid || form.get('endHour')?.invalid"
+              >
+                +
+              </button>
             </div>
           </div>
         </div>
