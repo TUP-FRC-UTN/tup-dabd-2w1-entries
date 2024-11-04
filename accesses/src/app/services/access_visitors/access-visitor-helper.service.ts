@@ -336,23 +336,27 @@ export class AccessVisitorHelperService {
     // true para init_hour o false para end_hour
     stringToHour(allowedDayDto: AccessAllowedDaysDto, x: boolean): string {
       
-      const hours = x ? allowedDayDto.init_hour : allowedDayDto.end_hour;      
+      let response = x ? allowedDayDto.init_hour : allowedDayDto.end_hour;      
     
-      // funcion auxiliar para formatear la hora
-      const formatHour = (hour: unknown): string => {
-        if (typeof hour === 'string') {
-          return hour.padStart(2, '0');
-        } else if (typeof hour === 'number') {
-          return hour.toString().padStart(2, '0');
-        }
-        return '00';
-      };
+      if(response.length < 7){
+        // funcion auxiliar para formatear la hora
+        const formatHour = (hour: unknown): string => {
+          if (typeof hour === 'string') {
+            return hour.padStart(2, '0');
+          } else if (typeof hour === 'number') {
+            return hour.toString().padStart(2, '0');
+          }
+          return '00';
+        };
+      
+        // formatea horas y minutos
+        const formattedHours = formatHour(response?.[0]);
+        const formattedMinutes = formatHour(response?.[1]);
+
+        response = `${formattedHours}:${formattedMinutes}:00`;
+      }
     
-      // formatea horas y minutos
-      const formattedHours = formatHour(hours?.[0]);
-      const formattedMinutes = formatHour(hours?.[1]);
-    
-      return `${formattedHours}:${formattedMinutes}:00`;
+      return response;
     }
 
     //devuelve el dia de hoy (en el mismo formato q devuelve el back, osea el tipo de dato DayOfWeek en java)
@@ -388,8 +392,8 @@ export class AccessVisitorHelperService {
         rangesHtml += `
         <p>
           <strong>Día ${this.translateDay(dayAllowed.day)}:</strong> <br>
-          <strong>Desde: </strong> ${dayAllowed.init_hour}<br>
-          <strong>Hasta: </strong> ${dayAllowed.end_hour}
+          <strong>Desde: </strong> ${this.stringToHour(dayAllowed, true)}<br>
+          <strong>Hasta: </strong> ${this.stringToHour(dayAllowed, false)}
         </p>
       `;
       }
@@ -470,19 +474,6 @@ export class AccessVisitorHelperService {
 
   // muestra un modal avisando q el Visitor esta SALIENDO TARDE (hora de egreso mayor q la hora permitida)
   hourLateExitRegistered(authRanges: AuthRangeInfoDto | undefined){
-       // let allowedDay = visitor.authRanges.at(indexAuthRange)?.allowedDays.at(indexDayAllowed);
-
-    // if(allowedDay != undefined && allowedDay.day != undefined && allowedDay.init_hour != undefined && allowedDay.end_hour != undefined){
-          
-    //     rangesHtml = `
-    //       <p>
-    //         <strong>Rango horario del día ${this.translateDay(allowedDay.day)} </strong> <br>
-    //         <strong>Desde: </strong> ${allowedDay.init_hour} <br>
-    //         <strong>Hasta: </strong> ${allowedDay.end_hour}
-    //       </p>
-    //     `;
-      
-    // }
 
     let rangesHtml = '';
 
@@ -491,8 +482,8 @@ export class AccessVisitorHelperService {
         rangesHtml += `
         <p>
           <strong>Rango ${this.translateDay(dayAllowed.day)}:</strong> <br>
-          <strong>Desde: </strong> ${dayAllowed.init_hour}<br>
-          <strong>Hasta: </strong> ${dayAllowed.end_hour}
+          <strong>Desde: </strong> ${this.stringToHour(dayAllowed, true)}<br>
+          <strong>Hasta: </strong> ${this.stringToHour(dayAllowed, true)}
         </p>
       `;
       }
