@@ -287,7 +287,22 @@ setTodayDate(): void {
   }
 
   removeVisitor(index: number): void {
+    // Remove the visitor
     this.additionalVisitors.splice(index, 1);
+    
+    // Remove the validation errors for this visitor
+    delete this.additionalVisitorsErrors[index];
+    
+    // Reindex the remaining errors
+    const newErrors: AdditionalVisitorsErrors = {};
+    Object.keys(this.additionalVisitorsErrors)
+      .filter(key => parseInt(key) > index)
+      .forEach(key => {
+        const oldIndex = parseInt(key);
+        newErrors[oldIndex - 1] = this.additionalVisitorsErrors[oldIndex];
+      });
+    
+    this.additionalVisitorsErrors = newErrors;
   }
 
   saveAllVisitors(): void {
@@ -567,52 +582,32 @@ setTodayDate(): void {
     });
   }
 
-hasValidationErrors(): boolean {
-  // Validaciones existentes
-  Object.keys(this.selectedVisitor).forEach(field => {
-    if (field !== 'authRange' && field !== 'authId') {
-      this.validateField(field, (this.selectedVisitor as any)[field]);
-    }
-  });
-
-  this.additionalVisitors.forEach((visitor, index) => {
-    Object.keys(visitor).forEach(field => {
+  hasValidationErrors(): boolean {
+    // Validaciones del visitante principal
+    Object.keys(this.selectedVisitor).forEach(field => {
       if (field !== 'authRange' && field !== 'authId') {
-        this.validateField(field, (visitor as any)[field], index);
+        this.validateField(field, (this.selectedVisitor as any)[field]);
       }
     });
-  });
 
-  // Validar fechas, días y horas
-  this.validateDateRange();
+    // Validaciones de visitantes adicionales
+    this.additionalVisitors.forEach((visitor, index) => {
+      Object.keys(visitor).forEach(field => {
+        if (field !== 'authRange' && field !== 'authId') {
+          this.validateField(field, (visitor as any)[field], index);
+        }
+      });
+    });
 
-  return Object.keys(this.validationErrors).length > 0 ||
-         Object.keys(this.additionalVisitorsErrors).some(index => 
-           Object.keys(this.additionalVisitorsErrors[Number(index)]).length > 0);
-}
-  
-  private getVisitorErrors(visitor: any): { [key: string]: string } {
-    const errors: { [key: string]: string } = {};
-    
-    if (!visitor.name?.trim()) {
-      errors['name'] = 'El nombre es requerido';
-    }
-    
-    if (!visitor.last_name?.trim()) {
-      errors['last_name'] = 'El apellido es requerido';
-    }
-    
-    if (!visitor.document?.trim()) {
-      errors['document'] = 'El documento es requerido';
-    }
-    
-    if (!visitor.email?.trim()) {
-      errors['email'] = 'El email es requerido';
-    } else if (!this.isValidEmail(visitor.email)) {
-      errors['email'] = 'El formato del email no es válido';
-    }
-    
-    return errors;
+    // Validar fechas, días y horas
+    this.validateDateRange();
+
+    // Solo considerar errores de los índices que aún existen
+    const validVisitorErrors = Object.keys(this.additionalVisitorsErrors)
+      .filter(index => parseInt(index) < this.additionalVisitors.length)
+      .some(index => Object.keys(this.additionalVisitorsErrors[Number(index)]).length > 0);
+
+    return Object.keys(this.validationErrors).length > 0 || validVisitorErrors;
   }
   
 
