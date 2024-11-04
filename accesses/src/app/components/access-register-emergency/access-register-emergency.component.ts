@@ -255,7 +255,8 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
         },
         plate: formValue.vehicle?.plate ?? null
       },
-      observations: formValue.observations
+      observations: formValue.observations,
+      loggedUserId: 1 //TODO: CAMBIAR POR VALOR OBTENIDO DE USUARIOS
     };
     return emergencyDto;
   }

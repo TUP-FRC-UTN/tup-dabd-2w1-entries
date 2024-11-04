@@ -5,12 +5,13 @@ import { AccessGlobalReportComponent } from './components/access_reports/access-
 import { AccessGeneralDashboardComponent } from './components/access_dashboards/access-general-dashboard/access-general-dashboard.component';
 import { AccessDailyFetchComponent } from './components/access_entrys/access-daily-fetch/access-daily-fetch.component';
 import { AccessEditComponent } from './components/access_visitors/access-edit/access-edit.component';
+import { AccessEntryComponent } from './components/access_entrys/access-entry/access-entry.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'reports', pathMatch: 'full' },
     { path: 'visitors', component: AccessVisitorRegistryComponent },
     { path: 'reports', component: AccessGlobalReportComponent },
-    //{ path: 'entry', component: EntryComponent },
+    { path: 'entry', component: AccessEntryComponent },
     { path: 'dashboards', component: AccessGeneralDashboardComponent },
     { path: 'entry', component: AccessDailyFetchComponent },
     { path: 'edit', component: AccessEditComponent },
