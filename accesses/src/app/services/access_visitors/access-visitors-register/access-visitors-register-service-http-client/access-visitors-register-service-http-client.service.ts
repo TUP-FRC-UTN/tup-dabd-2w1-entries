@@ -3,7 +3,7 @@ import { HttpClient  } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, tap} from 'rxjs/operators';
 import { inject } from '@angular/core';
-import { AccessVisitorRecord, AccessVisitor, AccessAuthRange, AccessAllowedDay, AccessUser } from '../../../../models/access-visitors/access-visitors-models';
+import { AccessVisitorRecord, AccessAuthRange, AccessAllowedDay, AccessUser } from '../../../../models/access-visitors/access-visitors-models';
 import { QrDto } from '../../../../models/access-visitors/access-visitors-models';
 @Injectable({
   providedIn: 'root'
