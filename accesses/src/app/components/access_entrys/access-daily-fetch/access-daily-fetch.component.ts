@@ -62,7 +62,7 @@ export class AccessDailyFetchComponent implements OnInit,AfterViewInit {
   }
   ngOnInit(): void {
     this.setTodayDate(); 
-    
+    this.fetchMovements();
     
   }
   setTodayDate(): void {
@@ -115,7 +115,7 @@ export class AccessDailyFetchComponent implements OnInit,AfterViewInit {
       searching: true,
       info: true,
       autoWidth: false,
-      order: [6, 'asc'],
+      order: [1, 'des'],
       lengthMenu: [10, 25, 50],
       responsive: true,
       dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
@@ -145,7 +145,7 @@ export class AccessDailyFetchComponent implements OnInit,AfterViewInit {
           render: (data: string): string => {
             if (!data) return '';
             const movementDate = new Date(Date.parse(data));
-            return movementDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+            return movementDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
           }
         },
         { 
