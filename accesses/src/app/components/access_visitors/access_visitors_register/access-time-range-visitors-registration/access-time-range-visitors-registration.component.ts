@@ -86,8 +86,24 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
 
     this.form.get('startDate')?.valueChanges.subscribe(() => this.updateAvailableDays());
     this.form.get('endDate')?.valueChanges.subscribe(() => this.updateAvailableDays());
+    this.form.get('initHour')?.valueChanges.subscribe(() => this.validateTimeRange());
+    this.form.get('endHour')?.valueChanges.subscribe(() => this.validateTimeRange());
   }
-
+  private validateTimeRange(): void {
+    const initHour = this.form.get('initHour')?.value;
+    const endHour = this.form.get('endHour')?.value;
+  
+    if (initHour && endHour) {
+      const start = new Date(`1970-01-01T${initHour}`);
+      const end = new Date(`1970-01-01T${endHour}`);
+  
+      if (end <= start) {
+        this.form.get('endHour')?.setErrors({ invalidTimeRange: true });
+      } else {
+        this.form.get('endHour')?.setErrors(null);
+      }
+    }
+  }
   updateAvailableDays(): void {
     const startDate = this.form.get('startDate')?.value;
     const endDate = this.form.get('endDate')?.value;
