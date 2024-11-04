@@ -60,8 +60,9 @@
         <thead>
           <tr>
             <th scope="col">Nombre</th>
-            <th scope="col">Tipo Doc.</th>
+            <th scope="col">Tipo</th>
             <th scope="col">Documento</th>
+            <th scope="col">Vehiculo</th>
             <th scope="col">Acción</th>
             <th scope="col">Observaciones</th>
             <th scope="col">Estado</th>
@@ -156,11 +157,12 @@
           </p>
           <p><strong>Tipo de Persona:</strong> 
             {{ 
-              selectedVisitor.userType.description === 'Emplooyed' ? 'Empleado' : 
+              selectedVisitor.userType.description === 'Employeed' ? 'Empleado' : 
               selectedVisitor.userType.description === 'Visitor' ? 'Visitante' : 
               selectedVisitor.userType.description === 'Owner' ? 'Propietario' : 
               selectedVisitor.userType.description === 'Tenant' ? 'Inquilino' : 
-              selectedVisitor.userType.description 
+              selectedVisitor.userType.description ==='Supplier' ? 'Porveedor':
+              selectedVisitor.userType.description
             }}
           </p>
           <p>

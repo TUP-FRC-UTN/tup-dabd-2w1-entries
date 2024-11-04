@@ -1,0 +1,30 @@
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+  }
+  
+  .modal {
+    z-index: 1045;
+  }
+  
+  .modal.show {
+    display: block;
+  }
+  
+  body.modal-open {
+    overflow: hidden;
+  }
+  
+  /* Optional: Add animation */
+  .modal {
+    transition: opacity 0.15s linear;
+  }
+  
+  .modal.show {
+    opacity: 1;
+  }
