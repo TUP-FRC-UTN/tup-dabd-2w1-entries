@@ -283,12 +283,21 @@ export class AccessVisitorHelperService {
     
     //devuelve la hora de inicio (de un Allowed_DaysDto) en formato Date 
     getHourInit(allowedDayDto: AccessAllowedDaysDto): Date{
-      console.log('init_hour:', allowedDayDto.init_hour, 'type:', typeof allowedDayDto.init_hour);
+
+      let init_hour = allowedDayDto.init_hour;
+      console.log('allowedDayDto.init_hour =', allowedDayDto.init_hour);
+
+      if(init_hour.length < 7){
+        init_hour = this.stringToHour(allowedDayDto, true);
+      }
+
+      console.log('init_hour = ', init_hour);
+
       let response = new Date();
 
-      const hours: string = allowedDayDto.init_hour.substring(0, 2);
-      const minutes: string = allowedDayDto.init_hour.substring(3, 5);
-      const seconds: string = allowedDayDto.init_hour.substring(6, 8);
+      const hours: string = init_hour.substring(0, 2);
+      const minutes: string = init_hour.substring(3, 5);
+      const seconds: string = init_hour.substring(6, 8);
 
       response.setHours(Number(hours));
       response.setMinutes(Number(minutes));
@@ -300,11 +309,20 @@ export class AccessVisitorHelperService {
     //devuelve la hora de find (de un Allowed_DaysDto) en formato Date 
     getHourEnd(allowedDayDto: AccessAllowedDaysDto): Date{
 
+      let end_hour = allowedDayDto.end_hour;
+      console.log('allowedDayDto.end_hour = ', allowedDayDto.end_hour);
+
+      if(end_hour.length < 7){
+        end_hour = this.stringToHour(allowedDayDto, false);
+      }
+
+      console.log('end_hour = ', end_hour);
+
       let response = new Date();
 
-      const hours: string = allowedDayDto.end_hour.substring(0, 2);
-      const minutes: string = allowedDayDto.end_hour.substring(3, 5);
-      const seconds: string = allowedDayDto.end_hour.substring(6, 8);
+      const hours: string = end_hour.substring(0, 2);
+      const minutes: string = end_hour.substring(3, 5);
+      const seconds: string = end_hour.substring(6, 8);
 
       response.setHours(Number(hours));
       response.setMinutes(Number(minutes));
@@ -315,6 +333,7 @@ export class AccessVisitorHelperService {
 
 
     //metodo q devuelve la hora en formato string (para mostrarla en el front)
+    // true para init_hour o false para end_hour
     stringToHour(allowedDayDto: AccessAllowedDaysDto, x: boolean): string {
       
       const hours = x ? allowedDayDto.init_hour : allowedDayDto.end_hour;      
