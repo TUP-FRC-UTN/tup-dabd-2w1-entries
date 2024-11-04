@@ -283,7 +283,7 @@ export class AccessVisitorHelperService {
     
     //devuelve la hora de inicio (de un Allowed_DaysDto) en formato Date 
     getHourInit(allowedDayDto: AccessAllowedDaysDto): Date{
-
+      console.log('init_hour:', allowedDayDto.init_hour, 'type:', typeof allowedDayDto.init_hour);
       let response = new Date();
 
       const hours: string = allowedDayDto.init_hour.substring(0, 2);
