@@ -110,13 +110,13 @@ export class AccessDailyFetchComponent implements OnInit,AfterViewInit {
     let table = this.table = ($('#fetchTable') as any).DataTable({
       paging: true,
       ordering: true,
-      pageLength: 10,
+      pageLength: 5,
       lengthChange: true,
       searching: true,
       info: true,
       autoWidth: false,
       order: [1, 'des'],
-      lengthMenu: [10, 25, 50],
+      lengthMenu: [5, 10, 25, 50],
       responsive: true,
       dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
       language: {

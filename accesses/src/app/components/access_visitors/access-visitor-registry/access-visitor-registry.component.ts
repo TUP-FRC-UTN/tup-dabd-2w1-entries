@@ -170,7 +170,8 @@ export class AccessVisitorRegistryComponent
       this.dataTable = ($('#visitorsTable') as any).DataTable({
         paging: true,
         ordering: true,
-        pageLength: 10,
+        pageLength: 5,
+        lengthMenu: [5, 10, 25, 50],
         lengthChange: true,
         searching: true,
         info: true,
