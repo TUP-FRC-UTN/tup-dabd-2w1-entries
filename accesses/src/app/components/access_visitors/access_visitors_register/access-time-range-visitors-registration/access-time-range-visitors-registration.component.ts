@@ -89,21 +89,57 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
     this.form.get('initHour')?.valueChanges.subscribe(() => this.validateTimeRange());
     this.form.get('endHour')?.valueChanges.subscribe(() => this.validateTimeRange());
   }
-  private validateTimeRange(): void {
-    const initHour = this.form.get('initHour')?.value;
-    const endHour = this.form.get('endHour')?.value;
-  
-    if (initHour && endHour) {
-      const start = new Date(`1970-01-01T${initHour}`);
-      const end = new Date(`1970-01-01T${endHour}`);
-  
-      if (end <= start) {
-        this.form.get('endHour')?.setErrors({ invalidTimeRange: true });
-      } else {
-        this.form.get('endHour')?.setErrors(null);
-      }
+
+private validateTimeRange(): void {
+  const initHour = this.form.get('initHour')?.value;
+  const endHour = this.form.get('endHour')?.value;
+
+  if (initHour && endHour) {
+
+    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    
+    if (!timeRegex.test(initHour) || !timeRegex.test(endHour)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'El formato de hora debe ser HH:mm y estar entre 00:00 y 23:59',
+      });
+      this.form.get('initHour')?.setErrors({ invalidFormat: true });
+      this.form.get('endHour')?.setErrors({ invalidFormat: true });
+      return;
+    }
+
+    const start = new Date(`1970-01-01T${initHour}`);
+    const end = new Date(`1970-01-01T${endHour}`);
+
+    // Convertir a minutos para comparar
+    const startMinutes = start.getHours() * 60 + start.getMinutes();
+    const endMinutes = end.getHours() * 60 + end.getMinutes();
+
+    // Validar rango de horas
+    if (startMinutes < 0 || startMinutes > 1439 || endMinutes < 0 || endMinutes > 1439) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Las horas deben estar entre 00:00 y 23:59',
+      });
+      return;
+    }
+
+    // Validar que la hora final sea mayor que la inicial
+    if (end <= start) {
+      this.form.get('endHour')?.setErrors({ invalidTimeRange: true });
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'La hora de fin debe ser posterior a la hora de inicio',
+      });
+    } else {
+      this.form.get('endHour')?.setErrors(null);
+      this.form.get('initHour')?.setErrors(null);
     }
   }
+}
   updateAvailableDays(): void {
     const startDate = this.form.get('startDate')?.value;
     const endDate = this.form.get('endDate')?.value;
