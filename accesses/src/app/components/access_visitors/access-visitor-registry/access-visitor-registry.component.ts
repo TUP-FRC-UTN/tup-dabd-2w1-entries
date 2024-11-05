@@ -94,6 +94,22 @@ export class AccessVisitorRegistryComponent
 
   modalValid: boolean = false;
 
+  //carga TODOS los invitados al iniciar la pantalla
+  ngOnInit(): void {
+    //DATOS
+    //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
+    this.loadDataVisitors(); 
+    this.loadDataOwnerRenter();
+    this.loadDataEmp();
+
+    //los 3 siguientes cargan cada tipo (de userAllowed), en su propia lista separada
+    this.loadAllVisitors();
+    this.loadAllOwners();
+    this.loadAllEmployers();
+
+    console.log("cant total de userAllowed: ", this.allPeopleAllowed)
+  }
+
   ngOnDestroy() {
     if (this.dataTable) {
       this.dataTable.destroy();
@@ -170,7 +186,8 @@ export class AccessVisitorRegistryComponent
       this.dataTable = ($('#visitorsTable') as any).DataTable({
         paging: true,
         ordering: true,
-        pageLength: 10,
+        pageLength: 5,
+        lengthMenu: [5, 10, 25, 50],
         lengthChange: true,
         searching: true,
         info: true,
@@ -208,7 +225,7 @@ export class AccessVisitorRegistryComponent
     setTimeout(() => {
       this.initializeDataTable();
       this.setupModalEventListeners();
-      
+
       // Asegúrate de que el elemento de búsqueda esté disponible
       const searchInput = $('#dt-search-0');
       searchInput.on('keyup', () => {
@@ -219,6 +236,132 @@ export class AccessVisitorRegistryComponent
   }
   
 
+  // metodos Load LIST
+  loadVisitorsList() {
+    const subscriptionAll = this.visitorService.getVisitorsData().subscribe({
+      next: (data) => {
+        this.ngZone.run(() => {
+          this.onlyVisitors = data;
+          this.showVisitors = this.onlyVisitors;
+          //console.log("data en el component: ", data);
+          //console.log('visitors en el component: ', this.visitors);
+          this.updateDataTable();
+        });
+      },
+    });
+    this.subscription.add(subscriptionAll);
+  }
+  loadEmployersList() {
+    const subscriptionAll = this.userService.getSuppEmpData().subscribe({
+      next: (data) => {
+        this.ngZone.run(() => {
+          this.employers = data;
+          this.showEmployers = this.employers;
+          //console.log("data en el component: ", data);
+          //console.log('empleados en el component: ', this.employers);
+          this.updateDataTable();
+        });
+      },
+    });
+    this.subscription.add(subscriptionAll);
+  }
+  loadOwnerList() {
+    const subscriptionAll = this.ownerService.getAllOwnerRenterList().subscribe({
+      next: (data) => {
+        this.ngZone.run(() => {
+          this.owners = data;
+          this.showOwners = this.owners;
+          //console.log("data en el component: ", data);
+          //console.log('owners en el component: ', this.owners);
+          this.updateDataTable();
+        });
+      },
+    });
+    this.subscription.add(subscriptionAll);
+  }
+// FIN metodos Load LIST
+
+// metodos Load DATA
+  loadDataOwnerRenter() {
+    const subscriptionAll = this.ownerService
+      .getAllOwnerRenterList()
+      .subscribe({
+        next: (ownerList: AccessUserAllowedInfoDtoOwner[]) => {
+          this.ngZone.run(() => {
+            ownerList.forEach((owner) => {
+              this.allPeopleAllowed.push({ //lo agrega a la lista "comun" donde estan TODOS los autorizados a ingresar
+                document: owner.document,
+                name: owner.name,
+                userType: owner.userType,
+                last_name: owner.last_name,
+                documentTypeDto: owner.documentTypeDto,
+                authRanges: owner.authRanges,
+                email: owner.email,
+                vehicles: owner.vehicles,
+                neighbor_id: 0,
+              });
+            });
+
+            //console.log('Loaded owner/renter list:', this.visitors);
+            this.updateDataTable();
+          });
+        },
+      });
+    this.subscription.add(subscriptionAll);
+  }
+
+  private loadDataEmp(): void {
+    this.userService.getSuppEmpData().subscribe({
+      next: (empSuppList: AccessUserAllowedInfoDtoOwner[]) => {
+        this.ngZone.run(() => {
+          empSuppList.forEach((empSupp) => {
+            this.allPeopleAllowed.push({
+              document: empSupp.document,
+              name: empSupp.name,
+              userType: empSupp.userType,
+              last_name: empSupp.last_name,
+              documentTypeDto: empSupp.documentTypeDto,
+              authRanges: empSupp.authRanges,
+              email: empSupp.email,
+              vehicles: empSupp.vehicles,
+              neighbor_id: 0,
+            });
+          });
+
+          //console.log('Loaded emp/prov list:', this.visitors);
+          this.updateDataTable();
+        });
+      },
+    });
+  }
+  
+  private loadDataVisitors(): void {
+    this.visitorService.getVisitorsData().subscribe({
+      next: (visitorsList: AccessUserAllowedInfoDtoOwner[]) => {
+        this.ngZone.run(() => {
+          visitorsList.forEach((visitor) => {
+            this.allPeopleAllowed.push({
+              document: visitor.document,
+              name: visitor.name,
+              userType: visitor.userType,
+              last_name: visitor.last_name,
+              documentTypeDto: visitor.documentTypeDto,
+              authRanges: visitor.authRanges,
+              email: visitor.email,
+              vehicles: visitor.vehicles,
+              neighbor_id: 0,
+            });
+          });
+
+          //console.log('Loaded emp/prov list:', this.visitors);
+          this.updateDataTable();
+        });
+      },
+    });
+  }
+// FIN metodos Load DATA
+
+// metodos Load ALL (creo q son del "filtro" viejo, las podriamos borrar tranquilamente)
   /* Aca carga los visitantes */
   allVisitorsChecked = false;
 
@@ -235,7 +378,7 @@ export class AccessVisitorRegistryComponent
       this.showOwners = [];
       this.employers = [];
       this.showEmployers = [];
-      this.visitors = [];
+      this.onlyVisitors = [];
       this.showVisitors = [];
       this.updateDataTable();
     }
@@ -245,10 +388,10 @@ export class AccessVisitorRegistryComponent
     const subscriptionAll = this.visitorService.getVisitorsData().subscribe({
       next: (data) => {
         this.ngZone.run(() => {
-          this.visitors = data; // Carga todos los visitantes
-          this.showVisitors = this.visitors; // Actualiza la lista de visitantes a mostrar
-          console.log('Visores en el componente: ', this.visitors);
-          this.updateDataTable(); // Actualiza la tabla de visitantes
+          this.onlyVisitors = data; // Carga todos los visitantes
+          this.showVisitors = this.onlyVisitors; // Actualiza la lista de visitantes a mostrar
+      //    console.log('Visores en el componente: ', this.visitors);
+    //      this.updateDataTable(); // Actualiza la tabla de visitantes
         });
       },
       error: (error) => {
@@ -257,10 +400,8 @@ export class AccessVisitorRegistryComponent
     });
     this.subscription.add(subscriptionAll);
   }
-
-  ////carga empleados
+  //carga empleados
   allEmployersChecked = false;
-
   toggleAllEmployers(): void {
     this.allEmployersChecked = !this.allEmployersChecked;// Alternar el estado
     this.allVisitorsChecked = false; 
@@ -274,7 +415,7 @@ export class AccessVisitorRegistryComponent
     this.showOwners = [];
     this.employers = [];
     this.showEmployers = [];
-    this.visitors = [];
+    this.onlyVisitors = [];
     this.showVisitors = [];
       this.updateDataTable();
     }
@@ -286,8 +427,8 @@ export class AccessVisitorRegistryComponent
         this.ngZone.run(() => {
           this.employers = data; // Carga todos los visitantes
           this.showEmployers = this.employers; // Actualiza la lista de visitantes a mostrar
-          console.log('Empleados en el componente: ', this.employers);
-          this.updateDataTable(); // Actualiza la tabla de visitantes
+ //         console.log('Empleados en el componente: ', this.employers);
+ //         this.updateDataTable(); // Actualiza la tabla de visitantes
         });
       },
       error: (error) => {
@@ -296,7 +437,7 @@ export class AccessVisitorRegistryComponent
     });
     this.subscription.add(subscriptionAll);
   }
-//// carga owners
+// carga owners
 allOwnersChecked = false;
 
 toggleAllOwner(): void {
@@ -312,7 +453,7 @@ toggleAllOwner(): void {
     this.showOwners = [];
     this.employers = [];
     this.showEmployers = [];
-    this.visitors = [];
+    this.onlyVisitors = [];
     this.showVisitors = [];
     this.updateDataTable();
   }
@@ -323,8 +464,8 @@ loadAllOwners(): void {
       this.ngZone.run(() => {
         this.owners = data; // Carga todos los visitantes
         this.showOwners = this.owners; // Actualiza la lista de visitantes a mostrar
-        console.log('owners en el componente: ', this.owners);
-        this.updateDataTable(); // Actualiza la tabla de visitantes
+ //       console.log('owners en el componente: ', this.owners);
+//        this.updateDataTable(); // Actualiza la tabla de visitantes
       });
     },
     error: (error) => {
@@ -333,83 +474,18 @@ loadAllOwners(): void {
   });
   this.subscription.add(subscriptionAll);
 }
+// FIN metodos Load ALL
 
 
-  updateDataTable(): void {
-    if (this.dataTable) {
-      this.ngZone.runOutsideAngular(() => {
-        const formattedData = this.visitors.map((visitor, index) => {
-          const status = this.visitorStatus[visitor.document] || 'En espera';
-
-          let statusButton = '';
-          let actionButtons = '';
-
-          switch (status) {
-            case 'Ingresado':
-              statusButton = `<button class="btn btn-success">Ingresado</button>`;
-              actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
-              break;
-            case 'Egresado':
-              statusButton = `<button class="btn btn-danger">Egresado</button>`;
-              break;
-            case 'En espera':
-            default:
-              statusButton = `<button class="btn btn-warning">En espera</button>`;
-              actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
-              break;
-          }
-
-          return [
-            `${visitor.last_name} ${visitor.name}`,
-             // "PASSPORT" se muestre como "Pasaporte"
-            this.getUserTypeIcon(visitor.userType.description),
-            `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
-            `<div class="text-start">
-            <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-                <option value="" disabled selected>Seleccione un vehículo</option>
-                ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
-                    <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
-                    === 'Car' ? 'Coche' : 
-                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-                  vehicle.vehicle_Type.description } </option>
-                `).join('') : ''}
-                <option value="sin_vehiculo">Sin vehículo</option>
-            </select>
-         </div>`,
-            `<div class="d-flex justify-content-center">
-              <div class="dropdown">
-                <button class="btn btn-white dropdown-toggle p-0" 
-                        type="button" 
-                        data-bs-toggle="dropdown" 
-                        aria-expanded="false">
-                    <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-                  <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-
-                  <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-                  <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-                </ul>
-              </div>
-            </div>`,
-            `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-            statusButton,
-            actionButtons,
-          ];
-        });
-
-        this.dataTable.clear().rows.add(formattedData).draw();
-      });
-      this.addEventListeners();
-      if(this.allEmployersChecked){
+    updateDataTable(): void {
+      if (this.dataTable) {
         this.ngZone.runOutsideAngular(() => {
-          const formattedData = this.employers.map((visitor, index) => {
+          const formattedData = this.allPeopleAllowed.map((visitor, index) => {
             const status = this.visitorStatus[visitor.document] || 'En espera';
-  
+
             let statusButton = '';
             let actionButtons = '';
-  
+
             switch (status) {
               case 'Ingresado':
                 statusButton = `<button class="btn btn-success">Ingresado</button>`;
@@ -424,24 +500,25 @@ loadAllOwners(): void {
                 actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
                 break;
             }
-  
+
             return [
               `${visitor.last_name} ${visitor.name}`,
+              // "PASSPORT" se muestre como "Pasaporte"
               this.getUserTypeIcon(visitor.userType.description),
-            `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
+              `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
               `<div class="text-start">
               <select class="form-select" id="vehicles${index}" name="vehicles${index}">
                   <option value="" disabled selected>Seleccione un vehículo</option>
                   ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
                       <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
                       === 'Car' ? 'Coche' : 
-                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-                  vehicle.vehicle_Type.description } </option>
+                    vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                    vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                    vehicle.vehicle_Type.description } </option>
                   `).join('') : ''}
                   <option value="sin_vehiculo">Sin vehículo</option>
               </select>
-           </div>`,
+          </div>`,
               `<div class="d-flex justify-content-center">
                 <div class="dropdown">
                   <button class="btn btn-white dropdown-toggle p-0" 
@@ -452,7 +529,7 @@ loadAllOwners(): void {
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
                     <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-  
+
                     <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
                     <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
                   </ul>
@@ -463,146 +540,211 @@ loadAllOwners(): void {
               actionButtons,
             ];
           });
-  
+
           this.dataTable.clear().rows.add(formattedData).draw();
         });
         this.addEventListeners();
-      } 
-      else if(this.allVisitorsChecked){
-        this.ngZone.runOutsideAngular(() => {
-          const formattedData = this.visitors.map((visitor, index) => {
-            const status = this.visitorStatus[visitor.document] || 'En espera';
-  
-            let statusButton = '';
-            let actionButtons = '';
-  
-            switch (status) {
-              case 'Ingresado':
-                statusButton = `<button class="btn btn-success">Ingresado</button>`;
-                actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
-                break;
-              case 'Egresado':
-                statusButton = `<button class="btn btn-danger">Egresado</button>`;
-                break;
-              case 'En espera':
-              default:
-                statusButton = `<button class="btn btn-warning">En espera</button>`;
-                actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
-                break;
-            }
-  
-            return [
-              `${visitor.last_name} ${visitor.name}`,
-              this.getUserTypeIcon(visitor.userType.description),
-            `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
-              `<div class="text-start">
-              <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-                  <option value="" disabled selected>Seleccione un vehículo</option>
-                  ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
-                      <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
-                      === 'Car' ? 'Coche' : 
-                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-                  vehicle.vehicle_Type.description } </option>
-                  `).join('') : ''}
-                  <option value="sin_vehiculo">Sin vehículo</option>
-              </select>
-           </div>`,
-              `<div class="d-flex justify-content-center">
-                <div class="dropdown">
-                  <button class="btn btn-white dropdown-toggle p-0" 
-                          type="button" 
-                          data-bs-toggle="dropdown" 
-                          aria-expanded="false">
-                      <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-                  </button>
-                  <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-                    <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-  
-                    <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-                    <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-                  </ul>
-                </div>
-              </div>`,
-              `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-              statusButton,
-              actionButtons,
-            ];
-          });
-  
-          this.dataTable.clear().rows.add(formattedData).draw();
-        });
-        this.addEventListeners();
-      }
-      else if(this.allOwnersChecked){
-        this.ngZone.runOutsideAngular(() => {
-          const formattedData = this.owners.map((visitor, index) => {
-            const status = this.visitorStatus[visitor.document] || 'En espera';
-  
-            let statusButton = '';
-            let actionButtons = '';
-  
-            switch (status) {
-              case 'Ingresado':
-                statusButton = `<button class="btn btn-success">Ingresado</button>`;
-                actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
-                break;
-              case 'Egresado':
-                statusButton = `<button class="btn btn-danger">Egresado</button>`;
-                break;
-              case 'En espera':
-              default:
-                statusButton = `<button class="btn btn-warning">En espera</button>`;
-                actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
-                break;
-            }
-  
-            return [
-              `${visitor.last_name} ${visitor.name}`,
-              this.getUserTypeIcon(visitor.userType.description),
-           //   `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
-           `<div class="text-start">${"D " +visitor.document}</div>`,
-              `<div class="text-start">
-              <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-                  <option value="" disabled selected>Seleccione un vehículo</option>
-                  ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
-                      <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description 
-                      === 'Car' ? 'Coche' : 
-                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-                  vehicle.vehicle_Type.description } </option>
-                  `).join('') : ''}
-                  <option value="sin_vehiculo">Sin vehículo</option>
-              </select>
-           </div>`,
-              `<div class="d-flex justify-content-center">
-                <div class="dropdown">
-                  <button class="btn btn-white dropdown-toggle p-0" 
-                          type="button" 
-                          data-bs-toggle="dropdown" 
-                          aria-expanded="false">
-                      <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-                  </button>
-                  <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-                    <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-  
-                    <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-                    <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-                  </ul>
-                </div>
-              </div>`,
-              `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-              statusButton,
-              actionButtons,
-            ];
-          });
-  
-          this.dataTable.clear().rows.add(formattedData).draw();
-        });
-        this.addEventListeners();
+        // if(this.allEmployersChecked){
+        //   this.ngZone.runOutsideAngular(() => {
+        //     const formattedData = this.employers.map((visitor, index) => {
+        //       const status = this.visitorStatus[visitor.document] || 'En espera';
+    
+        //       let statusButton = '';
+        //       let actionButtons = '';
+    
+        //       switch (status) {
+        //         case 'Ingresado':
+        //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
+        //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+        //           break;
+        //         case 'Egresado':
+        //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
+        //           break;
+        //         case 'En espera':
+        //         default:
+        //           statusButton = `<button class="btn btn-warning">En espera</button>`;
+        //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+        //           break;
+        //       }
+    
+        //       return [
+        //         `${visitor.last_name} ${visitor.name}`,
+        //         this.getUserTypeIcon(visitor.userType.description),
+        //       `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
+        //         `<div class="text-start">
+        //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+        //             <option value="" disabled selected>Seleccione un vehículo</option>
+        //             ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
+        //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
+        //                 === 'Car' ? 'Coche' : 
+        //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+        //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+        //             vehicle.vehicle_Type.description } </option>
+        //             `).join('') : ''}
+        //             <option value="sin_vehiculo">Sin vehículo</option>
+        //         </select>
+        //     </div>`,
+        //         `<div class="d-flex justify-content-center">
+        //           <div class="dropdown">
+        //             <button class="btn btn-white dropdown-toggle p-0" 
+        //                     type="button" 
+        //                     data-bs-toggle="dropdown" 
+        //                     aria-expanded="false">
+        //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+        //             </button>
+        //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+        //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+    
+        //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+        //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+        //             </ul>
+        //           </div>
+        //         </div>`,
+        //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+        //         statusButton,
+        //         actionButtons,
+        //       ];
+        //     });
+    
+        //     this.dataTable.clear().rows.add(formattedData).draw();
+        //   });
+        //   this.addEventListeners();
+        // } 
+        // else if(this.allVisitorsChecked){
+        //   this.ngZone.runOutsideAngular(() => {
+        //     const formattedData = this.visitors.map((visitor, index) => {
+        //       const status = this.visitorStatus[visitor.document] || 'En espera';
+    
+        //       let statusButton = '';
+        //       let actionButtons = '';
+    
+        //       switch (status) {
+        //         case 'Ingresado':
+        //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
+        //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+        //           break;
+        //         case 'Egresado':
+        //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
+        //           break;
+        //         case 'En espera':
+        //         default:
+        //           statusButton = `<button class="btn btn-warning">En espera</button>`;
+        //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+        //           break;
+        //       }
+    
+        //       return [
+        //         `${visitor.last_name} ${visitor.name}`,
+        //         this.getUserTypeIcon(visitor.userType.description),
+        //       `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
+        //         `<div class="text-start">
+        //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+        //             <option value="" disabled selected>Seleccione un vehículo</option>
+        //             ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+        //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
+        //                 === 'Car' ? 'Coche' : 
+        //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+        //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+        //             vehicle.vehicle_Type.description } </option>
+        //             `).join('') : ''}
+        //             <option value="sin_vehiculo">Sin vehículo</option>
+        //         </select>
+        //     </div>`,
+        //         `<div class="d-flex justify-content-center">
+        //           <div class="dropdown">
+        //             <button class="btn btn-white dropdown-toggle p-0" 
+        //                     type="button" 
+        //                     data-bs-toggle="dropdown" 
+        //                     aria-expanded="false">
+        //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+        //             </button>
+        //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+        //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+    
+        //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+        //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+        //             </ul>
+        //           </div>
+        //         </div>`,
+        //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+        //         statusButton,
+        //         actionButtons,
+        //       ];
+        //     });
+    
+        //     this.dataTable.clear().rows.add(formattedData).draw();
+        //   });
+        //   this.addEventListeners();
+        // }
+        // else if(this.allOwnersChecked){
+        //   this.ngZone.runOutsideAngular(() => {
+        //     const formattedData = this.owners.map((visitor, index) => {
+        //       const status = this.visitorStatus[visitor.document] || 'En espera';
+    
+        //       let statusButton = '';
+        //       let actionButtons = '';
+    
+        //       switch (status) {
+        //         case 'Ingresado':
+        //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
+        //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+        //           break;
+        //         case 'Egresado':
+        //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
+        //           break;
+        //         case 'En espera':
+        //         default:
+        //           statusButton = `<button class="btn btn-warning">En espera</button>`;
+        //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+        //           break;
+        //       }
+    
+        //       return [
+        //         `${visitor.last_name} ${visitor.name}`,
+        //         this.getUserTypeIcon(visitor.userType.description),
+        //     //   `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
+        //     `<div class="text-start">${"D " +visitor.document}</div>`,
+        //         `<div class="text-start">
+        //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+        //             <option value="" disabled selected>Seleccione un vehículo</option>
+        //             ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+        //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description 
+        //                 === 'Car' ? 'Coche' : 
+        //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+        //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+        //             vehicle.vehicle_Type.description } </option>
+        //             `).join('') : ''}
+        //             <option value="sin_vehiculo">Sin vehículo</option>
+        //         </select>
+        //     </div>`,
+        //         `<div class="d-flex justify-content-center">
+        //           <div class="dropdown">
+        //             <button class="btn btn-white dropdown-toggle p-0" 
+        //                     type="button" 
+        //                     data-bs-toggle="dropdown" 
+        //                     aria-expanded="false">
+        //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+        //             </button>
+        //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+        //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+    
+        //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+        //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+        //             </ul>
+        //           </div>
+        //         </div>`,
+        //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+        //         statusButton,
+        //         actionButtons,
+        //       ];
+        //     });
+    
+        //     this.dataTable.clear().rows.add(formattedData).draw();
+        //   });
+        //   this.addEventListeners();
+        // }
       }
     }
-  }
 
   // Actualizar el método addEventListeners para manejar los clicks en el nuevo menú
   addEventListeners(): void {
@@ -620,16 +762,16 @@ loadAllOwners(): void {
           const selectedVehicle = selectElement.value;
           if (index !== null) {
            
-            let selectedOwner =  this.visitors[parseInt(index, 10)];
+            let selectedOwner =  this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
 
             if(this.allEmployersChecked){
-              selectedOwner = this.employers[parseInt(index, 10)];
+              selectedOwner = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
             }
             if(this.allVisitorsChecked){
-              selectedOwner = this.visitors[parseInt(index, 10)];
+              selectedOwner = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
             }
             if(this.allOwnersChecked){
-              let selectedOwnerr = this.owners[parseInt(index, 10)];
+              let selectedOwnerr = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
               let selectedOwnerWithNeighborId: AccessUserAllowedInfoDto = {
                 ...selectedOwnerr,
                 neighbor_id: 0, // Agregar el neighbor_id
@@ -667,17 +809,133 @@ loadAllOwners(): void {
   }
 
   getUserTypeIcon(descr : string){
-    if(descr === "Employeed" || descr == "Supplier"){
-      
-       return `<i class="bi bi-tools"></i>`
-    }
-    if(descr === "Visitor"){
-      return   `<i class="bi bi-person-raised-hand"></i>  `
-    }
-    else {
-     return  `<i class="bi bi-house-fill"></i>`
+    switch (descr){
+      case "Employeed" : {
+        return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary">
+  <i class="bi bi-tools"></i> 
+</button>`
+      }
+      case "Supplier" : {
+        return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary">
+  <i class="bi bi-tools"></i> 
+</button>`
+      }
+      case "Visitor" : {
+        return   `<button style="background-color: blue;border: bisque;" class="btn btn-primary">
+  <i class="bi bi-person-raised-hand"></i>
+</button> `
+      }
+      case "Owner" : {
+        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary">
+  <i class="bi bi-house-fill"></i> 
+</button>`
+      }
+      case "Tenant" : {
+        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary">
+  <i class="bi bi-house-fill"></i> 
+</button>`
+      }
+      default : {
+        return  `<button style="background-color: blue;border: bisque;" class="btn btn-primary">
+        <i class="bi bi-person-raised-hand"></i>
+      </button> `
+      }
     }
   }
+
+  selectedValues: string[] = [];
+
+  onCheckboxChange(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    const value = checkbox.value;
+
+    if (checkbox.checked) {
+      this.selectedValues.push(value); // Agregar el valor si está seleccionado
+    } else {
+      this.selectedValues = this.selectedValues.filter(val => val !== value); // Eliminar el valor si está deseleccionado
+    }
+
+    console.log(this.selectedValues); // Puedes ver el resultado actual en la consola
+    this.applyFilter(); // Llama al método de filtro si necesitas hacerlo automáticamente
+  }
+
+  applyFilter(): void {
+    if (this.selectedValues.length > 0) {
+      console.log("visitors list actual: ", this.allPeopleAllowed)
+        this.allPeopleAllowed = []; // Resetea la lista "comun" (donde estan todos los userAllowed) 
+                                    // antes de aplicar el filtro
+        
+        for (let value of this.selectedValues) {
+            switch (value) {
+                case "employee": {
+                    this.loadAllEmployers();
+                    for (let user of this.showEmployers) {
+                        this.allPeopleAllowed.push(user);
+                    }
+                    break; // Continua al siguiente valor en lugar de detener el ciclo
+                }
+                case "neighbour": {
+                    this.loadAllOwners();
+                    for (let user of this.showOwners) {
+                        const owner: AccessUserAllowedInfoDto = {
+                            ...user,  // Copia los campos de `user`
+                            neighbor_id: 0  // Agrega el campo `neighbor_id` con un valor por defecto
+                        };
+                        this.allPeopleAllowed.push(owner);
+                    }
+                    break;
+                }
+                case "visitor": {
+                    this.loadAllVisitors();
+                    for (let user of this.showVisitors) {
+                        this.allPeopleAllowed.push(user);
+                    }
+                    break;
+                }
+
+            }
+        }
+     } else {
+
+        //si no hay ninguno seleccionado, cargamos todos los tipos
+        this.loadAllEmployers();
+        for (let user of this.showEmployers) {
+            this.allPeopleAllowed.push(user);
+        }
+        this.loadAllOwners();
+        for (let user of this.showOwners) {
+            const visitor: AccessUserAllowedInfoDto = {
+                ...user,  
+                neighbor_id: 0
+            };
+            this.allPeopleAllowed.push(visitor);
+        }
+        this.loadAllVisitors();
+        for (let user of this.showVisitors) {
+            this.allPeopleAllowed.push(user);
+        }
+      
+    //     console.log("No se seleccionó ningún filtro"); 
+    //     setTimeout(() => {
+    //       this.initializeDataTable();
+    //       this.setupModalEventListeners();
+          
+    //       // Asegúrate de que el elemento de búsqueda esté disponible
+    //       const searchInput = $('#dt-search-0');
+    //       searchInput.on('keyup', () => {
+    //         const searchTerm = searchInput.val() as string;
+    //         this.dataTable.search(searchTerm).draw();
+    //       });
+    //     });
+     }
+
+    //console.log("-----inicio ---------------------");
+    console.log("visitors list filtrada: ", this.allPeopleAllowed)
+    //console.log("-----fin-------------------------");
+
+    this.updateDataTable(); // Actualiza la tabla al final de aplicar todos los filtros
+}
+
 
   onSelectionChange(event: Event, visitor: AccessUserAllowedInfoDto,vehiclePlate:string) {
     const selectElement = event.target as HTMLSelectElement;
@@ -753,73 +1011,22 @@ loadAllOwners(): void {
     selectElement.value = '';
 }
 
-  //carga TODOS los invitados al iniciar la pantalla
-  ngOnInit(): void {
-    //DATOS
-    /*  Comentado para que no cargue de entrada los datos*/
-    this.loadVisitorsList();
-    this.loadOwnerRenter();
-    this.loadDataEmp();
-  }
+  allPeopleAllowed: AccessUserAllowedInfoDto[] = [];
 
-  loadVisitorsList() {
-    const subscriptionAll = this.visitorService.getVisitorsData().subscribe({
-      next: (data) => {
-        this.ngZone.run(() => {
-          this.visitors = data;
-          this.showVisitors = this.visitors;
-          //console.log("data en el component: ", data);
-          console.log('visitors en el component: ', this.visitors);
-          this.updateDataTable();
-        });
-      },
-    });
-    this.subscription.add(subscriptionAll);
-  }
-  loadEmployersList() {
-    const subscriptionAll = this.userService.getSuppEmpData().subscribe({
-      next: (data) => {
-        this.ngZone.run(() => {
-          this.employers = data;
-          this.showEmployers = this.employers;
-          //console.log("data en el component: ", data);
-          console.log('empleados en el component: ', this.employers);
-          this.updateDataTable();
-        });
-      },
-    });
-    this.subscription.add(subscriptionAll);
-  }
-  loadOwnerList() {
-    const subscriptionAll = this.ownerService.getAllOwnerRenterList().subscribe({
-      next: (data) => {
-        this.ngZone.run(() => {
-          this.owners = data;
-          this.showOwners = this.owners;
-          //console.log("data en el component: ", data);
-          console.log('owners en el component: ', this.visitors);
-          this.updateDataTable();
-        });
-      },
-    });
-    this.subscription.add(subscriptionAll);
-  }
-
- // lista de empleados
+ // lista de SOLO empleados y proveedores
  employers: AccessUserAllowedInfoDto[] = [];
  // lista de emplados que se muestran en pantalla
  showEmployers = this.employers;
 
-  // lista de owners
+  // lista de SOLO owners (vecinos e inquilinos)
   owners: AccessUserAllowedInfoDtoOwner[] = [];
   // lista de owners que se muestran en pantalla
   showOwners = this.owners;
-
   
-  // lista de Visitors
-  visitors: AccessUserAllowedInfoDto[] = [];
+  // lista de SOLO Visitors (visitantes)
+  onlyVisitors: AccessUserAllowedInfoDto[] = [];
   // lista de Visitors que se muestran en pantalla
-  showVisitors = this.visitors;
+  showVisitors = this.onlyVisitors;
 
   // datos de búsqueda/filtrado
   parameter: string = '';
@@ -834,9 +1041,7 @@ loadAllOwners(): void {
 
   getDocumentType(visitor: AccessUserAllowedInfoDto): string {
     return visitor.documentTypeDto?.description === 'PASSPORT'
-      ? 'P'
-      : visitor.documentTypeDto?.description ||
-          'D';
+      ? 'Pasaporte' : 'DNI';
   }
 
   getVehicles(visitor: AccessUserAllowedInfoDto): AccessNewVehicleDto[] {
@@ -949,7 +1154,7 @@ loadAllOwners(): void {
         };
 
         // Agregar el visitante a la lista y actualizar el DataTable
-        this.visitors.push(newVisitor);
+        this.allPeopleAllowed.push(newVisitor);
         this.updateDataTable(); // Actualiza la tabla de visitantes
 
         // Cerrar el modal si hay uno abierto
@@ -977,9 +1182,6 @@ loadAllOwners(): void {
       this.stopScanner();
     });
   }
-
-  // agregar un visitante que no esta en una lista, pero tiene autorizacion del Propietario/Inquilino
-  AddVisitor() {}
 
   //owner
   doument: AccessDocumentTypeDto = {
@@ -1012,33 +1214,6 @@ loadAllOwners(): void {
       description: '',
     },
   };
-  loadOwnerRenter() {
-    const subscriptionAll = this.ownerService
-      .getAllOwnerRenterList()
-      .subscribe({
-        next: (ownerList: AccessUserAllowedInfoDtoOwner[]) => {
-          this.ngZone.run(() => {
-            ownerList.forEach((owner) => {
-              this.visitors.push({
-                document: owner.document,
-                name: owner.name,
-                userType: owner.userType,
-                last_name: owner.last_name,
-                documentTypeDto: owner.documentTypeDto,
-                authRanges: owner.authRanges,
-                email: owner.email,
-                vehicles: owner.vehicles,
-                neighbor_id: 0,
-              });
-            });
-
-            console.log('Loaded owner/renter list:', this.visitors);
-            this.updateDataTable();
-          });
-        },
-      });
-    this.subscription.add(subscriptionAll);
-  }
 
 
   // registra el ingreso de un VECINO (propietario o inquilino)
@@ -1224,31 +1399,7 @@ loadAllOwners(): void {
   private userType: AccessUserAllowedTypeDto = {
     description: 'Employeed',
   };
-  private loadDataEmp(): void {
-    this.userService.getSuppEmpData().subscribe({
-      next: (ownerList: AccessUserAllowedInfoDtoOwner[]) => {
-        this.ngZone.run(() => {
-          ownerList.forEach((owner) => {
-            this.visitors.push({
-              document: owner.document,
-              name: owner.name,
-              userType: owner.userType,
-              last_name: owner.last_name,
-              documentTypeDto: owner.documentTypeDto,
-              authRanges: owner.authRanges,
-              email: owner.email,
-              vehicles: owner.vehicles,
-              neighbor_id: 0,
-            });
-          });
 
-          console.log('Loaded owner/renter list:', this.visitors);
-          this.updateDataTable();
-        });
-      },
-    });
-  }
-  
 
   
   private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {

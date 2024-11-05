@@ -138,8 +138,8 @@ setTodayDate(): void {
       ordering: true,
       lengthChange: true,
       order: [0, 'asc'],
-      lengthMenu: [10, 25, 50],
-      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50],
+      pageLength: 5,
       data: this.visitors, // Fuente de datos
   
       // Definición de columnas

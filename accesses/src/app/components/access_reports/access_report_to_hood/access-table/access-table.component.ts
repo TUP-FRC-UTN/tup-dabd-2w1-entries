@@ -135,8 +135,9 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.table = ($('#myTable') as any).DataTable({
       paging: true,
       ordering: false,
-      pageLength: 10,
+      pageLength: 5,
       lengthChange: true,
+      lengthMenu: [5, 10, 25, 50],
       searching: true,
       info: true,
       autoWidth: false,
