@@ -868,40 +868,53 @@ loadAllOwners(): void {
         for (let value of this.selectedValues) {
             switch (value) {
                 case "employee": {
-                    this.loadAllEmployers();
-                    for (let user of this.showEmployers) {
-                        this.allPeopleAllowed.push(user);
-                    }
-                    break; // Continua al siguiente valor en lugar de detener el ciclo
+                  this.loadAllEmployers();
+                  //lista de SOLO empleados
+                  let employees = this.showEmployers.filter(x => x.userType.description === 'Employeed')
+                  for (let user of employees) {
+                      this.allPeopleAllowed.push(user);
+                  }
+                  break; // Continua al siguiente valor en lugar de detener el ciclo
+                }
+                case "supplier": {
+                  this.loadAllEmployers();
+                  //lista de SOLO proveedores
+                  let suppliers = this.showEmployers.filter(x => x.userType.description === 'Supplier')
+                  for (let user of suppliers) {
+                      this.allPeopleAllowed.push(user);
+                  }
+                  break; // Continua al siguiente valor en lugar de detener el ciclo
                 }
                 case "neighbour": {
-                    this.loadAllOwners();
-                    for (let user of this.showOwners) {
-                        const owner: AccessUserAllowedInfoDto = {
-                            ...user,  // Copia los campos de `user`
-                            neighbor_id: 0  // Agrega el campo `neighbor_id` con un valor por defecto
-                        };
-                        this.allPeopleAllowed.push(owner);
-                    }
-                    break;
+                  this.loadAllOwners();
+                  for (let user of this.showOwners) {
+                      const owner: AccessUserAllowedInfoDto = {
+                          ...user,  // Copia los campos de `user`
+                          neighbor_id: 0  // Agrega el campo `neighbor_id` con un valor por defecto
+                      };
+                      this.allPeopleAllowed.push(owner);
+                  }
+                  break;
                 }
                 case "visitor": {
-                    this.loadAllVisitors();
-                    for (let user of this.showVisitors) {
-                        this.allPeopleAllowed.push(user);
-                    }
-                    break;
-                }
+                  this.loadAllVisitors();
+                  for (let user of this.showVisitors) {
+                      this.allPeopleAllowed.push(user);
+                  }
+                  break;
+              }
 
             }
         }
      } else {
 
         //si no hay ninguno seleccionado, cargamos todos los tipos
+        //Empleados y Proveedores
         this.loadAllEmployers();
         for (let user of this.showEmployers) {
             this.allPeopleAllowed.push(user);
         }
+        //Vecinos (propietarios inquilinos)
         this.loadAllOwners();
         for (let user of this.showOwners) {
             const visitor: AccessUserAllowedInfoDto = {
@@ -910,6 +923,7 @@ loadAllOwners(): void {
             };
             this.allPeopleAllowed.push(visitor);
         }
+        //Visitantes
         this.loadAllVisitors();
         for (let user of this.showVisitors) {
             this.allPeopleAllowed.push(user);
