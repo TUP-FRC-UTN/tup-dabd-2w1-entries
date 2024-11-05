@@ -32,11 +32,19 @@
                 id="initHour" 
                 formControlName="initHour" 
                 placeholder="Desde"
+                min="00:00"
+                max="23:59"
+                step="60"
                 [class.is-invalid]="form.get('initHour')?.touched && form.get('initHour')?.invalid"
                 required
               >
-              <div class="invalid-feedback" *ngIf="form.get('initHour')?.touched && form.get('initHour')?.errors?.['required']">
-                La hora de inicio es requerida
+              <div class="invalid-feedback" *ngIf="form.get('initHour')?.touched">
+                <span *ngIf="form.get('initHour')?.errors?.['required']">
+                  La hora de inicio es requerida
+                </span>
+                <span *ngIf="form.get('initHour')?.errors?.['invalidFormat']">
+                  Formato inválido. Use HH:mm
+                </span>
               </div>
             </div>
             <div class="col-5">
@@ -46,12 +54,18 @@
                 id="endHour" 
                 formControlName="endHour" 
                 placeholder="Hasta"
+                min="00:00"
+                max="23:59"
+                step="60"
                 [class.is-invalid]="form.get('endHour')?.touched && form.get('endHour')?.invalid"
                 required
               >
               <div class="invalid-feedback" *ngIf="form.get('endHour')?.touched">
                 <span *ngIf="form.get('endHour')?.errors?.['required']">
                   La hora de fin es requerida
+                </span>
+                <span *ngIf="form.get('endHour')?.errors?.['invalidFormat']">
+                  Formato inválido. Use HH:mm
                 </span>
                 <span *ngIf="form.get('endHour')?.errors?.['invalidTimeRange']">
                   La hora de fin debe ser posterior a la hora de inicio
