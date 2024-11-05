@@ -816,8 +816,8 @@ loadAllOwners(): void {
 </button>`
       }
       case "Supplier" : {
-        return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary">
-  <i class="bi bi-tools"></i> 
+        return `<button style="background-color: rgb(255, 230, 4);border: bisque;" class="btn btn-primary">
+  <i class="bi bi-box-seam-fill"></i> 
 </button>`
       }
       case "Visitor" : {
