@@ -209,7 +209,7 @@ export class AccessVisitorRegistryComponent
     setTimeout(() => {
       this.initializeDataTable();
       this.setupModalEventListeners();
-      
+
       // Asegúrate de que el elemento de búsqueda esté disponible
       const searchInput = $('#dt-search-0');
       searchInput.on('keyup', () => {
@@ -719,6 +719,7 @@ loadAllOwners(): void {
 
   applyFilter(): void {
     if (this.selectedValues.length > 0) {
+      console.log("visitors list actual: ", this.visitors)
         this.visitors = []; // Resetea la lista antes de aplicar el filtro
         
         for (let value of this.selectedValues) {
@@ -748,30 +749,46 @@ loadAllOwners(): void {
                     }
                     break;
                 }
-                default: {
-                    console.log("Error en la selección de los checkboxes");
-                    break;
-                }
+
             }
         }
-    } else {
-        console.log("No se seleccionó ningún filtro"); 
-        setTimeout(() => {
-          this.initializeDataTable();
-          this.setupModalEventListeners();
-          
-          // Asegúrate de que el elemento de búsqueda esté disponible
-          const searchInput = $('#dt-search-0');
-          searchInput.on('keyup', () => {
-            const searchTerm = searchInput.val() as string;
-            this.dataTable.search(searchTerm).draw();
-          });
-        });
-    }
+     } else {
 
-    console.log("-----inicio ---------------------");
-    console.log(this.visitors);
-    console.log("-----fin-------------------------");
+        //si no hay ninguno seleccionado, cargamos todos los tipos
+        this.loadAllEmployers();
+        for (let user of this.showEmployers) {
+            this.visitors.push(user);
+        }
+        this.loadAllOwners();
+        for (let user of this.showOwners) {
+            const visitor: AccessUserAllowedInfoDto = {
+                ...user,  
+                neighbor_id: 0
+            };
+            this.visitors.push(visitor);
+        }
+        this.loadAllVisitors();
+        for (let user of this.showVisitors) {
+            this.visitors.push(user);
+        }
+      
+    //     console.log("No se seleccionó ningún filtro"); 
+    //     setTimeout(() => {
+    //       this.initializeDataTable();
+    //       this.setupModalEventListeners();
+          
+    //       // Asegúrate de que el elemento de búsqueda esté disponible
+    //       const searchInput = $('#dt-search-0');
+    //       searchInput.on('keyup', () => {
+    //         const searchTerm = searchInput.val() as string;
+    //         this.dataTable.search(searchTerm).draw();
+    //       });
+    //     });
+     }
+
+    //console.log("-----inicio ---------------------");
+    console.log("visitors list filtrada: ", this.visitors)
+    //console.log("-----fin-------------------------");
 
     this.updateDataTable(); // Actualiza la tabla al final de aplicar todos los filtros
 }
@@ -867,7 +884,7 @@ loadAllOwners(): void {
           this.visitors = data;
           this.showVisitors = this.visitors;
           //console.log("data en el component: ", data);
-          console.log('visitors en el component: ', this.visitors);
+          //console.log('visitors en el component: ', this.visitors);
           this.updateDataTable();
         });
       },
@@ -881,7 +898,7 @@ loadAllOwners(): void {
           this.employers = data;
           this.showEmployers = this.employers;
           //console.log("data en el component: ", data);
-          console.log('empleados en el component: ', this.employers);
+          //console.log('empleados en el component: ', this.employers);
           this.updateDataTable();
         });
       },
@@ -1074,9 +1091,6 @@ loadAllOwners(): void {
     });
   }
 
-  // agregar un visitante que no esta en una lista, pero tiene autorizacion del Propietario/Inquilino
-  AddVisitor() {}
-
   //owner
   doument: AccessDocumentTypeDto = {
     description: 'DNI',
@@ -1128,7 +1142,7 @@ loadAllOwners(): void {
               });
             });
 
-            console.log('Loaded owner/renter list:', this.visitors);
+            //console.log('Loaded owner/renter list:', this.visitors);
             this.updateDataTable();
           });
         },
@@ -1338,7 +1352,7 @@ loadAllOwners(): void {
             });
           });
 
-          console.log('Loaded owner/renter list:', this.visitors);
+          //console.log('Loaded emp/prov list:', this.visitors);
           this.updateDataTable();
         });
       },
