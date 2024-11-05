@@ -130,7 +130,7 @@ export class VisitorsService {
 
       // Mostrar diálogo de confirmación
       Swal.fire({
-        title: 'Confirmar Ingreso',
+        title: 'Confirmar Engreso',
         text: `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`,
         icon: 'warning',
         showCancelButton: true,
@@ -296,7 +296,6 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto): Observable<boolean> {
           if(visitor.observations == undefined){
             visitor.observations = "";
           }
-
           // verifica si esta dentro de rango (fechas permitidas)
           let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
           if(indexAuthRange >= 0){

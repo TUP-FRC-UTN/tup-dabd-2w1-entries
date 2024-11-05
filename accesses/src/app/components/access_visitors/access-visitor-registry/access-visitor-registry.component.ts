@@ -811,32 +811,32 @@ loadAllOwners(): void {
   getUserTypeIcon(descr : string){
     switch (descr){
       case "Employeed" : {
-        return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary">
+        return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary" title="Empleado">
   <i class="bi bi-tools"></i> 
 </button>`
       }
       case "Supplier" : {
-        return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary">
-  <i class="bi bi-tools"></i> 
+        return `<button style="background-color: rgb(255, 230, 4);border: bisque;" class="btn btn-primary" title="Proveedor">
+  <i class="bi bi-box-seam-fill"></i> 
 </button>`
       }
       case "Visitor" : {
-        return   `<button style="background-color: blue;border: bisque;" class="btn btn-primary">
+        return   `<button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
   <i class="bi bi-person-raised-hand"></i>
 </button> `
       }
       case "Owner" : {
-        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary">
+        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
   <i class="bi bi-house-fill"></i> 
 </button>`
       }
       case "Tenant" : {
-        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary">
+        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
   <i class="bi bi-house-fill"></i> 
 </button>`
       }
       default : {
-        return  `<button style="background-color: blue;border: bisque;" class="btn btn-primary">
+        return  `<button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
         <i class="bi bi-person-raised-hand"></i>
       </button> `
       }
@@ -1444,26 +1444,38 @@ loadAllOwners(): void {
                             },
                             error: (err) => {
                                 console.error('Error al registrar la entrada:', err);
+
+                                if(err.status == 403){
+                                this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
+                                // Swal.fire({
+                                //   title: 'Error',
+                                //   text: 'No tiene permitido salir.',
+                                //   icon: 'error',
+                                //   confirmButtonText: 'Cerrar',
+                                // });
+                                //return false;
+                                observer.next(false);
+                                observer.complete(); 
+                              }
+                              else if (err.status == 409){
+                                Swal.fire({
+                                  title: 'Error',
+                                  text: 'Tiene que salir antes de entrar.',
+                                  icon: 'error',
+                                  confirmButtonText: 'Cerrar',
+                                });
                                 
-                                const errorMessage = err.status === 403 
-                                    ? {
-                                        title: 'Error',
-                                        text: 'No tiene permitido el ingreso.',
-                                    }
-                                    : {
-                                        title: 'La Persona tiene un Ingreso previo!',
-                                        text: 'La persona debe egresar antes de poder volver a entrar',
-                                    };
+                               
 
                                 Swal.fire({
-                                    ...errorMessage,
+                                    title: 'eee',
                                     icon: 'error',
                                     confirmButtonText: 'Cerrar',
                                 }).then(() => {
                                     observer.next(false);
                                     observer.complete();
                                 });
-                            }
+                              }}
                         });
 
                     // Agregar la suscripción al gestor de suscripciones
@@ -1538,12 +1550,13 @@ loadAllOwners(): void {
                 observer.complete(); 
 
               } else if(err.status == 403){
-                Swal.fire({
-                  title: 'Error',
-                  text: 'No tiene permitido salir.',
-                  icon: 'error',
-                  confirmButtonText: 'Cerrar',
-                });
+                this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
+                // Swal.fire({
+                //   title: 'Error',
+                //   text: 'No tiene permitido salir.',
+                //   icon: 'error',
+                //   confirmButtonText: 'Cerrar',
+                // });
                 //return false;
                 observer.next(false);
                 observer.complete(); 
