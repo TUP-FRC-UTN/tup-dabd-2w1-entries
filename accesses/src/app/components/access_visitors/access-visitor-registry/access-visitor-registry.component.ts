@@ -94,6 +94,22 @@ export class AccessVisitorRegistryComponent
 
   modalValid: boolean = false;
 
+  //carga TODOS los invitados al iniciar la pantalla
+  ngOnInit(): void {
+    //DATOS
+    //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
+    this.loadDataVisitors(); 
+    this.loadDataOwnerRenter();
+    this.loadDataEmp();
+
+    //los 3 siguientes cargan cada tipo (de userAllowed), en su propia lista separada
+    this.loadAllVisitors();
+    this.loadAllOwners();
+    this.loadAllEmployers();
+
+    console.log("cant total de userAllowed: ", this.allPeopleAllowed)
+  }
+
   ngOnDestroy() {
     if (this.dataTable) {
       this.dataTable.destroy();
@@ -220,6 +236,132 @@ export class AccessVisitorRegistryComponent
   }
   
 
+  // metodos Load LIST
+  loadVisitorsList() {
+    const subscriptionAll = this.visitorService.getVisitorsData().subscribe({
+      next: (data) => {
+        this.ngZone.run(() => {
+          this.onlyVisitors = data;
+          this.showVisitors = this.onlyVisitors;
+          //console.log("data en el component: ", data);
+          //console.log('visitors en el component: ', this.visitors);
+          this.updateDataTable();
+        });
+      },
+    });
+    this.subscription.add(subscriptionAll);
+  }
+  loadEmployersList() {
+    const subscriptionAll = this.userService.getSuppEmpData().subscribe({
+      next: (data) => {
+        this.ngZone.run(() => {
+          this.employers = data;
+          this.showEmployers = this.employers;
+          //console.log("data en el component: ", data);
+          //console.log('empleados en el component: ', this.employers);
+          this.updateDataTable();
+        });
+      },
+    });
+    this.subscription.add(subscriptionAll);
+  }
+  loadOwnerList() {
+    const subscriptionAll = this.ownerService.getAllOwnerRenterList().subscribe({
+      next: (data) => {
+        this.ngZone.run(() => {
+          this.owners = data;
+          this.showOwners = this.owners;
+          //console.log("data en el component: ", data);
+          //console.log('owners en el component: ', this.owners);
+          this.updateDataTable();
+        });
+      },
+    });
+    this.subscription.add(subscriptionAll);
+  }
+// FIN metodos Load LIST
+
+// metodos Load DATA
+  loadDataOwnerRenter() {
+    const subscriptionAll = this.ownerService
+      .getAllOwnerRenterList()
+      .subscribe({
+        next: (ownerList: AccessUserAllowedInfoDtoOwner[]) => {
+          this.ngZone.run(() => {
+            ownerList.forEach((owner) => {
+              this.allPeopleAllowed.push({ //lo agrega a la lista "comun" donde estan TODOS los autorizados a ingresar
+                document: owner.document,
+                name: owner.name,
+                userType: owner.userType,
+                last_name: owner.last_name,
+                documentTypeDto: owner.documentTypeDto,
+                authRanges: owner.authRanges,
+                email: owner.email,
+                vehicles: owner.vehicles,
+                neighbor_id: 0,
+              });
+            });
+
+            //console.log('Loaded owner/renter list:', this.visitors);
+            this.updateDataTable();
+          });
+        },
+      });
+    this.subscription.add(subscriptionAll);
+  }
+
+  private loadDataEmp(): void {
+    this.userService.getSuppEmpData().subscribe({
+      next: (empSuppList: AccessUserAllowedInfoDtoOwner[]) => {
+        this.ngZone.run(() => {
+          empSuppList.forEach((empSupp) => {
+            this.allPeopleAllowed.push({
+              document: empSupp.document,
+              name: empSupp.name,
+              userType: empSupp.userType,
+              last_name: empSupp.last_name,
+              documentTypeDto: empSupp.documentTypeDto,
+              authRanges: empSupp.authRanges,
+              email: empSupp.email,
+              vehicles: empSupp.vehicles,
+              neighbor_id: 0,
+            });
+          });
+
+          //console.log('Loaded emp/prov list:', this.visitors);
+          this.updateDataTable();
+        });
+      },
+    });
+  }
+  
+  private loadDataVisitors(): void {
+    this.visitorService.getVisitorsData().subscribe({
+      next: (visitorsList: AccessUserAllowedInfoDtoOwner[]) => {
+        this.ngZone.run(() => {
+          visitorsList.forEach((visitor) => {
+            this.allPeopleAllowed.push({
+              document: visitor.document,
+              name: visitor.name,
+              userType: visitor.userType,
+              last_name: visitor.last_name,
+              documentTypeDto: visitor.documentTypeDto,
+              authRanges: visitor.authRanges,
+              email: visitor.email,
+              vehicles: visitor.vehicles,
+              neighbor_id: 0,
+            });
+          });
+
+          //console.log('Loaded emp/prov list:', this.visitors);
+          this.updateDataTable();
+        });
+      },
+    });
+  }
+// FIN metodos Load DATA
+
+// metodos Load ALL (creo q son del "filtro" viejo, las podriamos borrar tranquilamente)
   /* Aca carga los visitantes */
   allVisitorsChecked = false;
 
@@ -236,7 +378,7 @@ export class AccessVisitorRegistryComponent
       this.showOwners = [];
       this.employers = [];
       this.showEmployers = [];
-      this.visitors = [];
+      this.onlyVisitors = [];
       this.showVisitors = [];
       this.updateDataTable();
     }
@@ -246,8 +388,8 @@ export class AccessVisitorRegistryComponent
     const subscriptionAll = this.visitorService.getVisitorsData().subscribe({
       next: (data) => {
         this.ngZone.run(() => {
-          this.visitors = data; // Carga todos los visitantes
-          this.showVisitors = this.visitors; // Actualiza la lista de visitantes a mostrar
+          this.onlyVisitors = data; // Carga todos los visitantes
+          this.showVisitors = this.onlyVisitors; // Actualiza la lista de visitantes a mostrar
       //    console.log('Visores en el componente: ', this.visitors);
     //      this.updateDataTable(); // Actualiza la tabla de visitantes
         });
@@ -258,10 +400,8 @@ export class AccessVisitorRegistryComponent
     });
     this.subscription.add(subscriptionAll);
   }
-
-  ////carga empleados
+  //carga empleados
   allEmployersChecked = false;
-
   toggleAllEmployers(): void {
     this.allEmployersChecked = !this.allEmployersChecked;// Alternar el estado
     this.allVisitorsChecked = false; 
@@ -275,7 +415,7 @@ export class AccessVisitorRegistryComponent
     this.showOwners = [];
     this.employers = [];
     this.showEmployers = [];
-    this.visitors = [];
+    this.onlyVisitors = [];
     this.showVisitors = [];
       this.updateDataTable();
     }
@@ -297,7 +437,7 @@ export class AccessVisitorRegistryComponent
     });
     this.subscription.add(subscriptionAll);
   }
-//// carga owners
+// carga owners
 allOwnersChecked = false;
 
 toggleAllOwner(): void {
@@ -313,7 +453,7 @@ toggleAllOwner(): void {
     this.showOwners = [];
     this.employers = [];
     this.showEmployers = [];
-    this.visitors = [];
+    this.onlyVisitors = [];
     this.showVisitors = [];
     this.updateDataTable();
   }
@@ -334,11 +474,13 @@ loadAllOwners(): void {
   });
   this.subscription.add(subscriptionAll);
 }
+// FIN metodos Load ALL
+
 
     updateDataTable(): void {
       if (this.dataTable) {
         this.ngZone.runOutsideAngular(() => {
-          const formattedData = this.visitors.map((visitor, index) => {
+          const formattedData = this.allPeopleAllowed.map((visitor, index) => {
             const status = this.visitorStatus[visitor.document] || 'En espera';
 
             let statusButton = '';
@@ -620,16 +762,16 @@ loadAllOwners(): void {
           const selectedVehicle = selectElement.value;
           if (index !== null) {
            
-            let selectedOwner =  this.visitors[parseInt(index, 10)];
+            let selectedOwner =  this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
 
             if(this.allEmployersChecked){
-              selectedOwner = this.employers[parseInt(index, 10)];
+              selectedOwner = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
             }
             if(this.allVisitorsChecked){
-              selectedOwner = this.visitors[parseInt(index, 10)];
+              selectedOwner = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
             }
             if(this.allOwnersChecked){
-              let selectedOwnerr = this.owners[parseInt(index, 10)];
+              let selectedOwnerr = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
               let selectedOwnerWithNeighborId: AccessUserAllowedInfoDto = {
                 ...selectedOwnerr,
                 neighbor_id: 0, // Agregar el neighbor_id
@@ -719,33 +861,34 @@ loadAllOwners(): void {
 
   applyFilter(): void {
     if (this.selectedValues.length > 0) {
-      console.log("visitors list actual: ", this.visitors)
-        this.visitors = []; // Resetea la lista antes de aplicar el filtro
+      console.log("visitors list actual: ", this.allPeopleAllowed)
+        this.allPeopleAllowed = []; // Resetea la lista "comun" (donde estan todos los userAllowed) 
+                                    // antes de aplicar el filtro
         
         for (let value of this.selectedValues) {
             switch (value) {
                 case "employee": {
                     this.loadAllEmployers();
                     for (let user of this.showEmployers) {
-                        this.visitors.push(user);
+                        this.allPeopleAllowed.push(user);
                     }
                     break; // Continua al siguiente valor en lugar de detener el ciclo
                 }
                 case "neighbour": {
                     this.loadAllOwners();
                     for (let user of this.showOwners) {
-                        const visitor: AccessUserAllowedInfoDto = {
+                        const owner: AccessUserAllowedInfoDto = {
                             ...user,  // Copia los campos de `user`
                             neighbor_id: 0  // Agrega el campo `neighbor_id` con un valor por defecto
                         };
-                        this.visitors.push(visitor);
+                        this.allPeopleAllowed.push(owner);
                     }
                     break;
                 }
                 case "visitor": {
                     this.loadAllVisitors();
                     for (let user of this.showVisitors) {
-                        this.visitors.push(user);
+                        this.allPeopleAllowed.push(user);
                     }
                     break;
                 }
@@ -757,7 +900,7 @@ loadAllOwners(): void {
         //si no hay ninguno seleccionado, cargamos todos los tipos
         this.loadAllEmployers();
         for (let user of this.showEmployers) {
-            this.visitors.push(user);
+            this.allPeopleAllowed.push(user);
         }
         this.loadAllOwners();
         for (let user of this.showOwners) {
@@ -765,11 +908,11 @@ loadAllOwners(): void {
                 ...user,  
                 neighbor_id: 0
             };
-            this.visitors.push(visitor);
+            this.allPeopleAllowed.push(visitor);
         }
         this.loadAllVisitors();
         for (let user of this.showVisitors) {
-            this.visitors.push(user);
+            this.allPeopleAllowed.push(user);
         }
       
     //     console.log("No se seleccionó ningún filtro"); 
@@ -787,7 +930,7 @@ loadAllOwners(): void {
      }
 
     //console.log("-----inicio ---------------------");
-    console.log("visitors list filtrada: ", this.visitors)
+    console.log("visitors list filtrada: ", this.allPeopleAllowed)
     //console.log("-----fin-------------------------");
 
     this.updateDataTable(); // Actualiza la tabla al final de aplicar todos los filtros
@@ -868,73 +1011,22 @@ loadAllOwners(): void {
     selectElement.value = '';
 }
 
-  //carga TODOS los invitados al iniciar la pantalla
-  ngOnInit(): void {
-    //DATOS
-    /*  Comentado para que no cargue de entrada los datos*/
-    this.loadVisitorsList();
-    this.loadOwnerRenter();
-    this.loadDataEmp();
-  }
+  allPeopleAllowed: AccessUserAllowedInfoDto[] = [];
 
-  loadVisitorsList() {
-    const subscriptionAll = this.visitorService.getVisitorsData().subscribe({
-      next: (data) => {
-        this.ngZone.run(() => {
-          this.visitors = data;
-          this.showVisitors = this.visitors;
-          //console.log("data en el component: ", data);
-          //console.log('visitors en el component: ', this.visitors);
-          this.updateDataTable();
-        });
-      },
-    });
-    this.subscription.add(subscriptionAll);
-  }
-  loadEmployersList() {
-    const subscriptionAll = this.userService.getSuppEmpData().subscribe({
-      next: (data) => {
-        this.ngZone.run(() => {
-          this.employers = data;
-          this.showEmployers = this.employers;
-          //console.log("data en el component: ", data);
-          //console.log('empleados en el component: ', this.employers);
-          this.updateDataTable();
-        });
-      },
-    });
-    this.subscription.add(subscriptionAll);
-  }
-  loadOwnerList() {
-    const subscriptionAll = this.ownerService.getAllOwnerRenterList().subscribe({
-      next: (data) => {
-        this.ngZone.run(() => {
-          this.owners = data;
-          this.showOwners = this.owners;
-          //console.log("data en el component: ", data);
-          console.log('owners en el component: ', this.visitors);
-          this.updateDataTable();
-        });
-      },
-    });
-    this.subscription.add(subscriptionAll);
-  }
-
- // lista de empleados
+ // lista de SOLO empleados y proveedores
  employers: AccessUserAllowedInfoDto[] = [];
  // lista de emplados que se muestran en pantalla
  showEmployers = this.employers;
 
-  // lista de owners
+  // lista de SOLO owners (vecinos e inquilinos)
   owners: AccessUserAllowedInfoDtoOwner[] = [];
   // lista de owners que se muestran en pantalla
   showOwners = this.owners;
-
   
-  // lista de Visitors
-  visitors: AccessUserAllowedInfoDto[] = [];
+  // lista de SOLO Visitors (visitantes)
+  onlyVisitors: AccessUserAllowedInfoDto[] = [];
   // lista de Visitors que se muestran en pantalla
-  showVisitors = this.visitors;
+  showVisitors = this.onlyVisitors;
 
   // datos de búsqueda/filtrado
   parameter: string = '';
@@ -1062,7 +1154,7 @@ loadAllOwners(): void {
         };
 
         // Agregar el visitante a la lista y actualizar el DataTable
-        this.visitors.push(newVisitor);
+        this.allPeopleAllowed.push(newVisitor);
         this.updateDataTable(); // Actualiza la tabla de visitantes
 
         // Cerrar el modal si hay uno abierto
@@ -1122,33 +1214,6 @@ loadAllOwners(): void {
       description: '',
     },
   };
-  loadOwnerRenter() {
-    const subscriptionAll = this.ownerService
-      .getAllOwnerRenterList()
-      .subscribe({
-        next: (ownerList: AccessUserAllowedInfoDtoOwner[]) => {
-          this.ngZone.run(() => {
-            ownerList.forEach((owner) => {
-              this.visitors.push({
-                document: owner.document,
-                name: owner.name,
-                userType: owner.userType,
-                last_name: owner.last_name,
-                documentTypeDto: owner.documentTypeDto,
-                authRanges: owner.authRanges,
-                email: owner.email,
-                vehicles: owner.vehicles,
-                neighbor_id: 0,
-              });
-            });
-
-            //console.log('Loaded owner/renter list:', this.visitors);
-            this.updateDataTable();
-          });
-        },
-      });
-    this.subscription.add(subscriptionAll);
-  }
 
 
   // registra el ingreso de un VECINO (propietario o inquilino)
@@ -1334,31 +1399,7 @@ loadAllOwners(): void {
   private userType: AccessUserAllowedTypeDto = {
     description: 'Employeed',
   };
-  private loadDataEmp(): void {
-    this.userService.getSuppEmpData().subscribe({
-      next: (ownerList: AccessUserAllowedInfoDtoOwner[]) => {
-        this.ngZone.run(() => {
-          ownerList.forEach((owner) => {
-            this.visitors.push({
-              document: owner.document,
-              name: owner.name,
-              userType: owner.userType,
-              last_name: owner.last_name,
-              documentTypeDto: owner.documentTypeDto,
-              authRanges: owner.authRanges,
-              email: owner.email,
-              vehicles: owner.vehicles,
-              neighbor_id: 0,
-            });
-          });
 
-          //console.log('Loaded emp/prov list:', this.visitors);
-          this.updateDataTable();
-        });
-      },
-    });
-  }
-  
 
   
   private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
