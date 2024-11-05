@@ -11,6 +11,8 @@ import {
   AfterViewInit,
   ViewChild,
   ElementRef,
+  ViewChildren,
+  QueryList,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
@@ -117,6 +119,27 @@ export class AccessVisitorRegistryComponent
 
     this.subscription.unsubscribe();
   }
+
+  //metodos para limpiar los filtros
+  //agrupa TODOS los checkbox (q tengan #checkBoxRef en su tag)
+  @ViewChildren('checkBoxRef') checkBoxes!: QueryList<ElementRef>;
+
+  clearFilters(){
+    this.checkBoxes.forEach((checkbox) => {
+      checkbox.nativeElement.checked = false;
+    });
+
+    // Limpia el input de busqueda 
+    this.dataTable.search('').draw(false);
+
+    //limpia los valores elegidos en los checkbox
+    this.selectedValues = [];
+    //busca todos los userAllowed (ya q no hay filtros en this.selectedValues)
+    this.applyFilter();
+  }
+  // FIN metodos para limpiar los filtros
+
+
   //PARA ESCANEAR
 
   isScanning = false;
@@ -336,7 +359,7 @@ export class AccessVisitorRegistryComponent
   }
   
   private loadDataVisitors(): void {
-    this.visitorService.getVisitorsData().subscribe({
+    const sub = this.visitorService.getVisitorsData().subscribe({
       next: (visitorsList: AccessUserAllowedInfoDtoOwner[]) => {
         this.ngZone.run(() => {
           visitorsList.forEach((visitor) => {
@@ -358,6 +381,7 @@ export class AccessVisitorRegistryComponent
         });
       },
     });
+    this.subscription.add(sub);
   }
 // FIN metodos Load DATA
 
@@ -860,11 +884,11 @@ loadAllOwners(): void {
   }
 
   applyFilter(): void {
-    if (this.selectedValues.length > 0) {
-      console.log("visitors list actual: ", this.allPeopleAllowed)
-        this.allPeopleAllowed = []; // Resetea la lista "comun" (donde estan todos los userAllowed) 
-                                    // antes de aplicar el filtro
-        
+    this.allPeopleAllowed = []; // Resetea la lista "comun" (donde estan todos los userAllowed) 
+                                // antes de aplicar el filtro
+    //console.log("visitors list actual: ", this.allPeopleAllowed)
+
+    if (this.selectedValues.length > 0) {        
         for (let value of this.selectedValues) {
             switch (value) {
                 case "employee": {
