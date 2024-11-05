@@ -363,7 +363,7 @@ loadAllOwners(): void {
               `${visitor.last_name} ${visitor.name}`,
               // "PASSPORT" se muestre como "Pasaporte"
               this.getUserTypeIcon(visitor.userType.description),
-              `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
+              `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
               `<div class="text-start">
               <select class="form-select" id="vehicles${index}" name="vehicles${index}">
                   <option value="" disabled selected>Seleccione un vehículo</option>
@@ -769,7 +769,7 @@ loadAllOwners(): void {
         });
     }
 
-    console.log("-----incio ---------------------");
+    console.log("-----inicio ---------------------");
     console.log(this.visitors);
     console.log("-----fin-------------------------");
 
@@ -932,9 +932,7 @@ loadAllOwners(): void {
 
   getDocumentType(visitor: AccessUserAllowedInfoDto): string {
     return visitor.documentTypeDto?.description === 'PASSPORT'
-      ? 'P'
-      : visitor.documentTypeDto?.description ||
-          'D';
+      ? 'Pasaporte' : 'DNI';
   }
 
   getVehicles(visitor: AccessUserAllowedInfoDto): AccessNewVehicleDto[] {
