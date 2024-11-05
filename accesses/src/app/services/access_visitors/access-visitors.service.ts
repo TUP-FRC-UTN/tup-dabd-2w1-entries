@@ -125,7 +125,7 @@ export class VisitorsService {
 
 
   //METODOS (para registrar Ingresos y Egresos)
-  RegisterExit(visitor: AccessUserAllowedInfoDto): Observable<boolean> {
+  RegisterExit(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
     return new Observable<boolean>((observer) => {
 
       // Mostrar diálogo de confirmación
@@ -142,7 +142,7 @@ export class VisitorsService {
           if (visitor.observations == undefined) {
             visitor.observations = "";
           }
-          const newUserAllowedDto = this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
+          const newUserAllowedDto = this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor, vehiclePlate);
           const newAuthRangeDto = this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
           const newMovement_ExitDto = this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
 
@@ -278,7 +278,7 @@ export class VisitorsService {
 
 
   
-RegisterAccess(visitor :AccessUserAllowedInfoDto): Observable<boolean> {
+RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
   return new Observable<boolean>((observer) => {
 
     // Mostrar diálogo de confirmación
@@ -308,7 +308,7 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto): Observable<boolean> {
               
               // mapeos
               const newUserAllowedDto: AccessNewUserAllowedDto = 
-                this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor);
+                this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor, vehiclePlate);
               const newAuthRangeDto: AccessNewAuthRangeDto = 
                 this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
 

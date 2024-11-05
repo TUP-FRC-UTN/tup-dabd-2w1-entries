@@ -949,7 +949,7 @@ loadAllOwners(): void {
       } else if (visitor.userType.description === 'Employeed' || visitor.userType.description === 'Supplier') {
         accessObservable = this.prepareEntryMovementEmp(visitor);
       } else {
-        accessObservable = this.visitorService.RegisterAccess(visitor);
+        accessObservable = this.visitorService.RegisterAccess(visitor, vehiclePlate);
       }
 
       if (accessObservable) {
@@ -982,7 +982,7 @@ loadAllOwners(): void {
         exitObservable = this.prepareExitMovementEmp(visitor);
 
       } else {
-        exitObservable = this.visitorService.RegisterExit(visitor);
+        exitObservable = this.visitorService.RegisterExit(visitor, vehiclePlate);
         
       }
 
