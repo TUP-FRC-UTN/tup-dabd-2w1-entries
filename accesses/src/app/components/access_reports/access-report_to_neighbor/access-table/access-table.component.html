@@ -1,9 +1,9 @@
-<!-- Contenedor principal -->
+
 <div class="filter-section mb-4">
     <!-- Fila de filtros directos -->
     <div class="row g-3 mb-3">
         <!-- Nombre del Ingresante -->
-        <div class="col-md-3">
+        <div class="col-md-2-4">
             <label class="form-label">Nombre del Ingresante</label>
             <div class="input-group">
                 <input type="text" class="form-control" id="nombreIngresanteFilter" placeholder="Buscar por nombre">
@@ -11,7 +11,7 @@
         </div>
 
         <!-- Documento -->
-        <div class="col-md-3">
+        <div class="col-md-2-4">
             <label class="form-label">Documento</label>
             <div class="input-group">
                 <input type="text" class="form-control" id="documentoFilter" placeholder="Buscar por documento">
@@ -19,40 +19,59 @@
         </div>
 
         <!-- Placa -->
-        <div class="col-md-2">
+        <div class="col-md-2-4">
             <label class="form-label">Placa</label>
             <div class="input-group">
                 <input type="text" class="form-control" id="placaFilter" placeholder="Buscar por placa">
             </div>
         </div>
 
-        <!-- Propietario -->
-        <div class="col-md-2">
+        <!-- Propietario con ng-select -->
+        <div class="col-md-2-4">
             <label class="form-label">Propietario</label>
             <div class="input-group">
-                <input type="text" class="form-control" id="propietarioFilter" placeholder="Buscar propietario">
+                <ng-select
+                    class="flex-grow-1"
+                    [items]="propietariosOptions"
+                    [multiple]="true"
+                    [closeOnSelect]="false"
+                    [searchable]="true"
+                    bindLabel="label"
+                    bindValue="id"
+                    [clearable]="false"
+                    [placeholder]="filterValues.selectedPropietario.length ? '' : 'Buscar propietario'"
+                    [(ngModel)]="filterValues.selectedPropietario"
+                    (change)="applyFilters()">
+                    <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                        <span>Opciones seleccionadas ({{items.length}})</span>
+                    </ng-template>
+                    <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                        <input id="propietario-{{index}}" type="checkbox" [checked]="item$.selected"/> 
+                        <span class="ms-2">{{item.label}}</span>
+                    </ng-template>
+                </ng-select>
             </div>
         </div>
 
         <!-- Botones de acción -->
-        <div class="col-md-2 d-flex align-items-end gap-2">
-            <div data-bs-toggle="tooltip modal" data-bs-placement="top">
-                <button class="btn btn-secondary" 
+        <div class="col-md-2-4 d-flex align-items-end">
+            <div class="action-buttons-container">
+                <button class="btn btn-primary action-btn" 
                         data-bs-target="#advancedFiltersModal"
                         data-bs-toggle="modal"
                         title="Filtros avanzados">
-                    <i class="fa-solid fa-filter"></i>
+                    <i class="bi bi-sort-down"></i>
+                </button>
+                <button class="btn btn-secondary action-btn" (click)="clearFilters()" title="Limpiar filtros">
+                    <i class="bi bi-trash"></i>
+                </button>
+                <button class="btn btn-success action-btn" id="excelBtn" [disabled]="!exportButtonsEnabled" title="Exportar a Excel">
+                    <i class="bi bi-file-earmark-excel"></i>
+                </button>
+                <button class="btn btn-danger action-btn" id="pdfBtn" [disabled]="!exportButtonsEnabled" title="Exportar a PDF">
+                    <i class="bi bi-file-earmark-pdf"></i>
                 </button>
             </div>
-            <button class="btn btn-primary" (click)="clearFilters()" title="Limpiar filtros">
-                <i class="fa-regular fa-trash-can"></i>
-            </button>
-            <button id="excelBtn" class="btn btn-success" [disabled]="!exportButtonsEnabled" title="Exportar a Excel">
-                <i class="fas fa-file-excel"></i>
-            </button>
-            <button id="pdfBtn" class="btn btn-danger" [disabled]="!exportButtonsEnabled" title="Exportar a PDF">
-                <i class="fas fa-file-pdf"></i>
-            </button>
         </div>
     </div>
 </div>
@@ -68,86 +87,167 @@
             <div class="modal-body">
                 <div class="row g-3">
                     <!-- Tipo de Entrada -->
-                   <!-- Tipo de Entrada -->
                     <div class="col-md-6">
                         <label class="form-label">Tipo de Entrada</label>
-                        <ng-select
-                        [items]="entryExitOptions"
-                        [multiple]="true"
-                        [closeOnSelect]="false"
-                        bindLabel="label"
-                        bindValue="value"
-                       
-                        [(ngModel)]="filterValues.entryOrExit"
-                        (change)="applyFilters()">
-                    </ng-select>
+                        <div class="input-group">
+                            <ng-select
+                                [items]="entryExitOptions"
+                                [multiple]="true"
+                                [closeOnSelect]="false"
+                                [searchable]="true"
+                                bindLabel="label"
+                                bindValue="value"
+                                [clearable]="false"
+                                [placeholder]="filterValues.entryOrExit.length ? '' : 'Seleccionar'"
+                                [(ngModel)]="filterValues.entryOrExit"
+                                (change)="applyFilters()">
+                                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                                    <span>Opciones seleccionadas ({{items.length}})</span>
+                                </ng-template>
+                                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                    <input id="entry-{{index}}" type="checkbox" [checked]="item$.selected"/> 
+                                    <span class="ms-2">{{item.label}}</span>
+                                </ng-template>
+                            </ng-select>
+                        </div>
                     </div>
+
                     <!-- Tipo de Ingresante -->
                     <div class="col-md-6">
                         <label class="form-label">Tipo de Ingresante</label>
-                        <ng-select
-                            [items]="tiposIngresante"
-                            [multiple]="true"
-                            [closeOnSelect]="false"
-                            bindLabel="label"
-                            bindValue="value"
-                           
-                            [(ngModel)]="filterValues.tipoIngresante"
-                            (change)="applyFilters()">
-                        </ng-select>
+                        <div class="input-group">
+                            <ng-select
+                                [items]="tiposIngresante"
+                                [multiple]="true"
+                                [closeOnSelect]="false"
+                                [searchable]="true"
+                                bindLabel="label"
+                                bindValue="value"
+                                [clearable]="false"
+                                [placeholder]="filterValues.tipoIngresante.length ? '' : 'Seleccionar'"
+                                [(ngModel)]="filterValues.tipoIngresante"
+                                (change)="applyFilters()">
+                                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                                    <span>Opciones seleccionadas ({{items.length}})</span>
+                                </ng-template>
+                                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                    <input id="ingresante-{{index}}" type="checkbox" [checked]="item$.selected"/> 
+                                    <span class="ms-2">{{item.label}}</span>
+                                </ng-template>
+                            </ng-select>
+                        </div>
                     </div>
 
                     <!-- Tipo de Vehículo -->
                     <div class="col-md-6">
                         <label class="form-label">Tipo de Vehículo</label>
-                        <ng-select
-                            [items]="tiposVehiculo"
-                            [multiple]="true"
-                            [closeOnSelect]="false"
-                            bindLabel="label"
-                            bindValue="value"
-                           
-                            [(ngModel)]="filterValues.typeCar"
-                            (change)="applyFilters()">
-                        </ng-select>
+                        <div class="input-group">
+                            <ng-select
+                                [items]="tiposVehiculo"
+                                [multiple]="true"
+                                [closeOnSelect]="false"
+                                [searchable]="true"
+                                bindLabel="label"
+                                bindValue="value"
+                                [clearable]="false"
+                                [placeholder]="filterValues.typeCar.length ? '' : 'Seleccionar'"
+                                [(ngModel)]="filterValues.typeCar"
+                                (change)="applyFilters()">
+                                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                                    <span>Opciones seleccionadas ({{items.length}})</span>
+                                </ng-template>
+                                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                    <input id="vehiculo-{{index}}" type="checkbox" [checked]="item$.selected"/> 
+                                    <span class="ms-2">{{item.label}}</span>
+                                </ng-template>
+                            </ng-select>
+                        </div>
                     </div>
 
                     <!-- Estado de Horario -->
                     <div class="col-md-6">
                         <label class="form-label">Estado de Horario</label>
-                        <ng-select
-                            [items]="estadoHorarioOptions"
-                            [multiple]="true"
-                            [closeOnSelect]="false"
-                            [searchable]="false"
-                            bindLabel="label"
-                            bindValue="value"
-                           
-                            [(ngModel)]="filterValues.lateInRange"
-                            (change)="applyFilters()">
-                        </ng-select>
+                        <div class="input-group">
+                            <ng-select
+                                [items]="estadoHorarioOptions"
+                                [multiple]="true"
+                                [closeOnSelect]="false"
+                                [searchable]="true"
+                                bindLabel="label"
+                                bindValue="value"
+                                [clearable]="false"
+                                [placeholder]="filterValues.lateInRange.length ? '' : 'Seleccionar'"
+                                [(ngModel)]="filterValues.lateInRange"
+                                (change)="applyFilters()">
+                                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                                    <span>Opciones seleccionadas ({{items.length}})</span>
+                                </ng-template>
+                                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                    <input id="horario-{{index}}" type="checkbox" [checked]="item$.selected"/> 
+                                    <span class="ms-2">{{item.label}}</span>
+                                </ng-template>
+                            </ng-select>
+                        </div>
                     </div>
 
                     <!-- Días -->
-                    <div class="col-12">
+                    <div class="col-md-6">
                         <label class="form-label">Días</label>
-                        <ng-select
-                            [items]="daysOptions"
-                            [multiple]="true"
-                            [closeOnSelect]="false"
-                            bindLabel="label"
-                            bindValue="value"
-                          
-                            [(ngModel)]="filterValues.days"
-                            (change)="applyFilters()">
-                        </ng-select>
+                        <div class="input-group">
+                            <ng-select
+                                [items]="daysOptions"
+                                [multiple]="true"
+                                [closeOnSelect]="false"
+                                [searchable]="true"
+                                bindLabel="label"
+                                bindValue="value"
+                                [clearable]="false"
+                                [placeholder]="filterValues.days.length ? '' : 'Seleccionar'"
+                                [(ngModel)]="filterValues.days"
+                                (change)="applyFilters()">
+                                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                                    <span>Opciones seleccionadas ({{items.length}})</span>
+                                </ng-template>
+                                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                    <input id="day-{{index}}" type="checkbox" [checked]="item$.selected"/> 
+                                    <span class="ms-2">{{item.label}}</span>
+                                </ng-template>
+                            </ng-select>
+                        </div>
+                    </div>
+
+                    <!-- Guardia -->
+                    <div class="col-md-6">
+                        <label class="form-label">Guardia</label>
+                        <div class="input-group">
+                            <ng-select
+                                [items]="guardiasOptions"
+                                [multiple]="true"
+                                [closeOnSelect]="false"
+                                [searchable]="true"
+                                bindLabel="label"
+                                bindValue="id"
+                                [clearable]="false"
+                                [placeholder]="filterValues.selectedGuardia.length ? '' : 'Seleccionar'"
+                                [(ngModel)]="filterValues.selectedGuardia"
+                                (change)="applyFilters()">
+                                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                                    <span>Opciones seleccionadas ({{items.length}})</span>
+                                </ng-template>
+                                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                    <input id="guardia-{{index}}" type="checkbox" [checked]="item$.selected"/> 
+                                    <span class="ms-2">{{item.label}}</span>
+                                </ng-template>
+                            </ng-select>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-              
                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="applyFilters()">Aplicar</button>
-                <button type="button" class="btn btn-primary"  (click)="clearFilters()" > <i class="fa-regular fa-trash-can"></i></button>
+                <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+                    <i class="bi bi-trash"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -163,7 +263,6 @@
                 <th>Tipo de Entrada</th>
                 <th>Tipo de Ingresante</th>
                 <th>Nombre</th>
-                <th>Tipo Doc.</th>
                 <th>Documento</th>
                 <th>Observaciones</th>
                 <th>Tipo de Vehículo</th>
