@@ -482,8 +482,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
             if (cellText === 'entrada') {
               $(this).html(`
                 <div class="d-flex justify-content-center">
-                  <button type="button" class="btn rounded-pill w-75 d-flex align-items-center justify-content-center" 
-                    style="background-color: #28a745; color: white; border: none; text-transform: uppercase;">
+                  <button type="button" class="btn rounded-pill  d-flex align-items-center justify-content-center" 
+                    style="background-color: #28a745; color: white; border: none; ">
                     ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
                   </button>
                 </div>
@@ -491,8 +491,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
             } else if (cellText === 'salida') {
               $(this).html(`
                 <div class="d-flex justify-content-center">
-                  <button type="button" class="btn rounded-pill w-75 d-flex align-items-center justify-content-center" 
-                    style="background-color: #dc3545; color: white; border: none; text-transform: uppercase;">
+                  <button type="button" class="btn rounded-pill  d-flex align-items-center justify-content-center" 
+                    style="background-color: #dc3545; color: white; border: none;">
                     ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
                   </button>
                 </div>
@@ -505,8 +505,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
             if (estadoText === 'Tarde') {
               $(this).html(`
                 <div class="d-flex justify-content-center">
-                  <button type="button" class="btn rounded-pill w-75 d-flex align-items-center justify-content-center" 
-                    style="background-color: #dc3545; color: white; border: none; min-width: 150px; white-space: nowrap;">
+                <button type="button" class="btn rounded-pill  d-flex align-items-center justify-content-center" 
+                    style="background-color: #28a745; color: white; border: none;">
                     <span style="white-space: nowrap; display: inline-block;">Tarde</span>
                   </button>
                 </div>
@@ -514,8 +514,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
             } else if (estadoText.toLowerCase() === 'en horario') {
               $(this).html(`
                 <div class="d-flex justify-content-center">
-                  <button type="button" class="btn rounded-pill w-75 d-flex align-items-center justify-content-center" 
-                    style="background-color: #28a745; color: white; border: none; min-width: 150px; white-space: nowrap;">
+                  <button type="button" class="btn rounded-pill  d-flex align-items-center justify-content-center" 
+                    style="background-color: #28a745; color: white; border: none;">
                     <span style="white-space: nowrap; display: inline-block;">En Horario</span>
                   </button>
                 </div>
