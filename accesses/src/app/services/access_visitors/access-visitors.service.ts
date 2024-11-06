@@ -13,6 +13,9 @@ import { error } from 'jquery';
 })
 export class VisitorsService {
 
+  //trae TODOS los UserAllowed
+  private URL_GET_ALL_UserAllowed = "http://localhost:8090/user_Allowed/getAllUsersAllowed";
+
   private URL_GET_ALL_Visitors = "http://localhost:8090/user_Allowed/visitors/Visitor";
   private URL_POST_ENTRY_VisitorInList = "http://localhost:8090/movements_entry/register";
   private URL_POST_EXIT_VisitorInList = "http://localhost:8090/movements_exit/register";
@@ -27,54 +30,22 @@ export class VisitorsService {
   private readonly http: HttpClient = inject(HttpClient);
   private readonly helperService = inject(AccessVisitorHelperService);
   constructor() {
-    this.loadVisitorsData();
   }
 
-  //lista de Visitors
-  visitorslist : AccessUserAllowedInfoDto[] = [];
+
 
   validateQrCode(qrCode: string): Observable<boolean> {
     return this.http.post<boolean>(`${this.URL_POST_VALIDATE_QR}/validate`, { qrCode });
   }
 
-  loadVisitorsData(): void {
 
-    this.getVisitorsData().subscribe({
-      next: (data: AccessUserAllowedInfoDto[]) => {
-        this.visitorslist = data; // Asigna los datos una vez que se reciban
-        //console.log("data en el service: ", data);
-        //console.log("visitorslist en el service: ", this.visitorslist);
-
-      },
-      error: (error) => {
-        console.error('Error al cargar los datos de los Visitors:', error);
-      }
-    });
-  }
-
-  GetVisitorsList(): AccessUserAllowedInfoDto[]{
-    return [...this.visitorslist]
-  }
-
-  //filtra la list de Visitors
-  getVisitorByParam(parameter: string): AccessUserAllowedInfoDto[] {
-
-    //console.log("el cambio: " + parameter);
-
-    if (parameter != null && parameter.length > 2) {
-      let param = parameter.toLowerCase();
-
-      return this.visitorslist.filter(v =>
-        v.document.toLowerCase().includes(param) ||
-        v.name.toLowerCase().includes(param) ||
-        v.last_name.toLowerCase().includes(param)
-      );
-    } else {
-      return this.visitorslist;
-    }
-  }
 
   //Llamadas a Endpoints de la API:
+  //trae TODOS los UserAllowed
+  getAllUserAllowedData(): Observable<AccessUserAllowedInfoDto[]> {
+    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_UserAllowed);
+  }
+
   // METODO: getAllUserAllowedVisitors(@PathVariable String visitor)
   getVisitorsData(): Observable<AccessUserAllowedInfoDto[]> {
     return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_Visitors);
