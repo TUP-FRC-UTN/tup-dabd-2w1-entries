@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { AccessNewVehicleDto } from '../../../models/access-visitors/access-VisitorsModels';
-import { AbstractControl, AsyncValidatorFn, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { UserAllowed, UserAllowedDto } from '../../../services/access_visitors/movement.interface';
 import { Access_vehicleService } from '../../../services/access_vehicles/access_vehicle.service';
 import { catchError, debounceTime, map, Observable, of, Subject, Subscription, switchMap, takeUntil } from 'rxjs';
@@ -128,7 +128,6 @@ finUserByDni(): AsyncValidatorFn {
           this.userAllowed=data
           this.isUserFound=true;
           console.log(this.userAllowed)
-          this.loadUserVehicles()
           return null;
         } else {
           // El documento no existe
@@ -195,6 +194,7 @@ finUserByDni(): AsyncValidatorFn {
     });
   }
   logicDownVehicle(plate:string,userId:number):void{
+    console.log(plate)
     const sub=this.httpVehicleService.logicDown(plate,userId).subscribe({
       next:(response)=>{
         if(response.success){
@@ -224,20 +224,6 @@ finUserByDni(): AsyncValidatorFn {
       this.formVehicle.get('document')?.updateValueAndValidity();
     }
   }
-  loadUserVehicles(): void {
-    if (this.userAllowed) {
-      const vehiclesArray = this.formVehicle.get('vehicles') as FormArray;
-      console.log(this.userAllowed.vehicles)
-      // Mostrar vehículos ya asociados al usuario
-      this.userAllowed.vehicles?.forEach((vehicle) => {
-        // Los vehículos existentes se añaden al FormArray como grupos deshabilitados
-        vehiclesArray.push(this.fb.group({
-          plate: [{ value: vehicle.plate, disabled: true }], // Deshabilitar la placa
-          vehicleType: [{ value: vehicle.vehicleType, disabled: true }], // Deshabilitar tipo de vehículo
-          insurance: [{ value: vehicle.insurance, disabled: true }], // Deshabilitar seguro
-          isExistingVehicle: [true], // Indicamos que es un vehículo existente
-        }));
-      });
-    }
-  }
+ 
+  
 }
