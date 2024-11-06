@@ -14,6 +14,16 @@
           <input type="text" class="form-control" id="document" formControlName="document"
           [class.is-valid]="formVehicle.get('document')?.valid && formVehicle.get('document')?.touched"
           [class.is-invalid]="formVehicle.get('document')?.invalid && formVehicle.get('document')?.touched">
+          <div *ngIf="formVehicle.get('document')?.hasError('userNotFound') && formVehicle.get('document')?.touched" class="invalid-feedback">
+            El documento no existe.
+          </div>
+          <div *ngIf="formVehicle.get('document')?.hasError('userExists') && formVehicle.get('document')?.touched" class="valid-feedback">
+            El documento existe.
+          </div>
+          <div *ngIf="formVehicle.get('document')?.hasError('apiError') && formVehicle.get('document')?.touched" class="invalid-feedback">
+            Documento no encontrado.
+          </div>
+
           @if(formVehicle.get('document')?.invalid &&formVehicle.get('document')?.touched){
             @if(formVehicle.get('document')?.errors?.['required']){
                 <div class="invalid-feedback">El documento es requerido</div>
@@ -21,10 +31,13 @@
             @if(formVehicle.get('document')?.errors?.['minlengt']){
                 <div class="invalid-feedback">El documento debe tener 8 caracteres</div>
             }
-          
+            @if(formVehicle.get('document')?.errors?.['min']){
+              <div class="invalid-feedback">El documento debe tener 8 caracteres</div>
+          }
             @if(formVehicle.get('document')?.errors?.['userNotFound']){
                 <div class="invalid-feedback">El usuario no existe</div>
             }
+            
           }
           
         </div>
@@ -88,7 +101,7 @@
 
             <div class="col-12 text-end">
               <button type="button" class="btn btn-danger btn-sm" (click)="removeVehicle($index)">
-                Quitar Vehículo
+                Quitar 
               </button>
             </div>
           </div>
@@ -99,7 +112,7 @@
       <div class="row mb-3">
         <div class="col-12">
           <button type="button" class="btn btn-secondary" (click)="addVehicle()">
-            Agregar Vehículo
+            Agregar
           </button>
         </div>
       </div>

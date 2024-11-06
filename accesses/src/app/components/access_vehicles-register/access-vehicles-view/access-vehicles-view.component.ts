@@ -1,13 +1,14 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { AccessNewVehicleDto } from '../../../models/access-visitors/access-VisitorsModels';
-import { AbstractControl, AsyncValidatorFn, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { UserAllowed } from '../../../services/access_visitors/movement.interface';
+import { AbstractControl, AsyncValidatorFn, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { UserAllowed, UserAllowedDto } from '../../../services/access_visitors/movement.interface';
 import { Access_vehicleService } from '../../../services/access_vehicles/access_vehicle.service';
 import { catchError, debounceTime, map, Observable, of, Subject, Subscription, switchMap, takeUntil } from 'rxjs';
 import { Access_userDocumentService } from '../../../services/access_user-document/access_user-document.service';
 import { CommonModule } from '@angular/common';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
 import { AccessUserAllowedInfoDto } from '../../../models/access-visitors/access-visitors-models';
+import { valHooks } from 'jquery';
 
 @Component({
   selector: 'app-access-vehicles-view',
@@ -17,16 +18,26 @@ import { AccessUserAllowedInfoDto } from '../../../models/access-visitors/access
   styleUrl: './access-vehicles-view.component.css'
 })
 export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
+  constructor(
+    private fb: FormBuilder,
+  ) {}
+
   ngOnInit(): void {
     this.loadVehicleTypes()
-    this.formVehicle.get('document')?.valueChanges.pipe(
-      debounceTime(100), // Puedes agregar un debounce para esperar un poco después de que el usuario termine de escribir
-      switchMap(() => {
-        return this.finUserByDni()(this.formVehicle.get('document')!); // Llamar al validador
-      })
-    ).subscribe();
-    this.finUserByDni();
-   this.formVehicle
+    this.formVehicle = this.fb.group({
+      document: [
+        '', 
+        [Validators.required, this.ValidateCharacters], 
+        [this.finUserByDni()] // Agregando la validación asincrónica aquí
+      ],
+      documentType: ['', Validators.required],
+      vehicles: this.fb.array([])
+    });
+
+    // Actualizar validación de `document` cuando `documentType` cambie
+    this.formVehicle.get('documentType')?.valueChanges.subscribe(() => {
+      this.formVehicle.get('document')?.updateValueAndValidity();
+    });
   }
   private suscription=new Subscription();
   patentePlate = '^[A-Z]{1,3}\\d{3}[A-Z]{0,3}$';
@@ -47,14 +58,14 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
   vehicleOptions: { value: string, label: string }[] = [];
   vehiculos:AccessNewVehicleDto[]=[]
   isValidating: boolean = false;
-  userAllowed:UserAllowed|null=null;
+  userAllowed:UserAllowedDto|null=null;
   private readonly httpUserAllowedVehicle=inject(Access_userDocumentService)
   private readonly httpVehicleService=inject(Access_vehicleService)
   private readonly visitorHttpService: AccessVisitorsRegisterServiceHttpClientService=inject(AccessVisitorsRegisterServiceHttpClientService)
   
   formVehicle:FormGroup=new FormGroup({
     document:new FormControl('',[Validators.required,this.ValidateCharacters,
-      this.finUserByDni]),
+      this.finUserByDni,Validators.minLength(8)]),
     documentType:new FormControl('',[Validators.required]),
     vehicles:new FormArray([])
   })
@@ -76,11 +87,11 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
     const vehicleGroup=this.CreateVehicle()
     this.VehiclesArray.push(vehicleGroup)
   }
-  private ValidateCharacters(control:AbstractControl):ValidationErrors | null{
-      if(control.value && control.value<8){
-        return {minlengt:true}
-      }
-      return null;
+  private ValidateCharacters(control: AbstractControl): ValidationErrors | null {
+    if (control.value && control.value.length < 8) {
+      return { min: true };
+    }
+    return null;
   }
   getSelectedVehicles(): AccessNewVehicleDto[] {
     return this.VehiclesArray.controls.map((group: AbstractControl) => {
@@ -94,31 +105,36 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
       };
     });
   }
-  finUserByDni():AsyncValidatorFn{
-    return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      const document = control.value;
-      const documentType = this.formVehicle.get('documentType')?.value;
-  
-      if (!document || !documentType) {
-        return of(null); 
-      }
-  
-      return this.httpUserAllowedVehicle.getUserByDniAndDocument(document, documentType).pipe(
-        map((data: AccessUserAllowedInfoDto) => {
-          if (data) {
-            
-            return null
-          }
+
+
+finUserByDni(): AsyncValidatorFn {
+  return (control: AbstractControl): Observable<ValidationErrors | null> => {
+    const document = control.value;
+    const documentType = this.formVehicle.get('documentType')?.value;
+
+    if (!document || !documentType) {
+      return of(null);  // Si no hay documento o tipo de documento, no se valida
+    }
+
+    return this.httpUserAllowedVehicle.getUserByDniAndDocument(document, documentType).pipe(
+      map((data: UserAllowedDto | null) => {
+        if (data) {
+          // El documento existe
+          return null;
+        } else {
+          // El documento no existe
           return { userNotFound: true };
-        }),
-        catchError((error) => {
-          console.error(error);
-          alert("errorr")
-          return of({ apiError: true }); // Error en la API
-        })
-      );
-    };
-  }
+        }
+      }),
+      catchError((error) => {
+        console.error(error);
+        return of({ apiError: true });  // Si hay un error en la API
+      })
+    );
+  };
+}
+
+
 
   onSubmit():void{
     if(this.formVehicle.valid){
