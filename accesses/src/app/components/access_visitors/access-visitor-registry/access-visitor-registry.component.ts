@@ -1445,32 +1445,31 @@ loadAllOwners(): void {
                             error: (err) => {
                                 console.error('Error al registrar la entrada:', err);
 
-                                if(err.status == 403){
-                                this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
-                                // Swal.fire({
-                                //   title: 'Error',
-                                //   text: 'No tiene permitido salir.',
-                                //   icon: 'error',
-                                //   confirmButtonText: 'Cerrar',
-                                // });
-                                //return false;
-                                observer.next(false);
-                                observer.complete(); 
+                                if (err.status === 403) {
+                                  const errorMessage = err.error.message;
+                              
+                                  // Verifica el mensaje de error específico para mostrar una alerta distinta
+                                  if (errorMessage === "The user does not have authorization range") {
+                                      Swal.fire({
+                                          title: 'Acceso Denegado',
+                                          text: 'El usuario no tiene un rango de autorización asignado.',
+                                          icon: 'error',
+                                          confirmButtonText: 'Cerrar'
+                                      });
+                                  } else if (errorMessage === "The user does not have authorization to entry for today") {
+                                    this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
+                                  }
+                              
+                                  // Ejecuta la lógica de manejo del observador
+                                  observer.next(false);
+                                  observer.complete();
                               }
-                              else if (err.status == 409){
+                              else if (err.status === 409){
                                 Swal.fire({
                                   title: 'Error',
                                   text: 'Tiene que salir antes de entrar.',
                                   icon: 'error',
                                   confirmButtonText: 'Cerrar',
-                                });
-                                
-                               
-
-                                Swal.fire({
-                                    title: 'eee',
-                                    icon: 'error',
-                                    confirmButtonText: 'Cerrar',
                                 }).then(() => {
                                     observer.next(false);
                                     observer.complete();
@@ -1549,19 +1548,26 @@ loadAllOwners(): void {
                 observer.next(false);
                 observer.complete(); 
 
-              } else if(err.status == 403){
-                this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
-                // Swal.fire({
-                //   title: 'Error',
-                //   text: 'No tiene permitido salir.',
-                //   icon: 'error',
-                //   confirmButtonText: 'Cerrar',
-                // });
-                //return false;
+              } else if (err.status === 403) {
+                const errorMessage = err.error.message;
+            
+                // Verifica el mensaje de error específico para mostrar una alerta distinta
+                if (errorMessage === "The user does not have authorization range") {
+                    Swal.fire({
+                        title: 'Acceso Denegado',
+                        text: 'El usuario no tiene un rango de autorización asignado.',
+                        icon: 'error',
+                        confirmButtonText: 'Cerrar'
+                    });
+                } else if (errorMessage === "The user does not have authorization to entry for today") {
+                  this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
+                }
+            
+                // Ejecuta la lógica de manejo del observador
                 observer.next(false);
-                observer.complete(); 
-              }
-              else if (err.status == 409){
+                observer.complete();
+            }
+              else if (err.status === 409){
                 Swal.fire({
                   title: 'Error',
                   text: 'Tiene que entrar antes de salir.',
