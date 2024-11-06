@@ -1307,7 +1307,7 @@ loadUsersAllowedData(): Observable<boolean> {
                 if (errorMessage === "The user does not have authorization range") {
                     Swal.fire({
                         title: 'Acceso Denegado',
-                        text: 'El usuario no tiene un rango de autorización asignado.',
+                        text: 'El usuario no tiene un rango de autorización asignado para hoy.',
                         icon: 'error',
                         confirmButtonText: 'Cerrar'
                     });
