@@ -7,45 +7,55 @@
         <h4 class="text-left">Registrar Ingresos/Egresos</h4>
       </div>
       <!-- Contenedor para los botones alineados a la derecha -->
-      <div class="d-flex justify-content-start botones">
+      <div class="row align-items-end botones">
 
         <!-- ng-select -->
-          <ng-select
-            [items]="userTypeOptions"
-            [multiple]="true"
-            [closeOnSelect]="false"
-            [searchable]="true"
-            bindLabel="label"
-            bindValue="value"
-            [clearable]="false"
-            placeholder="Seleccionar tipos de ingresante"
-            [(ngModel)]="selectedUserTypes"
-            (change)="onFilterSelectionChange()">
-            
-            <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-              <span>Tipos seleccionados ({{items.length}})</span>
-            </ng-template>
-            
-            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-              <input id="type-{{item.value}}" 
-                     type="checkbox" 
-                     [checked]="item$.selected"
-                     class="form-check-input me-2"/>
-              <span>{{item.label}}</span>
-            </ng-template>
-          </ng-select>
-      
-        <button class="btn btn-secondary action-btn me-2" (click)="clearFilters()" title="Limpiar filtros">
-          <i class="bi bi-trash"></i>
-        </button>
+        <div class="col-4 justify-content-start">
+          <label class="form-label">Tipo de Ingresante</label>
+          <div class="input-group ng-select pb-1">
+            <ng-select
+              [items]="userTypeOptions"
+              [multiple]="true"
+              [closeOnSelect]="false"
+              [searchable]="true"
+              bindLabel="label"
+              bindValue="value"
+              [clearable]="false"
+              placeholder=""
+              [(ngModel)]="selectedUserTypes"
+              (change)="onFilterSelectionChange()">
+              
+              <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                <span>Tipos seleccionados ({{items.length}})</span>
+              </ng-template>
+              
+              <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                <input id="type-{{item.value}}" 
+                      type="checkbox" 
+                      [checked]="item$.selected"
+                      class="form-check-input me-2"/>
+                <span>{{item.label}}</span>
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
 
-        <button
-          class="btn btn-primary me-2"
-          data-bs-toggle="modal"
-          data-bs-target="#qrScannerModal"
-        >
-          <i class="bi bi-qr-code-scan"></i>
-        </button>
+        <div class="col-auto m-0">
+          <button class="btn btn-secondary action-btn" (click)="clearFilters()" title="Limpiar filtros">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+        
+        <div class="col-auto m-0">
+          <button
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#qrScannerModal"
+          >
+            <i class="bi bi-qr-code-scan"></i>
+          </button>
+        </div>
+        
         <!-- Botón para cargar imagen de QR -->
 <!--         <button class="btn btn-primary me-2" (click)="uploadQrImage()">
           <i class="bi bi-file-earmark-arrow-up"></i>
