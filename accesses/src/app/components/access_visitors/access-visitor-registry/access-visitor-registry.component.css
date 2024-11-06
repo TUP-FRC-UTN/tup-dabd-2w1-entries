@@ -1,3 +1,18 @@
+/* estilos de ng-select */
+::ng-deep .ng-select {
+  .ng-select-container {
+      background-color: white !important;
+  }
+  
+  .ng-dropdown-panel {
+      background-color: white !important;
+  }
+  
+  .ng-option {
+      background-color: white !important;
+  }
+}
+
 /* Ver q este bien esto */
 .botones{
   position: relative;

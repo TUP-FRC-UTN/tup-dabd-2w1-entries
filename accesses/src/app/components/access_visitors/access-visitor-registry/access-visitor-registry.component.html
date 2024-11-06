@@ -7,83 +7,33 @@
         <h4 class="text-left">Registrar Ingresos/Egresos</h4>
       </div>
       <!-- Contenedor para los botones alineados a la derecha -->
-      <div class="d-flex justify-content-center botones">
-        <div class="dropdown">
-          <button class="btn dropdown-toggle w-95 me-2 border form-control" 
-          type="button" 
-          id="dropdownTipoIngresante" 
-          data-bs-toggle="dropdown" 
-          aria-expanded="false">
-      Seleccionar tipos de ingresante
-      <span class="selected-count"></span>
-  </button>
-  
-  
-      
-          <ul class="dropdown-menu w-95 mx-2" aria-labelledby="dropdownTipoIngresante">
-              <li>
-                  <label class="dropdown-item">
-                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="neighbour" id="neighbourCheckBox" (change)="onCheckboxChange($event)"> 
-                      Vecino
-                  </label>
-              </li>
-              <li>
-                  <label class="dropdown-item">
-                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="visitor" id="visitorCheckBox" (change)="onCheckboxChange($event)"> 
-                      Visitante
-                  </label>
-              </li>
-              <li>
-                  <label class="dropdown-item">
-                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="employee" id="employeeCheckBox" (change)="onCheckboxChange($event)"> 
-                      Empleado
-                  </label>
-              </li>
-              <li>
-                <label class="dropdown-item">
-                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="service" id="servicesCheckBox" (change)="onCheckboxChange($event)"> 
-                    Servicio
-                </label>
-            </li>
-              <li><hr class="dropdown-divider"></li>
-              <li>
-                <label class="dropdown-item">
-                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="supplier" id="supplierCheckBox" (change)="onCheckboxChange($event)"> 
-                    Proveedor
-                </label>
-              </li>
-              <!-- nuevos tipos de userAllowed -->
-              <li>
-                <label class="dropdown-item">
-                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="worker" id="workerCheckBox" (change)="onCheckboxChange($event)"> 
-                    Obrero
-                </label>
-              </li>
-              <li>
-                <label class="dropdown-item">
-                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="delivery" id="deliveryCheckBox" (change)="onCheckboxChange($event)"> 
-                    Delivery
-                </label>
-              </li>
-              <!-- <li>
-                <label class="dropdown-item">
-                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="taxi" id="taxiCheckBox" (change)="onCheckboxChange($event)"> Taxi
-                </label>
-              </li> -->
-              <li>
-                <label class="dropdown-item">
-                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="cleaning" id="cleaningCheckBox" (change)="onCheckboxChange($event)"> 
-                    Personal de Limpieza
-                </label>
-              </li>
-              <li>
-                <label class="dropdown-item">
-                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="gardener" id="gardenerCheckBox" (change)="onCheckboxChange($event)"> 
-                    Jardinero
-                </label>
-              </li>
-          </ul>
-      </div>
+      <div class="d-flex justify-content-start botones">
+
+        <!-- ng-select -->
+          <ng-select
+            [items]="userTypeOptions"
+            [multiple]="true"
+            [closeOnSelect]="false"
+            [searchable]="true"
+            bindLabel="label"
+            bindValue="value"
+            [clearable]="false"
+            placeholder="Seleccionar tipos de ingresante"
+            [(ngModel)]="selectedUserTypes"
+            (change)="onFilterSelectionChange()">
+            
+            <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+              <span>Tipos seleccionados ({{items.length}})</span>
+            </ng-template>
+            
+            <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+              <input id="type-{{item.value}}" 
+                     type="checkbox" 
+                     [checked]="item$.selected"
+                     class="form-check-input me-2"/>
+              <span>{{item.label}}</span>
+            </ng-template>
+          </ng-select>
       
         <button class="btn btn-secondary action-btn me-2" (click)="clearFilters()" title="Limpiar filtros">
           <i class="bi bi-trash"></i>
