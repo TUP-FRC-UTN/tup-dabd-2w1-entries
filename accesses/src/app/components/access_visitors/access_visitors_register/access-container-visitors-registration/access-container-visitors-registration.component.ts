@@ -196,7 +196,7 @@ setNameQr(): void {
         Validators.maxLength(15),
         Validators.pattern('^[A-Za-z0-9]{8,15}$'), 
       ]],
-      documentType:[''],
+      documentType:['', [Validators.required]],
       email: ['', [Validators.required, Validators.email, Validators.maxLength(70)]],
       hasVehicle: [false],
       licensePlate: [''],
