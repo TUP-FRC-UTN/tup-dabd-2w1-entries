@@ -157,7 +157,8 @@ finUserByDni(): AsyncValidatorFn {
         next:(response)=>{
           if(response.success){
             alert("Vehiculos añadido con exito");
-            this.formVehicle.reset();
+            console.log(bodyData.vehicleDtos)
+            this.userAllowed?.vehicles?.push(bodyData.vehicleDtos)
           }
         },
        error: (error: HttpErrorResponse) => {
@@ -199,7 +200,10 @@ finUserByDni(): AsyncValidatorFn {
       next:(response)=>{
         if(response.success){
           alert("Vehiculos dado de baja con exito");
-          this.formVehicle.reset();
+         let index= this.userAllowed?.vehicles?.findIndex(vehicle=> vehicle.plate===plate)
+         if(index!==-1 && index!==undefined)
+         this.userAllowed?.vehicles?.splice(index,1)
+        
         }
         else{
           if(response.message==='The vehicle not exist'){
