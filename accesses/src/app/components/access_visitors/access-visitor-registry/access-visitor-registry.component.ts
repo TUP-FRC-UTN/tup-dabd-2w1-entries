@@ -45,7 +45,6 @@ import {
   NgxScannerQrcodeComponent,
   NgxScannerQrcodeModule,
 } from 'ngx-scanner-qrcode';
-import jsQR from 'jsqr';
 import {
   AccessNewMovementsEntryDtoOwner,
   AccessUserAllowedInfoDtoOwner,
@@ -169,56 +168,6 @@ export class AccessVisitorRegistryComponent
     this.qrInput.nativeElement.click();
   }
 
-  onFileSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      const reader = new FileReader();
-
-      // Procesa la imagen una vez cargada
-      reader.onload = (e: any) => {
-        const img = new Image();
-        img.src = e.target.result;
-
-        img.onload = () => {
-          // Crea un canvas temporal para extraer los datos de la imagen
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-
-          if (context) {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            context.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const imageData = context.getImageData(
-              0,
-              0,
-              canvas.width,
-              canvas.height
-            );
-
-            // Usa jsQR para procesar la imagen
-            const qrCode = jsQR(
-              imageData.data,
-              imageData.width,
-              imageData.height
-            );
-
-            if (qrCode) {
-              // QR encontrado: procesa el contenido escaneado
-              this.handleQrScan([{ value: qrCode.data }]);
-            } else {
-              // QR no válido: muestra una alerta
-              Swal.fire({
-                icon: 'error',
-                title: 'QR Invalido',
-                text: 'No se ha podido leer un código QR válido en la imagen.',
-              });
-            }
-          }
-        };
-      };
-      reader.readAsDataURL(file);
-    }
-  }
 
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
