@@ -1,11 +1,11 @@
 <div class="card mt-5 mx-3 mx-md-5 shadow-lg p-3 mb-5 bg-body-tertiary rounded">
-    <div class="card-header fs-1">
-        Registro de invitados
-    </div>
     <div class="card-body fs-2">
         <h5 class="card-title">Ingrese aquí los datos:</h5>
     </div>
     <form [formGroup]="visitorForm" class="needs-validation" novalidate (ngSubmit)="sendVisitorWithoutRH()">
+
+        <div class="card mt-3 mb-3">
+            <div class="card-body">
         <div class="row g-3">
             <div class="col-12 col-md-6 col-lg-6">
                 <label for="document" class="form-label">Documento</label>
@@ -28,7 +28,8 @@
                 <label for="documentType" class="form-label">Tipo Documento</label>
                 <select id="documentType" class="form-select" formControlName="documentType"
                     [class.is-valid]="visitorForm.get('documentType')?.valid && visitorForm.get('documentType')?.touched"
-                    [class.is-invalid]="visitorForm.get('documentType')?.invalid && visitorForm.get('documentType')?.touched" required="">
+                    [class.is-invalid]="visitorForm.get('documentType')?.invalid && visitorForm.get('documentType')?.touched"
+                    required="">
                     <option value="" disabled selected>Seleccione el tipo de documento</option>
                     <option value=1>DNI</option>
                     <option value=2>Pasaporte</option>
@@ -101,21 +102,23 @@
                 </div>
                 <div class="col-12 col-md-6 col-lg-6">
                     <div class="input-group" style="margin-top: 30px;">
-                      <select class="form-select" id="vehicleType" formControlName="vehicleType"
-                          [class.is-valid]="visitorForm.get('vehicleType')?.valid && visitorForm.get('vehicleType')?.touched"
-                          [class.is-invalid]="visitorForm.get('vehicleType')?.invalid && visitorForm.get('vehicleType')?.touched">
-                        <option value="" disabled selected>Seleccione el tipo de vehículo</option>
-                        <option *ngFor="let option of vehicleOptions" [value]="option.value">{{ option.label }}</option>
-                      </select>
-                      <label class="input-group-text" for="vehicleType">Tipo de Vehículo</label>
+                        <select class="form-select" id="vehicleType" formControlName="vehicleType"
+                            [class.is-valid]="visitorForm.get('vehicleType')?.valid && visitorForm.get('vehicleType')?.touched"
+                            [class.is-invalid]="visitorForm.get('vehicleType')?.invalid && visitorForm.get('vehicleType')?.touched">
+                            <option value="" disabled selected>Seleccione el tipo de vehículo</option>
+                            <option *ngFor="let option of vehicleOptions" [value]="option.value">{{ option.label }}
+                            </option>
+                        </select>
+                        
                     </div>
                     <div class="invalid-feedback"
                         *ngIf="visitorForm.get('vehicleType')?.errors && visitorForm.get('vehicleType')?.touched">
-                      <div *ngIf="visitorForm.get('vehicleType')?.errors?.['required']">Por favor, seleccione un tipo de vehículo.</div>
+                        <div *ngIf="visitorForm.get('vehicleType')?.errors?.['required']">Por favor, seleccione un tipo
+                            de vehículo.</div>
                     </div>
-                  </div>
-                  
-                  
+                </div>
+
+
 
                 <div class="col-12 col-md-6 col-lg-6">
                     <label for="insurance" class="form-label">Seguro</label>
@@ -153,30 +156,22 @@
                     )">Agregar</button>
             </div>
         </div>
-
-        <div class="card-header fs-3">
-            Lista de invitaciones
-        </div>
-        <app-access-grid-visitors-registration (updateVisit)="updateVisitor($event)"></app-access-grid-visitors-registration>
-
-
-        <div class="card-header fs-3">
-            Rango de dias permitidos para la invitacion
-        </div>
-        <app-access-time-range-visitors-registration></app-access-time-range-visitors-registration>
+    </div>
+</div>
         
-        
+
+        <app-access-grid-visitors-registration
+            (updateVisit)="updateVisitor($event)"></app-access-grid-visitors-registration>
+        <app-access-time-range-visitors-registration (selectedUser)="handleSelectedUser($event)">
+        </app-access-time-range-visitors-registration>
+
         <div class="col-12 mt-5">
             <div class="d-flex justify-content-end gap-3">
-                <button 
-                class="btn btn-outline-success btn-lg" 
-                type="button" 
-                *ngIf="isQRCodeAvailable" 
-                (click)="downloadQRCode()" 
-                [disabled]="!isQRCodeAvailable">
-                Descargar Qr
-            </button>
-                <button class="btn btn-primary btn-lg" type="button" (click)="sendVisitorRecord()">Registrar</button>
+                <button class="btn btn-outline-success btn-lg" type="button" *ngIf="isQRCodeAvailable"
+                    (click)="downloadQRCode()" [disabled]="!isQRCodeAvailable">
+                    Descargar Qr
+                </button>
+                <button class="btn btn-primary btn-sm" type="button" (click)="sendVisitorRecord()">Registrar</button>
             </div>
         </div>
     </form>
