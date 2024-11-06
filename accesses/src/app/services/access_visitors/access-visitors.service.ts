@@ -18,6 +18,7 @@ export class VisitorsService {
   private URL_POST_EXIT_VisitorInList = "http://localhost:8090/movements_exit/register";
   private URL_GET_LastEntryByDocument = "http://localhost:8090/movements_entry/last_entry_by_document?document=";
   private URL_GET_LastExitByDocument = "http://localhost:8090/movements_exit/last_exit_by_document?document=";
+  private URL_GET_ALL_UserAllowed = "http://localhost:8090/user_Allowed/getAllUsersAllowed";
 
   private URL_POST_VALIDATE_QR = 'http://localhost:8090/visitor-qr';
 
@@ -35,6 +36,12 @@ export class VisitorsService {
 
   validateQrCode(qrCode: string): Observable<boolean> {
     return this.http.post<boolean>(`${this.URL_POST_VALIDATE_QR}/validate`, { qrCode });
+  }
+
+
+  //trae TODOS los UserAllowed
+  getAllUserAllowedData(): Observable<AccessUserAllowedInfoDto[]> {
+    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_UserAllowed);
   }
 
   loadVisitorsData(): void {

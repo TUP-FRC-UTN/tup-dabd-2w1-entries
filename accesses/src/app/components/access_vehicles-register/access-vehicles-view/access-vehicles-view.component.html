@@ -1,0 +1,137 @@
+<div class="card mt-5 mx-3 mx-md-5 shadow-lg p-3 mb-5 bg-body-tertiary rounded">
+    <div class="card-header fs-1">
+      Añadir vehiculo
+    </div>
+    <div class="card-body fs-2">
+      <h5 class="card-title">Ingrese aquí los datos:</h5>
+    </div>
+    
+    <form [formGroup]="formVehicle" class="needs-validation" novalidate (ngSubmit)="onSubmit()">
+      <!-- Document Info -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label for="document" class="form-label">Documento</label>
+          <input type="text" class="form-control" id="document" formControlName="document"
+          [class.is-valid]="formVehicle.get('document')?.valid && formVehicle.get('document')?.touched"
+          [class.is-invalid]="formVehicle.get('document')?.invalid && formVehicle.get('document')?.touched">
+          <div *ngIf="formVehicle.get('document')?.hasError('userNotFound') && formVehicle.get('document')?.touched" class="invalid-feedback">
+            El documento no existe.
+          </div>
+          <div *ngIf="formVehicle.get('document')?.hasError('userExists') && formVehicle.get('document')?.touched" class="valid-feedback">
+            El documento existe.
+          </div>
+          <div *ngIf="formVehicle.get('document')?.hasError('apiError') && formVehicle.get('document')?.touched" class="invalid-feedback">
+            Documento no encontrado.
+          </div>
+
+          @if(formVehicle.get('document')?.invalid &&formVehicle.get('document')?.touched){
+            @if(formVehicle.get('document')?.errors?.['required']){
+                <div class="invalid-feedback">El documento es requerido</div>
+            }
+            @if(formVehicle.get('document')?.errors?.['minlengt']){
+                <div class="invalid-feedback">El documento debe tener 8 caracteres</div>
+            }
+            @if(formVehicle.get('document')?.errors?.['min']){
+              <div class="invalid-feedback">El documento debe tener 8 caracteres</div>
+          }
+            @if(formVehicle.get('document')?.errors?.['userNotFound']){
+                <div class="invalid-feedback">El usuario no existe</div>
+            }
+            
+          }
+          
+        </div>
+        <div class="col-md-6">
+          <label for="documentType" class="form-label">Tipo de Documento</label>
+          <select class="form-select" id="documentType" formControlName="documentType"
+          [class.is-valid]="formVehicle.get('documentType')?.valid && formVehicle.get('documentType')?.touched"
+          [class.is-invalid]="formVehicle.get('documentType')?.invalid && formVehicle.get('documentType')?.touched">
+            <option value="">Seleccione tipo</option>
+            <option value="DNI">DNI</option>
+            <option value="PASSPORT">Pasaporte</option>
+          </select>
+        </div>
+      </div>
+        @if (isUserFound) {
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            <h5>Datos del Usuario:</h5>
+            <p>Nombre: {{ userAllowed?.name }} {{ userAllowed?.last_name }}</p>
+            <p>Email: {{ userAllowed?.email }}</p>
+          </div>
+          </div>
+        }
+      <!-- Vehicle Forms -->
+      <div formArrayName="vehicles">
+        @for (vehicleGroup of VehiclesArray.controls; track $index) {
+          <div [formGroupName]="$index" class="row g-3 mb-3 border-bottom pb-3">
+            <div class="col-12 col-md-4">
+              <label for="plate{{$index}}" class="form-label">Patente</label>
+              <input type="text" class="form-control" [id]="'plate'+$index" formControlName="plate"
+                [class.is-valid]="vehicleGroup.get('plate')?.valid && vehicleGroup.get('plate')?.touched"
+                [class.is-invalid]="vehicleGroup.get('plate')?.invalid && vehicleGroup.get('plate')?.touched">
+              @if (vehicleGroup.get('plate')?.errors?.['required'] && vehicleGroup.get('plate')?.touched) {
+                <div class="invalid-feedback">La patente es requerida.</div>
+              }
+              @if (vehicleGroup.get('plate')?.errors?.['pattern'] && vehicleGroup.get('plate')?.touched) {
+                <div class="invalid-feedback">Formato de patente inválido.</div>
+              }
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label for="vehicleType{{$index}}" class="form-label">Tipo de Vehículo</label>
+              <select class="form-select" [id]="'vehicleType'+$index" formControlName="vehicleType"
+                [class.is-valid]="vehicleGroup.get('vehicleType')?.valid && vehicleGroup.get('vehicleType')?.touched"
+                [class.is-invalid]="vehicleGroup.get('vehicleType')?.invalid && vehicleGroup.get('vehicleType')?.touched">
+                <option value="">Seleccione el tipo de vehículo</option>
+                @for (option of vehicleOptions; track option.value) {
+                  <option [value]="option.value">{{option.label}}</option>
+                }
+              </select>
+              @if (vehicleGroup.get('vehicleType')?.errors?.['required'] && vehicleGroup.get('vehicleType')?.touched) {
+                <div class="invalid-feedback">Por favor, seleccione un tipo de vehículo.</div>
+              }
+            </div>
+
+            <div class="col-12 col-md-4">
+              <label for="insurance{{$index}}" class="form-label">Seguro</label>
+              <select class="form-select" [id]="'insurance'+$index" formControlName="insurance"
+                [class.is-valid]="vehicleGroup.get('insurance')?.valid && vehicleGroup.get('insurance')?.touched"
+                [class.is-invalid]="vehicleGroup.get('insurance')?.invalid && vehicleGroup.get('insurance')?.touched">
+                <option value="">Seleccione el seguro de vehículo</option>
+                <option value="San Cristobal">San Cristobal</option>
+                <option value="La Nueva">La Nueva</option>
+              </select>
+              @if (vehicleGroup.get('insurance')?.errors?.['required'] && vehicleGroup.get('insurance')?.touched) {
+                <div class="invalid-feedback">Por favor, seleccione un seguro.</div>
+              }
+            </div>
+
+            <div class="col-12 text-end">
+              <button type="button" class="btn btn-danger btn-sm" (click)="removeVehicle($index)">
+                Quitar 
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Add Vehicle Button -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <button type="button" class="btn btn-secondary" (click)="addVehicle()">
+            Agregar
+          </button>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="row">
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-primary" [disabled]="!formVehicle.valid">
+            Guardar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>

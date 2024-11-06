@@ -68,10 +68,16 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
 
   orderDays: string[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
-  constructor(private visitorService: AccessVisitorsRegisterServiceService, private fb: FormBuilder,private httpService:AccessVisitorsRegisterServiceHttpClientService) {
-      this.form = this.fb.group({
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
+  constructor(
+    private visitorService: AccessVisitorsRegisterServiceService, 
+    private fb: FormBuilder,
+    private httpService: AccessVisitorsRegisterServiceHttpClientService
+  ) {
+    const today = new Date().toISOString().split('T')[0]; // Formatear la fecha a 'YYYY-MM-DD'
+  
+    this.form = this.fb.group({
+      startDate: [today, Validators.required],
+      endDate: [today, Validators.required],
       initHour: ['', Validators.required],
       endHour: ['', Validators.required],
       Lun: [{ value: false, disabled: true }],
@@ -82,13 +88,13 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
       Sáb: [{ value: false, disabled: true }],
       Dom: [{ value: false, disabled: true }],
     });
-
-
+  
     this.form.get('startDate')?.valueChanges.subscribe(() => this.updateAvailableDays());
     this.form.get('endDate')?.valueChanges.subscribe(() => this.updateAvailableDays());
     this.form.get('initHour')?.valueChanges.subscribe(() => this.validateTimeRange());
     this.form.get('endHour')?.valueChanges.subscribe(() => this.validateTimeRange());
   }
+  
 
 private validateTimeRange(): void {
   const initHour = this.form.get('initHour')?.value;
@@ -204,17 +210,14 @@ private validateTimeRange(): void {
   
 
 
- get areDatesDisabled(): boolean {
+get areDatesDisabled(): boolean {
   return this._allowedDays.length === 0; 
 }
 
 get areDatesReadonly(): boolean {
   return this._allowedDays.length > 0; 
 }
- disableDateInputs: boolean = false;
-
-
-
+disableDateInputs: boolean = false;
 
   handleUsers(): number {
     for (const user of this.users) {
@@ -226,6 +229,7 @@ get areDatesReadonly(): boolean {
     }
     return 0; 
   }
+
   agregarAuthRange(): void {
     console.log('Iniciando agregarAuthRange');
     console.log('Valores del formulario:', this.form.value);
