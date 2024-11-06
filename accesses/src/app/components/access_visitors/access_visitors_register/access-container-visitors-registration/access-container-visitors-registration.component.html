@@ -1,7 +1,4 @@
 <div class="card mt-5 mx-3 mx-md-5 shadow-lg p-3 mb-5 bg-body-tertiary rounded">
-    <div class="card-header fs-1">
-        Registro de invitados
-    </div>
     <div class="card-body fs-2">
         <h5 class="card-title">Ingrese aquí los datos:</h5>
     </div>
@@ -109,7 +106,7 @@
                             <option *ngFor="let option of vehicleOptions" [value]="option.value">{{ option.label }}
                             </option>
                         </select>
-                        <label class="input-group-text" for="vehicleType">Tipo de Vehículo</label>
+                        
                     </div>
                     <div class="invalid-feedback"
                         *ngIf="visitorForm.get('vehicleType')?.errors && visitorForm.get('vehicleType')?.touched">
@@ -157,17 +154,9 @@
             </div>
         </div>
 
-        <div class="card-header fs-3">
-            Lista de invitaciones
-        </div>
+      
         <app-access-grid-visitors-registration
             (updateVisit)="updateVisitor($event)"></app-access-grid-visitors-registration>
-
-
-        <div class="card-header fs-3">
-            Rango de dias permitidos para la invitacion
-        </div>
-
         <app-access-time-range-visitors-registration (selectedUser)="handleSelectedUser($event)">
         </app-access-time-range-visitors-registration>
 
@@ -177,7 +166,7 @@
                     (click)="downloadQRCode()" [disabled]="!isQRCodeAvailable">
                     Descargar Qr
                 </button>
-                <button class="btn btn-primary btn-lg" type="button" (click)="sendVisitorRecord()">Registrar</button>
+                <button class="btn btn-primary btn-sm" type="button" (click)="sendVisitorRecord()">Registrar</button>
             </div>
         </div>
     </form>
