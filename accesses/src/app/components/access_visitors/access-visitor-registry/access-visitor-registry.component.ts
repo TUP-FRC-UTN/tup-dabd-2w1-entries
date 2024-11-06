@@ -101,10 +101,12 @@ export class AccessVisitorRegistryComponent
     //DATOS
     //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
     const sub = this.loadUsersAllowedData().subscribe({
-      next: (data) => {
+      next: () => {
         console.log("allPeopleAllowed: ", this.allPeopleAllowed)
         this.filteredAllPeopleAllowed = this.allPeopleAllowed;
+        console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
         
+
       },
       error: (err) => {
         console.log(err);
@@ -292,6 +294,7 @@ loadUsersAllowedData(): Observable<boolean> {
             observer.next(true);
             observer.complete();
           });
+          this.updateDataTable();
         },
         error: (err) => {
           console.log(err);
