@@ -37,8 +37,8 @@ export class AccessGridVisitorsRegistrationComponent implements OnInit, OnDestro
         visitor.firstName,
         visitor.lastName, 
         visitor.hasVehicle ? visitor.vehicle?.licensePlate : 'Sin vehículo', 
-        `<div class="dropdown">
-          <button class="btn btn-light dropdown-toggle" type="button" id="actionMenu${index}" data-bs-toggle="dropdown" aria-expanded="false">
+        `<div class="dropdown d-flex justify-content-center">
+          <button class="btn btn-light dropdown-toggle d-flex align-items-center justify-content-center" type="button" id="actionMenu${index}" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="fas fa-ellipsis-v" style="color: black;"></i>
           </button>
           <ul class="dropdown-menu" aria-labelledby="actionMenuButton-${visitor.document}">
@@ -91,9 +91,9 @@ export class AccessGridVisitorsRegistrationComponent implements OnInit, OnDestro
         zeroRecords: "No se encontraron invitaciones",
         search: "Buscar:",
         emptyTable: "No hay invitaciones cargadas",
-        info: "Mostrando _START_ a _END_ de _TOTAL_ invitaciones",
+        info: "",
         infoEmpty: "",
-        infoFiltered: "(filtrado de _MAX_ invitaciones totales)"
+        infoFiltered: ""
       },
       responsive: true
     });

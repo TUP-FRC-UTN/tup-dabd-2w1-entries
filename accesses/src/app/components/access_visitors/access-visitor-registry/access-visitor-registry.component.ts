@@ -45,7 +45,6 @@ import {
   NgxScannerQrcodeComponent,
   NgxScannerQrcodeModule,
 } from 'ngx-scanner-qrcode';
-import jsQR from 'jsqr';
 import {
   AccessNewMovementsEntryDtoOwner,
   AccessUserAllowedInfoDtoOwner,
@@ -171,56 +170,6 @@ export class AccessVisitorRegistryComponent
     this.qrInput.nativeElement.click();
   }
 
-  onFileSelected(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      const reader = new FileReader();
-
-      // Procesa la imagen una vez cargada
-      reader.onload = (e: any) => {
-        const img = new Image();
-        img.src = e.target.result;
-
-        img.onload = () => {
-          // Crea un canvas temporal para extraer los datos de la imagen
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-
-          if (context) {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            context.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const imageData = context.getImageData(
-              0,
-              0,
-              canvas.width,
-              canvas.height
-            );
-
-            // Usa jsQR para procesar la imagen
-            const qrCode = jsQR(
-              imageData.data,
-              imageData.width,
-              imageData.height
-            );
-
-            if (qrCode) {
-              // QR encontrado: procesa el contenido escaneado
-              this.handleQrScan([{ value: qrCode.data }]);
-            } else {
-              // QR no válido: muestra una alerta
-              Swal.fire({
-                icon: 'error',
-                title: 'QR Invalido',
-                text: 'No se ha podido leer un código QR válido en la imagen.',
-              });
-            }
-          }
-        };
-      };
-      reader.readAsDataURL(file);
-    }
-  }
 
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
@@ -236,7 +185,8 @@ export class AccessVisitorRegistryComponent
         language: {
           lengthMenu: '_MENU_',
           zeroRecords: 'No se encontraron registros',
-          search: 'Buscar:',
+          search: '',
+          searchPlaceholder: 'Buscar',
           emptyTable: 'No hay datos disponibles',
           info: '',
           infoEmpty: '',
@@ -320,21 +270,22 @@ loadUsersAllowedData(): Observable<boolean> {
 
             switch (status) {
               case 'Ingresado':
-                statusButton = `<button class="btn btn-success">Ingresado</button>`;
-                actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+                statusButton = `<span class="badge  text-bg-success">Ingresado</span>`;
+                actionButtons = `<span class="badge  text-bg-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</span>`;
                 break;
               case 'Egresado':
-                statusButton = `<button class="btn btn-danger">Egresado</button>`;
+                statusButton = `<span class="badge  text-bg-danger">Egresado</span>`;
                 break;
               case 'En espera':
               default:
-                statusButton = `<button class="btn btn-warning">En espera</button>`;
-                actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+                statusButton = `<span class="badge text-bg-warning">En espera</span>`;
+                actionButtons = `<span class="badge  text-bg-success" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</span>`;
                 break;
             }
 
             return [
-              `${visitor.last_name} ${visitor.name}`,
+              statusButton,
+              `${visitor.last_name}, ${visitor.name}`,
               // "PASSPORT" se muestre como "Pasaporte"
               this.getUserTypeIcon(visitor.userType.description),
               `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
@@ -351,6 +302,7 @@ loadUsersAllowedData(): Observable<boolean> {
                   <option value="sin_vehiculo">Sin vehículo</option>
               </select>
           </div>`,
+          `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
               `<div class="d-flex justify-content-center">
                 <div class="dropdown">
                   <button class="btn btn-white dropdown-toggle p-0" 
@@ -367,8 +319,8 @@ loadUsersAllowedData(): Observable<boolean> {
                   </ul>
                 </div>
               </div>`,
-              `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-              statusButton,
+              
+
               actionButtons,
             ];
           });
@@ -1248,32 +1200,31 @@ loadUsersAllowedData(): Observable<boolean> {
                             error: (err) => {
                                 console.error('Error al registrar la entrada:', err);
 
-                                if(err.status == 403){
-                                this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
-                                // Swal.fire({
-                                //   title: 'Error',
-                                //   text: 'No tiene permitido salir.',
-                                //   icon: 'error',
-                                //   confirmButtonText: 'Cerrar',
-                                // });
-                                //return false;
-                                observer.next(false);
-                                observer.complete(); 
+                                if (err.status === 403) {
+                                  const errorMessage = err.error.message;
+                              
+                                  // Verifica el mensaje de error específico para mostrar una alerta distinta
+                                  if (errorMessage === "The user does not have authorization range") {
+                                      Swal.fire({
+                                          title: 'Acceso Denegado',
+                                          text: 'El usuario no tiene un rango de autorización asignado.',
+                                          icon: 'error',
+                                          confirmButtonText: 'Cerrar'
+                                      });
+                                  } else if (errorMessage === "The user does not have authorization to entry for today") {
+                                    this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
+                                  }
+                              
+                                  // Ejecuta la lógica de manejo del observador
+                                  observer.next(false);
+                                  observer.complete();
                               }
-                              else if (err.status == 409){
+                              else if (err.status === 409){
                                 Swal.fire({
                                   title: 'Error',
                                   text: 'Tiene que salir antes de entrar.',
                                   icon: 'error',
                                   confirmButtonText: 'Cerrar',
-                                });
-                                
-                               
-
-                                Swal.fire({
-                                    title: 'eee',
-                                    icon: 'error',
-                                    confirmButtonText: 'Cerrar',
                                 }).then(() => {
                                     observer.next(false);
                                     observer.complete();
@@ -1352,19 +1303,26 @@ loadUsersAllowedData(): Observable<boolean> {
                 observer.next(false);
                 observer.complete(); 
 
-              } else if(err.status == 403){
-                this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
-                // Swal.fire({
-                //   title: 'Error',
-                //   text: 'No tiene permitido salir.',
-                //   icon: 'error',
-                //   confirmButtonText: 'Cerrar',
-                // });
-                //return false;
+              } else if (err.status === 403) {
+                const errorMessage = err.error.message;
+            
+                // Verifica el mensaje de error específico para mostrar una alerta distinta
+                if (errorMessage === "The user does not have authorization range") {
+                    Swal.fire({
+                        title: 'Acceso Denegado',
+                        text: 'El usuario no tiene un rango de autorización asignado para hoy.',
+                        icon: 'error',
+                        confirmButtonText: 'Cerrar'
+                    });
+                } else if (errorMessage === "The user does not have authorization to entry for today") {
+                  this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
+                }
+            
+                // Ejecuta la lógica de manejo del observador
                 observer.next(false);
-                observer.complete(); 
-              }
-              else if (err.status == 409){
+                observer.complete();
+            }
+              else if (err.status === 409){
                 Swal.fire({
                   title: 'Error',
                   text: 'Tiene que entrar antes de salir.',

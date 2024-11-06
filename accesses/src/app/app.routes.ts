@@ -7,6 +7,7 @@ import { AccessDailyFetchComponent } from './components/access_entrys/access-dai
 import { AccessEditComponent } from './components/access_visitors/access-edit/access-edit.component';
 import { AccessEntryComponent } from './components/access_entrys/access-entry/access-entry.component';
 import { AccessDashboardEgressComponent } from './components/access_dashboards/access_dashboard_egress/access-dashboard-egress-container/access-dashboard-egress.component';
+import { AccessVehiclesViewComponent } from './components/access_vehicles-register/access-vehicles-view/access-vehicles-view.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'reports', pathMatch: 'full' },
@@ -17,5 +18,6 @@ export const routes: Routes = [
     { path: 'entry', component: AccessDailyFetchComponent },
     { path: 'edit', component: AccessEditComponent },
     { path: 'visitor/register', component: AccessContainerVisitorsRegistrationComponent },
-    {path:'dasboard-egress', component:AccessDashboardEgressComponent}
+    {path:'dasboard-egress', component:AccessDashboardEgressComponent},
+    {path: 'vehicleAdd', component: AccessVehiclesViewComponent}
 ];
