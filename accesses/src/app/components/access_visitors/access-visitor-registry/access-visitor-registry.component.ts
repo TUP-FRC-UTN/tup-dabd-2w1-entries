@@ -45,7 +45,6 @@ import {
   NgxScannerQrcodeComponent,
   NgxScannerQrcodeModule,
 } from 'ngx-scanner-qrcode';
-import jsQR from 'jsqr';
 import {
   AccessNewMovementsEntryDtoOwner,
   AccessUserAllowedInfoDtoOwner,
@@ -153,7 +152,7 @@ export class AccessVisitorRegistryComponent
     this.qrInput.nativeElement.click();
   }
 
-  onFileSelected(event: Event) {
+/*   onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -202,7 +201,7 @@ export class AccessVisitorRegistryComponent
       };
       reader.readAsDataURL(file);
     }
-  }
+  } */
 
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
@@ -512,21 +511,22 @@ loadAllOwners(): void {
 
             switch (status) {
               case 'Ingresado':
-                statusButton = `<button class="btn btn-success">Ingresado</button>`;
-                actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+                statusButton = `<span class="badge  text-bg-success">Ingresado</span>`;
+                actionButtons = `<span class="badge  text-bg-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</span>`;
                 break;
               case 'Egresado':
-                statusButton = `<button class="btn btn-danger">Egresado</button>`;
+                statusButton = `<span class="badge  text-bg-danger">Egresado</span>`;
                 break;
               case 'En espera':
               default:
-                statusButton = `<button class="btn btn-warning">En espera</button>`;
-                actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+                statusButton = `<span class="badge text-bg-warning">En espera</span>`;
+                actionButtons = `<span class="badge  text-bg-success" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</span>`;
                 break;
             }
 
             return [
-              `${visitor.last_name} ${visitor.name}`,
+              statusButton,
+              `${visitor.last_name}, ${visitor.name}`,
               // "PASSPORT" se muestre como "Pasaporte"
               this.getUserTypeIcon(visitor.userType.description),
               `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
@@ -543,6 +543,7 @@ loadAllOwners(): void {
                   <option value="sin_vehiculo">Sin vehículo</option>
               </select>
           </div>`,
+          `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
               `<div class="d-flex justify-content-center">
                 <div class="dropdown">
                   <button class="btn btn-white dropdown-toggle p-0" 
@@ -553,14 +554,13 @@ loadAllOwners(): void {
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
                     <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-
                     <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
                     <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
                   </ul>
                 </div>
               </div>`,
-              `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-              statusButton,
+              
+   
               actionButtons,
             ];
           });
@@ -835,34 +835,40 @@ loadAllOwners(): void {
   getUserTypeIcon(descr : string){
     switch (descr){
       case "Employeed" : {
-        return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary" title="Empleado">
+        return ` <div class="d-flex justify-content-center">
+ <button style="background-color: orangered;border: bisque;" class="btn btn-primary" title="Empleado">
   <i class="bi bi-tools"></i> 
-</button>`
+</button> </div>`
       }
       case "Supplier" : {
-        return `<button style="background-color: rgb(255, 230, 4);border: bisque;" class="btn btn-primary" title="Proveedor">
+        return ` <div class="d-flex justify-content-center">
+ <button style="background-color: rgb(255, 230, 4);border: bisque;" class="btn btn-primary" title="Proveedor">
   <i class="bi bi-box-seam-fill"></i> 
-</button>`
+</button> </div>`
       }
       case "Visitor" : {
-        return   `<button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
+        return   ` <div class="d-flex justify-content-center">
+ <button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
   <i class="bi bi-person-raised-hand"></i>
-</button> `
+</button> </div> `
       }
       case "Owner" : {
-        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
+        return  ` <div class="d-flex justify-content-center">
+ <button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
   <i class="bi bi-house-fill"></i> 
-</button>`
+</button> </div>`
       }
       case "Tenant" : {
-        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
+        return  ` <div class="d-flex justify-content-center">
+ <button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
   <i class="bi bi-house-fill"></i> 
-</button>`
+</button> </div>`
       }
       default : {
-        return  `<button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
+        return  ` <div class="d-flex justify-content-center">
+ <button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
         <i class="bi bi-person-raised-hand"></i>
-      </button> `
+      </button> </div>`
       }
     }
   }

@@ -9,10 +9,17 @@
       <!-- Contenedor para los botones alineados a la derecha -->
       <div class="d-flex justify-content-center botones">
         <div class="dropdown">
-          <button class="btn btn-secondary dropdown-toggle w-95 me-2" type="button" id="dropdownTipoIngresante" data-bs-toggle="dropdown" aria-expanded="false">
-              Seleccionar tipos de ingresante
-              <span class="selected-count"></span>
-          </button>
+          <button class="btn dropdown-toggle w-95 me-2 border form-control" 
+          type="button" 
+          id="dropdownTipoIngresante" 
+          data-bs-toggle="dropdown" 
+          aria-expanded="false">
+      Seleccionar tipos de ingresante
+      <span class="selected-count"></span>
+  </button>
+  
+  
+      
           <ul class="dropdown-menu w-95 mx-2" aria-labelledby="dropdownTipoIngresante">
               <li>
                   <label class="dropdown-item">
@@ -49,7 +56,7 @@
           <i class="bi bi-qr-code-scan"></i>
         </button>
         <!-- Botón para cargar imagen de QR -->
-        <button class="btn btn-primary me-2" (click)="uploadQrImage()">
+<!--         <button class="btn btn-primary me-2" (click)="uploadQrImage()">
           <i class="bi bi-file-earmark-arrow-up"></i>
         </button>
         <input
@@ -58,22 +65,23 @@
           #qrInput
           hidden
           (change)="onFileSelected($event)"
-        />
+        /> -->
       </div>
 
       <table
         id="visitorsTable"
-        class="table table-bordered table-striped"
+        class="table table-hover table-striped"
       >
         <thead>
           <tr>
+            <th scope="col">Estado</th>
             <th scope="col">Nombre</th>
             <th scope="col">Tipo</th>
             <th scope="col">Documento</th>
             <th scope="col">Vehiculo</th>
-            <th scope="col">Acción</th>
             <th scope="col">Observaciones</th>
-            <th scope="col">Estado</th>
+            <th scope="col">Acción</th>
+
           </tr>
         </thead>
         <tbody>
