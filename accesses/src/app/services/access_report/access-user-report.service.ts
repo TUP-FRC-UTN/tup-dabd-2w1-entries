@@ -70,10 +70,10 @@ export class AccessUserReportService {
       map(() => {
         const user = this.userCache.get(id);
         if (user) {
-          return `${user.name} ${user.lastname}`;
+          return `${user.lastname}, ${user.name}`;
         }
         // Si no se encuentra el usuario, devolver el default
-        return `${this.defaultOwner.name} ${this.defaultOwner.lastname}`;
+        return `${this.defaultOwner.lastname}, ${this.defaultOwner.name}`;
       })
     );
   }
@@ -92,7 +92,7 @@ export class AccessUserReportService {
       return this.getUsersByRole('Propietario').pipe(
         map(users => users.map(user => ({
           id: user.id,
-          label: `${user.name} ${user.lastname}`
+          label: `${user.lastname}, ${user.name}`
         })))
       );
     }
@@ -102,7 +102,7 @@ export class AccessUserReportService {
       return this.getUsersByRole('Seguridad').pipe(
         map(users => users.map(user => ({
           id: user.id,
-          label: `${user.name} ${user.lastname}`
+          label: `${user.lastname}, ${user.name}`
         })))
       );
     }

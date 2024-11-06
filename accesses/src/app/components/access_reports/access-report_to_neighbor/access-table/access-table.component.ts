@@ -5,7 +5,7 @@ import { DataTablesModule } from 'angular-datatables';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule } from '@angular/forms';
 import { AccessUserReportService } from '../../../../services/access_report/access-user-report.service';
-import { forkJoin, map, Observable, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 
 import $ from 'jquery';
 import 'datatables.net';
@@ -21,17 +21,14 @@ import Swal from 'sweetalert2';
 interface FilterValues {
   entryOrExit: string[];
   tipoIngresante: string[];
-  nombreIngresante: string;
-  documento: string;
+  unifiedSearch: string;
   typeCar: string[];
-  propietario: string;
   lateInRange: string[];
-  plate: string;
-  securityGuard: string;
   days: string[];
   selectedGuardia: number[];  
   selectedPropietario: number[];
 }
+
 @Component({
   selector: 'app-access-table',
   standalone: true,
@@ -56,8 +53,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   guardiasOptions: any[] = [];
 
   entryExitOptions = [
-    { value: 'entry', label: 'Entrada' },
-    { value: 'exit', label: 'Salida' }
+    { value: 'entrada', label: 'Entrada' },
+    { value: 'salida', label: 'Salida' }
   ];
 
   tiposIngresante = [
@@ -92,15 +89,11 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   filterValues: FilterValues = {
     entryOrExit: [],
     tipoIngresante: [],
-    nombreIngresante: '',
-    documento: '',
+    unifiedSearch: '',
     typeCar: [],
-    propietario: '',
     lateInRange: [],
-    plate: '',
-    securityGuard: '',
     days: [],
-    selectedGuardia: [],  // Inicializar como array vacío
+    selectedGuardia: [],
     selectedPropietario: []
   };
 
@@ -134,19 +127,15 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filterValues = {
       entryOrExit: [],
       tipoIngresante: [],
-      nombreIngresante: '',
-      documento: '',
+      unifiedSearch: '',
       typeCar: [],
-      propietario: '',
       lateInRange: [],
-      plate: '',
-      securityGuard: '',
       days: [],
-      selectedGuardia: [],  // Inicializar como array vacío
+      selectedGuardia: [],
       selectedPropietario: []
     };
 
-    $('#nombreIngresanteFilter, #documentoFilter').val('');
+    $('#unifiedSearchFilter').val('');
     
     if (this.table) {
       this.table.draw();
@@ -171,7 +160,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private removeEventListeners(): void {
-    $('#nombreIngresanteFilter, #documentoFilter').off();
+    $('#unifiedSearchFilter').off();
   }
 
   fetchData(): void {
@@ -218,6 +207,13 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private setupExportButtons(): void {
+    const today = new Date();
+    const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+    const formattedDateForFilename = formattedDate.replace(/\//g, '-');
+    
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const currentMonth = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
+  
     const buttons = new ($.fn.dataTable as any).Buttons(this.table, {
       buttons: [
         {
@@ -225,59 +221,69 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           text: 'Excel',
           className: 'buttons-excel d-none',
           filename: () => {
-            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            const month = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
-            return `Movimientos de ${month}`;
+            return `${formattedDateForFilename}. Movimientos del mes de ${currentMonth}`;
           },
           exportOptions: {
             columns: ':visible'
           },
-          title: `LISTADO MENSUAL DE INGRESOS/EGRESOS - Fecha de emisión ${new Date().toLocaleDateString('es-AR')}`,
+          messageTop: `Movimientos del mes de ${currentMonth}\nFecha de emisión: ${formattedDate}`,
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS',
+          customize: function(xlsx: any) {
+            const sheet = xlsx.xl.worksheets['sheet1.xml'];
+            $('row:first c', sheet).attr('s', '48');
+            $('row c[r^="A1"]', sheet).attr('s', '51');
+          },
         },
         {
           extend: 'pdf',
           text: 'PDF',
           className: 'buttons-pdf d-none',
           filename: () => {
-            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            const month = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
-            return `Movimientos de ${month}`;
+            return `${formattedDateForFilename}. Movimientos del mes de ${currentMonth}`;
           },
           orientation: 'landscape',
           exportOptions: {
             columns: ':visible'
           },
-          title: `LISTADO MENSUAL DE INGRESOS/EGRESOS - Fecha de emisión ${new Date().toLocaleDateString('es-AR')}`,
+          customize: function(doc: any) {
+            doc.content[1].table.headerRows = 1;
+            doc.content[1].table.body[0].forEach((cell: any) => {
+              cell.fillColor = '#25B79D';
+              cell.color = '#FFFFFF';
+            });
+            
+            doc.content[0] = {
+              text: 'LISTADO MENSUAL DE INGRESOS/EGRESOS',
+              alignment: 'left',
+              fontSize: 14,
+              bold: true,
+              margin: [0, 0, 0, 10]
+            };
+            
+            doc.content.splice(1, 0, {
+              text: `Movimientos del mes de: ${currentMonth}`,
+              alignment: 'left',
+              fontSize: 12,
+              margin: [0, 0, 0, 5]
+            });
+          },
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
         }
       ]
     });
-
+  
     this.table.buttons().container().appendTo('#myTable_wrapper');
   }
 
   setupFilters(): void {
-    $('#nombreIngresanteFilter, #documentoFilter').on('keyup', (e) => {
+    $('#unifiedSearchFilter').on('keyup', (e) => {
       const target = $(e.target);
       const inputValue = target.val() as string;
 
       if (inputValue.length < 3) {
-        switch(target.attr('id')) {
-          case 'nombreIngresanteFilter':
-            this.filterValues.nombreIngresante = '';
-            break;
-          case 'documentoFilter':
-            this.filterValues.documento = '';
-            break;
-        }
+        this.filterValues.unifiedSearch = '';
       } else {
-        switch(target.attr('id')) {
-          case 'nombreIngresanteFilter':
-            this.filterValues.nombreIngresante = inputValue;
-            break;
-          case 'documentoFilter':
-            this.filterValues.documento = inputValue;
-            break;
-        }
+        this.filterValues.unifiedSearch = inputValue;
       }
 
       if (this.table) {
@@ -296,9 +302,20 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const [fecha, hora, tipoEntrada, tipoIngresante, nombre, documento, 
            observaciones, tipoVehiculo, placa, propietario, guardia, estadoHorario] = data;
 
+    if (this.filterValues.unifiedSearch) {
+      const searchTerm = this.filterValues.unifiedSearch.toLowerCase();
+      const matchesNombre = nombre.toLowerCase().includes(searchTerm);
+      const matchesDocumento = documento.toLowerCase().includes(searchTerm);
+      const matchesPlaca = placa.toLowerCase().includes(searchTerm);
+      
+      if (!matchesNombre && !matchesDocumento && !matchesPlaca) {
+        return false;
+      }
+    }
+
     const mappings = {
-      entry: 'entrada',
-      exit: 'salida',
+      entrada: 'entrada',
+      salida: 'salida',
       neighbour: 'vecino',
       visitor: 'visitante',
       delivery: 'delivery',
@@ -318,7 +335,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.filterValues.entryOrExit.length > 0 && 
         !this.filterValues.entryOrExit.some(value => 
-          tipoEntrada.toLowerCase() === mappings[value as keyof typeof mappings])) {
+          tipoEntrada.toLowerCase() === value.toLowerCase())) {
       return false;
     }
 
@@ -328,41 +345,26 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       return false;
     }
 
-    if (this.filterValues.nombreIngresante && 
-        !nombre.toLowerCase().includes(this.filterValues.nombreIngresante.toLowerCase())) {
-      return false;
-    }
-
-    if (this.filterValues.documento && 
-        !documento.toLowerCase().includes(this.filterValues.documento.toLowerCase())) {
-      return false;
-    }
-
     if (this.filterValues.typeCar.length > 0 && 
         !this.filterValues.typeCar.some(value => 
           tipoVehiculo.toLowerCase() === mappings[value as keyof typeof mappings])) {
       return false;
     }
 
-    // Filtro de propietario con ng-select
-    if (this.filterValues.selectedPropietario) {
-      const propietarioOption = this.propietariosOptions.find(p => p.id === this.filterValues.selectedPropietario);
-      if (propietarioOption && !propietario.toLowerCase().includes(propietarioOption.label.toLowerCase())) {
-        return false;
-      }
+    if (this.filterValues.selectedPropietario && this.filterValues.selectedPropietario.length > 0) {
+      const propietarioMatches = this.filterValues.selectedPropietario.some(selectedId => {
+        const propietarioOption = this.propietariosOptions.find(p => p.id === selectedId);
+        return propietarioOption && propietario.toLowerCase().includes(propietarioOption.label.toLowerCase());
+      });
+      if (!propietarioMatches) return false;
     }
 
-    // Filtro de guardia con ng-select
-    if (this.filterValues.selectedGuardia) {
-      const guardiaOption = this.guardiasOptions.find(g => g.id === this.filterValues.selectedGuardia);
-      if (guardiaOption && !guardia.toLowerCase().includes(guardiaOption.label.toLowerCase())) {
-        return false;
-      }
-    }
-
-    if (this.filterValues.plate && 
-        !placa.toLowerCase().includes(this.filterValues.plate.toLowerCase())) {
-      return false;
+    if (this.filterValues.selectedGuardia && this.filterValues.selectedGuardia.length > 0) {
+      const guardiaMatches = this.filterValues.selectedGuardia.some(selectedId => {
+        const guardiaOption = this.guardiasOptions.find(g => g.id === selectedId);
+        return guardiaOption && guardia.toLowerCase().includes(guardiaOption.label.toLowerCase());
+      });
+      if (!guardiaMatches) return false;
     }
 
     if (this.filterValues.lateInRange.length > 0 && 
@@ -453,88 +455,105 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
   initializeDataTable(): void {
     this.table = ($('#myTable') as any).DataTable({
-      paging: true,
-      ordering: false,
-      pageLength: 5,
-      lengthMenu: [[5, 10, 20], [5, 10, 20]], 
-      scrollX: true,
-      lengthChange: true,
-      searching: true,
-      info: true,
-      autoWidth: false,
-      language: {
-        lengthMenu: " _MENU_ ",
-        zeroRecords: "No se encontraron registros",
-        info: "Mostrando de _START_ a _END_ de _TOTAL_ registros",
-        infoEmpty: "No se encontraron resultados",
-        infoFiltered: "(filtrado de _MAX_ registros totales)",
-        search: "Buscar:",
-        emptyTable: "No se encontraron resultados",
-      },
-      responsive: true,
-      dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
-      drawCallback: function(settings: any) {
-        const table = this;
-        setTimeout(function() {
-          // Manejo de Entrada/Salida
-          $(table).find('td:nth-child(3)').each(function() {
-            const cellText = $(this).text().trim().toLowerCase();
-            if (cellText === 'entrada') {
-              $(this).html(`
-                <div class="d-flex justify-content-center">
-                  <button type="button" class="btn rounded-pill  d-flex align-items-center justify-content-center" 
-                    style="background-color: #28a745; color: white; border: none; ">
-                    ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
-                  </button>
-                </div>
-              `);
-            } else if (cellText === 'salida') {
-              $(this).html(`
-                <div class="d-flex justify-content-center">
-                  <button type="button" class="btn rounded-pill  d-flex align-items-center justify-content-center" 
-                    style="background-color: #dc3545; color: white; border: none;">
-                    ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
-                  </button>
-                </div>
-              `);
+        paging: true,
+        ordering: true,
+        pageLength: 5,
+        lengthMenu: [[5, 10, 25,50 ], [5, 10, 25, 50]], 
+        scrollX: true,
+        lengthChange: true,
+        orderCellsTop: true,
+        order: [],
+        columnDefs: [
+            { 
+                targets: 11, // Columna Estado
+                className: 'text-center'
+            },
+            {
+                targets: 9, // Columna Propietario (0-based index)
+                render: function(data: any, type: any, row: any) {
+                    if (data === '------') {
+                        return '<div class="text-center">------</div>';
+                    }
+                    return data;
+                }
             }
-          });
-          $(table).find('td:nth-child(12)').each(function() {
-            const estadoText = $(this).text().trim();
-            if (estadoText === 'Tarde') {
-              $(this).html(`
-                <div class="d-flex justify-content-center">
-                <button type="button" class="btn rounded-pill  d-flex align-items-center justify-content-center" 
-                    style="background-color: #28a745; color: white; border: none;">
-                    <span style="white-space: nowrap; display: inline-block;">Tarde</span>
-                  </button>
-                </div>
-              `);
-            } else if (estadoText.toLowerCase() === 'en horario') {
-              $(this).html(`
-                <div class="d-flex justify-content-center">
-                  <button type="button" class="btn rounded-pill  d-flex align-items-center justify-content-center" 
-                    style="background-color: #28a745; color: white; border: none;">
-                    <span style="white-space: nowrap; display: inline-block;">En Horario</span>
-                  </button>
-                </div>
-              `);
-            }
-          });
-        }, 0);
-      }
+        ],
+        searching: true,
+        info: true,
+        autoWidth: false,
+        language: {
+            lengthMenu: " _MENU_ ",
+            zeroRecords: "No se encontraron registros",
+            info: "",
+            infoEmpty: "",
+            infoFiltered: "",
+            search: "Buscar:",
+            emptyTable: "No se encontraron resultados",
+        },
+        responsive: true,
+        dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
+        drawCallback: function(settings: any) {
+            const table = this;
+            setTimeout(function() {
+                // Manejo de Entrada/Salida
+                $(table).find('td:nth-child(3)').each(function() {
+                    const cellText = $(this).text().trim().toLowerCase();
+                    if (cellText === 'entrada') {
+                        $(this).html(`
+                            <div class="d-flex justify-content-center">
+                                <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
+                                    style="background-color: #28a745; color: white; border: none;">
+                                    ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
+                                </span>
+                            </div>
+                        `);
+                    } else if (cellText === 'salida') {
+                        $(this).html(`
+                            <div class="d-flex justify-content-center">
+                                <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
+                                    style="background-color: #dc3545; color: white; border: none;">
+                                    ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
+                                </span>
+                            </div>
+                        `);
+                    }
+                });
+                $(table).find('td:nth-child(12)').each(function() {
+                    const estadoText = $(this).text().trim();
+                    if (estadoText === 'Tarde') {
+                        $(this).html(`
+                            <div class="d-flex justify-content-center">
+                                <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
+                                    style="background-color: #dc3545; color: white; border: none;">
+                                    <span style="white-space: nowrap; display: inline-block;">Tarde</span>
+                                </span>
+                            </div>
+                        `);
+                    } else if (estadoText.toLowerCase() === 'en horario') {
+                        $(this).html(`
+                            <div class="d-flex justify-content-center">
+                                <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
+                                    style="background-color: #28a745; color: white; border: none;">
+                                    <span style="white-space: nowrap; display: inline-block;">En Horario</span>
+                                </span>
+                            </div>
+                        `);
+                    }
+                });
+            }, 0);
+        }
     });
 
     $('#excelBtn').on('click', () => {
-      if (!this.exportButtonsEnabled) return;
-      this.table.button('.buttons-excel').trigger();
+        if (!this.exportButtonsEnabled) return;
+        this.table.button('.buttons-excel').trigger();
     });
 
     $('#pdfBtn').on('click', () => {
-      if (!this.exportButtonsEnabled) return;
-      this.table.button('.buttons-pdf').trigger();
+        if (!this.exportButtonsEnabled) return;
+        this.table.button('.buttons-pdf').trigger();
     });
 
     this.setupExportButtons();
-  }
+}
 }
