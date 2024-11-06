@@ -596,33 +596,55 @@ loadUsersAllowedData(): Observable<boolean> {
     switch (descr){
       case "Employeed" : {
         return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary" title="Empleado">
-  <i class="bi bi-tools"></i> 
-</button>`
+                  <i class="bi bi-briefcase"></i>
+                </button>`
       }
       case "Supplier" : {
-        return `<button style="background-color: rgb(255, 230, 4);border: bisque;" class="btn btn-primary" title="Proveedor">
-  <i class="bi bi-box-seam-fill"></i> 
-</button>`
+        return `<button style="background-color: rgb(255, 230, 4);border: bisque;" class="btn btn-warning" title="Proveedor">
+                  <i class="bi bi-truck"></i>
+                </button>`
       }
       case "Visitor" : {
         return   `<button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
-  <i class="bi bi-person-raised-hand"></i>
-</button> `
+                    <i class="bi bi-person-raised-hand"></i>
+                  </button> `
       }
       case "Owner" : {
         return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
-  <i class="bi bi-house-fill"></i> 
-</button>`
+                    <i class="bi bi-house-fill"></i> 
+                  </button>`
       }
       case "Tenant" : {
         return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
-  <i class="bi bi-house-fill"></i> 
-</button>`
+                    <i class="bi bi-house-fill"></i> 
+                  </button>`
       }
+
+      case "Worker" : {
+        return  `<button style="background-color: red;border: bisque;" class="btn btn-primary" title="Obrero">
+                    <i class="bi bi-tools"></i> 
+                  </button>`
+      }
+      case "Delivery" : {
+        return  `<button style="background-color: purple;border: bisque;" class="btn btn-primary" title="Delivery">
+                    <i class="bi bi-box-seam"></i> 
+                  </button>`
+      }
+      case "Cleaning" : {
+        return  `<button style="background-color: pink;border: bisque;" class="btn btn-primary" title="Cleaning">
+                    <i class="bi bi-stars"></i>
+                  </button>`
+      }
+      case "Gardener" : {
+        return  `<button style="background-color: darkgreen;border: bisque;" class="btn btn-primary" title="Gardener">
+                    <i class="bi bi-flower1"></i>
+                  </button>`
+      }
+
       default : {
-        return  `<button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
-        <i class="bi bi-person-raised-hand"></i>
-      </button> `
+      return  `<button style="background-color: grey;border: bisque;" class="btn btn-primary" title="???">
+                  <i class="bi bi-question-lg"></i>
+                </button> `
       }
     }
   }
@@ -651,24 +673,6 @@ loadUsersAllowedData(): Observable<boolean> {
     if (this.selectedValues.length > 0) {        
         for (let value of this.selectedValues) {
             switch (value) {
-                case "employee": {
-                  this.loadUsersAllowedData();
-                  //lista de SOLO empleados
-                  let employees = this.allPeopleAllowed.filter(x => x.userType.description === 'Employeed')
-                  for (let user of employees) {
-                      this.filteredAllPeopleAllowed.push(user);
-                  }
-                  break; // Continua al siguiente valor en lugar de detener el ciclo
-                }
-                case "supplier": {
-                  this.loadUsersAllowedData();
-                  //lista de SOLO proveedores
-                  let suppliers = this.allPeopleAllowed.filter(x => x.userType.description === 'Supplier')
-                  for (let user of suppliers) {
-                      this.filteredAllPeopleAllowed.push(user);
-                  }
-                  break; // Continua al siguiente valor en lugar de detener el ciclo
-                }
                 case "neighbour": {
                   this.loadUsersAllowedData();
                   let neighbours = this.allPeopleAllowed.filter(x => x.userType.description === 'Owner' || x.userType.description === 'Tenant')
@@ -688,24 +692,88 @@ loadUsersAllowedData(): Observable<boolean> {
                       this.filteredAllPeopleAllowed.push(user);
                   }
                   break;
-              }
-
+                }
+                case "employee": {
+                  this.loadUsersAllowedData();
+                  //lista de SOLO empleados
+                  let employees = this.allPeopleAllowed.filter(x => x.userType.description === 'Employeed')
+                  for (let user of employees) {
+                      this.filteredAllPeopleAllowed.push(user);
+                  }
+                  break; 
+                }
+                case "service": {
+                  this.loadUsersAllowedData();
+                  //lista de "servicios" (Proveedor / Obrero / Delivery / P. de Limpieza / Jardinero)
+                  let services = this.allPeopleAllowed.filter(x => x.userType.description === 'Supplier' ||
+                                                                   x.userType.description === 'Worker' ||
+                                                                   x.userType.description === 'Delivery' ||
+                                                                   x.userType.description === 'Cleaning' ||
+                                                                   x.userType.description === 'Gardener'
+                  )
+                  for (let user of services) {
+                      this.filteredAllPeopleAllowed.push(user);
+                  }
+                  break; 
+                }
+                case "supplier": {
+                  this.loadUsersAllowedData();
+                  //lista de SOLO proveedores
+                  let suppliers = this.allPeopleAllowed.filter(x => x.userType.description === 'Supplier')
+                  for (let user of suppliers) {
+                      this.filteredAllPeopleAllowed.push(user);
+                  }
+                  break;
+                }
+                case "worker": {
+                  this.loadUsersAllowedData();
+                  //lista de SOLO proveedores
+                  let workers = this.allPeopleAllowed.filter(x => x.userType.description === 'Worker')
+                  for (let user of workers) {
+                      this.filteredAllPeopleAllowed.push(user);
+                  }
+                  break;
+                }
+                case "delivery": {
+                  this.loadUsersAllowedData();
+                  //lista de SOLO proveedores
+                  let deliveries = this.allPeopleAllowed.filter(x => x.userType.description === 'Delivery')
+                  for (let user of deliveries) {
+                      this.filteredAllPeopleAllowed.push(user);
+                  }
+                  break;
+                }
+                case "cleaning": {
+                  this.loadUsersAllowedData();
+                  //lista de SOLO proveedores
+                  let cleaningS = this.allPeopleAllowed.filter(x => x.userType.description === 'Cleaning')
+                  for (let user of cleaningS) {
+                      this.filteredAllPeopleAllowed.push(user);
+                  }
+                  break;
+                }
+                case "gardener": {
+                  this.loadUsersAllowedData();
+                  //lista de SOLO proveedores
+                  let gardeners = this.allPeopleAllowed.filter(x => x.userType.description === 'Gardener')
+                  for (let user of gardeners) {
+                      this.filteredAllPeopleAllowed.push(user);
+                  }
+                  break;
+                }
             }
         }
      } else {
-
         //si no hay ninguno seleccionado, cargamos todos los tipos
-        //Empleados y Proveedores
         this.loadUsersAllowedData();
         for (let user of this.allPeopleAllowed) {
             this.filteredAllPeopleAllowed.push(user);
         }
-        
      }
 
     console.log("visitors list filtrada: ", this.filteredAllPeopleAllowed)
 
-    this.updateDataTable(); // Actualiza la tabla al final de aplicar todos los filtros
+    this.updateDataTable(); 
 }
 
 

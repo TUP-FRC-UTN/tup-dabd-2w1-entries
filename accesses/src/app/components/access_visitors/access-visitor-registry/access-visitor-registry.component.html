@@ -23,24 +23,65 @@
           <ul class="dropdown-menu w-95 mx-2" aria-labelledby="dropdownTipoIngresante">
               <li>
                   <label class="dropdown-item">
-                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="neighbour" id="neighbourCheckBox" (change)="onCheckboxChange($event)"> Vecinos
+                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="neighbour" id="neighbourCheckBox" (change)="onCheckboxChange($event)"> 
+                      Vecino
                   </label>
               </li>
               <li>
                   <label class="dropdown-item">
-                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="visitor" id="visitorCheckBox" (change)="onCheckboxChange($event)"> Visitantes
+                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="visitor" id="visitorCheckBox" (change)="onCheckboxChange($event)"> 
+                      Visitante
                   </label>
               </li>
               <li>
                   <label class="dropdown-item">
-                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="employee" id="employeeCheckBox" (change)="onCheckboxChange($event)"> Empleados
+                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="employee" id="employeeCheckBox" (change)="onCheckboxChange($event)"> 
+                      Empleado
                   </label>
               </li>
               <li>
                 <label class="dropdown-item">
-                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="supplier" id="supplierCheckBox" (change)="onCheckboxChange($event)"> Proveedores
+                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="service" id="servicesCheckBox" (change)="onCheckboxChange($event)"> 
+                    Servicio
                 </label>
             </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <label class="dropdown-item">
+                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="supplier" id="supplierCheckBox" (change)="onCheckboxChange($event)"> 
+                    Proveedor
+                </label>
+              </li>
+              <!-- nuevos tipos de userAllowed -->
+              <li>
+                <label class="dropdown-item">
+                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="worker" id="workerCheckBox" (change)="onCheckboxChange($event)"> 
+                    Obrero
+                </label>
+              </li>
+              <li>
+                <label class="dropdown-item">
+                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="delivery" id="deliveryCheckBox" (change)="onCheckboxChange($event)"> 
+                    Delivery
+                </label>
+              </li>
+              <!-- <li>
+                <label class="dropdown-item">
+                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="taxi" id="taxiCheckBox" (change)="onCheckboxChange($event)"> Taxi
+                </label>
+              </li> -->
+              <li>
+                <label class="dropdown-item">
+                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="cleaning" id="cleaningCheckBox" (change)="onCheckboxChange($event)"> 
+                    Personal de Limpieza
+                </label>
+              </li>
+              <li>
+                <label class="dropdown-item">
+                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="gardener" id="gardenerCheckBox" (change)="onCheckboxChange($event)"> 
+                    Jardinero
+                </label>
+              </li>
           </ul>
       </div>
       
