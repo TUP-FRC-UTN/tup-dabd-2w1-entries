@@ -158,7 +158,7 @@ finUserByDni(): AsyncValidatorFn {
           if(response.success){
             alert("Vehiculos añadido con exito");
             console.log(bodyData.vehicleDtos)
-            this.userAllowed?.vehicles?.push(bodyData.vehicleDtos)
+            this.userAllowed?.vehicles?.push(...bodyData.vehicleDtos)
           }
         },
        error: (error: HttpErrorResponse) => {
