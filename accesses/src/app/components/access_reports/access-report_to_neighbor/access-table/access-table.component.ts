@@ -499,7 +499,6 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
               `);
             }
           });
-
           $(table).find('td:nth-child(12)').each(function() {
             const estadoText = $(this).text().trim();
             if (estadoText === 'Tarde') {

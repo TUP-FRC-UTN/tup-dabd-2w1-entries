@@ -18,24 +18,24 @@ export class AccessVisitorHelperService {
   //MAPEOS
   //post del registro de un visitor
     // mapeo de User_AllowedInfoDto a NewUserAllowedDto:
-    mapUser_AllowedInfoDtoToNewUserAllowedDto(visitorInfoDto: AccessUserAllowedInfoDto): AccessNewUserAllowedDto {
+    mapUser_AllowedInfoDtoToNewUserAllowedDto(visitorInfoDto: AccessUserAllowedInfoDto, plate: string): AccessNewUserAllowedDto {
 
-      //NewVehicleDto vacio
-      const emptyVehicleTypeDto: VehicleTypeDto = { description : "Car" };
-      const emptyVehicleDto: AccessNewVehicleDto = { plate: "", vehicle_Type: emptyVehicleTypeDto, insurance: ""}
+      // //NewVehicleDto vacio
+      // const emptyVehicleTypeDto: VehicleTypeDto = { description : "Car" };
+      // const emptyVehicleDto: AccessNewVehicleDto = { plate: "", vehicle_Type: emptyVehicleTypeDto, insurance: ""}
 
-      let visitorVehicle: AccessNewVehicleDto | undefined ;
+      // let visitorVehicle: AccessNewVehicleDto | undefined ;
 
-      //MOMENTANEO (en el futuro, el guardia debe poder seleccionar el vehiculo con el q entra el Visitor)
-      //se verifica si el Visitor tiene un vehiculo
-      if(visitorInfoDto.vehicles?.length > 0){
-        //si lo tiene se asigna
-        visitorVehicle = visitorInfoDto.vehicles.at(0);
-      } else {
-        //si no se le asigna uno vacio
-        visitorVehicle = emptyVehicleDto;
-      }
-      //MOMENTANEO 
+      // //MOMENTANEO (en el futuro, el guardia debe poder seleccionar el vehiculo con el q entra el Visitor)
+      // //se verifica si el Visitor tiene un vehiculo
+      // if(visitorInfoDto.vehicles?.length > 0){
+      //   //si lo tiene se asigna
+      //   visitorVehicle = visitorInfoDto.vehicles.at(0);
+      // } else {
+      //   //si no se le asigna uno vacio
+      //   visitorVehicle = emptyVehicleDto;
+      // }
+      // //MOMENTANEO 
 
       //mapeo de los datos
       let newUserAllowedDto: AccessNewUserAllowedDto = {
@@ -44,7 +44,7 @@ export class AccessVisitorHelperService {
         last_name : visitorInfoDto.last_name,
         documentType: visitorInfoDto.documentTypeDto,
         user_allowed_Type: visitorInfoDto.userType,
-        vehicle: visitorVehicle,
+        vehicle: plate ? visitorInfoDto.vehicles.find(v => v.plate === plate) || undefined : undefined,
         email: visitorInfoDto.email
       }
 

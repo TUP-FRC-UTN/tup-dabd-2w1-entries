@@ -4,7 +4,7 @@
   <div class="container-fluid m-1 p-2">
     <div class="container-fluid col-10 shadow p-3 mb-5 bg-body rounded"> <!-- Contenedor con sombra -->
       <div class>
-        <h4 class="text-left">Registro de Ingreso/Egreso</h4>
+        <h4 class="text-left">Registrar Ingresos/Egresos</h4>
       </div>
       <!-- Contenedor para los botones alineados a la derecha -->
       <div class="d-flex justify-content-center botones">
@@ -16,21 +16,30 @@
           <ul class="dropdown-menu w-95 mx-2" aria-labelledby="dropdownTipoIngresante">
               <li>
                   <label class="dropdown-item">
-                      <input type="checkbox" class="form-check-input me-2" value="neighbour" (change)="onCheckboxChange($event)"> Vecinos
+                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="neighbour" id="neighbourCheckBox" (change)="onCheckboxChange($event)"> Vecinos
                   </label>
               </li>
               <li>
                   <label class="dropdown-item">
-                      <input type="checkbox" class="form-check-input me-2" value="visitor" (change)="onCheckboxChange($event)"> Visitantes
+                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="visitor" id="visitorCheckBox" (change)="onCheckboxChange($event)"> Visitantes
                   </label>
               </li>
               <li>
                   <label class="dropdown-item">
-                      <input type="checkbox" class="form-check-input me-2" value="employee" (change)="onCheckboxChange($event)"> Empleados y Proveedores
+                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="employee" id="employeeCheckBox" (change)="onCheckboxChange($event)"> Empleados
                   </label>
               </li>
+              <li>
+                <label class="dropdown-item">
+                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="supplier" id="supplierCheckBox" (change)="onCheckboxChange($event)"> Proveedores
+                </label>
+            </li>
           </ul>
       </div>
+      
+        <button class="btn btn-secondary action-btn me-2" (click)="clearFilters()" title="Limpiar filtros">
+          <i class="bi bi-trash"></i>
+        </button>
 
         <button
           class="btn btn-primary me-2"
