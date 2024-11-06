@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, AfterViewInit, SimpleChanges } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DataTablesModule } from 'angular-datatables';
@@ -43,8 +43,10 @@ interface FilterValues {
   styleUrls: ['./access-table.component.css']
 })
 export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() selectedYear: number | null = null;
-  @Input() selectedMonth: number | null = null;
+  anios: number[] = [];
+  meses: number[] = [];
+  selectedYear: number | null = null;
+  selectedMonth: number | null = null;
 
   movements: any[] = [];
   table: any = null;
@@ -100,10 +102,35 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private http: HttpClient,
     private userService: AccessUserReportService
-  ) {}
+  ) {
+    this.initializeYears();
+    this.initializeMonths();
+  }
+
+  private initializeYears() {
+    const currentYear = new Date().getFullYear();
+    this.anios = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  }
+
+  private initializeMonths() {
+    this.meses = Array.from({ length: 12 }, (_, i) => i + 1);
+  }
 
   ngOnInit(): void {
     this.loadSelectOptions();
+    const currentDate = new Date();
+    this.selectedYear = currentDate.getFullYear();
+    this.selectedMonth = currentDate.getMonth() + 1;
+    this.fetchData();
+  }
+
+  onYearChange(year: number): void {
+    this.selectedYear = year;
+    this.fetchData();
+  }
+
+  onMonthChange(month: number): void {
+    this.selectedMonth = month;
     this.fetchData();
   }
 
@@ -142,12 +169,6 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedYear'] || changes['selectedMonth']) {
-      this.fetchData();
-    }
-  }
-
   ngOnDestroy(): void {
     if (this.table) {
       this.table.destroy();
@@ -166,23 +187,6 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   fetchData(): void {
     if (this.selectedYear && this.selectedMonth) {
       this.http.get<any>(`http://localhost:8090/movements_entryToNeighbor/ByMonth?year=${this.selectedYear}&month=${this.selectedMonth}`)
-      .subscribe({
-        next: (response) => {
-          this.movements = response.data;
-          this.loadDataIntoTable();
-        },
-        error: (error) => {
-          Swal.fire({
-            icon: 'error',
-            title: '¡Error!',
-            text: 'Ocurrió un error al intentar cargar los datos. Por favor, intente nuevamente.',
-          });
-        }
-      });
-    } else {
-      const year = new Date().getFullYear();
-      const month = new Date().getMonth() + 1;
-      this.http.get<any>(`http://localhost:8090/movements_entryToNeighbor/ByMonth?year=${year}&month=${month}`)
       .subscribe({
         next: (response) => {
           this.movements = response.data;
@@ -555,5 +559,5 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.setupExportButtons();
-}
+  }
 }
