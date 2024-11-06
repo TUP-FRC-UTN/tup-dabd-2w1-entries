@@ -45,6 +45,7 @@ import {
   NgxScannerQrcodeComponent,
   NgxScannerQrcodeModule,
 } from 'ngx-scanner-qrcode';
+import jsQR from 'jsqr';
 import {
   AccessNewMovementsEntryDtoOwner,
   AccessUserAllowedInfoDtoOwner,
@@ -168,6 +169,57 @@ export class AccessVisitorRegistryComponent
     this.qrInput.nativeElement.click();
   }
 
+  onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const reader = new FileReader();
+
+      // Procesa la imagen una vez cargada
+      reader.onload = (e: any) => {
+        const img = new Image();
+        img.src = e.target.result;
+
+        img.onload = () => {
+          // Crea un canvas temporal para extraer los datos de la imagen
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+
+          if (context) {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            context.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const imageData = context.getImageData(
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+
+            // Usa jsQR para procesar la imagen
+            const qrCode = jsQR(
+              imageData.data,
+              imageData.width,
+              imageData.height
+            );
+
+            if (qrCode) {
+              // QR encontrado: procesa el contenido escaneado
+              this.handleQrScan([{ value: qrCode.data }]);
+            } else {
+              // QR no válido: muestra una alerta
+              Swal.fire({
+                icon: 'error',
+                title: 'QR Invalido',
+                text: 'No se ha podido leer un código QR válido en la imagen.',
+              });
+            }
+          }
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
       this.dataTable = ($('#visitorsTable') as any).DataTable({
@@ -182,7 +234,8 @@ export class AccessVisitorRegistryComponent
         language: {
           lengthMenu: '_MENU_',
           zeroRecords: 'No se encontraron registros',
-          search: 'Buscar:',
+          search: '',
+          searchPlaceholder: 'Buscar',
           emptyTable: 'No hay datos disponibles',
           info: '',
           infoEmpty: '',
@@ -254,276 +307,276 @@ loadUsersAllowedData(): Observable<boolean> {
 }
 
 
-updateDataTable(): void {
-  if (this.dataTable) {
-    this.ngZone.runOutsideAngular(() => {
-      const formattedData = this.allPeopleAllowed.map((visitor, index) => {
-        const status = this.visitorStatus[visitor.document] || 'En espera';
+    updateDataTable(): void {
+      if (this.dataTable) {
+        this.ngZone.runOutsideAngular(() => {
+          const formattedData = this.filteredAllPeopleAllowed.map((visitor, index) => {
+            const status = this.visitorStatus[visitor.document] || 'En espera';
 
-        let statusButton = '';
-        let actionButtons = '';
+            let statusButton = '';
+            let actionButtons = '';
 
-        switch (status) {
-          case 'Ingresado':
-            statusButton = `<span class="badge  text-bg-success">Ingresado</span>`;
-            actionButtons = `<span class="badge  text-bg-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</span>`;
-            break;
-          case 'Egresado':
-            statusButton = `<span class="badge  text-bg-danger">Egresado</span>`;
-            break;
-          case 'En espera':
-          default:
-            statusButton = `<span class="badge text-bg-warning">En espera</span>`;
-            actionButtons = `<span class="badge  text-bg-success" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</span>`;
-            break;
-        }
+            switch (status) {
+              case 'Ingresado':
+                statusButton = `<span class="badge  text-bg-success">Ingresado</span>`;
+                actionButtons = `<span class="badge  text-bg-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</span>`;
+                break;
+              case 'Egresado':
+                statusButton = `<span class="badge  text-bg-danger">Egresado</span>`;
+                break;
+              case 'En espera':
+              default:
+                statusButton = `<span class="badge text-bg-warning">En espera</span>`;
+                actionButtons = `<span class="badge  text-bg-success" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</span>`;
+                break;
+            }
 
-        return [
-          statusButton,
-          `${visitor.last_name}, ${visitor.name}`,
-          // "PASSPORT" se muestre como "Pasaporte"
-          this.getUserTypeIcon(visitor.userType.description),
-          `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
-          `<div class="text-start">
-          <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-              <option value="" disabled selected>Seleccione un vehículo</option>
-              ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
-                  <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
-                  === 'Car' ? 'Coche' : 
-                vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-                vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-                vehicle.vehicle_Type.description } </option>
-              `).join('') : ''}
-              <option value="sin_vehiculo">Sin vehículo</option>
-          </select>
-      </div>`,
-      `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-          `<div class="d-flex justify-content-center">
-            <div class="dropdown">
-              <button class="btn btn-white dropdown-toggle p-0" 
-                      type="button" 
-                      data-bs-toggle="dropdown" 
-                      aria-expanded="false">
-                  <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-                <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-                <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-                <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-              </ul>
-            </div>
+            return [
+              statusButton,
+              `${visitor.last_name}, ${visitor.name}`,
+              // "PASSPORT" se muestre como "Pasaporte"
+              this.getUserTypeIcon(visitor.userType.description),
+              `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
+              `<div class="text-start">
+              <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+                  <option value="" disabled selected>Seleccione un vehículo</option>
+                  ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
+                      <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
+                      === 'Car' ? 'Coche' : 
+                    vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                    vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                    vehicle.vehicle_Type.description } </option>
+                  `).join('') : ''}
+                  <option value="sin_vehiculo">Sin vehículo</option>
+              </select>
           </div>`,
-          
+          `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+              `<div class="d-flex justify-content-center">
+                <div class="dropdown">
+                  <button class="btn btn-white dropdown-toggle p-0" 
+                          type="button" 
+                          data-bs-toggle="dropdown" 
+                          aria-expanded="false">
+                      <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+                    <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
 
-          actionButtons,
-        ];
-      });
+                    <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+                    <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+                  </ul>
+                </div>
+              </div>`,
+              
 
-      this.dataTable.clear().rows.add(formattedData).draw();
-    });
-    this.addEventListeners();
-    // if(this.allEmployersChecked){
-    //   this.ngZone.runOutsideAngular(() => {
-    //     const formattedData = this.employers.map((visitor, index) => {
-    //       const status = this.visitorStatus[visitor.document] || 'En espera';
+              actionButtons,
+            ];
+          });
 
-    //       let statusButton = '';
-    //       let actionButtons = '';
-
-    //       switch (status) {
-    //         case 'Ingresado':
-    //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
-    //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
-    //           break;
-    //         case 'Egresado':
-    //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
-    //           break;
-    //         case 'En espera':
-    //         default:
-    //           statusButton = `<button class="btn btn-warning">En espera</button>`;
-    //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
-    //           break;
-    //       }
-
-    //       return [
-    //         `${visitor.last_name} ${visitor.name}`,
-    //         this.getUserTypeIcon(visitor.userType.description),
-    //       `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
-    //         `<div class="text-start">
-    //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-    //             <option value="" disabled selected>Seleccione un vehículo</option>
-    //             ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
-    //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
-    //                 === 'Car' ? 'Coche' : 
-    //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-    //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-    //             vehicle.vehicle_Type.description } </option>
-    //             `).join('') : ''}
-    //             <option value="sin_vehiculo">Sin vehículo</option>
-    //         </select>
-    //     </div>`,
-    //         `<div class="d-flex justify-content-center">
-    //           <div class="dropdown">
-    //             <button class="btn btn-white dropdown-toggle p-0" 
-    //                     type="button" 
-    //                     data-bs-toggle="dropdown" 
-    //                     aria-expanded="false">
-    //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-    //             </button>
-    //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-    //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-
-    //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-    //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-    //             </ul>
-    //           </div>
-    //         </div>`,
-    //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-    //         statusButton,
-    //         actionButtons,
-    //       ];
-    //     });
-
-    //     this.dataTable.clear().rows.add(formattedData).draw();
-    //   });
-    //   this.addEventListeners();
-    // } 
-    // else if(this.allVisitorsChecked){
-    //   this.ngZone.runOutsideAngular(() => {
-    //     const formattedData = this.visitors.map((visitor, index) => {
-    //       const status = this.visitorStatus[visitor.document] || 'En espera';
-
-    //       let statusButton = '';
-    //       let actionButtons = '';
-
-    //       switch (status) {
-    //         case 'Ingresado':
-    //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
-    //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
-    //           break;
-    //         case 'Egresado':
-    //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
-    //           break;
-    //         case 'En espera':
-    //         default:
-    //           statusButton = `<button class="btn btn-warning">En espera</button>`;
-    //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
-    //           break;
-    //       }
-
-    //       return [
-    //         `${visitor.last_name} ${visitor.name}`,
-    //         this.getUserTypeIcon(visitor.userType.description),
-    //       `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
-    //         `<div class="text-start">
-    //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-    //             <option value="" disabled selected>Seleccione un vehículo</option>
-    //             ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
-    //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
-    //                 === 'Car' ? 'Coche' : 
-    //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-    //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-    //             vehicle.vehicle_Type.description } </option>
-    //             `).join('') : ''}
-    //             <option value="sin_vehiculo">Sin vehículo</option>
-    //         </select>
-    //     </div>`,
-    //         `<div class="d-flex justify-content-center">
-    //           <div class="dropdown">
-    //             <button class="btn btn-white dropdown-toggle p-0" 
-    //                     type="button" 
-    //                     data-bs-toggle="dropdown" 
-    //                     aria-expanded="false">
-    //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-    //             </button>
-    //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-    //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-
-    //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-    //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-    //             </ul>
-    //           </div>
-    //         </div>`,
-    //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-    //         statusButton,
-    //         actionButtons,
-    //       ];
-    //     });
-
-    //     this.dataTable.clear().rows.add(formattedData).draw();
-    //   });
-    //   this.addEventListeners();
-    // }
-    // else if(this.allOwnersChecked){
-    //   this.ngZone.runOutsideAngular(() => {
-    //     const formattedData = this.owners.map((visitor, index) => {
-    //       const status = this.visitorStatus[visitor.document] || 'En espera';
-
-    //       let statusButton = '';
-    //       let actionButtons = '';
-
-    //       switch (status) {
-    //         case 'Ingresado':
-    //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
-    //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
-    //           break;
-    //         case 'Egresado':
-    //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
-    //           break;
-    //         case 'En espera':
-    //         default:
-    //           statusButton = `<button class="btn btn-warning">En espera</button>`;
-    //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
-    //           break;
-    //       }
-
-    //       return [
-    //         `${visitor.last_name} ${visitor.name}`,
-    //         this.getUserTypeIcon(visitor.userType.description),
-    //     //   `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
-    //     `<div class="text-start">${"D " +visitor.document}</div>`,
-    //         `<div class="text-start">
-    //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-    //             <option value="" disabled selected>Seleccione un vehículo</option>
-    //             ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
-    //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description 
-    //                 === 'Car' ? 'Coche' : 
-    //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-    //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-    //             vehicle.vehicle_Type.description } </option>
-    //             `).join('') : ''}
-    //             <option value="sin_vehiculo">Sin vehículo</option>
-    //         </select>
-    //     </div>`,
-    //         `<div class="d-flex justify-content-center">
-    //           <div class="dropdown">
-    //             <button class="btn btn-white dropdown-toggle p-0" 
-    //                     type="button" 
-    //                     data-bs-toggle="dropdown" 
-    //                     aria-expanded="false">
-    //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-    //             </button>
-    //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-    //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-
-    //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-    //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-    //             </ul>
-    //           </div>
-    //         </div>`,
-    //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-    //         statusButton,
-    //         actionButtons,
-    //       ];
-    //     });
-
-    //     this.dataTable.clear().rows.add(formattedData).draw();
-    //   });
-    //   this.addEventListeners();
-    // }
-  }
-}
-
+          this.dataTable.clear().rows.add(formattedData).draw();
+        });
+        this.addEventListeners();
+        // if(this.allEmployersChecked){
+        //   this.ngZone.runOutsideAngular(() => {
+        //     const formattedData = this.employers.map((visitor, index) => {
+        //       const status = this.visitorStatus[visitor.document] || 'En espera';
+    
+        //       let statusButton = '';
+        //       let actionButtons = '';
+    
+        //       switch (status) {
+        //         case 'Ingresado':
+        //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
+        //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+        //           break;
+        //         case 'Egresado':
+        //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
+        //           break;
+        //         case 'En espera':
+        //         default:
+        //           statusButton = `<button class="btn btn-warning">En espera</button>`;
+        //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+        //           break;
+        //       }
+    
+        //       return [
+        //         `${visitor.last_name} ${visitor.name}`,
+        //         this.getUserTypeIcon(visitor.userType.description),
+        //       `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
+        //         `<div class="text-start">
+        //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+        //             <option value="" disabled selected>Seleccione un vehículo</option>
+        //             ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
+        //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
+        //                 === 'Car' ? 'Coche' : 
+        //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+        //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+        //             vehicle.vehicle_Type.description } </option>
+        //             `).join('') : ''}
+        //             <option value="sin_vehiculo">Sin vehículo</option>
+        //         </select>
+        //     </div>`,
+        //         `<div class="d-flex justify-content-center">
+        //           <div class="dropdown">
+        //             <button class="btn btn-white dropdown-toggle p-0" 
+        //                     type="button" 
+        //                     data-bs-toggle="dropdown" 
+        //                     aria-expanded="false">
+        //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+        //             </button>
+        //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+        //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+    
+        //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+        //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+        //             </ul>
+        //           </div>
+        //         </div>`,
+        //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+        //         statusButton,
+        //         actionButtons,
+        //       ];
+        //     });
+    
+        //     this.dataTable.clear().rows.add(formattedData).draw();
+        //   });
+        //   this.addEventListeners();
+        // } 
+        // else if(this.allVisitorsChecked){
+        //   this.ngZone.runOutsideAngular(() => {
+        //     const formattedData = this.visitors.map((visitor, index) => {
+        //       const status = this.visitorStatus[visitor.document] || 'En espera';
+    
+        //       let statusButton = '';
+        //       let actionButtons = '';
+    
+        //       switch (status) {
+        //         case 'Ingresado':
+        //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
+        //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+        //           break;
+        //         case 'Egresado':
+        //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
+        //           break;
+        //         case 'En espera':
+        //         default:
+        //           statusButton = `<button class="btn btn-warning">En espera</button>`;
+        //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+        //           break;
+        //       }
+    
+        //       return [
+        //         `${visitor.last_name} ${visitor.name}`,
+        //         this.getUserTypeIcon(visitor.userType.description),
+        //       `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
+        //         `<div class="text-start">
+        //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+        //             <option value="" disabled selected>Seleccione un vehículo</option>
+        //             ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+        //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
+        //                 === 'Car' ? 'Coche' : 
+        //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+        //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+        //             vehicle.vehicle_Type.description } </option>
+        //             `).join('') : ''}
+        //             <option value="sin_vehiculo">Sin vehículo</option>
+        //         </select>
+        //     </div>`,
+        //         `<div class="d-flex justify-content-center">
+        //           <div class="dropdown">
+        //             <button class="btn btn-white dropdown-toggle p-0" 
+        //                     type="button" 
+        //                     data-bs-toggle="dropdown" 
+        //                     aria-expanded="false">
+        //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+        //             </button>
+        //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+        //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+    
+        //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+        //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+        //             </ul>
+        //           </div>
+        //         </div>`,
+        //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+        //         statusButton,
+        //         actionButtons,
+        //       ];
+        //     });
+    
+        //     this.dataTable.clear().rows.add(formattedData).draw();
+        //   });
+        //   this.addEventListeners();
+        // }
+        // else if(this.allOwnersChecked){
+        //   this.ngZone.runOutsideAngular(() => {
+        //     const formattedData = this.owners.map((visitor, index) => {
+        //       const status = this.visitorStatus[visitor.document] || 'En espera';
+    
+        //       let statusButton = '';
+        //       let actionButtons = '';
+    
+        //       switch (status) {
+        //         case 'Ingresado':
+        //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
+        //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
+        //           break;
+        //         case 'Egresado':
+        //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
+        //           break;
+        //         case 'En espera':
+        //         default:
+        //           statusButton = `<button class="btn btn-warning">En espera</button>`;
+        //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
+        //           break;
+        //       }
+    
+        //       return [
+        //         `${visitor.last_name} ${visitor.name}`,
+        //         this.getUserTypeIcon(visitor.userType.description),
+        //     //   `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
+        //     `<div class="text-start">${"D " +visitor.document}</div>`,
+        //         `<div class="text-start">
+        //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+        //             <option value="" disabled selected>Seleccione un vehículo</option>
+        //             ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
+        //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description 
+        //                 === 'Car' ? 'Coche' : 
+        //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+        //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+        //             vehicle.vehicle_Type.description } </option>
+        //             `).join('') : ''}
+        //             <option value="sin_vehiculo">Sin vehículo</option>
+        //         </select>
+        //     </div>`,
+        //         `<div class="d-flex justify-content-center">
+        //           <div class="dropdown">
+        //             <button class="btn btn-white dropdown-toggle p-0" 
+        //                     type="button" 
+        //                     data-bs-toggle="dropdown" 
+        //                     aria-expanded="false">
+        //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+        //             </button>
+        //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+        //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+    
+        //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+        //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+        //             </ul>
+        //           </div>
+        //         </div>`,
+        //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+        //         statusButton,
+        //         actionButtons,
+        //       ];
+        //     });
+    
+        //     this.dataTable.clear().rows.add(formattedData).draw();
+        //   });
+        //   this.addEventListeners();
+        // }
+      }
+    }
 
   // Actualizar el método addEventListeners para manejar los clicks en el nuevo menú
   addEventListeners(): void {
