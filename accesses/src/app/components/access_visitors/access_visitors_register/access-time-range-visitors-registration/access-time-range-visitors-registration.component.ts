@@ -204,17 +204,14 @@ private validateTimeRange(): void {
   
 
 
- get areDatesDisabled(): boolean {
+get areDatesDisabled(): boolean {
   return this._allowedDays.length === 0; 
 }
 
 get areDatesReadonly(): boolean {
   return this._allowedDays.length > 0; 
 }
- disableDateInputs: boolean = false;
-
-
-
+disableDateInputs: boolean = false;
 
   handleUsers(): number {
     for (const user of this.users) {
@@ -226,6 +223,7 @@ get areDatesReadonly(): boolean {
     }
     return 0; 
   }
+
   agregarAuthRange(): void {
     console.log('Iniciando agregarAuthRange');
     console.log('Valores del formulario:', this.form.value);
