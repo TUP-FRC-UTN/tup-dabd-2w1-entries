@@ -52,7 +52,15 @@
           </select>
         </div>
       </div>
-
+        @if (isUserFound) {
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            <h5>Datos del Usuario:</h5>
+            <p>Nombre: {{ userAllowed?.name }} {{ userAllowed?.last_name }}</p>
+            <p>Email: {{ userAllowed?.email }}</p>
+          </div>
+          </div>
+        }
       <!-- Vehicle Forms -->
       <div formArrayName="vehicles">
         @for (vehicleGroup of VehiclesArray.controls; track $index) {

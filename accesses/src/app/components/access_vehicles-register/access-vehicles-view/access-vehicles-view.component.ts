@@ -9,6 +9,8 @@ import { CommonModule } from '@angular/common';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
 import { AccessUserAllowedInfoDto } from '../../../models/access-visitors/access-visitors-models';
 import { valHooks } from 'jquery';
+import { HttpErrorResponse } from '@angular/common/http';
+import { translateMessage, translations } from '../../../models/access-visitors/interface/access_api-response-tranasalted';
 
 @Component({
   selector: 'app-access-vehicles-view',
@@ -58,6 +60,7 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
   vehicleOptions: { value: string, label: string }[] = [];
   vehiculos:AccessNewVehicleDto[]=[]
   isValidating: boolean = false;
+  isUserFound: boolean = false;
   userAllowed:UserAllowedDto|null=null;
   private readonly httpUserAllowedVehicle=inject(Access_userDocumentService)
   private readonly httpVehicleService=inject(Access_vehicleService)
@@ -71,10 +74,11 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
   })
   
   private CreateVehicle():FormGroup{
-    return new FormGroup({
+    return this.fb.group({
       plate:new FormControl('',[Validators.required, Validators.pattern(this.patentePlate)]),
       vehicleType:new FormControl('',[Validators.required]),
-      insurance:new FormControl('',[Validators.required])
+      insurance:new FormControl('',[Validators.required]),
+      isExistingVehicle: [false]
     })
   }
   get VehiclesArray():FormArray{
@@ -120,6 +124,9 @@ finUserByDni(): AsyncValidatorFn {
       map((data: UserAllowedDto | null) => {
         if (data) {
           // El documento existe
+          this.userAllowed=data
+          this.isUserFound=true;
+          this.loadUserVehicles()
           return null;
         } else {
           // El documento no existe
@@ -151,13 +158,20 @@ finUserByDni(): AsyncValidatorFn {
             alert("Vehiculos añadido con exito");
             this.formVehicle.reset();
           }
-          else{
-            if(response.message==='The user not exist')
-            alert('El usuario no existe')
-          }
         },
-        error:(error)=>{
-          console.log(error)
+       error: (error: HttpErrorResponse) => {
+      // Verificamos si la respuesta contiene un mensaje que se pueda traducir
+        if (error.error && error.error.message) {
+    // Traducimos el mensaje de error usando translateMessage
+       const translatedMessage = translateMessage(error.error.message);
+
+         console.log('API Response Error:', error.error);
+        alert(`Error: ${translatedMessage}`);
+       } else {
+        // Si no se puede traducir el mensaje, mostramos uno genérico
+        console.error('Error en la solicitud:', error);
+         alert(`Error: ${error.message || error.statusText}`);
+        }
         }
       });
       this.suscription.add(sub);
@@ -205,6 +219,21 @@ finUserByDni(): AsyncValidatorFn {
     if (document && documentType) {
       this.isValidating = true; // Marcar como validando
       this.formVehicle.get('document')?.updateValueAndValidity();
+    }
+  }
+  loadUserVehicles(): void {
+    if (this.userAllowed) {
+      const vehiclesArray = this.formVehicle.get('vehicles') as FormArray;
+
+      // Mostrar vehículos ya asociados al usuario
+      this.userAllowed.vehicles?.forEach((vehicle) => {
+        vehiclesArray.push(this.fb.group({
+          plate: [{ value: vehicle.plate, disabled: true }], // Deshabilitar la placa
+          vehicleType: [{ value: vehicle.vehicleType, disabled: true }], // Deshabilitar tipo de vehículo
+          insurance: [{ value: vehicle.insurance, disabled: true }], // Deshabilitar seguro
+          isExistingVehicle: [true], // Indicamos que es un vehículo existente
+        }));
+      });
     }
   }
 }
