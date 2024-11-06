@@ -62,6 +62,7 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
   isValidating: boolean = false;
   isUserFound: boolean = false;
   userAllowed:UserAllowedDto|null=null;
+  userId=1
   private readonly httpUserAllowedVehicle=inject(Access_userDocumentService)
   private readonly httpVehicleService=inject(Access_vehicleService)
   private readonly visitorHttpService: AccessVisitorsRegisterServiceHttpClientService=inject(AccessVisitorsRegisterServiceHttpClientService)
@@ -126,6 +127,7 @@ finUserByDni(): AsyncValidatorFn {
           // El documento existe
           this.userAllowed=data
           this.isUserFound=true;
+          console.log(this.userAllowed)
           this.loadUserVehicles()
           return null;
         } else {
@@ -207,6 +209,7 @@ finUserByDni(): AsyncValidatorFn {
     error:(error)=>{
       console.log(error)
     }});
+    this.suscription.add(sub)
   }
   get documentControl() {
     return this.formVehicle.get('document');
@@ -224,9 +227,10 @@ finUserByDni(): AsyncValidatorFn {
   loadUserVehicles(): void {
     if (this.userAllowed) {
       const vehiclesArray = this.formVehicle.get('vehicles') as FormArray;
-
+      console.log(this.userAllowed.vehicles)
       // Mostrar vehículos ya asociados al usuario
       this.userAllowed.vehicles?.forEach((vehicle) => {
+        // Los vehículos existentes se añaden al FormArray como grupos deshabilitados
         vehiclesArray.push(this.fb.group({
           plate: [{ value: vehicle.plate, disabled: true }], // Deshabilitar la placa
           vehicleType: [{ value: vehicle.vehicleType, disabled: true }], // Deshabilitar tipo de vehículo

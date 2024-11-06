@@ -1,6 +1,6 @@
 <div class="card mt-5 mx-3 mx-md-5 shadow-lg p-3 mb-5 bg-body-tertiary rounded">
     <div class="card-header fs-1">
-      Añadir vehiculo
+      Añadir Vehiculo
     </div>
     <div class="card-body fs-2">
       <h5 class="card-title">Ingrese aquí los datos:</h5>
@@ -9,9 +9,9 @@
     <form [formGroup]="formVehicle" class="needs-validation" novalidate (ngSubmit)="onSubmit()">
       <!-- Document Info -->
       <div class="row g-3 mb-3">
-        <div class="col-md-6">
-          <label for="document" class="form-label">Documento</label>
-          <input type="text" class="form-control" id="document" formControlName="document"
+        <div class="col-md-6 d-flex align-items-center">
+          <label for="document" class="form-label me-2">Documento</label>
+          <input type="text" class="form-control is-valid" id="document" formControlName="document"
           [class.is-valid]="formVehicle.get('document')?.valid && formVehicle.get('document')?.touched"
           [class.is-invalid]="formVehicle.get('document')?.invalid && formVehicle.get('document')?.touched">
           <div *ngIf="formVehicle.get('document')?.hasError('userNotFound') && formVehicle.get('document')?.touched" class="invalid-feedback">
@@ -41,8 +41,8 @@
           }
           
         </div>
-        <div class="col-md-6">
-          <label for="documentType" class="form-label">Tipo de Documento</label>
+        <div class="col-md-6  d-flex align-items-center">
+          <label for="documentType" class="form-label me-2">Tipo de Documento</label>
           <select class="form-select" id="documentType" formControlName="documentType"
           [class.is-valid]="formVehicle.get('documentType')?.valid && formVehicle.get('documentType')?.touched"
           [class.is-invalid]="formVehicle.get('documentType')?.invalid && formVehicle.get('documentType')?.touched">
@@ -59,15 +59,16 @@
             <p>Nombre: {{ userAllowed?.name }} {{ userAllowed?.last_name }}</p>
             <p>Email: {{ userAllowed?.email }}</p>
           </div>
-          </div>
+          </div>   
+              
         }
       <!-- Vehicle Forms -->
       <div formArrayName="vehicles">
         @for (vehicleGroup of VehiclesArray.controls; track $index) {
           <div [formGroupName]="$index" class="row g-3 mb-3 border-bottom pb-3">
-            <div class="col-12 col-md-4">
-              <label for="plate{{$index}}" class="form-label">Patente</label>
-              <input type="text" class="form-control" [id]="'plate'+$index" formControlName="plate"
+            <div class="col-12 col-md-4 d-flex align-items-center">
+              <label for="plate{{$index}}" class="form-label me-2">Patente</label>
+              <input type="text" class="form-control is-valid" [id]="'plate'+$index" formControlName="plate"
                 [class.is-valid]="vehicleGroup.get('plate')?.valid && vehicleGroup.get('plate')?.touched"
                 [class.is-invalid]="vehicleGroup.get('plate')?.invalid && vehicleGroup.get('plate')?.touched">
               @if (vehicleGroup.get('plate')?.errors?.['required'] && vehicleGroup.get('plate')?.touched) {
@@ -78,8 +79,8 @@
               }
             </div>
 
-            <div class="col-12 col-md-4">
-              <label for="vehicleType{{$index}}" class="form-label">Tipo de Vehículo</label>
+            <div class="col-12 col-md-4  d-flex align-items-center">
+              <label for="vehicleType{{$index}}" class="form-label me-2">Tipo de Vehículo</label>
               <select class="form-select" [id]="'vehicleType'+$index" formControlName="vehicleType"
                 [class.is-valid]="vehicleGroup.get('vehicleType')?.valid && vehicleGroup.get('vehicleType')?.touched"
                 [class.is-invalid]="vehicleGroup.get('vehicleType')?.invalid && vehicleGroup.get('vehicleType')?.touched">
@@ -93,8 +94,8 @@
               }
             </div>
 
-            <div class="col-12 col-md-4">
-              <label for="insurance{{$index}}" class="form-label">Seguro</label>
+            <div class="col-12 col-md-4  d-flex align-items-center">
+              <label for="insurance{{$index}}" class="form-label me-2">Seguro</label>
               <select class="form-select" [id]="'insurance'+$index" formControlName="insurance"
                 [class.is-valid]="vehicleGroup.get('insurance')?.valid && vehicleGroup.get('insurance')?.touched"
                 [class.is-invalid]="vehicleGroup.get('insurance')?.invalid && vehicleGroup.get('insurance')?.touched">
