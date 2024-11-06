@@ -591,7 +591,7 @@ loadUsersAllowedData(): Observable<boolean> {
           const selectedVehicle = selectElement.value;
           if (index !== null) {
            
-            let selectedOwner =  this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
+            let selectedOwner =  this.filteredAllPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
 
             // if(this.allEmployersChecked){
             //   selectedOwner = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
@@ -954,7 +954,7 @@ loadUsersAllowedData(): Observable<boolean> {
         };
 
         // Agregar el visitante a la lista y actualizar el DataTable
-        this.allPeopleAllowed.push(newVisitor);
+        this.filteredAllPeopleAllowed.push(newVisitor); //CHEQUEAR con vic a q lista le gustaria añadirlo
         this.updateDataTable(); // Actualiza la tabla de visitantes
 
         // Cerrar el modal si hay uno abierto
