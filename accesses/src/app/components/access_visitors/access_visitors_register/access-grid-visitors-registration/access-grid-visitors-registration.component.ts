@@ -91,9 +91,9 @@ export class AccessGridVisitorsRegistrationComponent implements OnInit, OnDestro
         zeroRecords: "No se encontraron invitaciones",
         search: "Buscar:",
         emptyTable: "No hay invitaciones cargadas",
-        info: "Mostrando _START_ a _END_ de _TOTAL_ invitaciones",
+        info: "",
         infoEmpty: "",
-        infoFiltered: "(filtrado de _MAX_ invitaciones totales)"
+        infoFiltered: ""
       },
       responsive: true
     });
