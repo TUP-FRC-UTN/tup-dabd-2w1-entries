@@ -596,49 +596,49 @@ loadUsersAllowedData(): Observable<boolean> {
 
   getUserTypeIcon(descr : string){
     switch (descr){
-      case "Employeed" : {
-        return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary" title="Empleado">
+      case "Employeed" : {    //naranja (orange)
+        return `<button style="background-color: #fd7e14;border: bisque;" class="btn btn-primary" title="Empleado">
                   <i class="bi bi-briefcase"></i>
                 </button>`
       }
-      case "Supplier" : {
-        return `<button style="background-color: rgb(255, 230, 4);border: bisque;" class="btn btn-warning" title="Proveedor">
+      case "Supplier" : {   //turquesa / verde agua (teal)
+        return `<button style="background-color: #20c997;border: bisque;" class="btn btn-warning" title="Proveedor">
                   <i class="bi bi-truck"></i>
                 </button>`
       }
-      case "Visitor" : {
-        return   `<button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
+      case "Visitor" : {    //azul (blue)
+        return   `<button style="background-color: #0d6efd;border: bisque;" class="btn btn-primary" title="Visitante">
                     <i class="bi bi-person-raised-hand"></i>
                   </button> `
       }
-      case "Owner" : {
-        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
+      case "Owner" : {    //verde (green)
+        return  `<button style="background-color: #198754;border: bisque;" class="btn btn-primary" title="Vecino">
                     <i class="bi bi-house-fill"></i> 
                   </button>`
       }
-      case "Tenant" : {
-        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
+      case "Tenant" : {   //verde (green)
+        return  `<button style="background-color: #198754;border: bisque;" class="btn btn-primary" title="Vecino">
                     <i class="bi bi-house-fill"></i> 
                   </button>`
       }
 
-      case "Worker" : {
-        return  `<button style="background-color: red;border: bisque;" class="btn btn-primary" title="Obrero">
+      case "Worker" : {   //rojo (red)
+        return  `<button style="background-color: #dc3545;border: bisque;" class="btn btn-primary" title="Obrero">
                     <i class="bi bi-tools"></i> 
                   </button>`
       }
-      case "Delivery" : {
+      case "Delivery" : {   //violeta (indigo)
         return  `<button style="background-color: purple;border: bisque;" class="btn btn-primary" title="Delivery">
                     <i class="bi bi-box-seam"></i> 
                   </button>`
       }
-      case "Cleaning" : {
-        return  `<button style="background-color: pink;border: bisque;" class="btn btn-primary" title="Cleaning">
+      case "Cleaning" : {   //rosa (pink)
+        return  `<button style="background-color: #d63384;border: bisque;" class="btn btn-primary" title="P. de Limpieza">
                     <i class="bi bi-stars"></i>
                   </button>`
       }
-      case "Gardener" : {
-        return  `<button style="background-color: darkgreen;border: bisque;" class="btn btn-primary" title="Gardener">
+      case "Gardener" : { //celeste (cyan)
+        return  `<button style="background-color: #0dcaf0;border: bisque;" class="btn btn-primary" title="Jardinero">
                     <i class="bi bi-flower1"></i>
                   </button>`
       }
