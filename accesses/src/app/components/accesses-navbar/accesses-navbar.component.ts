@@ -80,6 +80,12 @@ export class AccessesNavbarComponent {
            route: "dashboards",
            roles: ["SuperAdmin", "Gerente","Security"]
          },
+         {
+          icon: "bi bi-question-diamond-fill",
+          title: "Entradas Diarias",
+          route: "dashboards1",
+          roles: ["SuperAdmin", "Gerente","Security"]
+        },
 
          /* DEFINIR COMO HACER CON EL INGRESO DE EMERGENCIA */
         /*  {

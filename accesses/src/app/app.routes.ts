@@ -9,6 +9,8 @@ import { AccessEntryComponent } from './components/access_entrys/access-entry/ac
 import { AccessContainerVisitorsEditComponent } from './components/access_visitors/access-edit/access-container-visitors-edit/access-container-visitors-edit.component';
 import { AccessDashboardEgressComponent } from './components/access_dashboards/access_dashboard_egress/access-dashboard-egress-container/access-dashboard-egress.component';
 import { AccessVehiclesViewComponent } from './components/access_vehicles-register/access-vehicles-view/access-vehicles-view.component';
+import { DashboardPruebaComponent } from './components/access_dashboards/dashboard-prueba/dashboard-prueba.component';
+import { DashboardComponent } from 'angular-google-charts';
 
 
 export const routes: Routes = [
@@ -16,7 +18,9 @@ export const routes: Routes = [
     { path: 'visitors', component: AccessVisitorRegistryComponent },
     { path: 'reports', component: AccessGlobalReportComponent },
     { path: 'entry', component: AccessEntryComponent },
-    { path: 'dashboards', component: AccessGeneralDashboardComponent },
+    { path: 'dashboards', component: DashboardPruebaComponent },
+    { path: 'dashboards1', component: AccessGeneralDashboardComponent },
+
     { path: 'entry', component: AccessDailyFetchComponent },
     { path: 'edit', component: AccessContainerVisitorsEditComponent },
     { path: 'visitor/register', component: AccessContainerVisitorsRegistrationComponent },

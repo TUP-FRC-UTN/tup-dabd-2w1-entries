@@ -11,11 +11,11 @@ export class AccessMetricsService {
   constructor(private http:HttpClient) { }
 
   getMonthlyVisitorCounts(): Observable<AccessMonthlyVisitorCount[]> {
-    return this.http.get<AccessMonthlyVisitorCount[]>(this.apiUrl + "/entries/monthly");
+    return this.http.get<AccessMonthlyVisitorCount[]>(this.apiUrl + "/egresses/monthly/observations");
   }
 
   getMonthlyVisitorCountsByType(): Observable<AccessMonthlyVisitorCount[]> {
-    return this.http.get<AccessMonthlyVisitorCount[]>(this.apiUrl + "/entries/monthly/type");
+    return this.http.get<AccessMonthlyVisitorCount[]>(this.apiUrl + "/egresses/monthly/type/observations");
   }
 
 }
