@@ -5,6 +5,9 @@ import { AccessEmergenciesService } from '../../services/access-emergencies/acce
 import { AccessNewEmergencyDto, AccessNewEmergencyPerson } from '../../models/access-emergencies/access-new-emergecy-dto';
 import { Subject, Subscription } from 'rxjs';
 import { AccessEmergencyPersonDto } from '../../models/access-emergencies/access-emergency-person-dto';
+import Swal from 'sweetalert2';
+import { AccessUser } from '../../models/access-visitors/access-visitors-models';
+import { AccessVisitorsRegisterServiceHttpClientService } from '../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
 
 @Component({
   selector: 'access-app-register-emergency',
@@ -13,13 +16,16 @@ import { AccessEmergencyPersonDto } from '../../models/access-emergencies/access
   templateUrl: './access-register-emergency.component.html',
   styleUrl: './access-register-emergency.component.css'
 })
-export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewChecked{
+export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewChecked {
   private readonly emergenciesService: AccessEmergenciesService = inject(AccessEmergenciesService);
+  private readonly visitorService: AccessVisitorsRegisterServiceHttpClientService = inject(AccessVisitorsRegisterServiceHttpClientService);
   private readonly subscription = new Subscription();
   private readonly personUpdated = new Subject<void>();
   
   private peopleSubscriptionsArray: Subscription[] = [];
   private personAdded: boolean = false;
+  private perfectRegisterSuccess: boolean = false;
+  private userId?: number;
 
   form = new FormGroup({
     onlyExit: new FormControl(false),
@@ -30,20 +36,36 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
     }),
     observations: new FormControl()
   });
-  requestStatus: RequestStatus = RequestStatus.None;
-
-  public get RequestStatus(): typeof RequestStatus {
-    return RequestStatus;
-  }
 
   ngOnInit(): void {
+    let usersSubscription = this.visitorService.getUsers().subscribe({
+        next: (users) => {
+          this.userId = this.handleUsers(users);
+        },
+        error: (error) => {
+          console.error('Error loading users:', error);
+        },
+    });
+    this.subscription.add(usersSubscription);
     this.subscription.add(this.personUpdated);
     const modal = document.getElementById('emergencyModal');
     modal!.addEventListener('show.bs.modal', event => {
       this.resetForm()
     });
   }
-  
+
+  handleUsers(users: AccessUser[]): number {
+    console.log(users);
+    for (const user of users) {
+      for (const role of user.roles) {
+        if (role === "Seguridad") {
+          return user.id; 
+        }
+      }
+    }
+
+    return 0; 
+  }
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
@@ -56,42 +78,59 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
     }
   }
   registerEntry() {
-    this.requestStatus = RequestStatus.Loading;
     const emergency: AccessNewEmergencyDto = this.getFormAsDto();
     const newSubscription = this.emergenciesService.registerEmergencyEntry(emergency).subscribe({
     next: nv => {
-      this.requestStatus = RequestStatus.Success;
       this.resetPeopleControl();
       nv.forEach(v => {
+        if (v.state != 'SUCCESSFUL')
+          this.perfectRegisterSuccess = false;
         this.addPersonForm(v);
-      })
+      });
+      if (this.perfectRegisterSuccess)
+        this.fireSuccess();
     },
     error: e => {
-      this.requestStatus = RequestStatus.Error;
+      this.fireError();
     }});
 
     this.subscription.add(newSubscription);
   }
   
   registerExit() {
-    this.requestStatus = RequestStatus.Loading;
     const emergency: AccessNewEmergencyDto = this.getFormAsDto();
 
     const newSubscription = this.emergenciesService.registerEmergencyExit(emergency).subscribe({
     next: nv => {
-      this.requestStatus = RequestStatus.Success;
       this.resetPeopleControl();
       nv.forEach(v => {
+        if (v.state != 'SUCCESSFUL')
+          this.perfectRegisterSuccess = false;
         this.addPersonForm(v);
-      })
+      });
+      if (this.perfectRegisterSuccess)
+        this.fireSuccess();
     },
     error: e => {
-      this.requestStatus = RequestStatus.Error;
+      this.fireError();
     }});
 
     this.subscription.add(newSubscription);
   }
-  
+  private fireSuccess() {
+    Swal.fire({
+      title: 'Éxito',
+      icon: 'success',
+      text: 'La emergencia fue registrada.',
+    });
+  }
+  private fireError() {
+    Swal.fire({
+      title: 'Error',
+      icon: 'error',
+      text: 'No se pudo registrar la emergencia. Intente de nuevo.'
+    });
+  }
   addPersonForm(emergencyPerson?: AccessEmergencyPersonDto) {
     const peopleFormArray = this.form.controls.people;
     const documentTypeControl = new FormControl('DNI', [Validators.required]);
@@ -157,22 +196,41 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
   }
 
   private getStateString(state?: String) {
+
+    let text;
+    let alertType = 'alert-danger';
     switch (state) {
       case 'UNAUTHORIZED':
-        return 'El usuario no está autorizado a ingresar. Cuando se registra un ingreso se autoriza al usuario.';
+        text = 'El usuario no está autorizado a ingresar. Cuando se registra un ingreso se autoriza al usuario.';
+        break;
       case 'WITHOUT_USER':
-        return 'No existe un usuario con el documento provisto. Cuando se registra un ingreso se crea un usuaio.';
+        text =  'No existe un usuario con el documento provisto. Cuando se registra un ingreso se crea un usuaio.';
+        break;
       case 'WITHOUT_EXIT':
-        return 'El usuario posee un ingreso anterior y no se registró un egreso despues de el.';
+        text =  'El usuario posee un ingreso anterior y no se registró un egreso despues de el.';
+        break;
       case 'WITHOUT_ENTRY':
-        return 'El usuario no posee un ingreso anterior.';
+        text =  'El usuario no posee un ingreso anterior.';
+        break;
       case 'FAILED':
-        return 'Error al registrar esta persona.';
-      case null:
+        text =  'Error al registrar esta persona.';
+        break;
       case 'SUCCESSFUL':
+        if (this.perfectRegisterSuccess)
+          return '';
+        text = 'Éxito al registrar esta persona.'
+        alertType = 'alert-success';
+        break;
+      case null:
       default:
         return '';
-    }
+    }    
+    const stateHtml = `<div class="alert ${alertType} d-flex align-items-center" role="alert">
+                        <div>
+                          ${text}
+                        </div>
+                      </div>`
+    return stateHtml;
   }
 
   private documentUniqueValidator(documentTypeControl: FormControl): ValidatorFn {
@@ -190,13 +248,13 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
   }
 
   resetPeopleControl() {
+    this.perfectRegisterSuccess = true;
     this.form.controls.people.clear();
     this.peopleSubscriptionsArray.forEach(s => s.unsubscribe());
     this.peopleSubscriptionsArray = [];
   }
 
   resetForm() {
-    this.requestStatus = RequestStatus.None;
     this.form.reset();
     this.form.controls.vehicle.controls.type.setValue('');
     this.resetPeopleControl();
@@ -260,15 +318,8 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
         plate: formValue.vehicle?.plate ?? null
       },
       observations: formValue.observations,
-      loggedUserId: 1 //TODO: CAMBIAR POR VALOR OBTENIDO DE USUARIOS
+      loggedUserId: this.userId ?? 0
     };
     return emergencyDto;
   }
-}
-
-enum RequestStatus {
-  None,
-  Loading,
-  Error,
-  Success
 }
