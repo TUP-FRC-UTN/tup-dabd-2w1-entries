@@ -66,7 +66,10 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     { value: 'constructionworker', label: 'Obrero' },
     { value: 'suplier', label: 'Proveedor' },
     { value: 'employee', label: 'Empleado' },
-    { value: 'services', label: 'Servicios' }
+    { value: 'services', label: 'Servicios' },
+    { value: 'cleaning', label: 'Personal de Limpieza' },
+    { value: 'gardener', label: 'Jardinero' }
+
   ];
 
   tiposVehiculo = [
