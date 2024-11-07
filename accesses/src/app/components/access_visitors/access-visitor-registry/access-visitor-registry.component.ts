@@ -148,10 +148,6 @@ export class AccessVisitorRegistryComponent
       checkbox.nativeElement.checked = false;
     });
 
-    const customSearchInput = document.getElementById('customSearch') as HTMLInputElement;
-  if (customSearchInput) {
-    customSearchInput.value = '';
-  }
     // Limpia el input de busqueda 
     this.dataTable.search('').draw(false);
 
@@ -1048,7 +1044,7 @@ loadUsersAllowedData(): Observable<boolean> {
           title: 'Error',
           text: 'Ocurrió un error al procesar el código QR.',
           icon: 'error',
-          confirmButtonText: 'Cerrar',
+          confirmButtonText: 'Aceptar',
         });
       }
     } else {
@@ -1100,7 +1096,123 @@ loadUsersAllowedData(): Observable<boolean> {
 
 
   // registra el ingreso de un VECINO (propietario o inquilino)
-  private prepareEntryMovement(visitor: AccessUserAllowedInfoDtoOwner,plate:string): Observable<boolean> {
+  //Metodo pero con modal de bootstrap (revisar) deje comentado abajo el original por las dudas
+  private prepareEntryMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: string): Observable<boolean> {
+    return new Observable<boolean>(observer => {
+      try {
+        // Preparar datos del movimiento
+        const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
+        const firstRange = visitor.authRanges[0];
+        const now = new Date();
+  
+        // Construir objeto de movimiento
+        this.movement = {
+          movementDatetime: now,
+          authRangesDto: {
+            neighbor_id: firstRange.neighbor_id,
+            init_date: new Date(firstRange.init_date),
+            end_date: new Date(firstRange.end_date),
+            allowedDaysDtos: firstRange.allowedDays || [],
+          },
+          observations: this.observations,
+          newUserAllowedDto: {
+            name: visitor.name,
+            last_name: visitor.last_name,
+            document: visitor.document,
+            email: visitor.email,
+            user_allowed_Type: visitor.userType,
+            documentType: this.doument,
+            vehicle: vehicless,
+          }
+        };
+  
+        console.log('Observaciones:', this.movement.observations);
+  
+        // Preparar mensaje del modal
+        const modalMessage = `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`;
+        document.getElementById('modalMessage')!.textContent = modalMessage;
+  
+        // Obtener el modal usando el método correcto de Bootstrap 5
+        const modalElement = document.getElementById('confirmIngresoModal')!;
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  
+        // Configurar los eventos del modal antes de mostrarlo
+        modalElement.addEventListener('hidden.bs.modal', () => {
+          // Limpiar los event listeners cuando se cierra el modal
+          const confirmButton = document.getElementById('confirmButton')!;
+          const cancelButton = document.getElementById('cancelButton')!;
+          confirmButton.onclick = null;
+          cancelButton.onclick = null;
+        });
+  
+        // Configurar el botón de confirmación
+        const confirmButton = document.getElementById('confirmButton')!;
+        confirmButton.onclick = () => {
+          this.ownerService.registerOwnerRenterEntry(this.movement).subscribe({
+            next: (response) => {
+              console.log('Ingreso registrado con éxito:', response);
+              modal.hide();
+              
+              Swal.fire({
+                title: 'Registro Exitoso',
+                text: 'Registro de ingreso exitoso.',
+                icon: 'success',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(true);
+                observer.complete();
+              });
+            },
+            error: (err) => {
+              console.error('Error al registrar la entrada:', err);
+              modal.hide();
+  
+              if (err.status !== 409) {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Error al cargar los datos. Intenta nuevamente.',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar',
+                }).then(() => {
+                  observer.next(false);
+                  observer.complete();
+                });
+              } else {
+                Swal.fire({
+                  title: 'El Vecino tiene un Ingreso previo!',
+                  text: 'El Vecino debe egresar antes de poder volver a entrar',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar',
+                }).then(() => {
+                  observer.next(false);
+                  observer.complete();
+                });
+              }
+            }
+          });
+        };
+  
+        // Configurar el botón de cancelar
+        const cancelButton = document.getElementById('cancelButton')!;
+        cancelButton.onclick = () => {
+          modal.hide();
+          observer.next(false);
+          observer.complete();
+        };
+  
+        // Mostrar el modal
+        modal.show();
+  
+      } catch (error) {
+        console.error('Error al preparar el movimiento:', error);
+        observer.error(error);
+      }
+    });
+  }
+  
+
+  //LO DEJO COMENTADO EN CASO DE QUE EL METODO QUE CAMBIO A MODAL DE BOOTSTRAP ROMPA ALGO
+/*   private prepareEntryMovement(visitor: AccessUserAllowedInfoDtoOwner,plate:string): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
         // Preparar datos del movimiento
@@ -1196,9 +1308,130 @@ loadUsersAllowedData(): Observable<boolean> {
         observer.error(error);
       }
     });
-  }
+  } */
   
-  private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner,plate:string): Observable<boolean> {
+
+
+
+//Egreso con modal de bootstrap 
+private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: string): Observable<boolean> {
+  return new Observable<boolean>(observer => {
+    try {
+      // Preparar datos del movimiento
+      const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
+      const firstRange = visitor.authRanges[0];
+      const now = new Date();
+
+      // Construir objeto de movimiento
+      this.movement = {
+        movementDatetime: now,
+        authRangesDto: {
+          neighbor_id: firstRange.neighbor_id,
+          init_date: new Date(firstRange.init_date),
+          end_date: new Date(firstRange.end_date),
+          allowedDaysDtos: firstRange.allowedDays || [],
+        },
+        observations: this.observations,
+        newUserAllowedDto: {
+          name: visitor.name,
+          last_name: visitor.last_name,
+          document: visitor.document,
+          email: visitor.email,
+          user_allowed_Type: visitor.userType,
+          documentType: this.doument,
+          vehicle: vehicless,
+        }
+      };
+
+      console.log('Observaciones:', this.movement.observations);
+
+      // Preparar mensaje del modal
+      const modalMessage = `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`;
+      document.getElementById('modalMessageEgreso')!.textContent = modalMessage;
+
+      // Obtener el modal usando el método correcto de Bootstrap 5
+      const modalElement = document.getElementById('confirmEgresoModal')!;
+      const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+      // Configurar los eventos del modal antes de mostrarlo
+      modalElement.addEventListener('hidden.bs.modal', () => {
+        // Limpiar los event listeners cuando se cierra el modal
+        const confirmButton = document.getElementById('confirmEgresoButton')!;
+        const cancelButton = document.getElementById('cancelEgresoButton')!;
+        confirmButton.onclick = null;
+        cancelButton.onclick = null;
+      });
+
+      // Configurar el botón de confirmación
+      const confirmButton = document.getElementById('confirmEgresoButton')!;
+      confirmButton.onclick = () => {
+        const sub = this.ownerService.registerExitOwner(this.movement).subscribe({
+          next: (response) => {
+            console.log('Egreso registrado con éxito:', response);
+            modal.hide();
+            
+            Swal.fire({
+              title: 'Registro Exitoso',
+              text: 'Registro de egreso exitoso.',
+              icon: 'success',
+              confirmButtonText: 'Cerrar',
+            }).then(() => {
+              observer.next(true);
+              observer.complete();
+            });
+          },
+          error: (err) => {
+            console.error('Error al registrar el egreso:', err);
+            modal.hide();
+
+            if (err.status !== 409) {
+              Swal.fire({
+                title: 'Error',
+                text: 'Error al cargar los datos. Intenta nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(false);
+                observer.complete();
+              });
+            } else {
+              Swal.fire({
+                title: 'El Vecino tiene un egreso previo!',
+                text: 'El Vecino debe ingresar antes de poder volver a salir',
+                icon: 'error',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(false);
+                observer.complete();
+              });
+            }
+          }
+        });
+        this.subscription.add(sub);
+      };
+
+      // Configurar el botón de cancelar
+      const cancelButton = document.getElementById('cancelEgresoButton')!;
+      cancelButton.onclick = () => {
+        modal.hide();
+        observer.next(false);
+        observer.complete();
+      };
+
+      // Mostrar el modal
+      modal.show();
+
+    } catch (error) {
+      console.error('Error al preparar el movimiento:', error);
+      observer.error(error);
+    }
+  });
+}
+
+
+
+  //Egreso original comentado por las dudas que el que tiene modal de bootstrap rompa algo
+/*   private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner,plate:string): Observable<boolean> {
 
     return new Observable<boolean>((observer) => {
       const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
@@ -1276,7 +1509,7 @@ loadUsersAllowedData(): Observable<boolean> {
       });
 
     });
-}
+} */
 
   //Empleados
   private userType: AccessUserAllowedTypeDto = {
@@ -1284,8 +1517,224 @@ loadUsersAllowedData(): Observable<boolean> {
   };
 
 
-  
+
   private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
+    return new Observable<boolean>(observer => {
+      try {
+        // Preparar el objeto de movimiento
+        const movementS: AccessMovementEntryDto = {
+          description: String(this.observations || ''),
+          movementDatetime: new Date().toISOString(),
+          vehiclesId: 0,
+          document: visitor.document,
+        };
+  
+        // Preparar mensaje del modal
+        const modalMessage = `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`;
+        document.getElementById('modalMessageIngresoEmp')!.textContent = modalMessage;
+  
+        // Obtener el modal
+        const modalElement = document.getElementById('confirmIngresoEmpModal')!;
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  
+        // Configurar los eventos del modal
+        modalElement.addEventListener('hidden.bs.modal', () => {
+          const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+          const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+          confirmButton.onclick = null;
+          cancelButton.onclick = null;
+        });
+  
+        // Configurar el botón de confirmación
+        const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+        confirmButton.onclick = () => {
+          const subscription = this.userService.registerEmpSuppEntry(movementS).subscribe({
+            next: (response) => {
+              console.log('Respuesta de registro:', response);
+              console.log('Ingreso registrado con éxito:', response);
+              modal.hide();
+              
+              Swal.fire({
+                title: 'Registro Exitoso',
+                text: 'Registro de ingreso exitoso.',
+                icon: 'success',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(true);
+                observer.complete();
+              });
+            },
+            error: (err) => {
+              console.error('Error al registrar la entrada:', err);
+              modal.hide();
+  
+              if (err.status === 403) {
+                const errorMessage = err.error.message;
+                
+                if (errorMessage === "The user does not have authorization range") {
+                  Swal.fire({
+                    title: 'Acceso Denegado',
+                    text: 'El usuario no tiene un rango de autorización asignado.',
+                    icon: 'error',
+                    confirmButtonText: 'Cerrar'
+                  });
+                } else if (errorMessage === "The user does not have authorization to entry for today") {
+                  this.helperService.entryOutOfAuthorizedHourRange(
+                    visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges))
+                  );
+                }
+                observer.next(false);
+                observer.complete();
+              } else if (err.status === 409) {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Tiene que salir antes de entrar.',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar',
+                }).then(() => {
+                  observer.next(false);
+                  observer.complete();
+                });
+              }
+            }
+          });
+          this.subscription.add(subscription);
+        };
+  
+        // Configurar el botón de cancelar
+        const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+        cancelButton.onclick = () => {
+          modal.hide();
+          observer.next(false);
+          observer.complete();
+        };
+  
+        // Mostrar el modal
+        modal.show();
+  
+      } catch (error) {
+        console.error('Error al preparar el movimiento:', error);
+        observer.error(error);
+        observer.complete();
+      }
+    });
+  }
+  
+  private prepareExitMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
+    return new Observable<boolean>(observer => {
+      try {
+        // Preparar el objeto de movimiento
+        const movementS: AccessMovementEntryDto = {
+          description: String(this.observations || ''),
+          movementDatetime: new Date().toISOString(),
+          vehiclesId: 0,
+          document: visitor.document,
+        };
+  
+        // Preparar mensaje del modal
+        const modalMessage = `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`;
+        document.getElementById('modalMessageEgresoEmp')!.textContent = modalMessage;
+  
+        // Obtener el modal
+        const modalElement = document.getElementById('confirmEgresoEmpModal')!;
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  
+        // Configurar los eventos del modal
+        modalElement.addEventListener('hidden.bs.modal', () => {
+          const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+          const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+          confirmButton.onclick = null;
+          cancelButton.onclick = null;
+        });
+  
+        // Configurar el botón de confirmación
+        const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+        confirmButton.onclick = () => {
+          const sub = this.userService.registerEmpSuppExit(movementS).subscribe({
+            next: (response) => {
+              console.log('Egreso registrado con éxito:', response);
+              modal.hide();
+              
+              Swal.fire({
+                title: 'Registro Exitoso',
+                text: 'Registro de egreso exitoso.',
+                icon: 'success',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(true);
+                observer.complete();
+              });
+            },
+            error: (err) => {
+              console.error('Error al registrar el egreso:', err);
+              modal.hide();
+  
+              if (err.status != 409 && err.status != 403) {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Error al cargar los datos. Intenta nuevamente.',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar',
+                }).then(() => {
+                  observer.next(false);
+                  observer.complete();
+                });
+              } else if (err.status === 403) {
+                const errorMessage = err.error.message;
+                
+                if (errorMessage === "The user does not have authorization range") {
+                  Swal.fire({
+                    title: 'Acceso Denegado',
+                    text: 'El usuario no tiene un rango de autorización asignado para hoy.',
+                    icon: 'error',
+                    confirmButtonText: 'Cerrar'
+                  });
+                } else if (errorMessage === "The user does not have authorization to entry for today") {
+                  this.helperService.entryOutOfAuthorizedHourRange(
+                    visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges))
+                  );
+                }
+                observer.next(false);
+                observer.complete();
+              } else if (err.status === 409) {
+                Swal.fire({
+                  title: 'Error',
+                  text: 'Tiene que entrar antes de salir.',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar',
+                }).then(() => {
+                  observer.next(false);
+                  observer.complete();
+                });
+              }
+            }
+          });
+          this.subscription.add(sub);
+        };
+  
+        // Configurar el botón de cancelar
+        const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+        cancelButton.onclick = () => {
+          modal.hide();
+          observer.next(false);
+          observer.complete();
+        };
+  
+        // Mostrar el modal
+        modal.show();
+  
+      } catch (error) {
+        console.error('Error al preparar el movimiento:', error);
+        observer.error(error);
+        observer.complete();
+      }
+    });
+  }
+
+
+
+  //INGRESO ORIGINAL CON MODAL DE SWEET ALERT COMENTADO
+/*   private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
     return new Observable<boolean>(observer => {
         try {
           
@@ -1380,12 +1829,10 @@ loadUsersAllowedData(): Observable<boolean> {
             observer.complete();
         }
     });
-}
+} */
 
-
-
-
-  private prepareExitMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
+//EGRESO ORIGINAL COMENTADO
+/*   private prepareExitMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
 
     return new Observable<boolean>((observer) => {
 
@@ -1482,5 +1929,5 @@ loadUsersAllowedData(): Observable<boolean> {
       
     });
     
-  }
+  } */
 }

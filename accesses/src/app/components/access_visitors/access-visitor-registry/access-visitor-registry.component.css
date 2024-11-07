@@ -391,3 +391,20 @@
   text-decoration: none;
   cursor: pointer;
 }
+
+
+/* Eliminar la línea gris en el modal footer */
+#confirmIngresoModal .modal-footer {
+  border-top: none !important;
+}
+#confirmEgresoModal .modal-footer {
+  border-top: none !important;
+}
+
+#confirmIngresoEmpModal .modal-footer{
+  border-top: none !important;
+}
+
+#confirmEgresoEmpModal .modal-footer{
+  border-top: none !important;
+}

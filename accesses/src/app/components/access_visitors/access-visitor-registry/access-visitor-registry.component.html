@@ -2,7 +2,6 @@
   <div class="container-fluid m-1 p-2">
     <div class="container-fluid col-10 shadow p-3 mb-5 bg-body rounded">
       <div class="mb-3">
-        <h3 class="text-left">Registrar Ingresos/Egresos</h3>
       </div>
 <!-- Contenedor para todos los controles -->
 <div class="row g-3 mb-3 align-items-center">
@@ -11,17 +10,16 @@
     <div class="search-box">
       <input type="search" 
              class="form-control" 
-             placeholder="Buscar"
+             placeholder="Buscar..."
              id="customSearch">
     </div>
   </div>
 
   <!-- Selector de Tipo de Ingresante -->
-  <div class="col-md-3 pe-0">
-    <div class="d-flex align-items-center flex-nowrap">
-      <label class="form-label mb-0 me-2 text-nowrap">Tipo de ingresante:</label>
+  <div class="col-auto d-flex align-items-center gap-2">
+    <span>Tipo de Ingresante:</span>
+    <div class="col-auto ps-2">
       <ng-select
-        class="flex-grow-1"
         [items]="userTypeOptions"
         [multiple]="true"
         [closeOnSelect]="false"
@@ -29,6 +27,7 @@
         bindLabel="label"
         bindValue="value"
         [clearable]="false"
+        placeholder=""
         [(ngModel)]="selectedUserTypes"
         (change)="onFilterSelectionChange()">
         
@@ -170,6 +169,104 @@
             <p>No hay fecha cargada.</p>
           </ng-template>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal de Confirmación de Ingreso vecino -->
+<div class="modal fade" id="confirmIngresoModal" tabindex="-1" aria-labelledby="confirmIngresoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmIngresoModalLabel">Confirmar Ingreso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage">¿Está seguro que desea registrar el ingreso?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelButton" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmButton">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal de Confirmación de Egreso -->
+<div class="modal fade" id="confirmEgresoModal" tabindex="-1" aria-labelledby="confirmEgresoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmEgresoModalLabel">Confirmar Egreso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessageEgreso">¿Está seguro que desea registrar el egreso?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelEgresoButton" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmEgresoButton">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Ingreso Empleado -->
+<div class="modal fade" id="confirmIngresoEmpModal" tabindex="-1" aria-labelledby="confirmIngresoEmpModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmIngresoEmpModalLabel">Confirmar Ingreso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessageIngresoEmp">¿Está seguro que desea registrar el ingreso?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelIngresoEmpButton" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmIngresoEmpButton">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Egreso Empleado -->
+<div class="modal fade" id="confirmEgresoEmpModal" tabindex="-1" aria-labelledby="confirmEgresoEmpModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmEgresoEmpModalLabel">Confirmar Egreso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessageEgresoEmp">¿Está seguro que desea registrar el egreso?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelEgresoEmpButton" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmEgresoEmpButton">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary">Sí</button>
       </div>
     </div>
   </div>
