@@ -73,11 +73,15 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
     private fb: FormBuilder,
     private httpService: AccessVisitorsRegisterServiceHttpClientService
   ) {
-    const today = new Date().toISOString().split('T')[0]; // Formatear la fecha a 'YYYY-MM-DD'
+    const today = new Date();
+    // Ajustar al formato YYYY-MM-DD considerando la zona horaria local
+    const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000))
+                        .toISOString()
+                        .split('T')[0];
   
     this.form = this.fb.group({
-      startDate: [today, Validators.required],
-      endDate: [today, Validators.required],
+      startDate: [localDate, Validators.required],
+      endDate: [localDate, Validators.required],
       initHour: ['', Validators.required],
       endHour: ['', Validators.required],
       Lun: [{ value: false, disabled: true }],
