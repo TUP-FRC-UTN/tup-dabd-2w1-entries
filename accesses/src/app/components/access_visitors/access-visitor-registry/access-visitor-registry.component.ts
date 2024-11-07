@@ -845,7 +845,8 @@ loadUsersAllowedData(): Observable<boolean> {
       } else if (visitor.userType.description === 'Employeed' || visitor.userType.description === 'Supplier') {
         accessObservable = this.prepareEntryMovementEmp(visitor);
       } else {
-        accessObservable = this.visitorService.RegisterAccess(visitor, vehiclePlate);
+        //es para visitors y los otros tipos q funcionan igual
+        accessObservable = this.prepareEntryVisitor(visitor, vehiclePlate);
       }
 
       if (accessObservable) {
@@ -878,7 +879,9 @@ loadUsersAllowedData(): Observable<boolean> {
         exitObservable = this.prepareExitMovementEmp(visitor);
 
       } else {
-        exitObservable = this.visitorService.RegisterExit(visitor, vehiclePlate);
+        //es para visitors y los otros tipos q funcionan igual
+        exitObservable = this.prepareExitVisitor(visitor, vehiclePlate);
+        //this.visitorService.RegisterExit(visitor, vehiclePlate);
         
       }
 
@@ -905,6 +908,127 @@ loadUsersAllowedData(): Observable<boolean> {
     }
 
     selectElement.value = '';
+}
+
+prepareEntryVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean>{
+  return new Observable<boolean>((observer) => {
+
+    const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate).subscribe({
+      next: (response) => {
+        console.log("respuesta: ", response);
+
+        //fijate las respuestas ( observer.next('string') ) q puse en el metodo del service registerAccess linea 288,
+        //arriba de eso dice return false o true, eso es lo q deberia devolver este metodo
+        if (response == 'fijate las respuestas ( observer.next() ) q puse en el metodo del service registerAccess'+
+                      'linea 288, arriba de eso dice return false o true, eso es lo q deberia devolver este metodo') {
+          //aca pone el modal q corresponda
+          
+
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(true); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();
+        } else if (response == '') {
+          //aca pone el modal q corresponda
+
+
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(false); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();
+        }
+      },
+      error: (error) => {
+        //fijate las respuestas ( observer.next('string') ) q puse en el metodo del service registerAccess linea 288,
+        //arriba de eso dice return false o true, eso es lo q deberia devolver este metodo
+        console.error('Error al registrar egreso:', error);
+        if (error == 'fijate las respuestas ( observer.next() ) q puse en el metodo del service registerAccess'+
+                      'linea 288, arriba de eso dice return false o true, eso es lo q deberia devolver este metodo') {
+          //aca pone el modal q corresponda
+          
+          
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(false); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();        
+        } 
+          else if (error == '') {
+          //aca pone el modal q corresponda
+
+
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(false); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();       
+        }
+        else if (error == ''){
+          //aca pone el modal q corresponda
+
+
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(false); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();
+        }
+      }
+    });
+    this.subscription.add(sub);
+
+  });
+
+}
+
+prepareExitVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean>{
+  return new Observable<boolean>((observer) => {
+
+    const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate).subscribe({
+      next: (response) => {
+        //fijate las respuestas q puse een el metodo del service registerAccess linea 288
+        console.log("respuesta: ", response);
+        if (response == 'fijate las respuestas q puse een el metodo del service') {
+          //aca pone el modal q corresponda
+          
+
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(true); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();
+        } else if (response == '') {
+          //aca pone el modal q corresponda
+
+
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(false); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();
+        }
+      },
+      error: (error) => {
+        //fijate las respuestas q puse een el metodo del service registerAccess linea 288
+        console.error('Error al registrar egreso:', error);
+        if (error == 'fijate las respuestas q puse een el metodo del service') {
+          //aca pone el modal q corresponda
+          
+          
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(false); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();        
+        } 
+          else if (error == '') {
+          //aca pone el modal q corresponda
+
+
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(false); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();       
+        }
+        else if (error == ''){
+          //aca pone el modal q corresponda
+
+
+          //fijate vic q si el ingreso/egreso fue exitoso q devuelva true, sino q devuelva false
+          observer.next(false); //esto afecta al metodo onSelectionChange() linea 836 (aca en el component)
+          observer.complete();
+        }
+      }
+    });
+    this.subscription.add(sub);
+
+  });
+
 }
 
   allPeopleAllowed: AccessUserAllowedInfoDto[] = [];

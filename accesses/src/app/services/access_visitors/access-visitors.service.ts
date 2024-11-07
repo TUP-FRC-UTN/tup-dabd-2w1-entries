@@ -132,8 +132,8 @@ export class VisitorsService {
 
 
   //METODOS (para registrar Ingresos y Egresos)
-  RegisterExit(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
-    return new Observable<boolean>((observer) => {
+  RegisterExit(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<string> {
+    return new Observable<string>((observer) => {
 
       // Mostrar diálogo de confirmación
       Swal.fire({
@@ -166,12 +166,12 @@ export class VisitorsService {
                   if(response.status !== 409){
                     this.helperService.registerExitSuccess(newMovement_ExitDto);
                     //return true;
-                    observer.next(true);
+                    observer.next('egresoExitoso');
                     observer.complete();
                   } else {
-                    this.helperService.registerExitError();
+                    this.helperService.exitNotAllowed();
                     //return false;
-                    observer.next(false);
+                    observer.next('egresoPendiente');
                     observer.complete();
                   }
                   
@@ -181,13 +181,13 @@ export class VisitorsService {
                   if(error.status != 409){
                     this.helperService.registerExitError();
                     //return false;
-                    observer.next(false);
+                    observer.next('error');
                     observer.complete();
                     
                   } else {
                     this.helperService.exitNotAllowed();
                     //return false;
-                    observer.next(false);
+                    observer.next('egresoPendiente');
                     observer.complete();
                   }
                 }
@@ -201,12 +201,12 @@ export class VisitorsService {
                   if(response.status !== 409){
                     this.helperService.hourLateExitRegistered(visitor.authRanges.at(indexAuthRange));
                     //return true;
-                    observer.next(true);
+                    observer.next('egresoTardioRangoHorarioExitoso');
                     observer.complete();
                   } else {
-                    this.helperService.registerExitError();
+                    this.helperService.exitNotAllowed();
                     //return false;
-                    observer.next(false);
+                    observer.next('egresoPendiente');
                     observer.complete();
                   }
                   
@@ -216,13 +216,13 @@ export class VisitorsService {
                   if(error.status != 409){
                     this.helperService.registerExitError();
                     //return false;
-                    observer.next(false);
+                    observer.next('error');
                     observer.complete();
                     
                   } else {
                     this.helperService.exitNotAllowed();
                     //return false;
-                    observer.next(false);
+                    observer.next('egresoPendiente');
                     observer.complete();
                   }
                 }
@@ -237,12 +237,12 @@ export class VisitorsService {
                   if(response.status !== 409){
                     this.helperService.dateLateExitRegistered(visitor);
                     //return true;
-                    observer.next(true);
+                    observer.next('egresoTardioRangoFechaExitoso');
                     observer.complete();
                   } else {
-                    this.helperService.registerExitError();
+                    this.helperService.exitNotAllowed();
                     //return false;
-                    observer.next(false);
+                    observer.next('egresoPendiente');
                     observer.complete();
                   }
                   
@@ -252,13 +252,13 @@ export class VisitorsService {
                   if(error.status != 409){
                     this.helperService.registerExitError();
                     //return false;
-                    observer.next(false);
+                    observer.next('error');
                     observer.complete();
                     
                   } else {
                     this.helperService.exitNotAllowed();
                     //return false;
-                    observer.next(false);
+                    observer.next('egresoPendiente');
                     observer.complete();
                   }
                 }
@@ -267,7 +267,7 @@ export class VisitorsService {
 
         } else {
           // Si se cancela la confirmación
-          observer.next(false);
+          observer.next(''); //no hace nada cuando va al metodo del component
           observer.complete();
         }
       }).catch(error => {
@@ -285,8 +285,8 @@ export class VisitorsService {
 
 
   
-RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
-  return new Observable<boolean>((observer) => {
+RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observable<string> {
+  return new Observable<string>((observer) => {
 
     // Mostrar diálogo de confirmación
     Swal.fire({
@@ -330,13 +330,13 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
                   if(response.status !== 409){
                     this.helperService.registerEntrySuccess(newMovements_EntryDto);
                     //return true;
-                    observer.next(true);
+                    observer.next('ingresoExitoso');
                     observer.complete();   
 
                   } else {
-                    this.helperService.registerEntryError();
+                    this.helperService.entryNotAllowed();
                     //return false;
-                    observer.next(false);
+                    observer.next('ingresoPendiente');
                     observer.complete();
                   }
                 },
@@ -346,13 +346,13 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
                   if(error.status != 409){
                     this.helperService.registerEntryError();
                     //return false;
-                    observer.next(false);
+                    observer.next('error');
                     observer.complete();
 
                   } else {
                     this.helperService.entryNotAllowed();
                     //return false;
-                    observer.next(false);
+                    observer.next('ingresoPendiente');
                     observer.complete();
                   }
                 }
@@ -362,7 +362,7 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
               //se dispara si el Visitor esta fuera de rango (dia y horario permitido)
               this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(indexAuthRange));
               //return false;
-              observer.next(false);
+              observer.next('ingresoNoPermitidoFueraHorario');
               observer.complete();
 
             }
@@ -371,13 +371,13 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
             //se dispara si el Visitor esta fuera de rango (fechas permitidas)
             this.helperService.entryOutOfAuthorizedDateRange(visitor);
             //return false;
-            observer.next(false);
+            observer.next('ingresoNoPermitidoFueraRangoFecha');
             observer.complete();
           }
     
       } else {
         // Si se cancela la confirmación
-        observer.next(false);
+        observer.next(''); //no hace nada en el metodo del component
         observer.complete();
       }
     }).catch(error => {
