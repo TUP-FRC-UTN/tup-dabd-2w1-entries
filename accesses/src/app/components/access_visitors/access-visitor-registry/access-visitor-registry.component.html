@@ -10,16 +10,17 @@
     <div class="search-box">
       <input type="search" 
              class="form-control" 
-             placeholder="Buscar..."
+             placeholder="Buscar"
              id="customSearch">
     </div>
   </div>
 
   <!-- Selector de Tipo de Ingresante -->
-  <div class="col-auto d-flex align-items-center gap-2">
-    <span>Tipo de Ingresante:</span>
-    <div class="col-auto ps-2">
+  <div class="col-md-3 pe-0">
+    <div class="d-flex align-items-center flex-nowrap">
+      <label class="form-label mb-0 me-2 text-nowrap">Tipo de ingresante:</label>
       <ng-select
+       class="flex-grow-1"
         [items]="userTypeOptions"
         [multiple]="true"
         [closeOnSelect]="false"

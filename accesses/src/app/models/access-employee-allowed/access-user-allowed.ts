@@ -31,6 +31,7 @@ export interface AccessMovementEntryDto {
   movementDatetime: string; //string reprecenta LocalDateTime
   vehiclesId: number;
   document: string;
+  documentType: string;
 }
 
 export interface AccessMovementExitDto {
@@ -38,4 +39,5 @@ export interface AccessMovementExitDto {
   movementDatetime: string; //string reprecenta LocalDateTime
   vehiclesId: number;
   document: string;
+  documentType: string;
 }

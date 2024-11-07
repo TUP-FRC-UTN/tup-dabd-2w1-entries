@@ -148,6 +148,10 @@ export class AccessVisitorRegistryComponent
       checkbox.nativeElement.checked = false;
     });
 
+    const customSearchInput = document.getElementById('customSearch') as HTMLInputElement;
+    if (customSearchInput) {
+      customSearchInput.value = '';
+    }
     // Limpia el input de busqueda 
     this.dataTable.search('').draw(false);
 
@@ -1527,6 +1531,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: 0,
           document: visitor.document,
+          documentType: visitor.documentTypeDto.description
         };
   
         // Preparar mensaje del modal
@@ -1629,6 +1634,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: 0,
           document: visitor.document,
+          documentType: visitor.documentTypeDto.description
         };
   
         // Preparar mensaje del modal
