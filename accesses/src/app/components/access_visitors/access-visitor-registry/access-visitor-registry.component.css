@@ -351,3 +351,43 @@
 .modal-body {
   padding: 20px;
 }
+
+
+
+.dropdown{
+  position: relative;
+  right: 530px;
+  bottom: 1px;
+}
+
+.modal {
+  display: none; /* Escondido por defecto */
+  position: fixed; /* Fijo en la pantalla */
+  background-color: rgba(0, 0, 0, 0.4); /* Fondo negro con opacidad */
+}
+
+.modal.show {
+  display: block; /* Mostrar el modal cuando isModalOpen es verdadero */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% desde la parte superior y centrado */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Ancho del modal */
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}

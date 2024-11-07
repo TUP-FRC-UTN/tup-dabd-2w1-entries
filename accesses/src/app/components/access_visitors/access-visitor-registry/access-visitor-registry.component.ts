@@ -312,11 +312,11 @@ loadUsersAllowedData(): Observable<boolean> {
           `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
               `<div class="d-flex justify-content-center">
                 <div class="dropdown">
-                  <button class="btn btn-white dropdown-toggle p-0" 
+                  <button class="btn btn-light border border-2" 
                           type="button" 
                           data-bs-toggle="dropdown" 
                           aria-expanded="false">
-                      <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
+                    <i class="bi bi-three-dots-vertical"></i> <!-- Tres puntos verticales -->
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
                     <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
