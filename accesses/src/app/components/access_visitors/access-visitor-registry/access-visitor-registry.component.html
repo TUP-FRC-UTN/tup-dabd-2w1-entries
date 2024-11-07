@@ -4,34 +4,49 @@
   <div class="container-fluid m-1 p-2">
     <div class="container-fluid col-10 shadow p-3 mb-5 bg-body rounded"> <!-- Contenedor con sombra -->
       <div class>
-        <h4 class="text-left">Registro de Ingreso/Egreso</h4>
+        <h4 class="text-left">Registrar Ingresos/Egresos</h4>
       </div>
       <!-- Contenedor para los botones alineados a la derecha -->
-      <div class="d-flex justify-content-end botones">
-        <label>
-          <button 
-            class="btn btn-primary me-2" 
-            (click)="toggleAllVisitors()"
-            [ngClass]="{'active': allVisitorsChecked}">
-            <i class="bi bi-person-raised-hand"></i> 
-          </button>
-        </label>
-        <label>
-          <button 
-            class="btn btn-warning me-2" 
-            (click)="toggleAllEmployers()"
-            [ngClass]="{'active': allEmployersChecked}">
-            <i class="bi bi-tools"></i> 
-          </button>
-        </label>
-        <label>
-          <button 
-            class="btn btn-success me-2" 
-            (click)="toggleAllOwner()"
-            [ngClass]="{'active': allOwnersChecked}">
-            <i class="bi bi-house-fill"></i> 
-          </button>
-        </label>
+      <div class="d-flex justify-content-center botones">
+        <div class="dropdown">
+          <button class="btn dropdown-toggle w-95 me-2 border form-control" 
+          type="button" 
+          id="dropdownTipoIngresante" 
+          data-bs-toggle="dropdown" 
+          aria-expanded="false">
+      Seleccionar tipos de ingresante
+      <span class="selected-count"></span>
+  </button>
+  
+  
+      
+          <ul class="dropdown-menu w-95 mx-2" aria-labelledby="dropdownTipoIngresante">
+              <li>
+                  <label class="dropdown-item">
+                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="neighbour" id="neighbourCheckBox" (change)="onCheckboxChange($event)"> Vecinos
+                  </label>
+              </li>
+              <li>
+                  <label class="dropdown-item">
+                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="visitor" id="visitorCheckBox" (change)="onCheckboxChange($event)"> Visitantes
+                  </label>
+              </li>
+              <li>
+                  <label class="dropdown-item">
+                      <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="employee" id="employeeCheckBox" (change)="onCheckboxChange($event)"> Empleados
+                  </label>
+              </li>
+              <li>
+                <label class="dropdown-item">
+                    <input type="checkbox" #checkBoxRef class="form-check-input me-2" value="supplier" id="supplierCheckBox" (change)="onCheckboxChange($event)"> Proveedores
+                </label>
+            </li>
+          </ul>
+      </div>
+      
+        <button class="btn btn-secondary action-btn me-2" (click)="clearFilters()" title="Limpiar filtros">
+          <i class="bi bi-trash"></i>
+        </button>
 
         <button
           class="btn btn-primary me-2"
@@ -41,7 +56,7 @@
           <i class="bi bi-qr-code-scan"></i>
         </button>
         <!-- Botón para cargar imagen de QR -->
-        <button class="btn btn-primary me-2" (click)="uploadQrImage()">
+<!--         <button class="btn btn-primary me-2" (click)="uploadQrImage()">
           <i class="bi bi-file-earmark-arrow-up"></i>
         </button>
         <input
@@ -50,22 +65,23 @@
           #qrInput
           hidden
           (change)="onFileSelected($event)"
-        />
+        /> -->
       </div>
 
       <table
         id="visitorsTable"
-        class="table table-bordered table-striped"
+        class="table table-hover table-striped"
       >
         <thead>
           <tr>
+            <th scope="col">Estado</th>
             <th scope="col">Nombre</th>
             <th scope="col">Tipo</th>
             <th scope="col">Documento</th>
             <th scope="col">Vehiculo</th>
-            <th scope="col">Acción</th>
             <th scope="col">Observaciones</th>
-            <th scope="col">Estado</th>
+            <th scope="col">Acción</th>
+
           </tr>
         </thead>
         <tbody>
@@ -203,6 +219,8 @@
           <ng-template #noDays>
             <p>No hay fecha cargada.</p>
           </ng-template>
+        
+          
         </div>
       </div>
     </div>

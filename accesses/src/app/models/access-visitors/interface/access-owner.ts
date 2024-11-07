@@ -66,4 +66,8 @@ export interface AccessNewUserAllowedDtoOwner {
   user_allowed_Type: AccessUserallowedTypeDtoOwner;
   vehicle?: AccessVehicleOwner;
   email: string;
+}export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
 }

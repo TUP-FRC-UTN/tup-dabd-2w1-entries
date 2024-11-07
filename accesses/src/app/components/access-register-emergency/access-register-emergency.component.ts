@@ -125,9 +125,13 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
       lastName: new FormControl(emergencyPerson?.data.last_name ?? '')
     });
 
-    if (this.form.controls.onlyExit) {
+    if (this.form.controls.onlyExit.value) {
       personForm.controls.name.setValidators([]);
       personForm.controls.lastName.setValidators([]);
+    }    
+    else {
+      personForm.controls.name.setValidators([Validators.required]);
+      personForm.controls.lastName.setValidators([Validators.required]);
     }
 
     const onlyExitUpdated = this.form.controls.onlyExit.valueChanges.subscribe({

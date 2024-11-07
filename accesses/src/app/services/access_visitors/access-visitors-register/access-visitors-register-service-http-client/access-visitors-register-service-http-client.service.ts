@@ -3,8 +3,8 @@ import { HttpClient  } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, tap} from 'rxjs/operators';
 import { inject } from '@angular/core';
-import { AccessVisitorRecord, AccessVisitor, AccessAuthRange, AccessAllowedDay, AccessUser } from '../../../../models/access-visitors/access-visitors-models';
-
+import { AccessVisitorRecord, AccessAuthRange, AccessAllowedDay, AccessUser } from '../../../../models/access-visitors/access-visitors-models';
+import { QrDto } from '../../../../models/access-visitors/access-visitors-models';
 @Injectable({
   providedIn: 'root'
 })
@@ -27,7 +27,16 @@ export class AccessVisitorsRegisterServiceHttpClientService {
     });
   }
 
-
+  getUidQrByQrId(visitorId: string): Observable<QrDto> {
+    return this.http.post<QrDto>(`${this.apiUrl}/visitor-qr/${visitorId}`, null).pipe(
+      tap(response => {
+        console.log('Resultado de la validación del QR:', response);
+      }),
+      map(response => {
+        return response; 
+      })
+    );
+  }
 
 
 
@@ -76,7 +85,8 @@ private transformVisitorRecord(visitorRecord: AccessVisitorRecord): any[] {
         email: visitor.email,
         emailSent: false,
         authRanges: this.transformAuthRange(visitorRecord.authRange),
-        
+        neighbor_name:visitor.neighborName,
+        neighbor_last_name:visitor.neighborLastName,
         newVehicleDto: visitor.hasVehicle ? { 
             plate: visitor.vehicle?.licensePlate,
             vehicle_Type: visitor.vehicle?.vehicleType,
