@@ -66,19 +66,14 @@ export class AccessContainerVisitorsEditComponent implements OnInit, OnDestroy {
     this.loadVehicleTypes();
     this.listenToHasVehicleChanges();
     this.initVisitorRecord();
-    this.loadOwners();
+    
   }
   private resetEverything(): void {
     this.resetForm();
     
     this.visitorService.resetAllData();
   }
-  onOwnerChange(event: any) {
-    const selectedDocument = event.target?.value;
-    const selectedOwner = this.Owners.find(owner => owner.document === selectedDocument);
-    this.neighborid = selectedOwner?.authRanges[0].neighbor_id ?? 0;
-    this.visitorService.setNeighbors(this.neighborid);
-  }
+  
   initVisitorRecord(): void {
     combineLatest([
       this.visitorService.getVisitorsTemporalsSubject(),
@@ -108,19 +103,7 @@ export class AccessContainerVisitorsEditComponent implements OnInit, OnDestroy {
       insurance: ['']
     });
   }
-  loadOwners(): void {
-    this.visitorHttpService.getowners()
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe({
-        next: (Owners) => {
-          console.log('Owners cargados:', Owners);
-          this.Owners = Owners;
-        },
-        error: (error) => {
-          console.error('Error al cargar visitantes:', error);
-        }
-      });
-  }
+  
 loadVehicleTypes(): void {
   this.visitorHttpService.getVehicleTypes().pipe(
     takeUntil(this.unsubscribe$)
@@ -250,7 +233,7 @@ setFormData(visit: AccessUserAllowedInfoDto2): void {
 
 
       if (visit.authRange.allowedDays) {
- 
+        this.visitorService.clearAllowedDays();
         this.visitorService.addAllowedDays(visit.authRange.allowedDays);
       }
       

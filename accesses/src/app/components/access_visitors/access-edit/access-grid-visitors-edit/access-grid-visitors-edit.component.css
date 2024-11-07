@@ -1,127 +1,128 @@
-/* Sobreescribir estilos predeterminados de DataTables */
-
-/* Estilos para el encabezado de la tabla */
-#tablaconsulta thead tr {
-    background-color: #f8f9fa !important;
+/* Estilos de la tabla */
+.table-responsive {
+    overflow-x: auto;
+    margin-top: 1rem;
 }
 
-#tablaconsulta thead th {
-    background-color: #f8f9fa !important;
-    color: #212529 !important;
-    border-color: #dee2e6;
-    font-weight: 500;
-    border-top: 2px solid #3d2a1c; 
+#tablaconsulta {
+    width: 100%;
+    background-color: #f9f9f9;
+   
+   
 }
 
-/* Asegurarse que los estilos de DataTables no sobreescriban */
-table.dataTable thead th {
-    background-color: #f8f9fa !important;
-    color: #212529 !important;
+#tablaconsulta th, 
+#tablaconsulta td {
+    
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+   
 }
 
-/* Estilo de los botones de paginación */
-.dataTables_wrapper .dataTables_paginate .paginate_button:active {
-    background-color: #ffffff !important;
-    color: #000 !important;
-    border: 1px solid #ccc !important;
+/* Estilos para los botones de estado en la tabla */
+#tablaconsulta td .btn.rounded-pill {
+    min-width: 130px;
+    height: 32px;
+    padding: 4px 15px;
+    font-size: 12px;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:focus {
-    background-color: #ffffff !important;
-    color: #000 !important;
+#tablaconsulta td .btn.estado-btn {
+    min-width: 150px;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background-color: #f0f0f0 !important;
-    border: 1px solid transparent !important;
+#tablaconsulta td .btn.rounded-pill i {
+    font-size: 14px;
+    line-height: 1;
+    flex-shrink: 0;
 }
 
-/* Para el botón activo */
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background-color: #007bff !important;
-    color: #fff !important;
+#tablaconsulta td .btn.rounded-pill .estado-text {
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.dataTables_wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
 }
 
-/* Para quitar el fondo negro al hacer clic en "Primero" o "Último" */
-.dataTables_wrapper .dataTables_paginate .paginate_button:active,
-.dataTables_wrapper .dataTables_paginate .paginate_button:focus {
-    background-color: #ffffff !important;
-    color: #000 !important;
+.dataTables_scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
-/* Personalizar la tabla */
-table.dataTable {
-    border-collapse: collapse;
+.bottom {
+    position: sticky;
+    left: 0;
+    right: 0;
+    background-color: white;
+    z-index: 1;
+    margin-top: 10px;
+    padding: 8px;
+    border-top: 1px solid #dee2e6;
 }
 
-table.dataTable thead th {
-    background-color: #f8f9fa;
-    color: #212529;
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+    .action-btn {
+        padding: 0.25rem;
+    }
+    
+    .action-btn i {
+        font-size: 0.875rem;
+    }
+
+    .col-md-2-4 {
+        margin-bottom: 0.5rem;
+    }
+
+    ::ng-deep .ng-select .ng-select-container {
+        font-size: 0.875rem !important;
+    }
+
+    .input-group-with-label {
+        width: 100%;
+    }
+    
+    .col-md-4 {
+        margin-bottom: 1rem;
+    }
+
+    .action-buttons-container {
+        justify-content: flex-end;
+        width: 100%;
+    }
+
+    .modal-body .input-group-with-label {
+        flex-direction: row;
+    }
 }
 
-table.dataTable tr {
-    border-bottom: 1px solid rgb(245, 240, 240);
-}
+@media (max-width: 576px) {
+    .col-md-2-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
 
-table.dataTable tbody tr:nth-child(odd) {
-    background-color: #f2f2f2;
-}
+    .action-buttons-container {
+        justify-content: center;
+    }
 
-/* Cambiar el color de los iconos de ordenación */
-table.dataTable thead th.sorting:after,
-table.dataTable thead th.sorting_asc:after,
-table.dataTable thead th.sorting_desc:after {
-    color: #161a1a !important;
-}
-
-/* Estilos para el botón de tres puntos */
-.btn-options {
-    background-color: #ffffff !important; /* Fondo blanco */
-    border: 1px solid #dee2e6;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-weight: bold;
-    border-radius: 4px;
-}
-
-.btn-options::after {
-    content: '\2807';
-    font-size: 20px;
-    color: #6c757d;
-}
-
-.btn-options:hover {
-    background-color: #f8f9fa !important;
-}
-
-.btn-options:hover::after {
-    color: #343a40;
-}
-
-/* Estilos para el menú desplegable */
-.dropdown-menu {
-    min-width: 120px;
-    padding: 0.5rem 0;
-    margin: 0;
-    border: 1px solid rgba(0,0,0,.15);
-    border-radius: 0.25rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,.1);
-    background-color: #ffffff;
-}
-
-.dropdown-item {
-    padding: 0.5rem 1rem;
-    color: #212529;
-}
-
-.dropdown-item:hover {
-    background-color: #f8f9fa;
-}
-
-.dropdown-item.text-danger {
-    color: #dc3545 !important;
-}
-
-.dropdown-item.text-danger:hover {
-    background-color: #f8d7da;
+    .action-btn {
+        flex: 1;
+        max-width: calc(50% - 0.25rem);
+    }
 }

@@ -40,14 +40,33 @@ export class AccessVisitorsEditServiceService {
   getAllowedDays(): Observable<AccessApiAllowedDay[]> {
     return this.allowedDays$;
   }
-
-  addAllowedDays(allowedDays: AccessApiAllowedDay[]): void {
+  clearAllowedDays(): void {
+    this.allowedDaysSubject.next([]);
+  }
+  addAllowedDays(daysToAdd: AccessApiAllowedDay[]): void {
+    // Obtener los días actuales
     const currentDays = this.allowedDaysSubject.value;
-    this.allowedDaysSubject.next([...currentDays, ...allowedDays]);
+    
+    // Filtrar solo los días que no están duplicados
+    const uniqueDays = daysToAdd.filter(newDay => 
+      !currentDays.some(existingDay => 
+        existingDay.day === newDay.day &&
+        existingDay.init_hour[0] === newDay.init_hour[0] &&
+        existingDay.init_hour[1] === newDay.init_hour[1] &&
+        existingDay.end_hour[0] === newDay.end_hour[0] &&
+        existingDay.end_hour[1] === newDay.end_hour[1]
+      )
+    );
+
+    if (uniqueDays.length > 0) {
+      const updatedDays = [...currentDays, ...uniqueDays];
+      this.allowedDaysSubject.next(updatedDays);
+    }
   }
 
-  updateAllowedDays(allowedDays: AccessApiAllowedDay[]): void {
-    this.allowedDaysSubject.next(allowedDays);
+
+  updateAllowedDays(days: AccessApiAllowedDay[]): void {
+    this.allowedDaysSubject.next(days);
   }
 
   addVisitorsTemporalsSubject(visitor: AccessUserAllowedInfoDto2): boolean {

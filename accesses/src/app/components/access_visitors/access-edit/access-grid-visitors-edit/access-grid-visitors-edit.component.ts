@@ -24,7 +24,9 @@ export class AccessGridVisitorsEditComponent implements OnInit, OnDestroy{
   VisitorOnUpdate: AccessUserAllowedInfoDto2 | null = null;
   table: any = null;
   @Input() parent?: AccessContainerVisitorsEditComponent;
-  neighbors: number = 0;
+  Owners: Owner[] = [];
+
+  neighborid: number = 0;
   constructor(
     private visitorService: AccessVisitorsEditServiceService,
     private visitorHttpService: AccessVisitorsEditServiceHttpClientService
@@ -59,8 +61,7 @@ export class AccessGridVisitorsEditComponent implements OnInit, OnDestroy{
     this.visitors.forEach((visitor, index) => {
       this.table.row.add([
         visitor.document,
-        visitor.name,
-        visitor.last_name, 
+        `${visitor.last_name}, ${visitor.name}`,  // Combinamos apellido y nombre
         visitor.vehicle ? visitor.vehicle?.plate : 'Sin vehículo', 
         `<div class="dropdown">
           <button class="btn btn-light dropdown-toggle" type="button" id="actionMenu${index}" data-bs-toggle="dropdown" aria-expanded="false">
@@ -76,36 +77,38 @@ export class AccessGridVisitorsEditComponent implements OnInit, OnDestroy{
     
     this.table.draw();
     this.addActionsEventListeners();
-  }
+}
 
-  initializeDataTable(): void {
-    this.table = ($('#tablaconsulta') as any).DataTable({
-      dom: '<"top d-flex justify-content-start mb-2"f>rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"li>p><"clear">',
-      columnDefs: [
-        { orderable: false, searchable: false, targets: 4 },
-        { className: "text-start", targets: '_all' },
-        { className: "text-start", targets: 0 }
-      ],
-      paging: true,
-      ordering: true,
-      pageLength: 10,
-      lengthChange: true,
-      searching: true,
-      info: true,
-      autoWidth: false,
-      language: {
-        lengthMenu: " _MENU_ ",
-        zeroRecords: "No se encontraron invitaciones",
-        search: "Buscar:",
-        emptyTable: "No hay invitaciones cargadas",
-        info: "Mostrando _START_ a _END_ de _TOTAL_ invitaciones",
-        infoEmpty: "Invitaciones no encontradas",
-        infoFiltered: "(filtrado de _MAX_ invitaciones totales)"
-      },
-      responsive: true
-    });
-    this.updateDataTable();
-  }
+initializeDataTable(): void {
+  this.table = ($('#tablaconsulta') as any).DataTable({
+    dom: '<"top d-flex justify-content-start mb-2"f>rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"li>p><"clear">',
+    columnDefs: [
+      { orderable: false, searchable: false, targets: 3 }, // Cambiado de 4 a 3 porque ahora tenemos una columna menos
+      { className: "text-start", targets: '_all' },
+      { className: "text-start", targets: 0 },
+      { className: "text-center", targets: 3 }  // Agregamos esta línea para centrar la columna de acciones
+    ],
+    paging: true,
+    ordering: true,
+    pageLength: 5,
+    lengthChange: true,
+    searching: true,
+    info: true,
+    autoWidth: false,
+    language: {
+      lengthMenu: " _MENU_ ",
+      zeroRecords: "No se encontraron invitaciones",
+      search: "", 
+      searchPlaceholder: "Buscar",
+      emptyTable: "No hay invitaciones cargadas",
+      info: "",
+      infoEmpty: "",
+      infoFiltered: ""
+    },
+    responsive: true
+  });
+  this.updateDataTable();
+}
 
   addActionsEventListeners() {
     const updateButtons = document.querySelectorAll('.update-visitor-btn') as NodeListOf<HTMLButtonElement>;
@@ -143,10 +146,11 @@ export class AccessGridVisitorsEditComponent implements OnInit, OnDestroy{
   }
 
   ngOnInit(): void {
+    this.loadOwners();
     console.log('Iniciando componente de grilla...');
     this.visitorService.getNeighbors().subscribe(id => {
-      this.neighbors = id;
-      this.loadVisitors(this.neighbors)
+      this.neighborid = id;
+      this.loadVisitors(this.neighborid)
     });
     // Cargar visitantes iniciales
     ;
@@ -154,7 +158,7 @@ export class AccessGridVisitorsEditComponent implements OnInit, OnDestroy{
     // Suscribirse a cambios en el servicio
     if (this.parent) {
       this.parent.visitorSaved.subscribe(() => {
-        this.loadVisitors(this.neighbors);
+        this.loadVisitors(this.neighborid);
       });
     }
     
@@ -172,5 +176,27 @@ export class AccessGridVisitorsEditComponent implements OnInit, OnDestroy{
     }
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+  }
+
+  onOwnerChange(event: any) {
+    const selectedDocument = event.target?.value;
+    const selectedOwner = this.Owners.find(owner => owner.document === selectedDocument);
+    this.neighborid = selectedOwner?.authRanges[0].neighbor_id ?? 0;
+    this.visitorService.setNeighbors(this.neighborid);
+    console.log('Propietario seleccionado:', selectedOwner);
+  }
+
+  loadOwners(): void {
+    this.visitorHttpService.getowners()
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe({
+        next: (Owners) => {
+          console.log('Owners cargados:', Owners);
+          this.Owners = Owners;
+        },
+        error: (error) => {
+          console.error('Error al cargar visitantes:', error);
+        }
+      });
   }
 }

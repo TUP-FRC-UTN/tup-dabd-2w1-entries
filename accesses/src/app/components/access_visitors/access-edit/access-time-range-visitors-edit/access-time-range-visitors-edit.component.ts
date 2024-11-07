@@ -10,6 +10,7 @@ import { takeUntil } from 'rxjs';
 import { AccessVisitorsEditServiceService } from '../../../../services/access_visitors/access-visitors-edit/access-visitors-edit-service/access-visitors-edit-service.service';
 import { AccessVisitorsEditServiceHttpClientService } from '../../../../services/access_visitors/access-visitors-edit/access-visitors-edit-service-http-service/access-visitors-edit-service-http-client.service';
 import { AccessApiAllowedDay, AccessAuthRangeInfoDto2 } from '../../../../models/access-visitors/access-VisitorsModels';
+import { VisitorsService } from '../../../../services/access_visitors/access-visitors.service';
 
 @Component({
   selector: 'app-access-time-range-visitors-edit',
@@ -22,7 +23,7 @@ export class AccessTimeRangeVisitorsEditComponent implements OnInit {
   private unsubscribe$ = new Subject<void>();
   
   private _isFromParent: boolean = true;
-
+  neighborid: number = 0;
 
   days: AccessDay[] = [
     { name: 'Lun', value: false },
@@ -178,9 +179,14 @@ disableDateInputs: boolean = false;
       });
       return;
     }
-
+    this.visitorService.getNeighbors().subscribe(id => {
+      this.neighborid = id;
+  
+    });
+    console.log('Valores del vecino:', this.neighborid);
     const authRange: AccessAuthRangeInfoDto2 = {
-      neighbor_id :11,
+      
+      neighbor_id :this.neighborid,
       init_date: startDate,
       end_date: endDate,
       allowedDays: this._allowedDays,
@@ -205,18 +211,18 @@ disableDateInputs: boolean = false;
 
   updateDaysSelected(): void {
     this.days.forEach(day => {
-        const control = this.form.get(day.name);
-        if (control) {
-            const isAllowed = this._allowedDays.some(dayAllowed => dayAllowed.day === day.name);
-        
-            if (isAllowed) {
-                control.setValue(true);
-                control.disable(); 
-
-            }
+      const control = this.form.get(day.name);
+      if (control) {
+        const isAllowed = this.allowedDays.some(dayAllowed => dayAllowed.day === day.name);
+        if (isAllowed) {
+          control.setValue(true);
+          control.disable();
+        } else if (!control.disabled) {
+          control.setValue(false);
         }
+      }
     });
-}
+  }
 
   
   get allowedDays(): AccessApiAllowedDay[] {
@@ -251,47 +257,53 @@ disableDateInputs: boolean = false;
     if (!this.validateHours()) return;
     if (!this.validateDates()) return;
     
-
     const [initHour, initMinute] = this.form.value.initHour.split(':').map(Number);
     const [endHour, endMinute] = this.form.value.endHour.split(':').map(Number);
 
-    const crossesMidnight = 
-      initHour > endHour || (initHour === endHour && initMinute > endMinute);
+    const selectedDays = this.days.filter(day => this.form.controls[day.name].value);
+    const newDaysToAdd: AccessApiAllowedDay[] = selectedDays.map(day => ({
+      day: this.getDayName(day.name),
+      init_hour: [initHour, initMinute],
+      end_hour: [endHour, endMinute]
+    }));
 
-    const newDaysAlloweds: AccessApiAllowedDay[] = this.days
-      .filter(day => 
-        this.form.controls[day.name].value && 
-        !this._allowedDays.some(dp => dp.day === day.name)
+    // Verificar días duplicados
+    const duplicates = newDaysToAdd.filter(newDay => 
+      this.allowedDays.some(existingDay => 
+        existingDay.day === newDay.day &&
+        existingDay.init_hour[0] === newDay.init_hour[0] &&
+        existingDay.init_hour[1] === newDay.init_hour[1] &&
+        existingDay.end_hour[0] === newDay.end_hour[0] &&
+        existingDay.end_hour[1] === newDay.end_hour[1]
       )
-      .map(day => ({
-        day: this.getDayName(day.name),
-        init_hour: [initHour, initMinute],
-        end_hour: [endHour, endMinute]
-      }));
+    );
 
-    if (newDaysAlloweds.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Advertencia',
-        text: 'Por favor, seleccione al menos un día nuevo para agregar.',
-      });
-      return;
-    }
+  
 
-    this._allowedDays = [...this._allowedDays, ...newDaysAlloweds];
-    this.visitorService.updateAllowedDays(this._allowedDays);
+    // Si no hay duplicados, agregar los días
+    this.visitorService.addAllowedDays(newDaysToAdd);
+    
+    // Limpiar los campos del formulario
     this.form.controls['initHour'].setValue('');
     this.form.controls['endHour'].setValue('');
-    this.updateDaysSelected();
+    this.resetDaySelections();
+  }
+
+  private resetDaySelections(): void {
+    this.days.forEach(day => {
+      const control = this.form.get(day.name);
+      if (control && !control.disabled) {
+        control.setValue(false);
+      }
+    });
   }
   isAllowedDay(day: AccessDay): boolean {
     return this._allowedDays.some(allowedDay => allowedDay.day === day.name);
   }
 
   deleteAllowedDay(allowedDay: AccessApiAllowedDay): void {
-    this._allowedDays = this._allowedDays.filter(dp => dp.day !== allowedDay.day);
-    this.visitorService.updateAllowedDays(this._allowedDays);
-    this.updateDaysSelected();
+    const updatedDays = this.allowedDays.filter(dp => dp.day !== allowedDay.day);
+    this.visitorService.updateAllowedDays(updatedDays);
   }
 
   formatHour(schedule: AccessApiAllowedDay): string {
@@ -389,5 +401,30 @@ disableDateInputs: boolean = false;
     return dayMap[englishDay] || englishDay;
   }
 
-  
+  private validateDuplicateDays(daysToAdd: AccessApiAllowedDay[]): boolean {
+    const duplicates = daysToAdd.filter(newDay => 
+      this._allowedDays.some(existingDay => 
+        existingDay.day === newDay.day &&
+        existingDay.init_hour[0] === newDay.init_hour[0] &&
+        existingDay.init_hour[1] === newDay.init_hour[1] &&
+        existingDay.end_hour[0] === newDay.end_hour[0] &&
+        existingDay.end_hour[1] === newDay.end_hour[1]
+      )
+    );
+
+    if (duplicates.length > 0) {
+      const duplicateDays = duplicates
+        .map(day => this.getDayNameInSpanish(day.day))
+        .join(', ');
+      
+      Swal.fire({
+        icon: 'warning',
+        title: 'Días duplicados',
+        text: `Los siguientes días ya están agregados con el mismo horario: ${duplicateDays}`
+      });
+      return false;
+    }
+    return true;
+  }
+
 }
