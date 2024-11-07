@@ -1527,6 +1527,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: 0,
           document: visitor.document,
+          documentType: visitor.documentTypeDto.description
         };
   
         // Preparar mensaje del modal
@@ -1629,6 +1630,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: 0,
           document: visitor.document,
+          documentType: visitor.documentTypeDto.description
         };
   
         // Preparar mensaje del modal
