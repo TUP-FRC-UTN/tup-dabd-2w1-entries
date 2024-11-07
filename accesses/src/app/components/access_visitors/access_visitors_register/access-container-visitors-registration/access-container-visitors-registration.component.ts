@@ -266,39 +266,47 @@ onlyNumbers(event: Event): void {
 }
 
 sendVisitorWithoutRH(): void {
-    if (this.visitorForm.valid) {
-        const visitantData = this.visitorForm.value;
+  if (this.visitorForm.valid) {
+    const visitantData = this.visitorForm.value;
 
-        const vehicle: AccessVehicle | undefined = visitantData.hasVehicle ? {
-            licensePlate: visitantData.licensePlate,
-            vehicleType: {
-                description: visitantData.vehicleType 
-            },
-            insurance: visitantData.insurance,
-        } : undefined;
+    const vehicle: AccessVehicle | undefined = visitantData.hasVehicle ? {
+      licensePlate: visitantData.licensePlate,
+      vehicleType: {
+        description: visitantData.vehicleType 
+      },
+      insurance: visitantData.insurance,
+    } : undefined;
 
-        const visitor: AccessVisitor = {
-            firstName: visitantData.firstName,
-            lastName: visitantData.lastName,
-            document: visitantData.document,
-            email: visitantData.email,
-            hasVehicle: visitantData.hasVehicle,
-            documentType: visitantData.documentType || undefined,
-            vehicle: vehicle, 
-            neighborLastName:this.user?.lastname,
-            neighborName:this.user?.name
-        };
-        if(this.visitorService.addVisitorsTemporalsSubject(visitor)){
-          console.log("no sepudo agregar.")
-        }
-        
-        console.log(visitor);
-        console.log(this.visitorForm);
-        console.log(this.visitorForm.valid);
-        this.resetForm();
+    const visitor: AccessVisitor = {
+      firstName: visitantData.firstName,
+      lastName: visitantData.lastName,
+      document: visitantData.document,
+      email: visitantData.email,
+      hasVehicle: visitantData.hasVehicle,
+      documentType: visitantData.documentType || undefined,
+      vehicle: vehicle,
+      neighborLastName: this.user?.lastname,
+      neighborName: this.user?.name
+    };
+    if (!this.visitorService.addVisitorsTemporalsSubject(visitor)) {
+    
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se puede agregar el visitante: El documento o email ya existe en la lista.',
+        confirmButtonText: 'Entendido'
+      });
     } else {
-        console.log('El formulario no es válido');
+      this.resetForm();
     }
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Por favor, complete todos los campos requeridos correctamente.',
+      confirmButtonText: 'Entendido'
+    });
+  }
 }
 
 setFormData(visit: AccessVisitor): void {
