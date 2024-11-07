@@ -14,6 +14,7 @@ import {
   ViewChildren,
   QueryList,
 } from '@angular/core';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule } from '@angular/forms';
 import {
   AuthRangeInfoDto,
@@ -67,6 +68,7 @@ declare var bootstrap: any;
     AccessAutosizeTextareaDirective,
     RouterModule,
     NgxScannerQrcodeModule,
+    NgSelectModule
   ],
   providers: [DatePipe, VisitorsService, CommonModule],
   templateUrl: './access-visitor-registry.component.html',
@@ -100,10 +102,12 @@ export class AccessVisitorRegistryComponent
     //DATOS
     //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
     const sub = this.loadUsersAllowedData().subscribe({
-      next: (data) => {
+      next: () => {
         console.log("allPeopleAllowed: ", this.allPeopleAllowed)
         this.filteredAllPeopleAllowed = this.allPeopleAllowed;
+        console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
         
+
       },
       error: (err) => {
         console.log(err);
@@ -148,9 +152,9 @@ export class AccessVisitorRegistryComponent
     this.dataTable.search('').draw(false);
 
     //limpia los valores elegidos en los checkbox
-    this.selectedValues = [];
+    this.selectedUserTypes = [];
     //busca todos los userAllowed (ya q no hay filtros en this.selectedValues)
-    this.applyFilter();
+    this.onFilterSelectionChange();
   }
   // FIN metodos para limpiar los filtros
 
@@ -191,7 +195,7 @@ export class AccessVisitorRegistryComponent
           infoFiltered: '',
         },
         responsive: true,
-        dom: '<"top d-flex justify-content-start mb-2"f>rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"li>p><"clear">',
+        dom: '<"top d-flex justify-content-start mb-2">rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"li>p><"clear">',
       });
 
       $('#dt-search-0')
@@ -207,10 +211,15 @@ export class AccessVisitorRegistryComponent
             this.dataTable.search('').draw(false);
           }
         });
+
+        $('#customSearch').on('keyup', (e) => {
+          const target = e.target as HTMLInputElement;
+          this.dataTable.search(target.value).draw();
+        });
     });
+    
   }
   
-
 
 // metodos Load DATA
 loadUsersAllowedData(): Observable<boolean> {
@@ -242,6 +251,7 @@ loadUsersAllowedData(): Observable<boolean> {
             observer.next(true);
             observer.complete();
           });
+          this.updateDataTable();
         },
         error: (err) => {
           console.log(err);
@@ -591,119 +601,236 @@ loadUsersAllowedData(): Observable<boolean> {
 
   getUserTypeIcon(descr : string){
     switch (descr){
-      case "Employeed" : {
-        return `<button style="background-color: orangered;border: bisque;" class="btn btn-primary" title="Empleado">
-  <i class="bi bi-tools"></i> 
-</button>`
+      case "Employeed" : {    //naranja (orange)
+        return `<button style="background-color: #fd7e14;border: bisque;" class="btn btn-primary" title="Empleado">
+                  <i class="bi bi-briefcase"></i>
+                </button>`
       }
-      case "Supplier" : {
-        return `<button style="background-color: rgb(255, 230, 4);border: bisque;" class="btn btn-primary" title="Proveedor">
-  <i class="bi bi-box-seam-fill"></i> 
-</button>`
+      case "Supplier" : {   //turquesa / verde agua (teal)
+        return `<button style="background-color: #20c997;border: bisque;" class="btn btn-warning" title="Proveedor">
+                  <i class="bi bi-truck"></i>
+                </button>`
       }
-      case "Visitor" : {
-        return   `<button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
-  <i class="bi bi-person-raised-hand"></i>
-</button> `
+      case "Visitor" : {    //azul (blue)
+        return   `<button style="background-color: #0d6efd;border: bisque;" class="btn btn-primary" title="Visitante">
+                    <i class="bi bi-person-raised-hand"></i>
+                  </button> `
       }
-      case "Owner" : {
-        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
-  <i class="bi bi-house-fill"></i> 
-</button>`
+      case "Owner" : {    //verde (green)
+        return  `<button style="background-color: #198754;border: bisque;" class="btn btn-primary" title="Vecino">
+                    <i class="bi bi-house-fill"></i> 
+                  </button>`
       }
-      case "Tenant" : {
-        return  `<button style="background-color: green;border: bisque;" class="btn btn-primary" title="Vecino">
-  <i class="bi bi-house-fill"></i> 
-</button>`
+      case "Tenant" : {   //verde (green)
+        return  `<button style="background-color: #198754;border: bisque;" class="btn btn-primary" title="Vecino">
+                    <i class="bi bi-house-fill"></i> 
+                  </button>`
       }
+
+      case "Worker" : {   //rojo (red)
+        return  `<button style="background-color: #dc3545;border: bisque;" class="btn btn-primary" title="Obrero">
+                    <i class="bi bi-tools"></i> 
+                  </button>`
+      }
+      case "Delivery" : {   //violeta (indigo)
+        return  `<button style="background-color: purple;border: bisque;" class="btn btn-primary" title="Delivery">
+                    <i class="bi bi-box-seam"></i> 
+                  </button>`
+      }
+      case "Cleaning" : {   //rosa (pink)
+        return  `<button style="background-color: #d63384;border: bisque;" class="btn btn-primary" title="P. de Limpieza">
+                    <i class="bi bi-stars"></i>
+                  </button>`
+      }
+      case "Gardener" : { //celeste (cyan)
+        return  `<button style="background-color: #0dcaf0;border: bisque;" class="btn btn-primary" title="Jardinero">
+                    <i class="bi bi-flower1"></i>
+                  </button>`
+      }
+
       default : {
-        return  `<button style="background-color: blue;border: bisque;" class="btn btn-primary" title="Visitante">
-        <i class="bi bi-person-raised-hand"></i>
-      </button> `
+      return  `<button style="background-color: grey;border: bisque;" class="btn btn-primary" title="???">
+                  <i class="bi bi-question-lg"></i>
+                </button> `
       }
     }
   }
 
-  selectedValues: string[] = [];
+  selectedUserTypes: string[] = [];
 
-  onCheckboxChange(event: Event): void {
-    const checkbox = event.target as HTMLInputElement;
-    const value = checkbox.value;
+  // Definición de las opciones para ng-select
+  userTypeOptions = [
+    { value: 'neighbour', label: 'Vecino', descriptions: ['Owner', 'Tenant'] },
+    { value: 'visitor', label: 'Visitante', descriptions: ['Visitor'] },
+    { value: 'employee', label: 'Empleado', descriptions: ['Employeed'] },
+    { value: 'service', label: 'Servicio', descriptions: ['Supplier', 'Worker', 'Delivery', 'Cleaning', 'Gardener'] },
+    { value: 'supplier', label: 'Proveedor', descriptions: ['Supplier'] },
+    { value: 'worker', label: 'Obrero', descriptions: ['Worker'] },
+    { value: 'delivery', label: 'Delivery', descriptions: ['Delivery'] },
+    { value: 'cleaning', label: 'Personal de Limpieza', descriptions: ['Cleaning'] },
+    { value: 'gardener', label: 'Jardinero', descriptions: ['Gardener'] }
+  ];
 
-    if (checkbox.checked) {
-      this.selectedValues.push(value); // Agregar el valor si está seleccionado
+  onFilterSelectionChange(){
+    this.filteredAllPeopleAllowed = []; // Resetear la lista filtrada
+
+    if (this.selectedUserTypes.length > 0) {
+      // Obtener todas las descripciones seleccionadas
+      const selectedDescriptions = this.selectedUserTypes
+        .map(type => this.userTypeOptions.find(option => option.value === type)?.descriptions)
+        .flat();
+
+      // Filtrar usuarios según las descripciones seleccionadas
+      const filteredUsers = this.allPeopleAllowed.filter(user => 
+        selectedDescriptions.includes(user.userType.description)
+      );
+
+      // Procesar los usuarios filtrados
+      filteredUsers.forEach(user => {
+        if (['Owner', 'Tenant'].includes(user.userType.description)) {
+          // Caso especial para vecinos
+          this.filteredAllPeopleAllowed.push({
+            ...user,
+            neighbor_id: 0
+          });
+        } else {
+          // Resto de casos
+          this.filteredAllPeopleAllowed.push(user);
+        }
+      });
     } else {
-      this.selectedValues = this.selectedValues.filter(val => val !== value); // Eliminar el valor si está deseleccionado
+      // Si no hay selecciones, mostrar todos
+      this.filteredAllPeopleAllowed = [...this.allPeopleAllowed];
     }
 
-    console.log(this.selectedValues); // Puedes ver el resultado actual en la consola
-    this.applyFilter(); // Llama al método de filtro si necesitas hacerlo automáticamente
+    console.log("Lista filtrada:", this.filteredAllPeopleAllowed);
+    this.updateDataTable();
   }
 
-  applyFilter(): void {
-    this.filteredAllPeopleAllowed = []; // Resetea la lista "comun" (donde estan todos los userAllowed) 
-                                // antes de aplicar el filtro
-    //console.log("visitors list actual: ", this.allPeopleAllowed)
+  // onCheckboxChange(event: Event): void {
+  //   const checkbox = event.target as HTMLInputElement;
+  //   const value = checkbox.value;
 
-    if (this.selectedValues.length > 0) {        
-        for (let value of this.selectedValues) {
-            switch (value) {
-                case "employee": {
-                  this.loadUsersAllowedData();
-                  //lista de SOLO empleados
-                  let employees = this.allPeopleAllowed.filter(x => x.userType.description === 'Employeed')
-                  for (let user of employees) {
-                      this.filteredAllPeopleAllowed.push(user);
-                  }
-                  break; // Continua al siguiente valor en lugar de detener el ciclo
-                }
-                case "supplier": {
-                  this.loadUsersAllowedData();
-                  //lista de SOLO proveedores
-                  let suppliers = this.allPeopleAllowed.filter(x => x.userType.description === 'Supplier')
-                  for (let user of suppliers) {
-                      this.filteredAllPeopleAllowed.push(user);
-                  }
-                  break; // Continua al siguiente valor en lugar de detener el ciclo
-                }
-                case "neighbour": {
-                  this.loadUsersAllowedData();
-                  let neighbours = this.allPeopleAllowed.filter(x => x.userType.description === 'Owner' || x.userType.description === 'Tenant')
-                  for (let user of neighbours) {
-                      const owner: AccessUserAllowedInfoDto = {
-                          ...user,  // Copia los campos de `user`
-                          neighbor_id: 0  // Agrega el campo `neighbor_id` con un valor por defecto
-                      };
-                      this.filteredAllPeopleAllowed.push(owner);
-                  }
-                  break;
-                }
-                case "visitor": {
-                  this.loadUsersAllowedData();
-                  let visitors = this.allPeopleAllowed.filter(x => x.userType.description === 'Visitor')
-                  for (let user of visitors) {
-                      this.filteredAllPeopleAllowed.push(user);
-                  }
-                  break;
-              }
+  //   if (checkbox.checked) {
+  //     this.selectedFilterValues.push(value); // Agregar el valor si está seleccionado
+  //   } else {
+  //     this.selectedFilterValues = this.selectedFilterValues.filter(val => val !== value); // Eliminar el valor si está deseleccionado
+  //   }
 
-            }
-        }
-     } else {
+  //   console.log(this.selectedFilterValues); // Puedes ver el resultado actual en la consola
+  //   this.applyFilter(); // Llama al método de filtro si necesitas hacerlo automáticamente
+  // }
 
-        //si no hay ninguno seleccionado, cargamos todos los tipos
-        //Empleados y Proveedores
-        this.loadUsersAllowedData();
-        for (let user of this.allPeopleAllowed) {
-            this.filteredAllPeopleAllowed.push(user);
-        }
-        
-     }
+//   applyFilter(): void {
+//     this.filteredAllPeopleAllowed = []; // Resetea la lista "comun" (donde estan todos los userAllowed) 
+//                                 // antes de aplicar el filtro
+//     //console.log("visitors list actual: ", this.allPeopleAllowed)
 
-    console.log("visitors list filtrada: ", this.filteredAllPeopleAllowed)
+//     if (this.selectedFilterValues.length > 0) {        
+//         for (let value of this.selectedFilterValues) {
+//             switch (value) {
+//                 case "neighbour": {
+//                   this.loadUsersAllowedData();
+//                   let neighbours = this.allPeopleAllowed.filter(x => x.userType.description === 'Owner' || x.userType.description === 'Tenant')
+//                   for (let user of neighbours) {
+//                       const owner: AccessUserAllowedInfoDto = {
+//                           ...user,  // Copia los campos de `user`
+//                           neighbor_id: 0  // Agrega el campo `neighbor_id` con un valor por defecto
+//                       };
+//                       this.filteredAllPeopleAllowed.push(owner);
+//                   }
+//                   break;
+//                 }
+//                 case "visitor": {
+//                   this.loadUsersAllowedData();
+//                   let visitors = this.allPeopleAllowed.filter(x => x.userType.description === 'Visitor')
+//                   for (let user of visitors) {
+//                       this.filteredAllPeopleAllowed.push(user);
+//                   }
+//                   break;
+//                 }
+//                 case "employee": {
+//                   this.loadUsersAllowedData();
+//                   //lista de SOLO empleados
+//                   let employees = this.allPeopleAllowed.filter(x => x.userType.description === 'Employeed')
+//                   for (let user of employees) {
+//                       this.filteredAllPeopleAllowed.push(user);
+//                   }
+//                   break; 
+//                 }
+//                 case "service": {
+//                   this.loadUsersAllowedData();
+//                   //lista de "servicios" (Proveedor / Obrero / Delivery / P. de Limpieza / Jardinero)
+//                   let services = this.allPeopleAllowed.filter(x => x.userType.description === 'Supplier' ||
+//                                                                    x.userType.description === 'Worker' ||
+//                                                                    x.userType.description === 'Delivery' ||
+//                                                                    x.userType.description === 'Cleaning' ||
+//                                                                    x.userType.description === 'Gardener'
+//                   )
+//                   for (let user of services) {
+//                       this.filteredAllPeopleAllowed.push(user);
+//                   }
+//                   break; 
+//                 }
+//                 case "supplier": {
+//                   this.loadUsersAllowedData();
+//                   //lista de SOLO proveedores
+//                   let suppliers = this.allPeopleAllowed.filter(x => x.userType.description === 'Supplier')
+//                   for (let user of suppliers) {
+//                       this.filteredAllPeopleAllowed.push(user);
+//                   }
+//                   break;
+//                 }
+//                 case "worker": {
+//                   this.loadUsersAllowedData();
+//                   //lista de SOLO proveedores
+//                   let workers = this.allPeopleAllowed.filter(x => x.userType.description === 'Worker')
+//                   for (let user of workers) {
+//                       this.filteredAllPeopleAllowed.push(user);
+//                   }
+//                   break;
+//                 }
+//                 case "delivery": {
+//                   this.loadUsersAllowedData();
+//                   //lista de SOLO proveedores
+//                   let deliveries = this.allPeopleAllowed.filter(x => x.userType.description === 'Delivery')
+//                   for (let user of deliveries) {
+//                       this.filteredAllPeopleAllowed.push(user);
+//                   }
+//                   break;
+//                 }
+//                 case "cleaning": {
+//                   this.loadUsersAllowedData();
+//                   //lista de SOLO proveedores
+//                   let cleaningS = this.allPeopleAllowed.filter(x => x.userType.description === 'Cleaning')
+//                   for (let user of cleaningS) {
+//                       this.filteredAllPeopleAllowed.push(user);
+//                   }
+//                   break;
+//                 }
+//                 case "gardener": {
+//                   this.loadUsersAllowedData();
+//                   //lista de SOLO proveedores
+//                   let gardeners = this.allPeopleAllowed.filter(x => x.userType.description === 'Gardener')
+//                   for (let user of gardeners) {
+//                       this.filteredAllPeopleAllowed.push(user);
+//                   }
+//                   break;
+//                 }
+//             }
+//         }
+//      } else {
+//         //si no hay ninguno seleccionado, cargamos todos los tipos
+//         this.loadUsersAllowedData();
+//         for (let user of this.allPeopleAllowed) {
+//             this.filteredAllPeopleAllowed.push(user);
+//         }
+//      }
 
-    this.updateDataTable(); // Actualiza la tabla al final de aplicar todos los filtros
-}
+//     console.log("visitors list filtrada: ", this.filteredAllPeopleAllowed)
+
+//     this.updateDataTable(); 
+// }
 
 
   onSelectionChange(event: Event, visitor: AccessUserAllowedInfoDto,vehiclePlate:string) {
