@@ -52,7 +52,7 @@
                 [(ngModel)]="filterValues.selectedPropietario"
                 (change)="applyFilters()">
                 <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-                    <span>{{ items.length ? 'Seleccionadas (' + items.length + ')' : 'Seleccionar Propietario' }}</span>
+                    <span>{{ items.length ? '(' + items.length + ') Seleccionados  ' : 'Seleccionar Propietario' }}</span>
                 </ng-template>
                 <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
                     <input id="propietario-{{index}}" type="checkbox" [checked]="item$.selected"/> 
@@ -115,7 +115,7 @@
                                     [(ngModel)]="filterValues.entryOrExit"
                                     (change)="applyFilters()">
                                     <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-                                        <span>Seleccionadas ({{items.length}})</span>
+                                        <span>({{items.length}}) Seleccionados </span>
                                     </ng-template>
                                     <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
                                         <input id="entry-modal-{{index}}" type="checkbox" [checked]="item$.selected"/> 
@@ -139,7 +139,7 @@
                                     [(ngModel)]="filterValues.tipoIngresante"
                                     (change)="applyFilters()">
                                     <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-                                        <span>Seleccionadas ({{items.length}})</span>
+                                        <span>({{items.length}}) Seleccionados </span>
                                     </ng-template>
                                     <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
                                         <input id="ingresante-{{index}}" type="checkbox" [checked]="item$.selected"/> 
@@ -164,7 +164,7 @@
                                     [(ngModel)]="filterValues.typeCar"
                                     (change)="applyFilters()">
                                     <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-                                        <span>Seleccionadas ({{items.length}})</span>
+                                        <span>({{items.length}}) Seleccionados </span>
                                     </ng-template>
                                     <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
                                         <input id="vehiculo-{{index}}" type="checkbox" [checked]="item$.selected"/> 
@@ -189,7 +189,7 @@
                                     [(ngModel)]="filterValues.lateInRange"
                                     (change)="applyFilters()">
                                     <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-                                        <span>Seleccionadas ({{items.length}})</span>
+                                        <span>({{items.length}}) Seleccionados </span>
                                     </ng-template>
                                     <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
                                         <input id="horario-{{index}}" type="checkbox" [checked]="item$.selected"/> 
@@ -214,7 +214,7 @@
                                     [(ngModel)]="filterValues.days"
                                     (change)="applyFilters()">
                                     <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-                                        <span>Seleccionadas ({{items.length}})</span>
+                                        <span>({{items.length}}) Seleccionados </span>
                                     </ng-template>
                                     <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
                                         <input id="day-{{index}}" type="checkbox" [checked]="item$.selected"/> 
@@ -239,7 +239,7 @@
                                     [(ngModel)]="filterValues.selectedGuardia"
                                     (change)="applyFilters()">
                                     <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-                                        <span>Seleccionadas ({{items.length}})</span>
+                                        <span>({{items.length}}) Seleccionados </span>
                                     </ng-template>
                                     <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
                                         <input id="guardia-{{index}}" type="checkbox" [checked]="item$.selected"/> 
