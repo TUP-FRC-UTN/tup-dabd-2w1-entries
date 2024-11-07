@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AccessNewVehicleDto } from '../../../models/access-visitors/access-VisitorsModels';
 import { AbstractControl, AsyncValidatorFn, FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { UserAllowed, UserAllowedDto } from '../../../services/access_visitors/movement.interface';
@@ -11,7 +11,8 @@ import { AccessUserAllowedInfoDto } from '../../../models/access-visitors/access
 import { valHooks } from 'jquery';
 import { HttpErrorResponse } from '@angular/common/http';
 import { translateMessage, translations } from '../../../models/access-visitors/interface/access_api-response-tranasalted';
-
+import Swal from 'sweetalert2';
+declare var bootstrap: any;
 @Component({
   selector: 'app-access-vehicles-view',
   standalone: true,
@@ -19,17 +20,19 @@ import { translateMessage, translations } from '../../../models/access-visitors/
   templateUrl: './access-vehicles-view.component.html',
   styleUrl: './access-vehicles-view.component.css'
 })
-export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
+
+export class AccessVehiclesViewComponent implements OnDestroy,OnInit  {
   constructor(
-    private fb: FormBuilder,
+    private fb: FormBuilder
   ) {}
 
+  @ViewChild('confirmModal') confirmModal: any;
   ngOnInit(): void {
     this.loadVehicleTypes()
     this.formVehicle = this.fb.group({
       document: [
         '', 
-        [Validators.required, this.ValidateCharacters], 
+        [Validators.required, this.ValidateCharacters,Validators.pattern('^[0-9]+$')], 
         [this.finUserByDni()] // Agregando la validación asincrónica aquí
       ],
       documentType: ['', Validators.required],
@@ -48,6 +51,7 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
   }
+  
   private unsubscribe$ = new Subject<void>();
   vehicleTypes: string[] = ['Car', 'Motorbike', 'Truck', 'Van'];
   vehicleType: string[] = [];
@@ -61,6 +65,7 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
   vehiculos:AccessNewVehicleDto[]=[]
   isValidating: boolean = false;
   isUserFound: boolean = false;
+  selectedVehicle: any;
   userAllowed:UserAllowedDto|null=null;
   userId=1
   private readonly httpUserAllowedVehicle=inject(Access_userDocumentService)
@@ -69,7 +74,7 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit {
   
   formVehicle:FormGroup=new FormGroup({
     document:new FormControl('',[Validators.required,this.ValidateCharacters,
-      this.finUserByDni,Validators.minLength(8)]),
+      this.finUserByDni,Validators.minLength(8), Validators.pattern('^[0-9]+$')]),
     documentType:new FormControl('',[Validators.required]),
     vehicles:new FormArray([])
   })
@@ -145,7 +150,7 @@ finUserByDni(): AsyncValidatorFn {
 
 
   onSubmit():void{
-    if(this.formVehicle.valid){
+    if(this.formVehicle.valid && this.VehiclesArray.length > 0){
       const formValue=this.formVehicle.value;
       const bodyData={
         dni:formValue.document,
@@ -156,7 +161,12 @@ finUserByDni(): AsyncValidatorFn {
       .subscribe({
         next:(response)=>{
           if(response.success){
-            alert("Vehiculos añadido con exito");
+            Swal.fire({
+              icon:"success",
+              title:"Éxito",
+              text:"Vehiculos añadido con exito"
+            })
+          
             console.log(bodyData.vehicleDtos)
             this.userAllowed?.vehicles?.push(...bodyData.vehicleDtos)
             this.VehiclesArray.clear()
@@ -167,17 +177,33 @@ finUserByDni(): AsyncValidatorFn {
         if (error.error && error.error.message) {
     // Traducimos el mensaje de error usando translateMessage
        const translatedMessage = translateMessage(error.error.message);
-
+       Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `${translatedMessage}`,
+      });
          console.log('API Response Error:', error.error);
-        alert(`Error: ${translatedMessage}`);
+        
        } else {
         // Si no se puede traducir el mensaje, mostramos uno genérico
         console.error('Error en la solicitud:', error);
-         alert(`Error: ${error.message || error.statusText}`);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `${error.message || error.statusText}`,
+        });
+         
         }
         }
       });
       this.suscription.add(sub);
+    }
+    else{
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Debe agregar un vehiculo',
+      });
     }
   }
   loadVehicleTypes(): void {
@@ -195,13 +221,23 @@ finUserByDni(): AsyncValidatorFn {
       }
     });
   }
-  logicDownVehicle(plate:string,userId:number):void{
-    console.log(plate)
-    const sub=this.httpVehicleService.logicDown(plate,userId).subscribe({
+  openConfirmModal(plate: string): void {
+    this.selectedVehicle = { plate };  // Establecer la patente seleccionada
+    const modalElement = document.getElementById('confirmModal');
+    const modal = new bootstrap.Modal(modalElement); // Inicializar modal con Bootstrap
+    modal.show(); // Mostrar el modal
+  }
+  logicDownVehicle():void{
+    console.log(this.selectedVehicle.plate)
+    const sub=this.httpVehicleService.logicDown(this.selectedVehicle.plate,this.userId).subscribe({
       next:(response)=>{
         if(response.success){
-          alert("Vehiculos dado de baja con exito");
-         let index= this.userAllowed?.vehicles?.findIndex(vehicle=> vehicle.plate===plate)
+          Swal.fire({
+            icon:"success",
+            title:"Éxito",
+            text:"Vehiculos dado de baja con exito"
+          })
+         let index= this.userAllowed?.vehicles?.findIndex(vehicle=> vehicle.plate===this.selectedVehicle.plate)
          if(index!==-1 && index!==undefined)
          this.userAllowed?.vehicles?.splice(index,1)
         
@@ -213,6 +249,11 @@ finUserByDni(): AsyncValidatorFn {
     },
     error:(error)=>{
       console.log(error)
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al dar de baja',
+      });
     }});
     this.suscription.add(sub)
   }
