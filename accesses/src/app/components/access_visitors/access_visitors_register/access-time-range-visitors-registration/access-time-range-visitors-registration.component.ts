@@ -68,10 +68,20 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
 
   orderDays: string[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
-  constructor(private visitorService: AccessVisitorsRegisterServiceService, private fb: FormBuilder,private httpService:AccessVisitorsRegisterServiceHttpClientService) {
-      this.form = this.fb.group({
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
+  constructor(
+    private visitorService: AccessVisitorsRegisterServiceService, 
+    private fb: FormBuilder,
+    private httpService: AccessVisitorsRegisterServiceHttpClientService
+  ) {
+    const today = new Date();
+    // Ajustar al formato YYYY-MM-DD considerando la zona horaria local
+    const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000))
+                        .toISOString()
+                        .split('T')[0];
+  
+    this.form = this.fb.group({
+      startDate: [localDate, Validators.required],
+      endDate: [localDate, Validators.required],
       initHour: ['', Validators.required],
       endHour: ['', Validators.required],
       Lun: [{ value: false, disabled: true }],
@@ -82,13 +92,13 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
       Sáb: [{ value: false, disabled: true }],
       Dom: [{ value: false, disabled: true }],
     });
-
-
+  
     this.form.get('startDate')?.valueChanges.subscribe(() => this.updateAvailableDays());
     this.form.get('endDate')?.valueChanges.subscribe(() => this.updateAvailableDays());
     this.form.get('initHour')?.valueChanges.subscribe(() => this.validateTimeRange());
     this.form.get('endHour')?.valueChanges.subscribe(() => this.validateTimeRange());
   }
+  
 
 private validateTimeRange(): void {
   const initHour = this.form.get('initHour')?.value;

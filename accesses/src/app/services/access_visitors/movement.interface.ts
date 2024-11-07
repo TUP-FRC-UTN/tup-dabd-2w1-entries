@@ -13,6 +13,15 @@ export  interface UserAllowed {
     
  
 } 
+export  interface UserAllowedDto {
+    document: string;
+    name: string;
+    last_name: string;
+    email: string;
+    vehicles: any[] | null;
+    
+ 
+} 
 export interface VehicleDto {
     plate: string;
     vehicleType: vehicleTypeDto | null;

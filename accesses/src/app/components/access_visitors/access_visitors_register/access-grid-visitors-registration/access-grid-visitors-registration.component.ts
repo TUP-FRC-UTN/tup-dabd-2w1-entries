@@ -89,7 +89,8 @@ export class AccessGridVisitorsRegistrationComponent implements OnInit, OnDestro
       language: {
         lengthMenu: " _MENU_ ",
         zeroRecords: "No se encontraron invitaciones",
-        search: "Buscar:",
+        search: "", 
+        searchPlaceholder: "Buscar",
         emptyTable: "No hay invitaciones cargadas",
         info: "",
         infoEmpty: "",

@@ -1,7 +1,12 @@
-import { Component, Input, OnDestroy, OnInit, AfterViewInit, SimpleChanges } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DataTablesModule } from 'angular-datatables';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { FormsModule } from '@angular/forms';
+import { AccessUserReportService } from '../../../../services/access_report/access-user-report.service';
+import { forkJoin, Observable, of } from 'rxjs';
+
 import $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs5';
@@ -14,93 +19,153 @@ import 'jszip';
 import Swal from 'sweetalert2';
 
 interface FilterValues {
-  entryOrExit: Set<string>;
-  tipoIngresante: Set<string>;
-  nombreIngresante: string;
-  documento: string;
-  typeCar: Set<string>;
-  propietario: string;
-  lateInRange: Set<string>;
-  plate: string;
-  days: Set<string>;
-}
-
-interface DataTableButtons {
-  new (dt: any, config: any): any;
+  entryOrExit: string[];
+  tipoIngresante: string[];
+  unifiedSearch: string;
+  typeCar: string[];
+  lateInRange: string[];
+  days: string[];
+  selectedGuardia: number[];  
+  selectedPropietario: number[];
 }
 
 @Component({
   selector: 'app-access-table',
   standalone: true,
-  imports: [DataTablesModule, CommonModule, HttpClientModule],
+  imports: [
+    DataTablesModule, 
+    CommonModule, 
+    HttpClientModule,
+    NgSelectModule,
+    FormsModule
+  ],
   templateUrl: './access-table.component.html',
   styleUrls: ['./access-table.component.css']
 })
 export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() selectedYear: number | null = null;
-  @Input() selectedMonth: number | null = null;
+  anios: number[] = [];
+  meses: number[] = [];
+  selectedYear: number | null = null;
+  selectedMonth: number | null = null;
 
   movements: any[] = [];
   table: any = null;
   exportButtonsEnabled: boolean = false;
-  days: number[] = [];
-  showFilters = false;
+  propietariosOptions: any[] = [];
+  guardiasOptions: any[] = [];
+
+  entryExitOptions = [
+    { value: 'entrada', label: 'Entrada' },
+    { value: 'salida', label: 'Salida' }
+  ];
+
+  tiposIngresante = [
+    { value: 'neighbour', label: 'Vecino' },
+    { value: 'visitor', label: 'Visitante' },
+    { value: 'delivery', label: 'Delivery' },
+    { value: 'constructionworker', label: 'Obrero' },
+    { value: 'suplier', label: 'Proveedor' },
+    { value: 'employee', label: 'Empleado' },
+    { value: 'services', label: 'Servicios' }
+  ];
+
+  tiposVehiculo = [
+    { value: 'car', label: 'Auto' },
+    { value: 'motorcycle', label: 'Moto' },
+    { value: 'truck', label: 'Camión' },
+    { value: 'bike', label: 'Bicicleta' },
+    { value: 'van', label: 'Camioneta' },
+    { value: 'walk', label: 'Sin vehículo' }
+  ];
+
+  estadoHorarioOptions = [
+    { value: 'inrange', label: 'En horario' },
+    { value: 'late', label: 'Tarde' }
+  ];
+
+  daysOptions = Array.from({ length: 31 }, (_, i) => ({
+    value: (i + 1).toString(),
+    label: (i + 1).toString()
+  }));
 
   filterValues: FilterValues = {
-    entryOrExit: new Set<string>(),
-    tipoIngresante: new Set<string>(),
-    nombreIngresante: '',
-    documento: '',
-    typeCar: new Set<string>(),
-    propietario: '',
-    lateInRange: new Set<string>(),
-    plate: '',
-    days: new Set<string>()
+    entryOrExit: [],
+    tipoIngresante: [],
+    unifiedSearch: '',
+    typeCar: [],
+    lateInRange: [],
+    days: [],
+    selectedGuardia: [],
+    selectedPropietario: []
   };
 
-  private readonly entryOrExitMap: { [key: string]: string } = {
-    'entry': 'entrada',
-    'exit': 'salida'
-  };
+  constructor(
+    private http: HttpClient,
+    private userService: AccessUserReportService
+  ) {
+    this.initializeYears();
+    this.initializeMonths();
+  }
 
-  private readonly tipoIngresanteMap: { [key: string]: string } = {
-    'neighbour': 'vecino',
-    'visitor': 'visitante',
-    'delivery': 'delivery',
-    'constructionworker': 'obrero',
-    'suplier': 'proveedor',
-    'employee': 'empleado',
-    'services': 'servicios',
-  };
+  private initializeYears() {
+    const currentYear = new Date().getFullYear();
+    this.anios = Array.from({ length: 5 }, (_, i) => currentYear - i);
+  }
 
-  private readonly typeCarMap: { [key: string]: string } = {
-    'car': 'auto',
-    'motorcycle': 'moto',
-    'truck': 'camion',
-    'bike': 'bicicleta',
-    'van': 'camioneta',
-    'walk': 'sin vehículo',
-  };
-
-  private readonly lateInRangeMap: { [key: string]: string } = {
-    'inrange': 'en horario',
-    'late': 'tarde',
-  };
-
-  constructor(private http: HttpClient) {}
+  private initializeMonths() {
+    this.meses = Array.from({ length: 12 }, (_, i) => i + 1);
+  }
 
   ngOnInit(): void {
-    this.generateDays();
+    this.loadSelectOptions();
+    const currentDate = new Date();
+    this.selectedYear = currentDate.getFullYear();
+    this.selectedMonth = currentDate.getMonth() + 1;
     this.fetchData();
   }
 
-  private generateDays(): void {
-    this.days = Array.from({ length: 31 }, (_, i) => i + 1);
+  onYearChange(year: number): void {
+    this.selectedYear = year;
+    this.fetchData();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedYear'] || changes['selectedMonth']) {
-      this.fetchData();
+  onMonthChange(month: number): void {
+    this.selectedMonth = month;
+    this.fetchData();
+  }
+
+  private loadSelectOptions(): void {
+    this.userService.getPropietariosForSelect().subscribe(
+      options => this.propietariosOptions = options
+    );
+
+    this.userService.getGuardiasForSelect().subscribe(
+      options => this.guardiasOptions = options
+    );
+  }
+
+  applyFilters(): void {
+    if (this.table) {
+      this.table.draw();
+    }
+  }
+
+  clearFilters(): void {
+    this.filterValues = {
+      entryOrExit: [],
+      tipoIngresante: [],
+      unifiedSearch: '',
+      typeCar: [],
+      lateInRange: [],
+      days: [],
+      selectedGuardia: [],
+      selectedPropietario: []
+    };
+
+    $('#unifiedSearchFilter').val('');
+    
+    if (this.table) {
+      this.table.draw();
     }
   }
 
@@ -112,95 +177,18 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
     this.removeEventListeners();
-    $('#excelBtn, #pdfBtn, #printBtn').off('click');
+    $('#excelBtn, #pdfBtn').off('click');
   }
 
   private removeEventListeners(): void {
-    $('.dropdown-menu input[type="checkbox"]').off();
-    $('#nombreIngresanteFilter, #documentoFilter, #propietarioFilter, #placaFilter').off();
-    $('.dropdown-menu').off();
-    $('#advancedFiltersToggle').off();
-  }
-
-  toggleAdvancedFilters(): void {
-    this.showFilters = !this.showFilters;
-    const advancedFilters = document.getElementById('advancedFilters');
-    if (advancedFilters) {
-      if (this.showFilters) {
-        advancedFilters.classList.add('show');
-      } else {
-        advancedFilters.classList.remove('show');
-      }
-    }
-  }
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.initializeDataTable();
-      this.setupFilters();
-      this.setupDropdowns();
-    });
-  }
-
-  clearFilters(): void {
-    // Limpiar todos los checkboxes
-    $('.dropdown-menu input[type="checkbox"]').prop('checked', false);
-    
-    // Limpiar los inputs de texto
-    $('#nombreIngresanteFilter, #documentoFilter, #propietarioFilter, #placaFilter').val('');
-    
-    // Limpiar los contadores seleccionados
-    $('.dropdown button .selected-count').text('');
-    
-    // Limpiar los filtros avanzados
-    $('#placaFilter, #propietarioFilter').val('');
-    $('#dropdownTypecar, #dropdownLateInRange').find('input[type="checkbox"]').prop('checked', false);
-    $('#dropdownTypecar, #dropdownLateInRange').find('.selected-count').text('');
-    
-    // Resetear los valores de filtro
-    this.filterValues = {
-      entryOrExit: new Set<string>(),
-      tipoIngresante: new Set<string>(),
-      nombreIngresante: '',
-      documento: '',
-      typeCar: new Set<string>(),
-      propietario: '',
-      lateInRange: new Set<string>(),
-      plate: '',
-      days: new Set<string>()
-    };
-    
-    // Redibujar la tabla
-    if (this.table) {
-      this.table.draw();
-    }
+    $('#unifiedSearchFilter').off();
   }
 
   fetchData(): void {
     if (this.selectedYear && this.selectedMonth) {
       this.http.get<any>(`http://localhost:8090/movements_entryToNeighbor/ByMonth?year=${this.selectedYear}&month=${this.selectedMonth}`)
-        .subscribe({
-          next: (response) => {
-            console.log('API Response:', response);
-            this.movements = response.data;
-            this.loadDataIntoTable();
-          },
-          error: (error) => {
-            Swal.fire({
-              icon: 'error',
-              title: '¡Error!',
-              text: 'Ocurrió un error al intentar cargar los datos. Por favor, intente nuevamente.',
-            });
-          }
-        });
-    }
-    else {
-      const year = new Date().getFullYear();
-      const month = new Date().getMonth() + 1;
-      this.http.get<any>(`http://localhost:8090/movements_entryToNeighbor/ByMonth?year=${year}&month=${month}`)
       .subscribe({
         next: (response) => {
-          console.log('API Response:', response);
           this.movements = response.data;
           this.loadDataIntoTable();
         },
@@ -215,211 +203,91 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  initializeDataTable(): void {
-    this.table = ($('#myTable') as any).DataTable({
-      paging: true,
-      ordering: false,
-      pageLength: 5,
-      lengthMenu: [5, 10, 25, 50],
-      lengthChange: true,
-      searching: true,
-      info: true,
-      autoWidth: false,
-      language: {
-        lengthMenu: " _MENU_ ",
-        zeroRecords: "No se encontraron registros",
-        info: "Mostrando de _START_ a _END_ de _TOTAL_ registros",
-        infoEmpty: "No se encontraron resultados",
-        infoFiltered: "(filtrado de _MAX_ registros totales)",
-        search: "Buscar:",
-        emptyTable: "No se encontraron resultados",
-      },
-      responsive: true,
-      dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
-      drawCallback: function(settings: any) {
-        const table = this;
-        setTimeout(function() {
-          $(table).find('td:nth-child(3)').each(function() {
-            const cellText = $(this).text().trim().toLowerCase();
-            if (cellText === 'entrada') {
-              $(this).html(`
-                <div class="d-flex justify-content-center">
-                  <button type="button" class="btn rounded-pill w-75" 
-                    style="background-color: #28a745; color: white; border: none; text-transform: uppercase;">
-                    ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
-                  </button>
-                </div>
-              `);
-            } else if (cellText === 'salida') {
-              $(this).html(`
-                <div class="d-flex justify-content-center">
-                  <button type="button" class="btn rounded-pill w-75" 
-                    style="background-color: #dc3545; color: white; border: none; text-transform: uppercase;">
-                    ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
-                  </button>
-                </div>
-              `);
-            }
-          });
-          $(table).find('td:nth-child(12)').each(function() {
-            const estadoText = $(this).text().trim();
-            if (estadoText === 'Tarde') {
-              $(this).css("color", "red");
-              $(this).html(`<i class="fa-solid fa-triangle-exclamation"></i> ${estadoText}`);
-            } else if (estadoText === 'En horario') {
-              $(this).css("color", "green");
-              $(this).html(`<i class="fa-solid fa-circle-check"></i> ${estadoText}`);
-            }
-          });
-        }, 0);
-      }
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.initializeDataTable();
+      this.setupFilters();
     });
+  }
 
-    $('#excelBtn').on('click', () => {
-      if (!this.exportButtonsEnabled) return;
-      this.table.button('.buttons-excel').trigger();
-    });
-
-    $('#pdfBtn').on('click', () => {
-      if (!this.exportButtonsEnabled) return;
-      this.table.button('.buttons-pdf').trigger();
-    });
-
-    $('#printBtn').on('click', () => {
-      if (!this.exportButtonsEnabled) return;
-      this.table.button('.buttons-print').trigger();
-    });
-
-    const DataTableButtons = ($.fn.dataTable as any).Buttons as DataTableButtons;
-    const buttons = new DataTableButtons(this.table, {
+  private setupExportButtons(): void {
+    const today = new Date();
+    const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+    const formattedDateForFilename = formattedDate.replace(/\//g, '-');
+    
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const currentMonth = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
+  
+    const buttons = new ($.fn.dataTable as any).Buttons(this.table, {
       buttons: [
         {
           extend: 'excel',
           text: 'Excel',
           className: 'buttons-excel d-none',
           filename: () => {
-            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            const month = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
-            return `Movimientos de ${month}`;
+            return `${formattedDateForFilename}. Movimientos del mes de ${currentMonth}`;
           },
           exportOptions: {
             columns: ':visible'
           },
-          title: `LISTADO MENSUAL DE INGRESOS/EGRESOS - 
-                  Fecha de emisión ${new Date().toLocaleDateString('es-AR')}`,
+          messageTop: `Movimientos del mes de ${currentMonth}\nFecha de emisión: ${formattedDate}`,
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS',
+          customize: function(xlsx: any) {
+            const sheet = xlsx.xl.worksheets['sheet1.xml'];
+            $('row:first c', sheet).attr('s', '48');
+            $('row c[r^="A1"]', sheet).attr('s', '51');
+          },
         },
         {
           extend: 'pdf',
           text: 'PDF',
           className: 'buttons-pdf d-none',
           filename: () => {
-            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            const month = this.selectedMonth ? monthNames[this.selectedMonth - 1] : monthNames[new Date().getMonth()];
-            return `Movimientos de ${month}`;
+            return `${formattedDateForFilename}. Movimientos del mes de ${currentMonth}`;
           },
           orientation: 'landscape',
           exportOptions: {
             columns: ':visible'
           },
-          title: `LISTADO MENSUAL DE INGRESOS/EGRESOS - 
-                    Fecha de emisión ${new Date().toLocaleDateString('es-AR')}`,
-        },
+          customize: function(doc: any) {
+            doc.content[1].table.headerRows = 1;
+            doc.content[1].table.body[0].forEach((cell: any) => {
+              cell.fillColor = '#25B79D';
+              cell.color = '#FFFFFF';
+            });
+            
+            doc.content[0] = {
+              text: 'LISTADO MENSUAL DE INGRESOS/EGRESOS',
+              alignment: 'left',
+              fontSize: 14,
+              bold: true,
+              margin: [0, 0, 0, 10]
+            };
+            
+            doc.content.splice(1, 0, {
+              text: `Movimientos del mes de: ${currentMonth}`,
+              alignment: 'left',
+              fontSize: 12,
+              margin: [0, 0, 0, 5]
+            });
+          },
+          title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
+        }
       ]
     });
-
+  
     this.table.buttons().container().appendTo('#myTable_wrapper');
-
-    this.table.on('draw', () => {
-      const recordCount = this.table.rows({ filter: 'applied' }).count();
-      this.exportButtonsEnabled = recordCount > 0;
-      const buttons = ['#excelBtn', '#pdfBtn', '#printBtn'];
-      buttons.forEach(btn => {
-        $(btn).prop('disabled', !this.exportButtonsEnabled);
-      });
-    });
-  }
-
-  setupDropdowns(): void {
-    $('.dropdown-menu input[type="checkbox"]').on('click', (e) => {
-      e.stopPropagation();
-      const checkbox = $(e.target);
-      const value = checkbox.val() as string;
-      const isChecked = checkbox.prop('checked');
-      const dropdownId = checkbox.closest('.dropdown').find('button').attr('id');
-
-      switch (dropdownId) {
-        case 'dropdownEntryExit':
-          this.updateFilterSet('entryOrExit', value, isChecked);
-          break;
-        case 'dropdownTipoIngresante':
-          this.updateFilterSet('tipoIngresante', value, isChecked);
-          break;
-        case 'dropdownTypecar':
-          this.updateFilterSet('typeCar', value, isChecked);
-          break;
-        case 'dropdownLateInRange':
-          this.updateFilterSet('lateInRange', value, isChecked);
-          break;
-        case 'dropdownDays':
-          this.updateFilterSet('days', value, isChecked);
-          break;
-      }
-
-      const dropdown = checkbox.closest('.dropdown');
-      const selectedCount = dropdown.find('input:checked').length;
-      dropdown.find('.selected-count').text(selectedCount > 0 ? `(${selectedCount})` : '');
-
-      if (this.table) {
-        this.table.draw();
-      }
-    });
-
-    $('.dropdown-menu').on('click', (e) => {
-      e.stopPropagation();
-    });
-  }
-
-  private updateFilterSet(filterName: keyof FilterValues, value: string, isChecked: boolean): void {
-    const filter = this.filterValues[filterName];
-    if (filter instanceof Set) {
-      if (isChecked) {
-        filter.add(value.toLowerCase());
-      } else {
-        filter.delete(value.toLowerCase());
-      }
-    }
   }
 
   setupFilters(): void {
-    $('#nombreIngresanteFilter, #documentoFilter, #propietarioFilter, #placaFilter').on('keyup', (e) => {
+    $('#unifiedSearchFilter').on('keyup', (e) => {
       const target = $(e.target);
       const inputValue = target.val() as string;
 
       if (inputValue.length < 3) {
-        if (target.attr('id') === 'nombreIngresanteFilter') {
-          this.filterValues.nombreIngresante = '';
-        } else if (target.attr('id') === 'documentoFilter') {
-          this.filterValues.documento = '';
-        } else if (target.attr('id') === 'propietarioFilter') {
-          this.filterValues.propietario = '';
-        } else {
-          this.filterValues.plate = '';
-        }
-
-        if (this.table) {
-          this.table.draw();
-        }
-        return;
-      }
-
-      if (target.attr('id') === 'nombreIngresanteFilter') {
-        this.filterValues.nombreIngresante = inputValue;
-      } else if (target.attr('id') === 'documentoFilter') {
-        this.filterValues.documento = inputValue;
-      } else if (target.attr('id') === 'propietarioFilter') {
-        this.filterValues.propietario = inputValue;
-      } else if (target.attr('id') === 'placaFilter') {
-        this.filterValues.plate = inputValue;
+        this.filterValues.unifiedSearch = '';
+      } else {
+        this.filterValues.unifiedSearch = inputValue;
       }
 
       if (this.table) {
@@ -435,74 +303,83 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private filterRow(data: string[]): boolean {
-    const fecha = data[0];  
-    const hora = data[1];   
-    const tipoEntrada = data[2];  
-    const tipoIngresante = data[3];
-    const nombre = data[4];
-    const documento = data[5];
-    const tipoVehiculo = data[7];
-    const placa = data[8];
-    const propietario = data[9];
-    const estadoHorario = data[11];
+    const [fecha, hora, tipoEntrada, tipoIngresante, nombre, documento, 
+           observaciones, tipoVehiculo, placa, propietario, guardia, estadoHorario] = data;
 
-    // Filtro de tipo de entrada
-    if (this.filterValues.entryOrExit.size > 0 && 
-        !Array.from(this.filterValues.entryOrExit).some(value => 
-          tipoEntrada.toLowerCase() === this.entryOrExitMap[value])) {
+    if (this.filterValues.unifiedSearch) {
+      const searchTerm = this.filterValues.unifiedSearch.toLowerCase();
+      const matchesNombre = nombre.toLowerCase().includes(searchTerm);
+      const matchesDocumento = documento.toLowerCase().includes(searchTerm);
+      const matchesPlaca = placa.toLowerCase().includes(searchTerm);
+      
+      if (!matchesNombre && !matchesDocumento && !matchesPlaca) {
+        return false;
+      }
+    }
+
+    const mappings = {
+      entrada: 'entrada',
+      salida: 'salida',
+      neighbour: 'vecino',
+      visitor: 'visitante',
+      delivery: 'delivery',
+      constructionworker: 'obrero',
+      suplier: 'proveedor',
+      employee: 'empleado',
+      services: 'servicios',
+      car: 'auto',
+      motorcycle: 'moto',
+      truck: 'camion',
+      bike: 'bicicleta',
+      van: 'camioneta',
+      walk: 'sin vehículo',
+      inrange: 'en horario',
+      late: 'tarde'
+    };
+
+    if (this.filterValues.entryOrExit.length > 0 && 
+        !this.filterValues.entryOrExit.some(value => 
+          tipoEntrada.toLowerCase() === value.toLowerCase())) {
       return false;
     }
 
-    // Filtro de tipo de ingresante
-    if (this.filterValues.tipoIngresante.size > 0 && 
-        !Array.from(this.filterValues.tipoIngresante).some(value => 
-          tipoIngresante.toLowerCase() === this.tipoIngresanteMap[value])) {
+    if (this.filterValues.tipoIngresante.length > 0 && 
+        !this.filterValues.tipoIngresante.some(value => 
+          tipoIngresante.toLowerCase() === mappings[value as keyof typeof mappings])) {
       return false;
     }
 
-    // Filtro de nombre
-    if (this.filterValues.nombreIngresante && 
-        !nombre.toLowerCase().includes(this.filterValues.nombreIngresante.toLowerCase())) {
+    if (this.filterValues.typeCar.length > 0 && 
+        !this.filterValues.typeCar.some(value => 
+          tipoVehiculo.toLowerCase() === mappings[value as keyof typeof mappings])) {
       return false;
     }
 
-    // Filtro de documento
-    if (this.filterValues.documento && 
-        !documento.toLowerCase().includes(this.filterValues.documento.toLowerCase())) {
+    if (this.filterValues.selectedPropietario && this.filterValues.selectedPropietario.length > 0) {
+      const propietarioMatches = this.filterValues.selectedPropietario.some(selectedId => {
+        const propietarioOption = this.propietariosOptions.find(p => p.id === selectedId);
+        return propietarioOption && propietario.toLowerCase().includes(propietarioOption.label.toLowerCase());
+      });
+      if (!propietarioMatches) return false;
+    }
+
+    if (this.filterValues.selectedGuardia && this.filterValues.selectedGuardia.length > 0) {
+      const guardiaMatches = this.filterValues.selectedGuardia.some(selectedId => {
+        const guardiaOption = this.guardiasOptions.find(g => g.id === selectedId);
+        return guardiaOption && guardia.toLowerCase().includes(guardiaOption.label.toLowerCase());
+      });
+      if (!guardiaMatches) return false;
+    }
+
+    if (this.filterValues.lateInRange.length > 0 && 
+        !this.filterValues.lateInRange.some(value => 
+          estadoHorario.toLowerCase() === mappings[value as keyof typeof mappings])) {
       return false;
     }
 
-    // Filtro de tipo de vehículo
-    if (this.filterValues.typeCar.size > 0 && 
-        !Array.from(this.filterValues.typeCar).some(value => 
-          tipoVehiculo.toLowerCase() === this.typeCarMap[value.toLowerCase()])) {
-      return false;
-    }
-
-    // Filtro de propietario
-    if (this.filterValues.propietario && 
-        !propietario.toLowerCase().includes(this.filterValues.propietario.toLowerCase())) {
-      return false;
-    }
-
-    // Filtro de placa
-    if (this.filterValues.plate && 
-        !placa.toLowerCase().includes(this.filterValues.plate.toLowerCase())) {
-      return false;
-    }
-
-    // Filtro de estado de horario
-    if (this.filterValues.lateInRange.size > 0 && 
-        !Array.from(this.filterValues.lateInRange).some(value => 
-          estadoHorario.toLowerCase() === this.lateInRangeMap[value.toLowerCase()])) {
-      return false;
-    }
-
-    // Filtro de días
-    if (this.filterValues.days.size > 0) {
+    if (this.filterValues.days.length > 0) {
       const dayFromDate = fecha.split('/')[0].replace(/^0+/, '');
-      if (!Array.from(this.filterValues.days).some(value => 
-          dayFromDate === value)) {
+      if (!this.filterValues.days.includes(dayFromDate)) {
         return false;
       }
     }
@@ -515,26 +392,57 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       this.table.clear();
 
       if (Array.isArray(this.movements) && this.movements.length > 0) {
-        this.movements.forEach(movement => {
-          this.table.row.add([
-            movement.day + '/' + movement.month + '/' + movement.year,  // Fecha
-            movement.hour || '',                                        // Hora
-            movement.entryOrExit || '',                                // Tipo de Entrada
-            movement.entryType || '',                                  // Tipo de Ingresante
-            movement.visitorName || '',                                // Nombre
-            movement.visitorDocument || '',                            // Documento
-            movement.observations || '',                               // Observaciones
-            movement.carType || '',                                    // Tipo de Vehículo
-            movement.plate || '',                                      // Placa
-            movement.neighborId || '',                                 // Propietario
-            'Garcia, ireneg',                                         // Guardia
-            movement.lateOrNot || '',                                 // Estado de horario
-          ]);
-        });
+        this.userService.ensureCacheInitialized().then(() => {
+          const processedMovements = this.movements.map(movement => {
+            return new Promise<string[]>(resolve => {
+              const transformations: Observable<string>[] = [
+                of(movement.day + '/' + movement.month + '/' + movement.year),
+                of(movement.hour || ''),
+                of(movement.entryOrExit || ''),
+                of(movement.entryType || ''),
+                this.userService.transformNameOrId(movement.visitorName || ''),
+                of(movement.visitorDocument || ''),
+                of(movement.observations || ''),
+                of(movement.carType || ''),
+                of(movement.plate || ''),
+                this.userService.getUserById(movement.neighborId),
+                this.userService.getUserById(movement.securityId),
+                of(movement.lateOrNot || '')
+              ];
 
-        this.exportButtonsEnabled = true;
-        ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
-          $(btn).prop('disabled', false);
+              forkJoin(transformations).subscribe({
+                next: (results) => resolve(results),
+                error: () => resolve([
+                  movement.day + '/' + movement.month + '/' + movement.year,
+                  movement.hour || '',
+                  movement.entryOrExit || '',
+                  movement.entryType || '',
+                  movement.visitorName || '',
+                  movement.documentType || '',
+                  movement.visitorDocument || '',
+                  movement.observations || '',
+                  movement.carType || '',
+                  movement.plate || '',
+                  '------',
+                  'Error de conexión',
+                  movement.lateOrNot || ''
+                ])
+              });
+            });
+          });
+
+          Promise.all(processedMovements).then(processedRows => {
+            processedRows.forEach(row => {
+              this.table.row.add(row);
+            });
+
+            this.exportButtonsEnabled = true;
+            ['#excelBtn', '#pdfBtn'].forEach(btn => {
+              $(btn).prop('disabled', false);
+            });
+
+            this.table.draw();
+          });
         });
       } else {
         Swal.fire({
@@ -542,14 +450,114 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
           title: '¡No se encontraron registros!',
         });
         this.exportButtonsEnabled = false;
-        ['#excelBtn', '#pdfBtn', '#printBtn'].forEach(btn => {
+        ['#excelBtn', '#pdfBtn'].forEach(btn => {
           $(btn).prop('disabled', true);
         });
       }
-
-      this.table.draw();
-    } else {
-      this.initializeDataTable();
     }
+  }
+
+  initializeDataTable(): void {
+    this.table = ($('#myTable') as any).DataTable({
+        paging: true,
+        ordering: true,
+        pageLength: 5,
+        lengthMenu: [[5, 10, 25,50 ], [5, 10, 25, 50]], 
+        scrollX: true,
+        lengthChange: true,
+        orderCellsTop: true,
+        order: [],
+        columnDefs: [
+            { 
+                targets: 11, // Columna Estado
+                className: 'text-center'
+            },
+            {
+                targets: 9, // Columna Propietario (0-based index)
+                render: function(data: any, type: any, row: any) {
+                    if (data === '------') {
+                        return '<div class="text-center">------</div>';
+                    }
+                    return data;
+                }
+            }
+        ],
+        searching: true,
+        info: true,
+        autoWidth: false,
+        language: {
+            lengthMenu: " _MENU_ ",
+            zeroRecords: "No se encontraron registros",
+            info: "",
+            infoEmpty: "",
+            infoFiltered: "",
+            search: "Buscar:",
+            emptyTable: "No se encontraron resultados",
+        },
+        responsive: true,
+        dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
+        drawCallback: function(settings: any) {
+            const table = this;
+            setTimeout(function() {
+                // Manejo de Entrada/Salida
+                $(table).find('td:nth-child(3)').each(function() {
+                    const cellText = $(this).text().trim().toLowerCase();
+                    if (cellText === 'entrada') {
+                        $(this).html(`
+                            <div class="d-flex justify-content-center">
+                                <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
+                                    style="background-color: #28a745; color: white; border: none;">
+                                    ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
+                                </span>
+                            </div>
+                        `);
+                    } else if (cellText === 'salida') {
+                        $(this).html(`
+                            <div class="d-flex justify-content-center">
+                                <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
+                                    style="background-color: #dc3545; color: white; border: none;">
+                                    ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
+                                </span>
+                            </div>
+                        `);
+                    }
+                });
+                $(table).find('td:nth-child(12)').each(function() {
+                    const estadoText = $(this).text().trim();
+                    if (estadoText === 'Tarde') {
+                        $(this).html(`
+                            <div class="d-flex justify-content-center">
+                                <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
+                                    style="background-color: #dc3545; color: white; border: none;">
+                                    <span style="white-space: nowrap; display: inline-block;">Tarde</span>
+                                </span>
+                            </div>
+                        `);
+                    } else if (estadoText.toLowerCase() === 'en horario') {
+                        $(this).html(`
+                            <div class="d-flex justify-content-center">
+                                <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
+                                    style="background-color: #28a745; color: white; border: none;">
+                                    <span style="white-space: nowrap; display: inline-block;">En Horario</span>
+                                </span>
+                            </div>
+                        `);
+                    }
+                });
+            }, 0);
+        }
+    });
+
+    $('#excelBtn').on('click', () => {
+        if (!this.exportButtonsEnabled) return;
+        this.table.button('.buttons-excel').trigger();
+    });
+
+    $('#pdfBtn').on('click', () => {
+        if (!this.exportButtonsEnabled) return;
+        this.table.button('.buttons-pdf').trigger();
+    });
+
+    this.setupExportButtons();
   }
 }
