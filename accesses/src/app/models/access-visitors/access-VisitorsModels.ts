@@ -178,17 +178,26 @@ export interface AccessFormattedHours {
 
 export interface AccessUserAllowedInfoDto2 {
   document: string;
+  documentType: number;
   name: string;
   last_name: string;
   email: string;
   authId : string;
-  authRange: AccessAuthRangeInfoDto2; //List<AuthRangeInfoDto>
-  observations?: string; //campo extra (no esta en el back)
+  authRange: AccessAuthRangeInfoDto2;
+  vehicle: AccessNewVehicleDto2 | null;
+  visitorId: number | null;
+}
+export interface AccessNewVehicleDto2 {
+  id: number;
+  plate: string;
+  vehicle_Type: VehicleTypeDto;
+  insurance: string;
 }
 export interface AccessAuthRangeInfoDto2 {
   init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
   end_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
   allowedDays: AccessApiAllowedDay[]; //List<Allowed_DaysDto> 
+  neighbor_id : number;
 }
 export interface AccessCommonSettings {
   authRange: {
@@ -196,4 +205,15 @@ export interface AccessCommonSettings {
     end_date: Date;
     allowedDays: any[];
   };
+}
+
+export interface Owner {
+  document: string;
+  name: string;
+  last_name: string;
+  email: string;
+  vehicles: AccessNewVehicleDto[]; //List<NewVehicleDto> 
+  authRanges: AccessAuthRangeInfoDto2[]; //List<AuthRangeInfoDto>
+  documentTypeDto : AccessDocumentTypeDto;
+  neighbor_id : number| null;
 }
