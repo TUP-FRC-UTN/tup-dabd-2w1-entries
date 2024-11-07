@@ -57,7 +57,7 @@ import {
 import { AccessVisitorHelperService } from '../../../services/access_visitors/access-visitor-helper.service';
 import { AccessOwnerRenterserviceService } from '../../../services/access-owner/access-owner-renterservice.service';
 import { AccessUserServiceService } from '../../../services/access-user/access-user-service.service';
-
+declare var bootstrap: any;
 @Component({
   selector: 'access-app-visitor-registry',
   standalone: true,
