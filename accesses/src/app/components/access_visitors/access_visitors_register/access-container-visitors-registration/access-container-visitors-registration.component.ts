@@ -154,6 +154,11 @@ setNameQr(): void {
           this.isQRCodeAvailable = !!this.qrCodeId;
       },
       error: (error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se puede enviar el registro.',
+        });
           console.error('Error sending visitor record', error);
           this.isQRCodeAvailable = false;
       }
