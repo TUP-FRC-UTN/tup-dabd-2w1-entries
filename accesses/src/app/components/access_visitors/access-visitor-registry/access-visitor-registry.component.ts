@@ -195,7 +195,7 @@ export class AccessVisitorRegistryComponent
           infoFiltered: '',
         },
         responsive: true,
-        dom: '<"top d-flex justify-content-start mb-2"f>rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"li>p><"clear">',
+        dom: '<"top d-flex justify-content-start mb-2">rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"li>p><"clear">',
       });
 
       $('#dt-search-0')
@@ -211,10 +211,15 @@ export class AccessVisitorRegistryComponent
             this.dataTable.search('').draw(false);
           }
         });
+
+        $('#customSearch').on('keyup', (e) => {
+          const target = e.target as HTMLInputElement;
+          this.dataTable.search(target.value).draw();
+        });
     });
+    
   }
   
-
 
 // metodos Load DATA
 loadUsersAllowedData(): Observable<boolean> {
