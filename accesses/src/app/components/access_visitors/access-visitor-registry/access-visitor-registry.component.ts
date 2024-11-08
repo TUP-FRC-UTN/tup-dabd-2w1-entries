@@ -847,7 +847,7 @@ loadUsersAllowedData(): Observable<boolean> {
       if (visitor.userType.description === 'Owner' || visitor.userType.description === 'Tenant') {
         accessObservable = this.prepareEntryMovement(visitor,vehiclePlate);
       } else if (visitor.userType.description === 'Employeed' || visitor.userType.description === 'Supplier') {
-        accessObservable = this.prepareEntryMovementEmp(visitor);
+        accessObservable = this.prepareEntryMovementEmp(visitor, vehiclePlate);
       } else {
         accessObservable = this.visitorService.RegisterAccess(visitor, vehiclePlate);
       }
@@ -879,7 +879,7 @@ loadUsersAllowedData(): Observable<boolean> {
         
 
       } else if (visitor.userType.description === 'Employeed' || visitor.userType.description === 'Supplier') {
-        exitObservable = this.prepareExitMovementEmp(visitor);
+        exitObservable = this.prepareExitMovementEmp(visitor, vehiclePlate);
 
       } else {
         exitObservable = this.visitorService.RegisterExit(visitor, vehiclePlate);
@@ -1522,14 +1522,14 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
 
 
 
-  private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
+  private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner, platee : string): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
         // Preparar el objeto de movimiento
         const movementS: AccessMovementEntryDto = {
           description: String(this.observations || ''),
           movementDatetime: new Date().toISOString(),
-          vehiclesId: 0,
+          vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
           documentType: visitor.documentTypeDto.description
         };
@@ -1625,14 +1625,14 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
     });
   }
   
-  private prepareExitMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
+  private prepareExitMovementEmp(visitor: AccessUserAllowedInfoDtoOwner, platee : string): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
         // Preparar el objeto de movimiento
         const movementS: AccessMovementEntryDto = {
           description: String(this.observations || ''),
           movementDatetime: new Date().toISOString(),
-          vehiclesId: 0,
+          vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
           documentType: visitor.documentTypeDto.description
         };
