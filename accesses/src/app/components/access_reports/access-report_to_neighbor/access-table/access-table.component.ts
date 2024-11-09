@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
 import { DataTablesModule } from 'angular-datatables';
@@ -16,6 +16,7 @@ import { FilterValues, Movement } from '../../../../models/access-report/Types';
 import { DataTableConfigService } from '../../../../services/access_report/access_datatableconfig/data-table-config.service';
 import { ExportService } from '../../../../services/access_report/access-export/export.service';
 import { ENTRY_EXIT_OPTIONS, ESTADO_HORARIO_OPTIONS, TIPOS_INGRESANTE, TIPOS_VEHICULO, USER_TYPE_MAPPINGS, VALUE_MAPPINGS } from '../../../../models/access-report/constants';
+import { AccessRegistryUpdateService } from '../../../../services/access-registry-update/access-registry-update.service';
 
 @Component({
   selector: 'app-access-table',
@@ -128,15 +129,18 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-
+private readonly registryUpdate = inject (AccessRegistryUpdateService);
 
   /**
    * Inicialización del componente
    * Carga las opciones de los selectores y obtiene los datos iniciales
    */
   ngOnInit(): void {
-    this.loadSelectOptions();
-    this.fetchData();
+   
+    this.registryUpdate.getObservable().subscribe(() => {
+      this.loadSelectOptions();
+      this.fetchData();
+    });
   }
 
   /**
