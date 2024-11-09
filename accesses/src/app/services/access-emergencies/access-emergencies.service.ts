@@ -1,8 +1,9 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { AccessNewEmergencyDto } from '../../models/access-emergencies/access-new-emergecy-dto';
 import { AccessEmergencyPersonDto } from '../../models/access-emergencies/access-emergency-person-dto';
+import { AccessRegistryUpdateService } from '../access-registry-update/access-registry-update.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ import { AccessEmergencyPersonDto } from '../../models/access-emergencies/access
 export class AccessEmergenciesService {
   private URL_POST_EMERGENCY = "http://localhost:8090/";
   private readonly http: HttpClient = inject(HttpClient);
+  private readonly registryUpdate = inject(AccessRegistryUpdateService);
 
   constructor() { }
 
@@ -19,7 +21,12 @@ export class AccessEmergenciesService {
         emergency.observations = null;
       if ((emergency.vehicle?.vehicle_Type.description.length ?? 0) < 1)
         emergency.vehicle = null;
-      return this.http.post<AccessEmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_entry", emergency, { headers });
+      return this.http.post<AccessEmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_entry", emergency, { headers })
+      .pipe(
+        tap(() => {
+          this.registryUpdate.updateTable(true);
+        })
+      );
     }
 
     registerEmergencyExit(emergency: AccessNewEmergencyDto): Observable<AccessEmergencyPersonDto[]> {
@@ -28,6 +35,11 @@ export class AccessEmergenciesService {
         emergency.observations = null;
       if ((emergency.vehicle?.vehicle_Type.description.length ?? 0) < 1)
         emergency.vehicle = null;
-      return this.http.post<AccessEmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_exit", emergency, { headers });
+      return this.http.post<AccessEmergencyPersonDto[]>(this.URL_POST_EMERGENCY + "emergency/register_exit", emergency, { headers })
+      .pipe(
+        tap(() => {
+          this.registryUpdate.updateTable(true);
+        })
+      );
     }
 }

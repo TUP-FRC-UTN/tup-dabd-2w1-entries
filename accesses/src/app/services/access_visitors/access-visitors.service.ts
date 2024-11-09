@@ -1,12 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders} from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { AccessAllowedDaysDto, AuthRangeInfoDto, AccessDocumentTypeDto, AccessLastEntryUserAllowedDto, AccessLastExitUserAllowedDto, AccessNewAuthRangeDto, AccessNewMovementExitDto, AccessNewMovementsEntryDto, AccessNewUserAllowedDto, AccessNewVehicleDto, AccessUserAllowedInfoDto, AccessUserAllowedTypeDto, VehicleTypeDto, AccessVisitor } from '../../models/access-visitors/access-VisitorsModels';
 import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { AccessVisitorHelperService } from './access-visitor-helper.service';
 import Swal from 'sweetalert2';
 import { error } from 'jquery';
+import { AccessRegistryUpdateService } from '../access-registry-update/access-registry-update.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,8 @@ export class VisitorsService {
 
   private readonly http: HttpClient = inject(HttpClient);
   private readonly helperService = inject(AccessVisitorHelperService);
+  private readonly registryUpdate = inject(AccessRegistryUpdateService);
+
   constructor() {
     this.loadVisitorsData();
   }
@@ -254,7 +257,12 @@ export class VisitorsService {
                 }
               });
           }
-    });
+    })
+    .pipe(
+      tap(() => {
+        this.registryUpdate.updateTable(true);
+      })
+    );
   }
   
 
@@ -342,7 +350,12 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
             observer.next(false);
             observer.complete();
           }
-  });
+  })
+  .pipe(
+    tap(() => {
+      this.registryUpdate.updateTable(true);
+    })
+  );
 }
   // FIN Registrar INGRESO de un visitante
 // FIN METODOS (para registrar Ingresos y Egresos)
