@@ -3,7 +3,7 @@ import { HttpClient  } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, tap} from 'rxjs/operators';
 import { inject } from '@angular/core';
-import { AccessVisitorRecord, AccessAuthRange, AccessAllowedDay, AccessUser } from '../../../../models/access-visitors/access-visitors-models';
+import { AccessVisitorRecord, AccessAuthRange, AccessAllowedDay, AccessUser, UserType } from '../../../../models/access-visitors/access-visitors-models';
 import { QrDto } from '../../../../models/access-visitors/access-visitors-models';
 @Injectable({
   providedIn: 'root'
@@ -21,6 +21,7 @@ export class AccessVisitorsRegisterServiceHttpClientService {
     'Sáb': 'SATURDAY',
     'Dom': 'SUNDAY'
   };
+  
   getQRCode(visitorId: string): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/visitor-qr/image/${visitorId}`, {
       responseType: 'blob' 
@@ -54,6 +55,37 @@ export class AccessVisitorsRegisterServiceHttpClientService {
       })
     );
   }
+  private userTypeMapping: { [key: string]: string } = {
+    'Visitor': 'Visitante',
+    'Employeed': 'Empleado',
+    'Supplier': 'Proveedor',
+    'Owner': 'Propietario',
+    'Tenant': 'Inquilino',
+    'Emergency': 'Emergencia',
+    'Worker': 'Trabajador',
+    'Delivery': 'Delivery',
+    'Taxi': 'Taxi',
+    'Cleaning': 'Limpieza',
+    'Gardener': 'Jardinero'
+  };
+
+  getUsersType(): Observable<UserType[]> {
+    const url = 'http://localhost:8090/users_Type'; 
+    return this.http.get<any[]>(url).pipe(
+      tap(response => console.log('Respuesta completa del servidor:', response)),
+      map(response => {
+        if (Array.isArray(response)) {
+          return response.map((item, index) => ({
+            id: index,
+            description: this.userTypeMapping[item.description] || item.description
+          }));
+        } else {
+          console.error('La respuesta no es un array:', response);
+          return [];
+        }
+      })
+    );
+  }
   private readonly usersApiUrl = 'https://my-json-server.typicode.com/405786MoroBenjamin/users-responses/users';
 
   getUsers(): Observable<AccessUser[]> {
@@ -80,7 +112,7 @@ private transformVisitorRecord(visitorRecord: AccessVisitorRecord): any[] {
         document: visitor.document,
         name: visitor.firstName,
         last_name: visitor.lastName,
-        userType: 0,
+        userType: visitor.userType,
         documentType: visitor.documentType,
         email: visitor.email,
         emailSent: false,
