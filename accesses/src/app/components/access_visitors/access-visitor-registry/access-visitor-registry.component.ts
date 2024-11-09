@@ -1,12 +1,9 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {
   Component,
   inject,
-  OnChanges,
   OnDestroy,
   OnInit,
-  SimpleChanges,
   NgZone,
   AfterViewInit,
   ViewChild,
@@ -17,14 +14,7 @@ import {
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule } from '@angular/forms';
 import {
-  AuthRangeInfoDto,
   AccessDocumentTypeDto,
-  AccessLastEntryUserAllowedDto,
-  AccessLastExitUserAllowedDto,
-  AccessNewAuthRangeDto,
-  AccessNewMovementExitDto,
-  AccessNewMovementsEntryDto,
-  AccessNewUserAllowedDto,
   AccessNewVehicleDto,
   AccessUserAllowedInfoDto,
   AccessUserAllowedTypeDto,
@@ -38,8 +28,6 @@ import 'datatables.net';
 
 import 'datatables.net-bs5';
 //import { AlertDirective } from '../alert.directive';
-import { InternalSettings } from 'datatables.net';
-import { AllowedDaysDto } from '../../../services/access_visitors/movement.interface';
 import { RouterModule } from '@angular/router';
 import { AccessAutosizeTextareaDirective } from '../../../directives/access-autosize-textarea.directive';
 import {
@@ -53,7 +41,6 @@ import {
 } from '../../../models/access-visitors/interface/access-owner';
 import {
   AccessMovementEntryDto,
-  AccessSuppEmpDto,
 } from '../../../models/access-employee-allowed/access-user-allowed';
 import { AccessVisitorHelperService } from '../../../services/access_visitors/access-visitor-helper.service';
 import { AccessOwnerRenterserviceService } from '../../../services/access-owner/access-owner-renterservice.service';
@@ -65,7 +52,6 @@ declare var bootstrap: any;
   imports: [
     CommonModule,
     FormsModule,
-    AccessAutosizeTextareaDirective,
     RouterModule,
     NgxScannerQrcodeModule,
     NgSelectModule
@@ -923,8 +909,7 @@ prepareEntryVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Ob
 
         //fijate las respuestas ( observer.next('string') ) q puse en el metodo del service registerAccess linea 288,
         //arriba de eso dice return false o true, eso es lo q deberia devolver este metodo
-        if (response == 'fijate las respuestas ( observer.next() ) q puse en el metodo del service registerAccess'+
-                      'linea 288, arriba de eso dice return false o true, eso es lo q deberia devolver este metodo') {
+        if (response == '') {
           //aca pone el modal q corresponda
           
 
@@ -944,8 +929,7 @@ prepareEntryVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Ob
         //fijate las respuestas ( observer.next('string') ) q puse en el metodo del service registerAccess linea 288,
         //arriba de eso dice return false o true, eso es lo q deberia devolver este metodo
         console.error('Error al registrar egreso:', error);
-        if (error == 'fijate las respuestas ( observer.next() ) q puse en el metodo del service registerAccess'+
-                      'linea 288, arriba de eso dice return false o true, eso es lo q deberia devolver este metodo') {
+        if (error == '') {
           //aca pone el modal q corresponda
           
           
@@ -984,7 +968,7 @@ prepareExitVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Obs
       next: (response) => {
         //fijate las respuestas q puse een el metodo del service registerAccess linea 288
         console.log("respuesta: ", response);
-        if (response == 'fijate las respuestas q puse een el metodo del service') {
+        if (response == '') {
           //aca pone el modal q corresponda
           
 
@@ -1003,7 +987,7 @@ prepareExitVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Obs
       error: (error) => {
         //fijate las respuestas q puse een el metodo del service registerAccess linea 288
         console.error('Error al registrar egreso:', error);
-        if (error == 'fijate las respuestas q puse een el metodo del service') {
+        if (error == '') {
           //aca pone el modal q corresponda
           
           
