@@ -5,7 +5,7 @@ import { Subject, combineLatest } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AccessVisitorsRegisterServiceService } from '../../../../services/access_visitors/access-visitors-register/access-visitors-register-service/access-visitors-register-service.service';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
-import { AccessVisitor, AccessVisitorRecord, AccessAuthRange, AccessVehicle,AccessUser } from '../../../../models/access-visitors/access-visitors-models';
+import { AccessVisitor, AccessVisitorRecord, AccessAuthRange, AccessVehicle,AccessUser, UserType } from '../../../../models/access-visitors/access-visitors-models';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AccessTimeRangeVisitorsRegistrationComponent } from '../access-time-range-visitors-registration/access-time-range-visitors-registration.component';
 import { AccessGridVisitorsRegistrationComponent } from '../access-grid-visitors-registration/access-grid-visitors-registration.component';
@@ -23,6 +23,17 @@ import Swal from 'sweetalert2';
   ],
 })
 export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnDestroy {
+  indexUserType?:number;
+  onAuthorizedTypeChange(event: Event): void {
+    const selectedIndex = (event.target as HTMLSelectElement).value;
+    
+    if (selectedIndex !== "") {
+        const index = parseInt(selectedIndex, 10);
+        console.log('Índice seleccionado:', index);
+        this.indexUserType = index;  // Verifica que indexUserType se esté actualizando correctamente
+    }
+}
+
   user?: AccessUser;
   handleSelectedUser(user: AccessUser): void {
     this.user = user; 
@@ -37,6 +48,7 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   private unsubscribe$ = new Subject<void>();
   visitorRecord?:AccessVisitorRecord;
   vehicleTypes: string[] = ['Car', 'Motorbike', 'Truck', 'Van']; 
+  usersType:UserType[]=[];
 
   vehicleTypeMapping: { [key: string]: string } = {
     'Car': 'Auto',
@@ -61,6 +73,14 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
 
 
   downloadQRCode(): void {
+    if (this.indexUserType === 0) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Registro exitoso',
+        text: 'El registro se completó, pero no se puede descargar el código QR para este tipo de autorizado.',
+      });
+      return; 
+    }
     if (!this.qrCodeId) {
         Swal.fire({
             icon: 'warning',
@@ -126,47 +146,80 @@ setNameQr(): void {
     this.visitorService.resetAllData();
   }
 
-
   sendVisitorRecord(): void {
     if (this.visitorRecord) {
-      if(this.visitorRecord.visitors.length<=0){
+      // Verificar si el tipo de usuario es diferente de 0
+      if (this.indexUserType !== 0) {
+        // Si el tipo de usuario no es 0, no se generará el QR y solo se enviará el registro
+        this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
+          next: (response) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Registro enviado correctamente',
+              text: 'El registro del visitante se ha enviado exitosamente.',
+            });
+            this.isQRCodeAvailable = false; 
+            this.resetEverything();
+          },
+          error: (error) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se puede enviar el registro.',
+            });
+            console.error('Error sending visitor record', error);
+            this.isQRCodeAvailable = false;
+            this.resetEverything();
+          }
+        });
+        return; // Evitar continuar con la verificación de otros datos
+      }
+  
+      // Verificar si la lista de visitantes está vacía
+      if (this.visitorRecord.visitors.length <= 0) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
           text: 'No se puede enviar el registro: ingrese un visitante por lo menos.',
         });
+        return;
       }
-      if (!this.visitorRecord.authRange || this.visitorRecord.authRange ==null) {
+  
+      // Verificar si el rango de fechas está definido
+      if (!this.visitorRecord.authRange || this.visitorRecord.authRange == null) {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'No se puede enviar el registro: ingrese un rango de fechas con al menos un dia permitido.',
+          text: 'No se puede enviar el registro: ingrese un rango de fechas con al menos un día permitido.',
         });
-      
+  
         this.isQRCodeAvailable = false;
         return;
       }
   
+      // Enviar el registro con la generación del QR solo si el tipo de usuario es 0
       this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
         next: (response) => {
           this.qrCodeId = response.qrCodeId || response.id; 
           this.setNameQr();
-          this.isQRCodeAvailable = !!this.qrCodeId;
-      },
-      error: (error) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se puede enviar el registro.',
-        });
+          this.isQRCodeAvailable = true;
+          this.resetEverything();
+        },
+        error: (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se puede enviar el registro.',
+          });
           console.error('Error sending visitor record', error);
+          this.resetEverything();
           this.isQRCodeAvailable = false;
-      }
+        }
       });
     }
   }
   
-
+ 
   initVisitorRecord(): void {
     combineLatest([
       this.visitorService.getVisitorsTemporalsSubject(),
@@ -190,9 +243,11 @@ setNameQr(): void {
     this.loadVehicleTypes();
     this.listenToHasVehicleChanges();
     this.initVisitorRecord();
+    this.loadUsersType();
   }
   initForm(): void {
     this.visitorForm = this.fb.group({
+      authorizedType: ['', Validators.required],
       firstName: ['', [Validators.required, Validators.maxLength(45)]],
       lastName: ['', [Validators.required, Validators.maxLength(45)]],
       document: ['', [
@@ -224,7 +279,19 @@ loadVehicleTypes(): void {
     }
   });
 }
-
+loadUsersType(): void {
+  this.visitorHttpService.getUsersType().pipe(
+    takeUntil(this.unsubscribe$)
+  ).subscribe({
+    next: (types: UserType[]) => {
+      this.usersType = types;
+      console.log('Tipos de usuario cargados:', this.usersType);
+    },
+    error: (error) => {
+      console.error('Error al cargar tipos de usuarios:', error);
+    }
+  });
+}
 listenToHasVehicleChanges(): void {
   const hasVehicleControl = this.visitorForm.get('hasVehicle');
   if (hasVehicleControl) {
@@ -286,10 +353,11 @@ sendVisitorWithoutRH(): void {
       documentType: visitantData.documentType || undefined,
       vehicle: vehicle,
       neighborLastName: this.user?.lastname,
-      neighborName: this.user?.name
+      neighborName: this.user?.name,
+      userType:this.indexUserType
     };
+  
     if (!this.visitorService.addVisitorsTemporalsSubject(visitor)) {
-    
       Swal.fire({
         icon: 'error',
         title: 'Error',

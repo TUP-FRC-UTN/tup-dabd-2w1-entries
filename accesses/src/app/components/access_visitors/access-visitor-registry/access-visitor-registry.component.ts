@@ -148,6 +148,10 @@ export class AccessVisitorRegistryComponent
       checkbox.nativeElement.checked = false;
     });
 
+    const customSearchInput = document.getElementById('customSearch') as HTMLInputElement;
+    if (customSearchInput) {
+      customSearchInput.value = '';
+    }
     // Limpia el input de busqueda 
     this.dataTable.search('').draw(false);
 
@@ -843,7 +847,7 @@ loadUsersAllowedData(): Observable<boolean> {
       if (visitor.userType.description === 'Owner' || visitor.userType.description === 'Tenant') {
         accessObservable = this.prepareEntryMovement(visitor,vehiclePlate);
       } else if (visitor.userType.description === 'Employeed' || visitor.userType.description === 'Supplier') {
-        accessObservable = this.prepareEntryMovementEmp(visitor);
+        accessObservable = this.prepareEntryMovementEmp(visitor, vehiclePlate);
       } else {
         //es para visitors y los otros tipos q funcionan igual
         accessObservable = this.prepareEntryVisitor(visitor, vehiclePlate);
@@ -876,7 +880,7 @@ loadUsersAllowedData(): Observable<boolean> {
         
 
       } else if (visitor.userType.description === 'Employeed' || visitor.userType.description === 'Supplier') {
-        exitObservable = this.prepareExitMovementEmp(visitor);
+        exitObservable = this.prepareExitMovementEmp(visitor, vehiclePlate);
 
       } else {
         //es para visitors y los otros tipos q funcionan igual
@@ -1642,14 +1646,14 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
 
 
 
-  private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
+  private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner, platee : string): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
         // Preparar el objeto de movimiento
         const movementS: AccessMovementEntryDto = {
           description: String(this.observations || ''),
           movementDatetime: new Date().toISOString(),
-          vehiclesId: 0,
+          vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
           documentType: visitor.documentTypeDto.description
         };
@@ -1745,14 +1749,14 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
     });
   }
   
-  private prepareExitMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
+  private prepareExitMovementEmp(visitor: AccessUserAllowedInfoDtoOwner, platee : string): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
         // Preparar el objeto de movimiento
         const movementS: AccessMovementEntryDto = {
           description: String(this.observations || ''),
           movementDatetime: new Date().toISOString(),
-          vehiclesId: 0,
+          vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
           documentType: visitor.documentTypeDto.description
         };

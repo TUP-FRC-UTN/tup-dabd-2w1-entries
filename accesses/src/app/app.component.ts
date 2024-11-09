@@ -5,11 +5,12 @@ import { NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 import { CommonModule, DatePipe } from '@angular/common';
 import { AccessVisitorRegistryComponent } from './components/access_visitors/access-visitor-registry/access-visitor-registry.component';
 import { AccessRegisterEmergencyComponent } from './components/access-register-emergency/access-register-emergency.component';
+import { AccessesNavbarComponent } from "./components/accesses-navbar/accesses-navbar.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterModule, AccessVisitorRegistryComponent, AccessVisitorRegistryComponent, AccessRegisterEmergencyComponent, CommonModule, DatePipe,NgxScannerQrcodeModule],
+  imports: [RouterOutlet, RouterModule, AccessVisitorRegistryComponent, AccessVisitorRegistryComponent, AccessRegisterEmergencyComponent, CommonModule, DatePipe, NgxScannerQrcodeModule, AccessesNavbarComponent],
   providers: [DatePipe, CommonModule],
 
   templateUrl: './app.component.html',

@@ -37,6 +37,7 @@ export interface AccessVisitor {
   visitDate?: Date;
   neighborName?:string;
   neighborLastName?:string;
+  userType?:number;
 }
 export interface AccessVehicle {
   licensePlate: string; 
@@ -67,6 +68,9 @@ export interface AccessUser{
   roles:string[];
 }
 
+export interface UserType{
+  description:string;
+}
 
 // FIN cosas front de fede
 
