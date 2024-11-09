@@ -31,6 +31,11 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedYear: number | null = null;
   selectedMonth: number | null = null;
 
+
+ // propiedad para trackear el filtro activo
+  activeFilter: string | null = null;
+
+
   // Propiedades para datos y tabla
   movements: Movement[] = [];
   table: any = null;
@@ -71,6 +76,48 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     private exportService: ExportService
   ) {
     this.initializeDates();
+  }
+  /**
+ * Maneja el filtro rápido por tipo de usuario
+ */
+  toggleQuickFilter(type: string): void {
+    console.log('Current filter:', type); // Para debug
+  
+    // Si el filtro ya está activo, lo desactivamos
+    if (this.activeFilter === type) {
+      this.activeFilter = null;
+      this.filterValues.tipoIngresante = [];
+    } else {
+      this.activeFilter = type;
+      
+      switch(type) {
+        case 'Visitante':
+          this.filterValues.tipoIngresante = ['Visitante'];
+          break;
+        case 'Empleado':
+          this.filterValues.tipoIngresante = ['Empleado'];
+          break;
+        case 'Vecino':
+          this.filterValues.tipoIngresante = ['Vecino'];
+          break;
+        case 'Servicios':
+          // Incluimos todos los tipos de servicio
+          this.filterValues.tipoIngresante = [
+            'Cleaning',
+            'Jardinero',
+            'Delivery',
+            'Proveedor',
+            'Obrero'
+          ];
+          break;
+        default:
+          console.log('Tipo no reconocido:', type);
+          break;
+      }
+    }
+  
+    console.log('Filtered types:', this.filterValues.tipoIngresante); // Para debug
+    this.applyFilters();
   }
 
   /**
@@ -448,15 +495,39 @@ private filterRow(data: string[]): boolean {
       return false;
     }
   }
-
   // Verificar filtro de tipo de ingresante
   if (this.filterValues.tipoIngresante.length > 0) {
-    if (!this.filterValues.tipoIngresante.some(value => 
-      tipoIngresante.toLowerCase() === VALUE_MAPPINGS[value].toLowerCase())) {
+    console.log('Valor original en la fila:', tipoIngresante);
+    
+    const matches = this.filterValues.tipoIngresante.some(filterType => {
+      // Convertir ambos valores a minúsculas para la comparación
+      const currentTypeInRow = tipoIngresante.toLowerCase();
+      let filterValue = filterType.toLowerCase();
+
+      // Hacer el mapeo inverso para la comparación
+      switch(filterValue) {
+        case 'visitor':
+          filterValue = 'visitante';
+          break;
+        case 'employee':
+          filterValue = 'employeed';
+          break;
+        case 'neighbour':
+          filterValue = 'owner';
+          break;
+        case 'services':
+          return ['cleaning', 'gardener', 'delivery', 'supplier', 'worker']
+            .some(service => currentTypeInRow.includes(service.toLowerCase()));
+      }
+
+      console.log('Comparando:', currentTypeInRow, 'con', filterValue);
+      return currentTypeInRow === filterValue;
+    });
+
+    if (!matches) {
       return false;
     }
   }
-
   // Verificar filtro de tipo de vehículo
   if (this.filterValues.typeCar.length > 0) {
     if (!this.filterValues.typeCar.some(value => 
@@ -518,6 +589,7 @@ applyFilters(): void {
  */
 clearFilters(): void {
   // Reiniciar todos los valores de filtro
+  this.activeFilter = null; 
   this.filterValues = {
     entryOrExit: [],
     tipoIngresante: [],
