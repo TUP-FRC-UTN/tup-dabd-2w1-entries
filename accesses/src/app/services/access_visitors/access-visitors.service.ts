@@ -13,78 +13,28 @@ import { error } from 'jquery';
 })
 export class VisitorsService {
 
-  private URL_GET_ALL_Visitors = "http://localhost:8090/user_Allowed/visitors/Visitor";
+  // trae TODOS los q NO TIENEN movimientos (Ingresos o Egresos) y SI TIENEN un authRange
+  private URL_GET_ALL_UsersAllowedWithoutMovements = "http://localhost:8090/user_Allowed/getAllUsersAllowed/WithAuthRangeWithoutMovements";
   private URL_POST_ENTRY_VisitorInList = "http://localhost:8090/movements_entry/register";
   private URL_POST_EXIT_VisitorInList = "http://localhost:8090/movements_exit/register";
-  private URL_GET_LastEntryByDocument = "http://localhost:8090/movements_entry/last_entry_by_document?document=";
-  private URL_GET_LastExitByDocument = "http://localhost:8090/movements_exit/last_exit_by_document?document=";
-  private URL_GET_ALL_UserAllowed = "http://localhost:8090/user_Allowed/getAllUsersAllowed";
+  //trae TODOS
+  private URL_GET_ALL_UsersAllowed = "http://localhost:8090/user_Allowed/getAllUsersAllowed";
 
   private URL_POST_VALIDATE_QR = 'http://localhost:8090/visitor-qr';
 
-  //URL para la pantalla (registrar invitado que no esta en la lista)
-  private URL_POST_ENTRY_VisitorNotInList = "http://localhost:8090/movements_entry/register_if_not_exists";
 
   private readonly http: HttpClient = inject(HttpClient);
   private readonly helperService = inject(AccessVisitorHelperService);
-  constructor() {
-    this.loadVisitorsData();
-  }
-
-  //lista de Visitors
-  visitorslist : AccessUserAllowedInfoDto[] = [];
+  constructor() {}
 
   validateQrCode(qrCode: string): Observable<boolean> {
     return this.http.post<boolean>(`${this.URL_POST_VALIDATE_QR}/validate`, { qrCode });
   }
 
-
+  //Llamadas a Endpoints de la API:
   //trae TODOS los UserAllowed
   getAllUserAllowedData(): Observable<AccessUserAllowedInfoDto[]> {
-    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_UserAllowed);
-  }
-
-  loadVisitorsData(): void {
-
-    this.getVisitorsData().subscribe({
-      next: (data: AccessUserAllowedInfoDto[]) => {
-        this.visitorslist = data; // Asigna los datos una vez que se reciban
-        //console.log("data en el service: ", data);
-        //console.log("visitorslist en el service: ", this.visitorslist);
-
-      },
-      error: (error) => {
-        console.error('Error al cargar los datos de los Visitors:', error);
-      }
-    });
-  }
-
-  GetVisitorsList(): AccessUserAllowedInfoDto[]{
-    return [...this.visitorslist]
-  }
-
-  //filtra la list de Visitors
-  getVisitorByParam(parameter: string): AccessUserAllowedInfoDto[] {
-
-    //console.log("el cambio: " + parameter);
-
-    if (parameter != null && parameter.length > 2) {
-      let param = parameter.toLowerCase();
-
-      return this.visitorslist.filter(v =>
-        v.document.toLowerCase().includes(param) ||
-        v.name.toLowerCase().includes(param) ||
-        v.last_name.toLowerCase().includes(param)
-      );
-    } else {
-      return this.visitorslist;
-    }
-  }
-
-  //Llamadas a Endpoints de la API:
-  // METODO: getAllUserAllowedVisitors(@PathVariable String visitor)
-  getVisitorsData(): Observable<AccessUserAllowedInfoDto[]> {
-    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_Visitors);
+    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_UsersAllowedWithoutMovements);
   }
 
   // METODO: registerMovement_Entry(@RequestBody NewMovements_EntryDto movementsEntryDto)
@@ -99,35 +49,7 @@ export class VisitorsService {
     return this.http.post<any>(this.URL_POST_EXIT_VisitorInList, movement, { headers });
   }
 
-  // METODO: getUserAllowedLastEntryByDocument(@RequestParam String document)
-  getVisitorLastEntry(document: string): Observable<any> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const url = `${this.URL_GET_LastEntryByDocument}${encodeURIComponent(document)}`;
-    return this.http.get<any>(url, { headers });
-  }
 
-    // METODO: getUserAllowedLastExitByDocument(@RequestParam String document)
-    getVisitorLastExit(document: string): Observable<any> {
-      const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-      const url = `${this.URL_GET_LastExitByDocument}${encodeURIComponent(document)}`;
-      return this.http.get<any>(url, { headers });
-    }
-
-
-  // METODO: registerMovementEntryIfNotExists(
-    // @RequestParam String documento,
-    // @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate date,
-    // @RequestBody(required = false) NewMovements_EntryDto movementsEntryDto) {
-  postUnregisteredVisitorEntry(document: string, date: string, movement: AccessNewMovementsEntryDto): Observable<any> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  
-    // los parametros de consulta (documento y date) los pone en la URL
-    // ejemplo URL completa: http://localhost:8090/movements_entry/register_if_not_exists?documento=99887766&date=2024-10-11
-    const url = `${this.URL_POST_ENTRY_VisitorNotInList}?documento=${encodeURIComponent(document)}&date=${encodeURIComponent(date)}`;
-  
-    // hace el POST con movement en el body
-    return this.http.post<any>(url, movement, { headers });
-  }  
 
 
 
