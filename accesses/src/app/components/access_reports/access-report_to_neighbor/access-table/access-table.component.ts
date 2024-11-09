@@ -17,11 +17,12 @@ import { DataTableConfigService } from '../../../../services/access_report/acces
 import { ExportService } from '../../../../services/access_report/access-export/export.service';
 import { ENTRY_EXIT_OPTIONS, ESTADO_HORARIO_OPTIONS, TIPOS_INGRESANTE, TIPOS_VEHICULO, USER_TYPE_MAPPINGS, VALUE_MAPPINGS } from '../../../../models/access-report/constants';
 import { AccessRegistryUpdateService } from '../../../../services/access-registry-update/access-registry-update.service';
+import { AccessVisitorRegistryComponent } from '../../../access_visitors/access-visitor-registry/access-visitor-registry.component';
 
 @Component({
   selector: 'app-access-table',
   standalone: true,
-  imports: [DataTablesModule, CommonModule, HttpClientModule, NgSelectModule, FormsModule],
+  imports: [DataTablesModule, CommonModule, HttpClientModule, NgSelectModule, FormsModule, AccessVisitorRegistryComponent],
   templateUrl: './access-table.component.html',
   styleUrls: ['./access-table.component.css']
 })

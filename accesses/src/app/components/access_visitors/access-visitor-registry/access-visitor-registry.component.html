@@ -1,100 +1,111 @@
-<div class="container-fluid p-1 mt-2 mb-2">
-  <div class="container-fluid m-1 p-2">
-    <div class="container-fluid col-10 shadow p-3 mb-5 bg-body rounded">
-      <div class="mb-3">
+<!-- Modal de Visitantes -->
+<div class="modal fade" id="visitorListModal" tabindex="-1" aria-labelledby="visitorListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" style="max-width: 95vw; margin: 10px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="visitorListModalLabel">Lista de Visitantes</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-<!-- Contenedor para todos los controles -->
-<div class="row g-3 mb-3 align-items-center">
-  <!-- Campo de búsqueda -->
-  <div class="col-md-2 pe-0">
-    <div class="search-box">
-      <input type="search" 
-             class="form-control" 
-             placeholder="Buscar"
-             id="customSearch">
-    </div>
-  </div>
-
-  <!-- Selector de Tipo de Ingresante -->
-  <div class="col-md-3 pe-0">
-    <div class="d-flex align-items-center flex-nowrap">
-      <label class="form-label mb-0 me-2 text-nowrap">Tipo de ingresante:</label>
-      <ng-select
-       class="flex-grow-1"
-        [items]="userTypeOptions"
-        [multiple]="true"
-        [closeOnSelect]="false"
-        [searchable]="true"
-        bindLabel="label"
-        bindValue="value"
-        [clearable]="false"
-        placeholder=""
-        [(ngModel)]="selectedUserTypes"
-        (change)="onFilterSelectionChange()">
-        
-        <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-          <span>({{items.length}}) Seleccionados </span>
-        </ng-template>
-        
-        <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-          <input id="type-{{item.value}}" 
-                type="checkbox" 
-                [checked]="item$.selected"
-                class="form-check-input me-2"/>
-          <span>{{item.label}}</span>
-        </ng-template>
-      </ng-select>
-    </div>
-  </div>
-
-    <!-- Espacio flexible -->
-    <div class="col">
-    </div>
-
-
-        <!-- Botones de acción -->
-        <div class="col-4 d-flex justify-content-end">
-          <button class="btn btn-secondary action-btn me-2" (click)="clearFilters()" title="Limpiar filtros">
-            <i class="bi bi-trash"></i>
-          </button>
-          
-          <button
-            class="btn btn-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#qrScannerModal">
-            <i class="bi bi-qr-code-scan"></i>
-          </button>
+      <div class="modal-body">
+        <div class="container-fluid p-1 mt-2 mb-2">
+          <div class="container-fluid m-1 p-2">
+            <div class="container-fluid shadow p-3 mb-5 bg-body rounded"> <!-- Removida la clase col-10 -->
+             
+              <div class="mb-3">
+              </div>
+              <!-- Contenedor para todos los controles -->
+              <div class="row g-3 mb-3 align-items-center">
+                <!-- Campo de búsqueda -->
+                <div class="col-md-2 pe-0">
+                  <div class="search-box">
+                    <input type="search" 
+                           class="form-control" 
+                           placeholder="Buscar"
+                           id="customSearch">
+                  </div>
+                </div>
+ 
+                <!-- Selector de Tipo de Ingresante -->
+                <div class="col-md-3 pe-0">
+                  <div class="d-flex align-items-center flex-nowrap">
+                    <label class="form-label mb-0 me-2 text-nowrap">Tipo de ingresante:</label>
+                    <ng-select
+                     class="flex-grow-1"
+                      [items]="userTypeOptions"
+                      [multiple]="true"
+                      [closeOnSelect]="false"
+                      [searchable]="true"
+                      bindLabel="label"
+                      bindValue="value"
+                      [clearable]="false"
+                      placeholder=""
+                      [(ngModel)]="selectedUserTypes"
+                      (change)="onFilterSelectionChange()">
+                      
+                      <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                        <span>({{items.length}}) Seleccionados </span>
+                      </ng-template>
+                      
+                      <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                        <input id="type-{{item.value}}" 
+                              type="checkbox" 
+                              [checked]="item$.selected"
+                              class="form-check-input me-2"/>
+                        <span>{{item.label}}</span>
+                      </ng-template>
+                    </ng-select>
+                  </div>
+                </div>
+ 
+                <!-- Espacio flexible -->
+                <div class="col">
+                </div>
+ 
+                <!-- Botones de acción -->
+                <div class="col-4 d-flex justify-content-end">
+                  <button class="btn btn-secondary action-btn me-2" (click)="clearFilters()" title="Limpiar filtros">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  
+                  <button
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#qrScannerModal">
+                    <i class="bi bi-qr-code-scan"></i>
+                  </button>
+                </div>
+              </div>
+ 
+              <!-- Tabla -->
+              <table id="visitorsTable" class="table table-hover table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Documento</th>
+                    <th scope="col">Vehículos</th>
+                    <th scope="col">Observaciones</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Aquí iría la lógica para mostrar los visitantes -->
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- Tabla -->
-      <table id="visitorsTable" class="table table-hover table-striped">
-        <thead>
-          <tr>
-            <th scope="col">Estado</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Tipo</th>
-            <th scope="col">Documento</th>
-            <th scope="col">Vehículos</th>
-            <th scope="col">Observaciones</th>
-            <th scope="col">Acciones</th>
-
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Aquí iría la lógica para mostrar los visitantes -->
-        </tbody>
-      </table>
-
-      <div class="row align-items-center">
-        <!-- Espacio para botones adicionales si son necesarios -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
-</div>
-
-<!-- Modal del escáner QR -->
-<div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
+ </div>
+ 
+ <!-- Modal del escáner QR -->
+ <div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
@@ -114,10 +125,10 @@
       </div>
     </div>
   </div>
-</div>
-
-<!-- Modal de Información del Visitante -->
-<div class="modal" id="visitorInfoModal" tabindex="-1" aria-labelledby="visitorInfoModalLabel" aria-hidden="true" [class.show]="isModalOpen">
+ </div>
+ 
+ <!-- Modal de Información del Visitante -->
+ <div class="modal" id="visitorInfoModal" tabindex="-1" aria-labelledby="visitorInfoModalLabel" aria-hidden="true" [class.show]="isModalOpen">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -140,7 +151,7 @@
           <p><strong>Tipo de documento:</strong> {{ getDocumentType(selectedVisitor) }}</p>
           <p><strong>Documento:</strong> {{ selectedVisitor.document }}</p>
           <p><strong>Email:</strong> {{ selectedVisitor.email }}</p>
-
+ 
           <p><strong>Información del vehículo:</strong></p>
           <div *ngIf="hasVehicles(selectedVisitor); else noVehicle">
             <ul *ngFor="let vehicle of getVehicles(selectedVisitor)">
@@ -158,7 +169,7 @@
           <ng-template #noVehicle>
             <p>No tiene registro</p>
           </ng-template>
-
+ 
           <p><strong>Rango de fechas:</strong></p>
           <div *ngIf="selectedVisitor.authRanges.length > 0; else noDays">
             <ul *ngFor="let auth of selectedVisitor.authRanges">
@@ -173,12 +184,10 @@
       </div>
     </div>
   </div>
-</div>
-
-
-
-<!-- Modal de Confirmación de Ingreso vecino -->
-<div class="modal fade" id="confirmIngresoModal" tabindex="-1" aria-labelledby="confirmIngresoModalLabel" aria-hidden="true">
+ </div>
+ 
+ <!-- Modal de Confirmación de Ingreso vecino -->
+ <div class="modal fade" id="confirmIngresoModal" tabindex="-1" aria-labelledby="confirmIngresoModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -194,11 +203,10 @@
       </div>
     </div>
   </div>
-</div>
-
-
-<!-- Modal de Confirmación de Egreso -->
-<div class="modal fade" id="confirmEgresoModal" tabindex="-1" aria-labelledby="confirmEgresoModalLabel" aria-hidden="true">
+ </div>
+ 
+ <!-- Modal de Confirmación de Egreso -->
+ <div class="modal fade" id="confirmEgresoModal" tabindex="-1" aria-labelledby="confirmEgresoModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -214,10 +222,10 @@
       </div>
     </div>
   </div>
-</div>
-
-<!-- Modal de Confirmación de Ingreso Empleado -->
-<div class="modal fade" id="confirmIngresoEmpModal" tabindex="-1" aria-labelledby="confirmIngresoEmpModalLabel" aria-hidden="true">
+ </div>
+ 
+ <!-- Modal de Confirmación de Ingreso Empleado -->
+ <div class="modal fade" id="confirmIngresoEmpModal" tabindex="-1" aria-labelledby="confirmIngresoEmpModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -233,10 +241,10 @@
       </div>
     </div>
   </div>
-</div>
-
-<!-- Modal de Confirmación de Egreso Empleado -->
-<div class="modal fade" id="confirmEgresoEmpModal" tabindex="-1" aria-labelledby="confirmEgresoEmpModalLabel" aria-hidden="true">
+ </div>
+ 
+ <!-- Modal de Confirmación de Egreso Empleado -->
+ <div class="modal fade" id="confirmEgresoEmpModal" tabindex="-1" aria-labelledby="confirmEgresoEmpModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -252,11 +260,10 @@
       </div>
     </div>
   </div>
-</div>
-
-
-<!-- Modal de confirmación -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+ </div>
+ 
+ <!-- Modal de confirmación -->
+ <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -271,4 +278,6 @@
       </div>
     </div>
   </div>
-</div>
+ </div>
+
+ 
