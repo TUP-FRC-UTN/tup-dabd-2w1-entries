@@ -2,57 +2,82 @@
 import { ColumnDef, LanguageConfig, SelectOption } from './Types';
 
 
+  interface UserTypeMapping {
+  icon: string;
+  color: string;
+  title: string;
+  filterValue: string; // Valor usado en el filtro
+  columnValue: string; // Valor que aparece en la columna de la tabla
+}
+
       /**
    * Configuración de iconos para tipos de usuario
    */
-      export const USER_TYPE_ICONS = {
+      export const USER_TYPE_MAPPINGS: { [key: string]: UserTypeMapping } = {
         Empleado: {
           icon: 'bi bi-briefcase',
           color: '#fd7e14',
-          title: 'Empleado'
+          title: 'Empleado',
+          filterValue: 'employee',
+          columnValue: 'empleado'
         },
         Proveedor: {
           icon: 'bi bi-truck',
           color: '#20c997',
-          title: 'Proveedor'
+          title: 'Proveedor',
+          filterValue: 'suplier',
+          columnValue: 'proveedor'
         },
         Visitante: {
           icon: 'bi bi-person-raised-hand',
           color: '#0d6efd',
-          title: 'Visitante'
+          title: 'Visitante',
+          filterValue: 'visitor',
+          columnValue: 'visitante'
         },
         Vecino: {
           icon: 'bi bi-house-fill',
           color: '#198754',
-          title: 'Vecino'
+          title: 'Vecino',
+          filterValue: 'neighbour',
+          columnValue: 'vecino'
         },
         Obrero: {
           icon: 'bi bi-tools',
           color: '#dc3545',
-          title: 'Obrero'
+          title: 'Obrero',
+          filterValue: 'constructionworker',
+          columnValue: 'obrero'
         },
         Delivery: {
           icon: 'bi bi-box-seam',
           color: 'purple',
-          title: 'Delivery'
+          title: 'Delivery',
+          filterValue: 'delivery',
+          columnValue: 'delivery'
         },
         Cleaning: {
           icon: 'bi bi-stars',
           color: '#d63384',
-          title: 'P. de Limpieza'
+          title: 'P. de Limpieza',
+          filterValue: 'cleaning',
+          columnValue: 'personal de limpieza'
         },
         Jardinero: {
           icon: 'bi bi-flower1',
           color: '#0dcaf0',
-          title: 'Jardinero'
+          title: 'Jardinero',
+          filterValue: 'gardener',
+          columnValue: 'jardinero'
         },
         Emergencias: {
-          icon: 'bi bi-hospital"',
+          icon: 'bi bi-hospital',
           color: '#dc3545',
-          title: 'Emergencias'
+          title: 'Emergencias',
+          filterValue: 'services',
+          columnValue: 'emergencias'
         }
       };
-    
 /**
  * Opciones para el selector de entrada/salida
  */

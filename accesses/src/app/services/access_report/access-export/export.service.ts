@@ -11,11 +11,11 @@ import 'jszip';
   providedIn: 'root'
 })
 export class ExportService {
-   /**
+  /**
    * Configura los botones de exportación para la tabla
    */
-   setupExportButtons(table: any, selectedMonth: number | null): void {
-    const { formattedDate, formattedDateForFilename, currentMonth } = this.getFormattedDates(selectedMonth);
+  setupExportButtons(table: any, startDate: Date | null, endDate: Date | null): void {
+    const { formattedDateRange, formattedDateForFilename } = this.getFormattedDateRange(startDate, endDate);
     
     // Limpiar botones existentes si los hay
     if (table.buttons) {
@@ -26,11 +26,11 @@ export class ExportService {
     const buttonsConfig = {
       buttons: [
         {
-          ...this.getExcelConfig(formattedDateForFilename, currentMonth, formattedDate),
+          ...this.getExcelConfig(formattedDateForFilename, formattedDateRange),
           className: 'dt-button-excel d-none'
         },
         {
-          ...this.getPdfConfig(formattedDateForFilename, currentMonth),
+          ...this.getPdfConfig(formattedDateForFilename, formattedDateRange),
           className: 'dt-button-pdf d-none'
         }
       ]
@@ -46,49 +46,49 @@ export class ExportService {
   }
 
   /**
-   * Obtiene las fechas formateadas para los nombres de archivo
+   * Obtiene las fechas formateadas para el rango
    */
-  private getFormattedDates(selectedMonth: number | null) {
-    const today = new Date();
-    const formattedDate = this.formatDate(today);
-    const formattedDateForFilename = formattedDate.replace(/\//g, '-');
-    const currentMonth = this.getMonthName(selectedMonth);
+  private getFormattedDateRange(startDate: Date | null, endDate: Date | null): { 
+    formattedDateRange: string, 
+    formattedDateForFilename: string 
+  } {
+    if (!startDate || !endDate) {
+      return {
+        formattedDateRange: 'Sin fecha específica',
+        formattedDateForFilename: 'sin_fecha'
+      };
+    }
 
-    return { formattedDate, formattedDateForFilename, currentMonth };
-  }
+    const formatDate = (date: Date): string => {
+      return [
+        date.getDate().toString().padStart(2, '0'),
+        (date.getMonth() + 1).toString().padStart(2, '0'),
+        date.getFullYear()
+      ].join('/');
+    };
 
-  /**
-   * Formatea una fecha al formato dd/mm/yyyy
-   */
-  private formatDate(date: Date): string {
-    return [
-      date.getDate().toString().padStart(2, '0'),
-      (date.getMonth() + 1).toString().padStart(2, '0'),
-      date.getFullYear()
-    ].join('/');
-  }
+    const formatDateForFilename = (date: Date): string => {
+      return [
+        date.getDate().toString().padStart(2, '0'),
+        (date.getMonth() + 1).toString().padStart(2, '0'),
+        date.getFullYear()
+      ].join('_');
+    };
 
-  /**
-   * Obtiene el nombre del mes en español
-   */
-  private getMonthName(selectedMonth: number | null): string {
-    const monthNames = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
-    return selectedMonth ? 
-      monthNames[selectedMonth - 1] : 
-      monthNames[new Date().getMonth()];
+    return {
+      formattedDateRange: `${formatDate(startDate)} al ${formatDate(endDate)}`,
+      formattedDateForFilename: `${formatDateForFilename(startDate)}_al_${formatDateForFilename(endDate)}`
+    };
   }
 
   /**
    * Obtiene la configuración para exportación a Excel
    */
-  private getExcelConfig(formattedDateForFilename: string, currentMonth: string, formattedDate: string) {
+  private getExcelConfig(formattedDateForFilename: string, dateRange: string) {
     return {
       extend: 'excel',
       text: 'Excel',
-      filename: () => `${formattedDateForFilename}. Movimientos del mes de ${currentMonth}`,
+      filename: () => `Reporte_Accesos_${formattedDateForFilename}`,
       exportOptions: {
         columns: ':visible',
         format: {
@@ -124,8 +124,8 @@ export class ExportService {
           }
         }
       },
-      messageTop: `Movimientos del mes de ${currentMonth}\nFecha de emisión: ${formattedDate}`,
-      title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS',
+      messageTop: `Reporte de movimientos del ${dateRange}\nFecha de emisión: ${new Date().toLocaleDateString()}`,
+      title: 'LISTADO DE INGRESOS/EGRESOS',
       customize: (xlsx: any) => {
         const sheet = xlsx.xl.worksheets['sheet1.xml'];
         $('row:first c', sheet).attr('s', '48');
@@ -137,11 +137,11 @@ export class ExportService {
   /**
    * Obtiene la configuración para exportación a PDF
    */
-  private getPdfConfig(formattedDateForFilename: string, currentMonth: string) {
+  private getPdfConfig(formattedDateForFilename: string, dateRange: string) {
     return {
       extend: 'pdf',
       text: 'PDF',
-      filename: () => `${formattedDateForFilename}. Movimientos del mes de ${currentMonth}`,
+      filename: () => `Reporte_Accesos_${formattedDateForFilename}`,
       orientation: 'landscape',
       pageSize: 'A4',
       exportOptions: {
@@ -205,22 +205,22 @@ export class ExportService {
 
         // Título principal
         doc.content[0] = {
-          text: 'LISTADO MENSUAL DE INGRESOS/EGRESOS',
+          text: 'LISTADO DE INGRESOS/EGRESOS',
           alignment: 'left',
           fontSize: 14,
           bold: true,
           margin: [0, 0, 0, 10]
         };
 
-        // Subtítulo con el mes
+        // Subtítulo con el rango de fechas
         doc.content.splice(1, 0, {
-          text: `Movimientos del mes de: ${currentMonth}`,
+          text: `Reporte de movimientos del: ${dateRange}`,
           alignment: 'left',
           fontSize: 12,
           margin: [0, 0, 0, 5]
         });
       },
-      title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS'
+      title: 'LISTADO DE INGRESOS/EGRESOS'
     };
   }
 }

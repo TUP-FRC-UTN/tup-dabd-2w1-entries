@@ -1,7 +1,7 @@
 // services/datatable-config.service.ts
 
 import { Injectable } from "@angular/core";
-import { DEFAULT_COLUMN_DEFS, DEFAULT_LANGUAGE_CONFIG, ENTRY_STYLES, STATUS_STYLES, USER_TYPE_ICONS, VALUE_MAPPINGS } from "../../../models/access-report/constants";
+import { DEFAULT_COLUMN_DEFS, DEFAULT_LANGUAGE_CONFIG, ENTRY_STYLES, STATUS_STYLES, USER_TYPE_MAPPINGS, VALUE_MAPPINGS } from "../../../models/access-report/constants";
 import { DataTableConfig, ColumnDef } from "../../../models/access-report/Types";
 
 @Injectable({
@@ -9,7 +9,7 @@ import { DataTableConfig, ColumnDef } from "../../../models/access-report/Types"
 })
 export class DataTableConfigService {
   
-  public readonly USER_TYPE_ICONS = USER_TYPE_ICONS;
+  public readonly USER_TYPE_ICONS = USER_TYPE_MAPPINGS;
   public readonly ENTRY_STYLES = ENTRY_STYLES;
   public readonly STATUS_STYLES = STATUS_STYLES;
 
@@ -82,10 +82,10 @@ export class DataTableConfigService {
         };
 
         return `
-          <button style="background-color: ${typeConfig.color}; border: bisque;" 
+          <button style="background-color: ${typeConfig.color}; border: none;" 
                   class="btn btn-primary" 
                   title="${typeConfig.title}">
-            <i class="${typeConfig.icon}"></i>
+            <i class="${typeConfig.icon}"><div class="d-none">${typeConfig.title}</div></i>
           </button>`;
       }
     }

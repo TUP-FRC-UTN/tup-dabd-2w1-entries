@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
 import { DataTablesModule } from 'angular-datatables';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule } from '@angular/forms';
@@ -15,7 +15,7 @@ import Swal from 'sweetalert2';
 import { FilterValues, Movement } from '../../../../models/access-report/Types';
 import { DataTableConfigService } from '../../../../services/access_report/access_datatableconfig/data-table-config.service';
 import { ExportService } from '../../../../services/access_report/access-export/export.service';
-import { ENTRY_EXIT_OPTIONS, ESTADO_HORARIO_OPTIONS, TIPOS_INGRESANTE, TIPOS_VEHICULO, VALUE_MAPPINGS } from '../../../../models/access-report/constants';
+import { ENTRY_EXIT_OPTIONS, ESTADO_HORARIO_OPTIONS, TIPOS_INGRESANTE, TIPOS_VEHICULO, USER_TYPE_MAPPINGS, VALUE_MAPPINGS } from '../../../../models/access-report/constants';
 
 @Component({
   selector: 'app-access-table',
@@ -28,13 +28,14 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   // Propiedades para manejo de fechas
   anios: number[] = [];
   meses: number[] = [];
-  selectedYear: number | null = null;
-  selectedMonth: number | null = null;
+ startDate: Date | null = null;
+  endDate: Date | null = null;
 
 
  // propiedad para trackear el filtro activo
   activeFilter: string | null = null;
 
+  activeUserTypeFilters: Set<string> = new Set();
 
   // Propiedades para datos y tabla
   movements: Movement[] = [];
@@ -69,6 +70,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     selectedPropietario: []
   };
 
+
   constructor(
     private http: HttpClient,
     private userService: AccessUserReportService,
@@ -77,62 +79,56 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {
     this.initializeDates();
   }
+ 
   /**
- * Maneja el filtro rápido por tipo de usuario
- */
-  toggleQuickFilter(type: string): void {
-    console.log('Current filter:', type); // Para debug
-  
-    // Si el filtro ya está activo, lo desactivamos
-    if (this.activeFilter === type) {
-      this.activeFilter = null;
-      this.filterValues.tipoIngresante = [];
-    } else {
-      this.activeFilter = type;
-      
-      switch(type) {
-        case 'Visitante':
-          this.filterValues.tipoIngresante = ['Visitante'];
-          break;
-        case 'Empleado':
-          this.filterValues.tipoIngresante = ['Empleado'];
-          break;
-        case 'Vecino':
-          this.filterValues.tipoIngresante = ['Vecino'];
-          break;
-        case 'Servicios':
-          // Incluimos todos los tipos de servicio
-          this.filterValues.tipoIngresante = [
-            'Cleaning',
-            'Jardinero',
-            'Delivery',
-            'Proveedor',
-            'Obrero'
-          ];
-          break;
-        default:
-          console.log('Tipo no reconocido:', type);
-          break;
-      }
-    }
-  
-    console.log('Filtered types:', this.filterValues.tipoIngresante); // Para debug
-    this.applyFilters();
-  }
-
-  /**
-   * Inicializa las fechas del componente
-   * Configura los arrays de años y meses, y establece los valores por defecto
+   * Inicializa las fechas por defecto (último mes)
    */
   private initializeDates(): void {
-    const currentYear = new Date().getFullYear();
-    this.anios = Array.from({ length: 5 }, (_, i) => currentYear - i);
-    this.meses = Array.from({ length: 12 }, (_, i) => i + 1);
+    const today = new Date();
+    this.endDate = today;
     
-    const currentDate = new Date();
-    this.selectedYear = currentDate.getFullYear();
-    this.selectedMonth = currentDate.getMonth() + 1;
+    // Calcular la fecha de inicio (un mes antes)
+    this.startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
   }
+
+
+    /**
+   * Manejadores para los cambios de fecha
+   */
+    onStartDateChange(date: string): void {
+      this.startDate = new Date(date);
+      this.fetchData();
+    }
+  
+    onEndDateChange(date: string): void {
+      this.endDate = new Date(date);
+      this.fetchData();
+    }
+  
+
+  toggleUserTypeFilter(userType: string): void {
+    if (this.activeUserTypeFilters.has(userType)) {
+      this.activeUserTypeFilters.delete(userType);
+    } else {
+      this.activeUserTypeFilters.add(userType);
+    }
+    
+    // Actualizar los filtros usando el nuevo mapeo
+    this.filterValues.tipoIngresante = Array.from(this.activeUserTypeFilters)
+      .map(type => USER_TYPE_MAPPINGS[type]?.filterValue)
+      .filter(v => v); // Eliminar valores vacíos
+
+    if (this.table) {
+      this.table.draw();
+    }
+  }
+   // Método para verificar si un botón está activo (para el [class.active])
+   isUserTypeFilterActive(userType: string): boolean {
+    return this.activeUserTypeFilters.has(userType);
+  }
+
+
+
 
   /**
    * Inicialización del componente
@@ -158,32 +154,45 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Manejador del cambio de año
-   */
-  onYearChange(year: number): void {
-    this.selectedYear = year;
-    this.fetchData();
-  }
-
-  /**
-   * Manejador del cambio de mes
-   */
-  onMonthChange(month: number): void {
-    this.selectedMonth = month;
-    this.fetchData();
-  }
-
-  /**
    * Obtiene los datos del servidor
    * Realiza la petición HTTP y maneja los errores
    */
   fetchData(): void {
-    if (!this.selectedYear || !this.selectedMonth) return;
+    if (!this.startDate || !this.endDate) return;
 
-    const url = `http://localhost:8090/movements_entryToNeighbor/ByMonth?year=${this.selectedYear}&month=${this.selectedMonth}`;
+    // Ajustar las horas: inicio a 00:00:00 y fin a 23:59:59
+    const startDateTime = new Date(this.startDate);
+    startDateTime.setHours(0, 0, 0, 0);
+
+    const endDateTime = new Date(this.endDate);
+    endDateTime.setHours(23, 59, 59, 999);
+
+    // Formato específico YYYY-MM-DDThh:mm:ss
+    const formatDateTime = (date: Date) => {
+        return `${date.getFullYear()}-${
+            String(date.getMonth() + 1).padStart(2, '0')}-${
+            String(date.getDate()).padStart(2, '0')}T${
+            String(date.getHours()).padStart(2, '0')}:${
+            String(date.getMinutes()).padStart(2, '0')}:${
+            String(date.getSeconds()).padStart(2, '0')}`;
+    };
+
+    const formattedStartDate = formatDateTime(startDateTime);
+    const formattedEndDate = formatDateTime(endDateTime);
+
+    // Para debugging
+    console.log('Start DateTime:', formattedStartDate);
+    console.log('End DateTime:', formattedEndDate);
+
+    const url = `http://localhost:8090/movements_entryToNeighbor/ByMonth`;
     
-    this.http.get<any>(url).pipe(
+    const params = new HttpParams()
+      .set('startDate', formattedStartDate)
+      .set('endDate', formattedEndDate);
+
+    this.http.get<any>(url, { params }).pipe(
       catchError(error => {
+        console.error('Error en la petición:', error);
         Swal.fire({
           icon: 'error',
           title: '¡Error!',
@@ -195,8 +204,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       this.movements = response.data;
       this.loadDataIntoTable();
     });
-  }
-
+}
   /**
    * Carga los datos en la tabla DataTable
    * Procesa los movimientos y actualiza la visualización
@@ -328,7 +336,7 @@ private initializeDataTable(): void {
   this.table = ($('#myTable') as any).DataTable(config);
   
   // Primero configurar los botones
-  this.exportService.setupExportButtons(this.table, this.selectedMonth);
+  this.exportService.setupExportButtons(this.table, this.startDate, this.endDate);
   
   // Luego configurar los listeners
   this.setupExportButtonListeners();
@@ -479,6 +487,7 @@ private filterRow(data: string[]): boolean {
   const [fecha, , tipoEntrada, tipoIngresante, nombre, documento,
          , tipoVehiculo, placa, propietario, guardia, estadoHorario] = data;
 
+      console.log(data);
   // Búsqueda unificada
   if (this.filterValues.unifiedSearch) {
     const searchTerm = this.filterValues.unifiedSearch.toLowerCase();
@@ -495,39 +504,27 @@ private filterRow(data: string[]): boolean {
       return false;
     }
   }
-  // Verificar filtro de tipo de ingresante
-  if (this.filterValues.tipoIngresante.length > 0) {
-    console.log('Valor original en la fila:', tipoIngresante);
-    
-    const matches = this.filterValues.tipoIngresante.some(filterType => {
-      // Convertir ambos valores a minúsculas para la comparación
-      const currentTypeInRow = tipoIngresante.toLowerCase();
-      let filterValue = filterType.toLowerCase();
-
-      // Hacer el mapeo inverso para la comparación
-      switch(filterValue) {
-        case 'visitor':
-          filterValue = 'visitante';
-          break;
-        case 'employee':
-          filterValue = 'employeed';
-          break;
-        case 'neighbour':
-          filterValue = 'owner';
-          break;
-        case 'services':
-          return ['cleaning', 'gardener', 'delivery', 'supplier', 'worker']
-            .some(service => currentTypeInRow.includes(service.toLowerCase()));
-      }
-
-      console.log('Comparando:', currentTypeInRow, 'con', filterValue);
-      return currentTypeInRow === filterValue;
-    });
-
-    if (!matches) {
-      return false;
+    // Verificar filtros de tipo de usuario si hay alguno activo
+    if (this.filterValues.tipoIngresante.length > 0) {
+      const normalizedTipoIngresante = tipoIngresante.toLowerCase().trim();
+      console.log(tipoIngresante);
+      
+      const matchesTipo = this.filterValues.tipoIngresante.some(filterValue => {
+        // Encontrar el tipo de usuario que corresponde a este filterValue
+        const matchingType = Object.values(USER_TYPE_MAPPINGS).find(
+          mapping => mapping.filterValue === filterValue
+        );
+        
+        if (matchingType) {
+          // Comparar con el valor de la columna, normalizando ambos valores
+          return normalizedTipoIngresante === matchingType.columnValue.toLowerCase().trim();
+        }
+        return false;
+      });
+  
+      if (!matchesTipo) return false;
     }
-  }
+ 
   // Verificar filtro de tipo de vehículo
   if (this.filterValues.typeCar.length > 0) {
     if (!this.filterValues.typeCar.some(value => 

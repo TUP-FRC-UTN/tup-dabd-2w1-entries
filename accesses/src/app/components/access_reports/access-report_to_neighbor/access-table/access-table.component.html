@@ -6,36 +6,28 @@
         </div>
     </div>
 
-    <!-- Selector de Año -->
     <div class="col-auto ps-2">
         <div class="d-flex align-items-center">
-            <label class="form-label mb-0 me-1 small">Año:</label>
-            <ng-select
-                style="width: 75px"
-                [items]="anios"
-                [(ngModel)]="selectedYear"
-                [searchable]="false"
-                [clearable]="false"
-                (change)="onYearChange($event)">
-            </ng-select>
+            <label class="form-label mb-0 me-1 small">Desde:</label>
+            <input 
+                type="date" 
+                class="form-control form-control-sm" 
+                [ngModel]="startDate | date:'yyyy-MM-dd'" 
+                (ngModelChange)="onStartDateChange($event)">
         </div>
     </div>
-
-    <!-- Selector de Mes -->
+    
     <div class="col-auto ps-2">
         <div class="d-flex align-items-center">
-            <label class="form-label mb-0 me-1 small">Mes:</label>
-            <ng-select
-                style="width: 75px"
-                [items]="meses"
-                [(ngModel)]="selectedMonth"
-                [searchable]="false"
-                [clearable]="false"
-                (change)="onMonthChange($event)">
-            </ng-select>
+            <label class="form-label mb-0 me-1 small">Hasta:</label>
+            <input 
+                type="date" 
+                class="form-control form-control-sm" 
+                [ngModel]="endDate | date:'yyyy-MM-dd'" 
+                (ngModelChange)="onEndDateChange($event)">
         </div>
     </div>
-
+  
     <!-- Espacio flexible -->
     <div class="col">
     </div>
@@ -45,34 +37,42 @@
         <div class="d-flex gap-2">
             <!-- Botones de tipo de usuario -->
             <button class="btn btn-primary action-btn" 
-                [class.active]="activeFilter === 'Visitante'"
+            style="border: none"
                 title="Filtrar por Visitantes" 
+                (click)="toggleUserTypeFilter('Visitante')"
+                [class.active]="isUserTypeFilterActive('Visitante')"
                 [style.backgroundColor]="getUserTypeColor('Visitante')"
-                (click)="toggleQuickFilter('Visitante')">
+                >
                 <i [class]="getUserTypeIcon('Visitante')"></i>
             </button>
 
             <button class="btn btn-primary action-btn"
-                [class.active]="activeFilter === 'Empleado'"
+            style="border: none"
+            (click)="toggleUserTypeFilter('Empleado')"
+            [class.active]="isUserTypeFilterActive('Empleado')"
                 title="Filtrar por Empleados" 
                 [style.backgroundColor]="getUserTypeColor('Empleado')"
-                (click)="toggleQuickFilter('Empleado')">
+               >
                 <i [class]="getUserTypeIcon('Empleado')"></i>
             </button>
 
-            <button class="btn btn-primary action-btn"
-                [class.active]="activeFilter === 'Vecino'"
+            <button class="btn btn-primary action-btn "
+                style="border: none"
+                (click)="toggleUserTypeFilter('Vecino')"
+                [class.active]="isUserTypeFilterActive('Vecino')"
                 title="Filtrar por Vecinos" 
                 [style.backgroundColor]="getUserTypeColor('Vecino')"
-                (click)="toggleQuickFilter('Vecino')">
+                >
                 <i [class]="getUserTypeIcon('Vecino')"></i>
             </button>
 
             <button class="btn btn-primary action-btn"
-                [class.active]="activeFilter === 'Proveedor'"
+            style="border: none"
+                (click)="toggleUserTypeFilter('Proveedor')"
+                [class.active]="isUserTypeFilterActive('Proveedor')"
                 title="Filtrar por proveedores" 
                 [style.backgroundColor]="getUserTypeColor('Proveedor')"
-                (click)="toggleQuickFilter('Proveedor')">
+              >
                 <i [class]="getUserTypeIcon('Proveedor')"></i>
             </button>
 
