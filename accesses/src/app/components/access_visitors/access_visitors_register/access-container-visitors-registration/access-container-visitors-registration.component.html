@@ -209,20 +209,17 @@
 
         <div class="col-12 mt-5">
             <div class="d-flex justify-content-end gap-3">
-                <!-- Botón para descargar el código QR, visible solo si el tipo de usuario es 0 y el QR está disponible -->
                 <button class="btn btn-outline-success btn-lg" 
                 type="button" 
-                *ngIf="isQRCodeAvailable && indexUserType === 0" 
+                *ngIf="isQRCodeAvailable && indexUserType === 1" 
                 (click)="downloadQRCode()" 
                 [disabled]="!isQRCodeAvailable">
             Descargar Qr
-        </button>
-        
-                <!-- Botón para registrar el visitante -->
+                </button>
                 <button class="btn btn-primary btn-sm" type="button" (click)="sendVisitorRecord()">
                     Registrar
                 </button>
-            </div>
+        </div>
         </div>
         
     </form>
