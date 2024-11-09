@@ -41,7 +41,7 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   }
   uid?:string;
   qrCodeId?:string;
-  isQRCodeAvailable?: boolean;
+  isQRCodeAvailable: boolean = false; 
   visitorForm!: FormGroup; 
   vehicleType: string[] = [];
   patentePattern = '^[A-Z]{1,3}\\d{3}[A-Z]{0,3}$';
@@ -73,14 +73,7 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
 
 
   downloadQRCode(): void {
-    if (this.indexUserType === 0) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Registro exitoso',
-        text: 'El registro se completó, pero no se puede descargar el código QR para este tipo de autorizado.',
-      });
-      return; 
-    }
+    console.log(this.qrCodeId);
     if (!this.qrCodeId) {
         Swal.fire({
             icon: 'warning',
@@ -102,6 +95,7 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
             window.URL.revokeObjectURL(url);
 
             this.resetEverything();
+            this.isQRCodeAvailable=false;
             Swal.fire({
                 icon: 'success',
                 title: 'QR Descargado',
@@ -139,87 +133,77 @@ setNameQr(): void {
 
 
   private resetEverything(): void {
-    this.resetForm();
+    this.resetFormComplete();
     this.qrCodeId = undefined;
-    this.isQRCodeAvailable = false;
     this.visitorRecord = undefined;
     this.visitorService.resetAllData();
   }
 
   sendVisitorRecord(): void {
     if (this.visitorRecord) {
-      // Verificar si el tipo de usuario es diferente de 0
-      if (this.indexUserType !== 0) {
-        // Si el tipo de usuario no es 0, no se generará el QR y solo se enviará el registro
-        this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
-          next: (response) => {
+        if (this.visitorRecord.visitors.length <= 0) {
             Swal.fire({
-              icon: 'success',
-              title: 'Registro enviado correctamente',
-              text: 'El registro del visitante se ha enviado exitosamente.',
+                icon: 'error',
+                title: 'Error',
+                text: 'No se puede enviar el registro: ingrese un autorizado.',
             });
-            this.isQRCodeAvailable = false; 
-            this.resetEverything();
-          },
-          error: (error) => {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'No se puede enviar el registro.',
-            });
-            console.error('Error sending visitor record', error);
-            this.isQRCodeAvailable = false;
-            this.resetEverything();
-          }
-        });
-        return; // Evitar continuar con la verificación de otros datos
-      }
-  
-      // Verificar si la lista de visitantes está vacía
-      if (this.visitorRecord.visitors.length <= 0) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se puede enviar el registro: ingrese un visitante por lo menos.',
-        });
-        return;
-      }
-  
-      // Verificar si el rango de fechas está definido
-      if (!this.visitorRecord.authRange || this.visitorRecord.authRange == null) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se puede enviar el registro: ingrese un rango de fechas con al menos un día permitido.',
-        });
-  
-        this.isQRCodeAvailable = false;
-        return;
-      }
-  
-      // Enviar el registro con la generación del QR solo si el tipo de usuario es 0
-      this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
-        next: (response) => {
-          this.qrCodeId = response.qrCodeId || response.id; 
-          this.setNameQr();
-          this.isQRCodeAvailable = true;
-          this.resetEverything();
-        },
-        error: (error) => {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'No se puede enviar el registro.',
-          });
-          console.error('Error sending visitor record', error);
-          this.resetEverything();
-          this.isQRCodeAvailable = false;
+            return;
         }
-      });
+
+        if (!this.visitorRecord.authRange || this.visitorRecord.authRange == null) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se puede enviar el registro: ingrese un rango de fechas con al menos un día permitido.',
+            });
+            this.isQRCodeAvailable = false;
+            return;
+        }
+
+        this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
+            next: (response) => {
+                if (this.indexUserType === 0) {
+                  
+                    if (response.id) {
+                        this.qrCodeId = response.id;
+                    } 
+                    if (this.qrCodeId) {
+                        this.isQRCodeAvailable = true;
+                        this.setNameQr();
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Advertencia',
+                            text: 'El registro se creó pero no se generó el código QR.',
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registro enviado correctamente',
+                        text: 'El registro de autorización se ha enviado exitosamente.',
+                    });
+                    this.isQRCodeAvailable = false;
+                }
+                if (!this.isQRCodeAvailable) {
+                    this.resetEverything();
+                }
+            },
+            error: (error) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se puede enviar el registro.',
+                });
+                console.error('Error sending visitor record', error);
+                this.isQRCodeAvailable = false;
+                this.resetEverything();
+            }
+        });
     }
-  }
+}
   
- 
+
   initVisitorRecord(): void {
     combineLatest([
       this.visitorService.getVisitorsTemporalsSubject(),
@@ -238,12 +222,11 @@ setNameQr(): void {
     };
   }
   ngOnInit(): void {
-
     this.initForm();
     this.loadVehicleTypes();
     this.listenToHasVehicleChanges();
     this.initVisitorRecord();
-    this.loadUsersType();
+    this.loadUsersType();  
   }
   initForm(): void {
     this.visitorForm = this.fb.group({
@@ -404,7 +387,9 @@ onDocumentInput(event: Event): void {
 }
 
 resetForm(): void {
+  const currentAuthorizedType = this.visitorForm.get('authorizedType')?.value;
   this.visitorForm.reset({
+    authorizedType: currentAuthorizedType, 
     firstName: '',
     lastName: '',
     document: '',
@@ -414,7 +399,20 @@ resetForm(): void {
     vehicleType: ''
   });
 }
-
+resetFormComplete(): void {
+  this.visitorForm.reset({
+    authorizedType: '',
+    firstName: '',
+    lastName: '',
+    document: '',
+    documentType: '',
+    email: '',
+    hasVehicle: false,
+    licensePlate: '',
+    vehicleType: '',
+    insurance: ''
+  });
+}
 ngOnDestroy(): void {
   this.unsubscribe$.next();
   this.unsubscribe$.complete();
