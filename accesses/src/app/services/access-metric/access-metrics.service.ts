@@ -1,21 +1,39 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AccessMonthlyVisitorCount } from '../../models/access-visitors-count/access-monthly-visitor-count';
+import { AccessMetricsDTO, DayOfWeekMetricDTO, HourlyMetricDTO, UserTypeMetricDTO } from '../../models/access-metric/metris';
 @Injectable({
   providedIn: 'root'
 })
 export class AccessMetricsService {
-  private apiUrl = 'http://localhost:8090';
+
+  private baseUrl = 'http://localhost:8090';
   
-  constructor(private http:HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  getMonthlyVisitorCounts(): Observable<AccessMonthlyVisitorCount[]> {
-    return this.http.get<AccessMonthlyVisitorCount[]>(this.apiUrl + "/egresses/monthly/observations");
+  getDashboardMetrics(): Observable<AccessMetricsDTO> {
+    return this.http.get<AccessMetricsDTO>(`${this.baseUrl}/dashboard`);
   }
 
-  getMonthlyVisitorCountsByType(): Observable<AccessMonthlyVisitorCount[]> {
-    return this.http.get<AccessMonthlyVisitorCount[]>(this.apiUrl + "/egresses/monthly/type/observations");
+  getHourlyMetrics(): Observable<HourlyMetricDTO[]> {
+    return this.http.get<HourlyMetricDTO[]>(`${this.baseUrl}/hourly`);
   }
+
+  getUserTypeMetrics(): Observable<UserTypeMetricDTO[]> {
+    return this.http.get<UserTypeMetricDTO[]>(`${this.baseUrl}/user-types`);
+  }
+
+  getDailyAccessData(): Observable<{ date: string, count: number }[]> {
+    return this.http.get<{ date: string, count: number }[]>(`${this.baseUrl}/daily-access-count`);
+  }
+
+  getAccessCountByUserTypeForCurrentMonth(): Observable<{ userType: string, count: number }[]> {
+    return this.http.get<{ userType: string, count: number }[]>(`${this.baseUrl}/access-count-by-user-type`);
+  }
+
+  getAccessCountByWeekAndDayOfWeek(): Observable<DayOfWeekMetricDTO> {
+    return this.http.get<DayOfWeekMetricDTO>(`${this.baseUrl}/day-with-most-accesses`);
+  }
+
 
 }
