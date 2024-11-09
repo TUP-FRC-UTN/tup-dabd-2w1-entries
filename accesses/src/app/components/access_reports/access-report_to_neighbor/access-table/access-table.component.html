@@ -86,9 +86,11 @@
             <button class="btn btn-danger action-btn" id="pdfBtn" [disabled]="!exportButtonsEnabled" title="Exportar a PDF">
                 <i class="bi bi-file-earmark-pdf"></i>
             </button>
+            <!-- Agregar este div para los botones de DataTables -->
+            <div class="dt-buttons d-none"></div>
         </div>
     </div>
-</div>
+    
 <!-- Modal de Filtros Avanzados -->
 <div class="modal fade" id="advancedFiltersModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
