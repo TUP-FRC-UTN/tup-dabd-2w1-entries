@@ -135,16 +135,6 @@ export class VisitorsService {
   RegisterExit(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
     return new Observable<boolean>((observer) => {
 
-      // Mostrar diálogo de confirmación
-      Swal.fire({
-        title: 'Confirmar Engreso',
-        text: `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí',
-        cancelButtonText: 'Cancelar',
-      }).then((result) => {
-        if (result.isConfirmed) {
           // proceso de registro
           if (visitor.observations == undefined) {
             visitor.observations = "";
@@ -169,7 +159,7 @@ export class VisitorsService {
                     observer.next(true);
                     observer.complete();
                   } else {
-                    this.helperService.registerExitError();
+                    this.helperService.exitNotAllowed();
                     //return false;
                     observer.next(false);
                     observer.complete();
@@ -204,7 +194,7 @@ export class VisitorsService {
                     observer.next(true);
                     observer.complete();
                   } else {
-                    this.helperService.registerExitError();
+                    this.helperService.exitNotAllowed();
                     //return false;
                     observer.next(false);
                     observer.complete();
@@ -240,7 +230,7 @@ export class VisitorsService {
                     observer.next(true);
                     observer.complete();
                   } else {
-                    this.helperService.registerExitError();
+                    this.helperService.exitNotAllowed();
                     //return false;
                     observer.next(false);
                     observer.complete();
@@ -264,18 +254,6 @@ export class VisitorsService {
                 }
               });
           }
-
-        } else {
-          // Si se cancela la confirmación
-          observer.next(false);
-          observer.complete();
-        }
-      }).catch(error => {
-        console.error('Error en el diálogo de confirmación:', error);
-        observer.error(error);
-        observer.complete();
-      });
-
     });
   }
   
@@ -288,16 +266,6 @@ export class VisitorsService {
 RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
   return new Observable<boolean>((observer) => {
 
-    // Mostrar diálogo de confirmación
-    Swal.fire({
-      title: 'Confirmar Ingreso',
-      text: `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
           // proceso de registro
           //verifica observations
           if(visitor.observations == undefined){
@@ -334,7 +302,7 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
                     observer.complete();   
 
                   } else {
-                    this.helperService.registerEntryError();
+                    this.helperService.entryNotAllowed();
                     //return false;
                     observer.next(false);
                     observer.complete();
@@ -374,17 +342,6 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
             observer.next(false);
             observer.complete();
           }
-    
-      } else {
-        // Si se cancela la confirmación
-        observer.next(false);
-        observer.complete();
-      }
-    }).catch(error => {
-      console.error('Error en el diálogo de confirmación:', error);
-      observer.error(error);
-      observer.complete();
-    });
   });
 }
   // FIN Registrar INGRESO de un visitante

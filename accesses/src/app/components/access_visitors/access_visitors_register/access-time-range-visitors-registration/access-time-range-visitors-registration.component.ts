@@ -324,12 +324,12 @@ disableDateInputs: boolean = false;
   agregarDiasPermitidos(): void {
     if (!this.validateHours()) return;
     if (!this.validateDates()) return;
-
+  
     const initHour = new Date(`1970-01-01T${this.form.value.initHour}:00`);
     const endHour = new Date(`1970-01-01T${this.form.value.endHour}:00`);
-
+  
     const crossesMidnight = endHour <= initHour;
-
+  
     const newDaysAlloweds: AccessAllowedDay[] = this.days
       .filter(day => this.form.controls[day.name].value && !this._allowedDays.some(dp => dp.day.name === day.name))
       .map(day => ({
@@ -338,7 +338,7 @@ disableDateInputs: boolean = false;
         endTime: endHour,
         crossesMidnight: crossesMidnight,
       }));
-
+  
     if (newDaysAlloweds.length === 0) {
       Swal.fire({
         icon: 'warning',
@@ -347,10 +347,20 @@ disableDateInputs: boolean = false;
       });
       return;
     }
+    
     this._allowedDays = [...this._allowedDays, ...newDaysAlloweds];
     this.visitorService.updateAllowedDays(this._allowedDays);
-    this.form.controls['initHour'].setValue('');
-    this.form.controls['endHour'].setValue('');
+    
+    // Resetear los valores
+    this.form.get('initHour')?.reset();
+    this.form.get('endHour')?.reset();
+    
+    // Marcar como no tocados y actualizar validación
+    this.form.get('initHour')?.markAsUntouched();
+    this.form.get('endHour')?.markAsUntouched();
+    this.form.get('initHour')?.updateValueAndValidity();
+    this.form.get('endHour')?.updateValueAndValidity();
+    
     this.updateDaysSelected();
   }
   isAllowedDay(day: AccessDay): boolean {

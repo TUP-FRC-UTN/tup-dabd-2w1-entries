@@ -1,12 +1,9 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {
   Component,
   inject,
-  OnChanges,
   OnDestroy,
   OnInit,
-  SimpleChanges,
   NgZone,
   AfterViewInit,
   ViewChild,
@@ -17,14 +14,7 @@ import {
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule } from '@angular/forms';
 import {
-  AuthRangeInfoDto,
   AccessDocumentTypeDto,
-  AccessLastEntryUserAllowedDto,
-  AccessLastExitUserAllowedDto,
-  AccessNewAuthRangeDto,
-  AccessNewMovementExitDto,
-  AccessNewMovementsEntryDto,
-  AccessNewUserAllowedDto,
   AccessNewVehicleDto,
   AccessUserAllowedInfoDto,
   AccessUserAllowedTypeDto,
@@ -38,8 +28,6 @@ import 'datatables.net';
 
 import 'datatables.net-bs5';
 //import { AlertDirective } from '../alert.directive';
-import { InternalSettings } from 'datatables.net';
-import { AllowedDaysDto } from '../../../services/access_visitors/movement.interface';
 import { RouterModule } from '@angular/router';
 import { AccessAutosizeTextareaDirective } from '../../../directives/access-autosize-textarea.directive';
 import {
@@ -53,7 +41,6 @@ import {
 } from '../../../models/access-visitors/interface/access-owner';
 import {
   AccessMovementEntryDto,
-  AccessSuppEmpDto,
 } from '../../../models/access-employee-allowed/access-user-allowed';
 import { AccessVisitorHelperService } from '../../../services/access_visitors/access-visitor-helper.service';
 import { AccessOwnerRenterserviceService } from '../../../services/access-owner/access-owner-renterservice.service';
@@ -65,7 +52,6 @@ declare var bootstrap: any;
   imports: [
     CommonModule,
     FormsModule,
-    AccessAutosizeTextareaDirective,
     RouterModule,
     NgxScannerQrcodeModule,
     NgSelectModule
@@ -849,7 +835,8 @@ loadUsersAllowedData(): Observable<boolean> {
       } else if (visitor.userType.description === 'Employeed' || visitor.userType.description === 'Supplier') {
         accessObservable = this.prepareEntryMovementEmp(visitor, vehiclePlate);
       } else {
-        accessObservable = this.visitorService.RegisterAccess(visitor, vehiclePlate);
+        //es para visitors y los otros tipos q funcionan igual
+        accessObservable = this.prepareEntryVisitor(visitor, vehiclePlate);
       }
 
       if (accessObservable) {
@@ -882,7 +869,9 @@ loadUsersAllowedData(): Observable<boolean> {
         exitObservable = this.prepareExitMovementEmp(visitor, vehiclePlate);
 
       } else {
-        exitObservable = this.visitorService.RegisterExit(visitor, vehiclePlate);
+        //es para visitors y los otros tipos q funcionan igual
+        exitObservable = this.prepareExitVisitor(visitor, vehiclePlate);
+        //this.visitorService.RegisterExit(visitor, vehiclePlate);
         
       }
 
@@ -904,12 +893,14 @@ loadUsersAllowedData(): Observable<boolean> {
         this.subscription.add(sub);
       }
 
-    } else {
-      this.visitorStatus[visitor.document] = 'En espera';
-    }
+    } 
+    // else {
+    //   this.visitorStatus[visitor.document] = 'En espera';
+    // }
 
     selectElement.value = '';
 }
+
 
   allPeopleAllowed: AccessUserAllowedInfoDto[] = [];
   filteredAllPeopleAllowed: AccessUserAllowedInfoDto[] = [];
@@ -1521,7 +1512,6 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
   };
 
 
-
   private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner, platee : string): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
@@ -1737,6 +1727,137 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
     });
   }
 
+  prepareEntryVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean>{
+    return new Observable<boolean>((observer) => {
+  
+      try {
+  
+        // Preparar mensaje del modal
+        const modalMessage = `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`;
+        document.getElementById('modalMessageIngresoEmp')!.textContent = modalMessage;
+  
+        // Obtener el modal
+        const modalElement = document.getElementById('confirmIngresoEmpModal')!;
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  
+        // Configurar los eventos del modal
+        modalElement.addEventListener('hidden.bs.modal', () => {
+          const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+          const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+          confirmButton.onclick = null;
+          cancelButton.onclick = null;
+        });
+  
+        // Configurar el botón de confirmación
+        const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+        confirmButton.onclick = () => {
+          const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate).subscribe({
+            next: (response) => {
+              console.log("respuesta: ", response);
+              modal.hide();
+              if(response){
+                observer.next(true);
+                observer.complete();
+              } else {
+                observer.next(false);
+                observer.complete();
+              }
+            },
+            error: (error) => {
+              console.error('Error al registrar egreso:', error);
+              modal.hide();
+              observer.next(false);
+              observer.complete();
+            }
+          });
+          this.subscription.add(sub);
+        };
+  
+        // Configurar el botón de cancelar
+        const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+        cancelButton.onclick = () => {
+          modal.hide();
+          observer.next(false);
+          observer.complete();
+        };
+  
+        // Mostrar el modal
+        modal.show();
+  
+      } catch (error) {
+        console.error('Error al preparar el movimiento:', error);
+        observer.error(error);
+        observer.complete();
+      }
+    });
+  
+  }
+  
+  prepareExitVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean>{
+    return new Observable<boolean>((observer) => {
+  
+      try {
+  
+        // Preparar mensaje del modal
+        const modalMessage = `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`;
+        document.getElementById('modalMessageEgresoEmp')!.textContent = modalMessage;
+  
+        // Obtener el modal
+        const modalElement = document.getElementById('confirmEgresoEmpModal')!;
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  
+        // Configurar los eventos del modal
+        modalElement.addEventListener('hidden.bs.modal', () => {
+          const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+          const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+          confirmButton.onclick = null;
+          cancelButton.onclick = null;
+        });
+  
+        // Configurar el botón de confirmación
+        const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+        confirmButton.onclick = () => {
+          const sub = this.visitorService.RegisterExit(visitor, vehiclePlate).subscribe({
+            next: (response) => {
+              console.log("respuesta: ", response);
+              modal.hide();
+              if(response){
+                observer.next(true);
+                observer.complete();
+              }
+              else {
+                observer.next(false);
+                observer.complete();
+              }
+            },
+            error: (error) => {
+              console.error('Error al registrar egreso:', error);
+              modal.hide();
+              observer.next(false);
+              observer.complete();
+            }
+          });
+          this.subscription.add(sub);
+        };
+  
+        // Configurar el botón de cancelar
+        const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+        cancelButton.onclick = () => {
+          modal.hide();
+          observer.next(false);
+          observer.complete();
+        };
+  
+        // Mostrar el modal
+        modal.show();
+  
+      } catch (error) {
+        console.error('Error al preparar el movimiento:', error);
+        observer.error(error);
+        observer.complete();
+      }
+    });
+  }
 
 
   //INGRESO ORIGINAL CON MODAL DE SWEET ALERT COMENTADO
