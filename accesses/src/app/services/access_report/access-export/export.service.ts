@@ -7,10 +7,6 @@ import 'pdfmake/build/pdfmake';
 import 'pdfmake/build/vfs_fonts';
 import 'jszip';
 
-// Importar tipos de DataTables
-import { Api } from 'datatables.net';
-
-
 @Injectable({
   providedIn: 'root'
 })
@@ -48,6 +44,7 @@ export class ExportService {
     // Guardar referencia a los botones
     table.buttons = buttons;
   }
+
   /**
    * Obtiene las fechas formateadas para los nombres de archivo
    */
@@ -91,10 +88,41 @@ export class ExportService {
     return {
       extend: 'excel',
       text: 'Excel',
-      className: 'buttons-excel d-none',
       filename: () => `${formattedDateForFilename}. Movimientos del mes de ${currentMonth}`,
       exportOptions: {
-        columns: ':visible'
+        columns: ':visible',
+        format: {
+          body: (data: any, row: number, column: number) => {
+            // Convertir a string y eliminar espacios en blanco
+            const strData = String(data).trim();
+            
+            // Para la columna de tipo de ingresante
+            if (column === 3) {
+              const titleMatch = strData.match(/title="([^"]+)"/);
+              if (titleMatch && titleMatch[1]) {
+                return titleMatch[1];
+              }
+              return 'Desconocido';
+            }
+
+            // Para la columna con los guiones
+            if (column === 9) {
+              // Si incluye el div con clase text-center
+              if (strData.includes('text-center')) {
+                return '------';
+              }
+              // Si es directamente los guiones
+              if (strData === '------') {
+                return '------';
+              }
+              // Para cualquier otro caso, retornar el dato original
+              return strData;
+            }
+
+            // Para cualquier otra columna, retornar el dato sin modificar
+            return strData;
+          }
+        }
       },
       messageTop: `Movimientos del mes de ${currentMonth}\nFecha de emisión: ${formattedDate}`,
       title: 'LISTADO MENSUAL DE INGRESOS/EGRESOS',
@@ -113,12 +141,43 @@ export class ExportService {
     return {
       extend: 'pdf',
       text: 'PDF',
-      className: 'buttons-pdf d-none',
       filename: () => `${formattedDateForFilename}. Movimientos del mes de ${currentMonth}`,
       orientation: 'landscape',
       pageSize: 'A4',
       exportOptions: {
-        columns: ':visible'
+        columns: ':visible',
+        format: {
+          body: (data: any, row: number, column: number) => {
+            // Convertir a string y eliminar espacios en blanco
+            const strData = String(data).trim();
+            
+            // Para la columna de tipo de ingresante
+            if (column === 3) {
+              const titleMatch = strData.match(/title="([^"]+)"/);
+              if (titleMatch && titleMatch[1]) {
+                return titleMatch[1];
+              }
+              return 'Desconocido';
+            }
+
+            // Para la columna con los guiones
+            if (column === 9) {
+              // Si incluye el div con clase text-center
+              if (strData.includes('text-center')) {
+                return '------';
+              }
+              // Si es directamente los guiones
+              if (strData === '------') {
+                return '------';
+              }
+              // Para cualquier otro caso, retornar el dato original
+              return strData;
+            }
+
+            // Para cualquier otra columna, retornar el dato sin modificar
+            return strData;
+          }
+        }
       },
       customize: (doc: any) => {
         // Estilo para la tabla
@@ -127,7 +186,23 @@ export class ExportService {
           cell.fillColor = '#25B79D';
           cell.color = '#FFFFFF';
         });
-        
+
+        // Ajustar los anchos de las columnas
+        doc.content[1].table.widths = [
+          'auto',  // Fecha
+          'auto',  // Hora
+          'auto',  // Tipo
+          'auto',  // Ingresante
+          50,      // Nombre
+          100,     // Documento
+          100,     // Observaciones
+          'auto',  // Vehículo
+          'auto',  // Placa
+          'auto',  // Propietario
+          'auto',  // Guardia
+          'auto'   // Estado
+        ];
+
         // Título principal
         doc.content[0] = {
           text: 'LISTADO MENSUAL DE INGRESOS/EGRESOS',
@@ -136,7 +211,7 @@ export class ExportService {
           bold: true,
           margin: [0, 0, 0, 10]
         };
-        
+
         // Subtítulo con el mes
         doc.content.splice(1, 0, {
           text: `Movimientos del mes de: ${currentMonth}`,

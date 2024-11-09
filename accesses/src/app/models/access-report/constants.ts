@@ -1,6 +1,58 @@
 
 import { ColumnDef, LanguageConfig, SelectOption } from './Types';
 
+
+      /**
+   * Configuración de iconos para tipos de usuario
+   */
+      export const USER_TYPE_ICONS = {
+        Empleado: {
+          icon: 'bi bi-briefcase',
+          color: '#fd7e14',
+          title: 'Empleado'
+        },
+        Proveedor: {
+          icon: 'bi bi-truck',
+          color: '#20c997',
+          title: 'Proveedor'
+        },
+        Visitante: {
+          icon: 'bi bi-person-raised-hand',
+          color: '#0d6efd',
+          title: 'Visitante'
+        },
+        Vecino: {
+          icon: 'bi bi-house-fill',
+          color: '#198754',
+          title: 'Vecino'
+        },
+        Obrero: {
+          icon: 'bi bi-tools',
+          color: '#dc3545',
+          title: 'Obrero'
+        },
+        Delivery: {
+          icon: 'bi bi-box-seam',
+          color: 'purple',
+          title: 'Delivery'
+        },
+        Cleaning: {
+          icon: 'bi bi-stars',
+          color: '#d63384',
+          title: 'P. de Limpieza'
+        },
+        Jardinero: {
+          icon: 'bi bi-flower1',
+          color: '#0dcaf0',
+          title: 'Jardinero'
+        },
+        Emergencias: {
+          icon: 'bi bi-hospital"',
+          color: '#dc3545',
+          title: 'Emergencias'
+        }
+      };
+    
 /**
  * Opciones para el selector de entrada/salida
  */
@@ -91,6 +143,8 @@ export const DEFAULT_LANGUAGE_CONFIG: LanguageConfig = {
  * Configuración por defecto para las columnas de la tabla
  */
 export const DEFAULT_COLUMN_DEFS: ColumnDef[] = [
+
+    
   { 
     targets: 11,
     className: 'text-center'
@@ -115,3 +169,33 @@ export const BADGE_STYLES = {
     light: 'white'
   }
 };
+
+  /**
+   * Estilos predefinidos para los estados de horario
+   */
+  export const STATUS_STYLES = {
+    late: {
+      color: '#dc3545',  // Rojo para tarde
+      text: 'Tarde'
+    },
+    inrange: {
+      color: '#28a745',  // Verde para en horario
+      text: 'En Horario'
+    }
+  };
+
+
+  /**
+   * Estilos predefinidos para los tipos de entrada/salida
+   */
+  export const ENTRY_STYLES = {
+    entrada: {
+      color: '#28a745',  // Verde para entrada
+      text: 'Entrada'
+    },
+    salida: {
+      color: '#dc3545',  // Rojo para salida
+      text: 'Salida'
+    }
+  };
+  

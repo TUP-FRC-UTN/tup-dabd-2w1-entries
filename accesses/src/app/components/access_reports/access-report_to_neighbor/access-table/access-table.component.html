@@ -37,31 +37,7 @@
         </div>
     </div>
 
-    <!-- Propietario con ng-select -->
-    <div class="col-md-3 pe-0">
-        <div class="d-flex align-items-center">
-            <label class="form-label mb-0 me-1">Propietarios:</label>
-            <ng-select
-                class="w-100"
-                [items]="propietariosOptions"
-                [multiple]="true"
-                [closeOnSelect]="false"
-                [searchable]="true"
-                bindLabel="label"
-                bindValue="id"
-                [clearable]="false"
-                [(ngModel)]="filterValues.selectedPropietario"
-                (change)="applyFilters()">
-                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
-                    <span>{{ items.length ? '(' + items.length + ') Seleccionados  ' : 'Seleccionar Propietario' }}</span>
-                </ng-template>
-                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
-                    <input id="propietario-{{index}}" type="checkbox" [checked]="item$.selected"/> 
-                    <span class="ms-2">{{item.label}}</span>
-                </ng-template>
-            </ng-select>
-        </div>
-    </div>
+ 
 
     <!-- Espacio flexible -->
     <div class="col">
@@ -72,26 +48,48 @@
     <!-- Botones de acción -->
     <div class="col-auto ms-auto">
         <div class="d-flex gap-2">
-            <button class="btn btn-primary action-btn" 
-                    data-bs-target="#advancedFiltersModal"
-                    data-bs-toggle="modal"
-                    title="Filtros avanzados">
-                    <i class="bi bi-funnel-fill"></i>
-            </button>
-            <button class="btn btn-secondary action-btn" (click)="clearFilters()" title="Limpiar filtros">
-                <i class="bi bi-trash"></i>
-            </button>
-            <button class="btn btn-success action-btn" id="excelBtn" [disabled]="!exportButtonsEnabled" title="Exportar a Excel">
-                <i class="bi bi-file-earmark-excel"></i>
-            </button>
-            <button class="btn btn-danger action-btn" id="pdfBtn" [disabled]="!exportButtonsEnabled" title="Exportar a PDF">
-                <i class="bi bi-file-earmark-pdf"></i>
-            </button>
-            <!-- Agregar este div para los botones de DataTables -->
-            <div class="dt-buttons d-none"></div>
+       <!-- Botones de tipo de usuario -->
+<button class="btn btn-primary action-btn"  title="Filtrar por Visitantes" [style.backgroundColor]="getUserTypeColor('Visitante')">
+    <i [class]="getUserTypeIcon('Visitante')"></i>
+  </button>
+  <button class="btn btn-primary action-btn"  title="Filtrar por Empleados" [style.backgroundColor]="getUserTypeColor('Empleado')">
+    <i [class]="getUserTypeIcon('Empleado')"></i>
+  </button>
+  <button class="btn btn-primary action-btn"  title="Filtrar por Vecinos" [style.backgroundColor]="getUserTypeColor('Vecino')">
+    <i [class]="getUserTypeIcon('Vecino')"></i>
+  </button>
+  <button class="btn btn-primary action-btn"  title="Filtrar por Servicios" [style.backgroundColor]="getUserTypeColor('Servicios')">
+    <i [class]="getUserTypeIcon('Servicios')"></i>
+  </button>
+
+ <!-- Separador con línea vertical más visible -->
+ <div class="border-right border-1 border-secondary mx-2">|</div>
+  
+  <button class="btn btn-primary action-btn" title="Buscar">
+    <i class="bi bi-search"></i>
+  </button>
+  <button class="btn btn-primary action-btn" title="Escanear QR">
+    <i class="bi bi-qr-code-scan"></i>
+  </button>
+   <!-- Separador con línea vertical -->
+   <div class="border-right border-muted mx-2">|</div>
+          <!-- Botones de filtro y exportación existentes -->
+          <button class="btn btn-primary action-btn" data-bs-target="#advancedFiltersModal" data-bs-toggle="modal" title="Filtros avanzados">
+            <i class="bi bi-funnel-fill"></i>
+          </button>
+          <button class="btn btn-secondary action-btn" (click)="clearFilters()" title="Limpiar filtros">
+            <i class="bi bi-trash"></i>
+          </button>
+          <button class="btn btn-success action-btn" id="excelBtn" [disabled]="!exportButtonsEnabled" title="Exportar a Excel">
+            <i class="bi bi-file-earmark-excel"></i>
+          </button>
+          <button class="btn btn-danger action-btn" id="pdfBtn" [disabled]="!exportButtonsEnabled" title="Exportar a PDF">
+            <i class="bi bi-file-earmark-pdf"></i>
+          </button>
+          <div class="dt-buttons d-none"></div>
         </div>
-    </div>
-    
+      </div>
+
 <!-- Modal de Filtros Avanzados -->
 <div class="modal fade" id="advancedFiltersModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -152,6 +150,35 @@
                             </div>
                         </div>
                     </div>
+                     <!-- Propietario con ng-select -->
+                    <div class="col-md-6">
+                        <div class="input-group-with-label">
+                            <label class="form-label modal-label">Propietario</label>
+                            <div class="input-group">
+                                <ng-select
+                                class="w-100"
+                                [items]="propietariosOptions"
+                                [multiple]="true"
+                                [closeOnSelect]="false"
+                                [searchable]="true"
+                                bindLabel="label"
+                                bindValue="id"
+                                [clearable]="false"
+                                [(ngModel)]="filterValues.selectedPropietario"
+                                (change)="applyFilters()">
+                                <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                                    <span>{{ items.length ? '(' + items.length + ') Seleccionados  ' : 'Seleccionar Propietario' }}</span>
+                                </ng-template>
+                                <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                                    <input id="propietario-{{index}}" type="checkbox" [checked]="item$.selected"/> 
+                                    <span class="ms-2">{{item.label}}</span>
+                                </ng-template>
+                            </ng-select>
+                            </div>
+                        </div>
+                    </div>
+                      
+
 
                     <div class="col-md-6">
                         <div class="input-group-with-label">

@@ -275,7 +275,7 @@ private disableExportButtons(): void {
 private initializeDataTable(): void {
   const config = {
     ...this.dataTableConfig.getBaseConfig(),
-    // Agregar 'B' para soporte de botones
+   
   };
   
   this.table = ($('#myTable') as any).DataTable(config);
@@ -303,7 +303,15 @@ private setupExportButtonListeners(): void {
     }
   });
 }
+getUserTypeColor(type: string): string {
+  const typeConfig = this.dataTableConfig.USER_TYPE_ICONS[type as keyof typeof this.dataTableConfig.USER_TYPE_ICONS];
+  return typeConfig ? typeConfig.color : 'grey';
+}
 
+getUserTypeIcon(type: string): string {
+  const typeConfig = this.dataTableConfig.USER_TYPE_ICONS[type as keyof typeof this.dataTableConfig.USER_TYPE_ICONS];
+  return typeConfig ? typeConfig.icon : 'bi bi-question-lg';
+}
 
   /**
    * Maneja el evento de redibujado de la tabla

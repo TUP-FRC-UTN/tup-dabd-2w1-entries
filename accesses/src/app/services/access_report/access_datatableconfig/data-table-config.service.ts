@@ -1,7 +1,7 @@
 // services/datatable-config.service.ts
 
 import { Injectable } from "@angular/core";
-import { DEFAULT_COLUMN_DEFS, DEFAULT_LANGUAGE_CONFIG, VALUE_MAPPINGS } from "../../../models/access-report/constants";
+import { DEFAULT_COLUMN_DEFS, DEFAULT_LANGUAGE_CONFIG, ENTRY_STYLES, STATUS_STYLES, USER_TYPE_ICONS, VALUE_MAPPINGS } from "../../../models/access-report/constants";
 import { DataTableConfig, ColumnDef } from "../../../models/access-report/Types";
 
 @Injectable({
@@ -9,33 +9,11 @@ import { DataTableConfig, ColumnDef } from "../../../models/access-report/Types"
 })
 export class DataTableConfigService {
   
-    /**
-   * Estilos predefinidos para los estados de horario
-   */
-    private readonly STATUS_STYLES = {
-      late: {
-        color: '#dc3545',  // Rojo para tarde
-        text: 'Tarde'
-      },
-      inrange: {
-        color: '#28a745',  // Verde para en horario
-        text: 'En Horario'
-      }
-    };
+  public readonly USER_TYPE_ICONS = USER_TYPE_ICONS;
+  public readonly ENTRY_STYLES = ENTRY_STYLES;
+  public readonly STATUS_STYLES = STATUS_STYLES;
+
   
-    /**
-     * Estilos predefinidos para los tipos de entrada/salida
-     */
-    private readonly ENTRY_STYLES = {
-      entrada: {
-        color: '#28a745',  // Verde para entrada
-        text: 'Entrada'
-      },
-      salida: {
-        color: '#dc3545',  // Rojo para salida
-        text: 'Salida'
-      }
-    };
   
     /**
      * Retorna la configuración base para la tabla DataTable
@@ -78,9 +56,6 @@ export class DataTableConfigService {
       };
     }
   
-    /**
-     * Retorna la configuración de columnas para la tabla
-     */
     private getColumnDefs() {
       return [
         { 
@@ -92,10 +67,30 @@ export class DataTableConfigService {
           render: (data: any) => {
             return data === '------' ? '<div class="text-center">------</div>' : data;
           }
-        }
-      ];
+        },
+        {
+          // Asumiendo que la columna de tipo es la 3 (ajusta según tu estructura)
+        //ACA SE CONFIGURAN LOS otomes de las columnas
+      targets: 3,
+      className: 'text-center',
+      render: (data: string) => {
+        // Busca la configuración del tipo de usuario en USER_TYPE_ICONS
+        const typeConfig = this.USER_TYPE_ICONS[data as keyof typeof this.USER_TYPE_ICONS] || {
+          icon: 'bi bi-question-lg',
+          color: 'grey',
+          title: 'Desconocido'
+        };
+
+        return `
+          <button style="background-color: ${typeConfig.color}; border: bisque;" 
+                  class="btn btn-primary" 
+                  title="${typeConfig.title}">
+            <i class="${typeConfig.icon}"></i>
+          </button>`;
+      }
     }
-  
+  ];
+    }
     /**
      * Aplica los estilos a las columnas después de cada redibujado de la tabla
      * @param settings Configuración de la tabla
