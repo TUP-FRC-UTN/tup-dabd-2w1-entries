@@ -1,10 +1,27 @@
 <div class="card mt-5 mx-3 mx-md-5 shadow-lg p-3 mb-5 bg-body-tertiary rounded pruebaNavbar">
     <div class="card-body fs-2">
-        <!-- Ver esto xq capaz se tiene q borrar -->
-        <!-- <h5 class="card-title">Ingrese aquí los datos</h5> -->
+
+    
+        <h5 class="card-title">Levantar autorizacion </h5>
+
     </div>
     <form [formGroup]="visitorForm" class="needs-validation" novalidate (ngSubmit)="sendVisitorWithoutRH()">
-
+        <div class="col-12 col-md-6">
+            <div class="d-flex align-items-center">
+                <label for="authorizedType" class="form-label me-3">Autorizado</label>
+                <select id="authorizedType" 
+                        class="form-select flex-grow-1" 
+                        formControlName="authorizedType"
+                        [class.is-valid]="visitorForm.get('authorizedType')?.valid && visitorForm.get('authorizedType')?.touched"
+                        [class.is-invalid]="visitorForm.get('authorizedType')?.invalid && visitorForm.get('authorizedType')?.touched"
+                        required
+                        (change)="onAuthorizedTypeChange($event)">
+                        <option *ngFor="let type of usersType; let i = index" [value]="i">
+                            {{ type.description }}
+                        </option>
+                </select>
+            </div>
+        </div>
         <div class="card mt-3 mb-3">
             <div class="card-body">
                 <div class="row g-4">
@@ -152,7 +169,6 @@
                             <select id="insurance" class="form-select flex-grow-1" formControlName="insurance"
                                 [class.is-valid]="visitorForm.get('insurance')?.valid && visitorForm.get('insurance')?.touched"
                                 [class.is-invalid]="visitorForm.get('insurance')?.invalid && visitorForm.get('insurance')?.touched">
-                              
                                 <option value="San Cristobal">San Cristobal</option>
                                 <option value="La Nueva">La Nueva</option>
                                 <option value="La Segunda">La Segunda</option>
@@ -196,12 +212,18 @@
 
         <div class="col-12 mt-5">
             <div class="d-flex justify-content-end gap-3">
-                <button class="btn btn-outline-success btn-lg" type="button" *ngIf="isQRCodeAvailable"
+                <!-- Botón para descargar el código QR, visible solo si el tipo de usuario es 0 y el QR está disponible -->
+                <button class="btn btn-outline-success btn-lg" type="button" *ngIf="isQRCodeAvailable && this.indexUserType === 0"
                     (click)="downloadQRCode()" [disabled]="!isQRCodeAvailable">
                     Descargar Qr
                 </button>
-                <button class="btn btn-primary btn-sm" type="button" (click)="sendVisitorRecord()">Registrar</button>
+        
+                <!-- Botón para registrar el visitante -->
+                <button class="btn btn-primary btn-sm" type="button" (click)="sendVisitorRecord()">
+                    Registrar
+                </button>
             </div>
         </div>
+        
     </form>
 </div>
