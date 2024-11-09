@@ -252,7 +252,6 @@ loadUsersAllowedData(): Observable<boolean> {
     this.subscription.add(subscriptionAll);
 
   });
-    
 }
 
 
@@ -662,6 +661,9 @@ loadUsersAllowedData(): Observable<boolean> {
   ];
 
   onFilterSelectionChange(){
+
+    this.loadUsersAllowedAfterRegistrationData();
+
     this.filteredAllPeopleAllowed = []; // Resetear la lista filtrada
 
     if (this.selectedUserTypes.length > 0) {
@@ -843,11 +845,19 @@ loadUsersAllowedData(): Observable<boolean> {
         const sub = accessObservable.subscribe({
           next: (success) => {
             if (success) {
-              console.log('Se registró el Ingreso correctamente');
-              this.updateVisitorStatus(visitor, 'ingreso');
-              this.updateDataTable();
+              console.log('Se registró el Egreso correctamente');
+
+              const sub2 = this.loadUsersAllowedAfterRegistrationData().subscribe({
+                next: (response) => {
+                  if(response){
+                    this.onFilterSelectionChange();
+                  }
+                },
+              });
+              this.subscription.add(sub2);
+
             } else {
-              console.log('Falló al registrar ingreso');
+              console.log('Falló al registrar egreso');
             }
           },
           error: (error) => {
@@ -880,8 +890,16 @@ loadUsersAllowedData(): Observable<boolean> {
           next: (success) => {
             if (success) {
               console.log('Se registró el Egreso correctamente');
-              this.updateVisitorStatus(visitor, 'egreso');
-              this.updateDataTable();
+
+              const sub2 = this.loadUsersAllowedAfterRegistrationData().subscribe({
+                next: (response) => {
+                  if(response){
+                    this.onFilterSelectionChange();
+                  }
+                },
+              });
+              this.subscription.add(sub2);
+
             } else {
               console.log('Falló al registrar egreso');
             }
@@ -899,6 +917,50 @@ loadUsersAllowedData(): Observable<boolean> {
     // }
 
     selectElement.value = '';
+}
+
+loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
+
+  return new Observable<boolean>((observer) => {
+
+    const subscriptionAll = this.visitorService
+      .getAllUserAllowedData()
+      .subscribe({
+        next: (list: AccessUserAllowedInfoDto[]) => {
+
+          this.allPeopleAllowed = []; // se vacia
+
+          this.ngZone.run(() => {
+            list.forEach((userAllowed) => {
+              this.allPeopleAllowed.push({ //se agregan a la lista "comun" donde estan TODOS los autorizados a ingresar
+                document: userAllowed.document,
+                name: userAllowed.name,
+                userType: userAllowed.userType,
+                last_name: userAllowed.last_name,
+                documentTypeDto: userAllowed.documentTypeDto,
+                authRanges: userAllowed.authRanges,
+                email: userAllowed.email,
+                vehicles: userAllowed.vehicles,
+                neighbor_id: userAllowed.neighbor_id | 0,
+              });
+            });
+
+            console.log('allPeopleAllowed actualizada (luego del registro o cambio de filtro):', this.allPeopleAllowed);
+            //this.updateDataTable();
+            observer.next(true);
+            observer.complete();
+          });
+        },
+        error: (err) => {
+          console.log(err);
+          observer.next(false);
+          observer.complete();
+        }
+      });
+    this.subscription.add(subscriptionAll);
+
+  });
+    
 }
 
 
