@@ -26,13 +26,13 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   indexUserType?:number;
   onAuthorizedTypeChange(event: Event): void {
     const selectedIndex = (event.target as HTMLSelectElement).value;
-    
     if (selectedIndex !== "") {
         const index = parseInt(selectedIndex, 10);
-        console.log('Índice seleccionado:', index);
-        this.indexUserType = index;  // Verifica que indexUserType se esté actualizando correctamente
+        this.indexUserType = index + 1; 
+        console.log(this.indexUserType);
     }
 }
+
 
   user?: AccessUser;
   handleSelectedUser(user: AccessUser): void {
@@ -162,7 +162,7 @@ setNameQr(): void {
 
         this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
             next: (response) => {
-                if (this.indexUserType === 0) {
+                if (this.indexUserType === 1) {
                   
                     if (response.id) {
                         this.qrCodeId = response.id;
