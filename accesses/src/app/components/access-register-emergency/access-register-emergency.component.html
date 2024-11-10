@@ -74,6 +74,34 @@
                         }
                     </div>
                     <div class="mb-3">
+                        <div class="row">
+                            <div class="col-auto">
+                                <label for="ownersOptions" class="col-form-label">
+                                    Propietario
+                                </label>
+                            </div>
+                            @if (form.controls["neighborId"]; as owner) {
+                                <div class="col">
+                                    <ng-select
+                                        [items]="ownersOptions"
+                                        bindLabel="label"   
+                                        bindValue="id"
+                                        [clearable]="false"
+                                        formControlName="neighborId"
+                                        [ngClass]="{
+                                            'is-invalid': owner.touched && owner.invalid,
+                                            'is-valid': owner.valid
+                                            }"
+                                        id="ownersOptions">
+                                    </ng-select>
+                                    <div class="invalid-feedback">
+                                        <div *ngIf="owner.errors?.['required']">El propietario es requerido.</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="mb-3">
                         <label for="observations-text" class="col-form-label">Observaciones</label>
                         <textarea class="form-control" id="observations-text" formControlName="observations"></textarea>
                     </div>
@@ -93,7 +121,10 @@
                                             <div class="col  align-self-center">
                                                 <select id="vehicleTypeSelect"
                                                     class="form-select"
-                                                    [ngClass]="{'is-invalid': person.controls['documentType'].touched && person.controls['documentType'].invalid}"
+                                                    [ngClass]="{
+                                                        'is-invalid': person.controls['documentType'].touched && person.controls['documentType'].invalid,
+                                                        'is-valid': person.controls['documentType'].touched && person.controls['documentType'].valid
+                                                        }"
                                                     formControlName="documentType">
                                                     <option value="DNI">DNI</option>
                                                     <option value="Passport">Pasaporte</option>

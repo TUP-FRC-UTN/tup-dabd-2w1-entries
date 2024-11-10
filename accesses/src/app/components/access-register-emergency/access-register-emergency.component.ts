@@ -8,17 +8,21 @@ import { AccessEmergencyPersonDto } from '../../models/access-emergencies/access
 import Swal from 'sweetalert2';
 import { AccessUser } from '../../models/access-visitors/access-visitors-models';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { AccessUserReportService } from '../../services/access_report/access-user-report.service';
 
 @Component({
   selector: 'access-app-register-emergency',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, NgIf],
+  imports: [ReactiveFormsModule, NgClass, NgIf, NgSelectModule],
   templateUrl: './access-register-emergency.component.html',
   styleUrl: './access-register-emergency.component.css'
 })
 export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewChecked {
   private readonly emergenciesService: AccessEmergenciesService = inject(AccessEmergenciesService);
   private readonly visitorService: AccessVisitorsRegisterServiceHttpClientService = inject(AccessVisitorsRegisterServiceHttpClientService);
+  private readonly userService: AccessUserReportService = inject(AccessUserReportService);
+
   private readonly subscription = new Subscription();
   private readonly personUpdated = new Subject<void>();
   
@@ -26,9 +30,12 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
   private personAdded: boolean = false;
   private perfectRegisterSuccess: boolean = false;
   private userId?: number;
+  
+  ownersOptions: any[] = [];
 
   form = new FormGroup({
     onlyExit: new FormControl(false),
+    neighborId: new FormControl(null, [Validators.required]),
     people: new FormArray<FormGroup>([]),
     vehicle: new FormGroup({
       type: new FormControl(),
@@ -38,6 +45,10 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
   });
 
   ngOnInit(): void {
+    let ownersSubscription = this.userService.getPropietariosForSelect().subscribe(
+      options => this.ownersOptions = options
+    );
+
     let usersSubscription = this.visitorService.getUsers().subscribe({
         next: (users) => {
           this.userId = this.handleUsers(users);
@@ -46,8 +57,10 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
           console.error('Error loading users:', error);
         },
     });
+
     this.subscription.add(usersSubscription);
     this.subscription.add(this.personUpdated);
+    this.subscription.add(ownersSubscription);
     const modal = document.getElementById('emergencyModal');
     modal!.addEventListener('show.bs.modal', event => {
       this.resetForm()
@@ -318,7 +331,8 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
         plate: formValue.vehicle?.plate ?? null
       },
       observations: formValue.observations,
-      loggedUserId: this.userId ?? 0
+      loggedUserId: this.userId ?? 0,
+      neighborId: formValue.neighborId ?? 0
     };
     return emergencyDto;
   }
