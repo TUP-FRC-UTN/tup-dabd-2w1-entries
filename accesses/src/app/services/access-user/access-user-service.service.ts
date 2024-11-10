@@ -36,7 +36,7 @@ export class AccessUserServiceService {
   }
 
   getAuthRangeByDoc(document: string, documentType: string): Observable<AccessAuthRangeInfoDtoOwner[]> {
-    const url = `${this.apiUrl}/GetAuthRangeByDoc/${document}/${documentType}`;
+    const url = `${this.apiUrlGeneric}/GetAuthRangeByDoc/${document}/${documentType}`;
     return this.http.get<AccessAuthRangeInfoDtoOwner[]>(url);
   }
 

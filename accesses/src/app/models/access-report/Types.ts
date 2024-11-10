@@ -30,6 +30,7 @@ export interface FilterValues {
     hour: string;
     entryOrExit: string;
     entryType: string;
+    isLastMovement : boolean;
     visitorName: string;
     visitorDocument: string;
     observations: string;

@@ -5,7 +5,7 @@ import { DataTablesModule } from 'angular-datatables';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule } from '@angular/forms';
 import { AccessUserReportService } from '../../../../services/access_report/access-user-report.service';
-import { forkJoin, Observable, of, firstValueFrom } from 'rxjs';
+import { forkJoin, Observable, of, firstValueFrom, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
@@ -18,8 +18,14 @@ import { ExportService } from '../../../../services/access_report/access-export/
 import { ENTRY_EXIT_OPTIONS, ESTADO_HORARIO_OPTIONS, TIPOS_INGRESANTE, TIPOS_VEHICULO, USER_TYPE_MAPPINGS, VALUE_MAPPINGS } from '../../../../models/access-report/constants';
 import { AccessRegistryUpdateService } from '../../../../services/access-registry-update/access-registry-update.service';
 import { AccessVisitorRegistryComponent } from '../../../access_visitors/access-visitor-registry/access-visitor-registry.component';
-import { AccessUserAllowedInfoDto } from '../../../../models/access-visitors/access-visitors-models';
+import { AccessDocumentTypeDto, AccessUserAllowedInfoDto, AccessUserAllowedTypeDto } from '../../../../models/access-visitors/access-visitors-models';
 import { AccessOwnerRenterserviceService } from '../../../../services/access-owner/access-owner-renterservice.service';
+import { AccessAuthRangeInfoDtoOwner, AccessNewMovementsEntryDtoOwner, AccessUserAllowedInfoDtoOwner, AccessVehicleOwner } from '../../../../models/access-visitors/interface/access-owner';
+import { AccessMovementEntryDto } from '../../../../models/access-employee-allowed/access-user-allowed';
+import { AccessUserServiceService } from '../../../../services/access-user/access-user-service.service';
+import { AccessVisitorHelperService } from '../../../../services/access_visitors/access-visitor-helper.service';
+import { VisitorsService } from '../../../../services/access_visitors/access-visitors.service';
+import { accessRegisterEventDetails } from '../../../../models/problemas';
 
 @Component({
   selector: 'app-access-table',
@@ -146,6 +152,9 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       this.fetchData();
     });
     window.addEventListener('openModalInfo', this.handleOpenModal);
+    window.addEventListener('registerEntryExit',(e) => {
+      this.PrepareMovements(e)
+    })
   }
 /**
    * Se manda el documento al servicio
@@ -292,7 +301,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       const transformations: Observable<string>[] = [
         of(movement.day + '/' + movement.month + '/' + movement.year),
         of(movement.hour || ''),
-        of(movement.entryOrExit || ''),
+        of((movement.entryOrExit || '') + '!-' + (movement.isLastMovement)),
         of(movement.entryType || ''),
         this.userService.transformNameOrId(movement.visitorName || ''),
         of(movement.visitorDocument || ''),
@@ -374,31 +383,31 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
    * Maneja el evento de redibujado de la tabla
    * Aplica estilos a las celdas
    */
-  private handleDrawCallback(settings: any): void {
-    setTimeout(() => {
-      this.styleEntryExitColumn();
-    });
-  }
+  // private handleDrawCallback(settings: any): void {
+  //   setTimeout(() => {
+  //     this.styleEntryExitColumn();
+  //   });
+  // }
 
-  /**
-   * Aplica estilos a la columna de entrada/salida
-   */
-  private styleEntryExitColumn(): void {
-    $(this.table.table().node()).find('td:nth-child(3)').each(function() {
-      const cellText = $(this).text().trim().toLowerCase();
-      const color = cellText === 'entrada' ? '#28a745' : '#dc3545';
-      if (['entrada', 'salida'].includes(cellText)) {
-        $(this).html(`
-          <div class="d-flex justify-content-center">
-            <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
-                  style="background-color: ${color}; color: white; border: none;">
-              ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
-            </span>
-          </div>
-        `);
-      }
-    });
-  }
+  // /**
+  //  * Aplica estilos a la columna de entrada/salida
+  //  */
+  // private styleEntryExitColumn(): void {
+  //   $(this.table.table().node()).find('td:nth-child(3)').each(function() {
+  //     const cellText = $(this).text().trim().toLowerCase();
+  //     const color = cellText === 'entrada' ? '#28a745' : '#dc3545';
+  //     if (['entrada', 'salida'].includes(cellText)) {
+  //       $(this).html(`
+  //         <div class="d-flex justify-content-center">
+  //           <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
+  //                 style="background-color: ${color}; color: white; border: none;">
+  //             ${cellText.charAt(0).toUpperCase() + cellText.slice(1)}
+  //           </span>
+  //         </div>
+  //       `);
+  //     }
+  //   });
+  // }
 
   /**
    * Limpieza al destruir el componente
@@ -557,6 +566,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       selectedPropietario: []
     };
 
+
     // Limpiar el campo de búsqueda unificada
     $('#unifiedSearchFilter').val('');
     
@@ -564,5 +574,720 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.table) {
       this.table.draw();
     }
+    }
+ //////////// DESDE ACÁ SE VE EL TEMA DE INGRESAR | EGRESAR A LA PERSONA :)
+  PrepareMovements(event : Event){
+    const customEvent = event as CustomEvent
+    const detail = JSON.parse(customEvent.detail) as accessRegisterEventDetails;
+    const docType = this.getDocumentType(detail.document)
+    const docum = this.extractNumber(detail.document)
+    const userType = detail.userType
+    console.log(userType)
+    console.log(detail)
+    
+    
+
+    this.EmployedService.getAuthRangeByDoc( docum,docType + ''
+    ).subscribe({
+      next:  (authRanges) => {
+        
+       // this.AuthRanges = authRanges; // Asigna el resultado a la variable AuthRanges
+        
+      },
+      error :(error) => {
+        console.error('Error al obtener los rangos de autorización', error);
+      }
+    }
+    );
+    
+
+    // this.prepareEntryMovementEmp(1)
+    // this.prepareExitMovementEmp(1)
   }
+  private readonly helperService = inject(AccessVisitorHelperService);
+  private readonly visitorService = inject(VisitorsService);
+  private readonly EmployedService = inject(AccessUserServiceService)
+    //owner
+    doument: AccessDocumentTypeDto = {
+      description: 'DNI',
+    };
+    movement: AccessNewMovementsEntryDtoOwner = {
+      movementDatetime: new Date(),
+      observations: '',
+      newUserAllowedDto: {
+        name: '',
+        last_name: '',
+        document: '',
+        user_allowed_Type: {
+          description: '',
+        },
+        documentType: this.doument,
+        email: '',
+      },
+      authRangesDto: {
+        neighbor_id: 0,
+        init_date: new Date(),
+        end_date: new Date(),
+        allowedDaysDtos: [],
+      },
+    };
+    vehiclee: AccessVehicleOwner = {
+      plate: '',
+      insurance: '',
+      vehicle_Type: {
+        description: '',
+      },
+    };
+    subscription = new Subscription()
+    observations : string = '';
+    // registra el ingreso de un VECINO (propietario o inquilino)
+    //Metodo pero con modal de bootstrap (revisar) deje comentado abajo el original por las dudas
+//     private prepareEntryMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: string): Observable<boolean> {
+//       return new Observable<boolean>(observer => {
+//         try {
+//           // Preparar datos del movimiento
+//           const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
+//           const firstRange = visitor.authRanges[0];
+//           const now = new Date();
+    
+//           // Construir objeto de movimiento
+//           this.movement = {
+//             movementDatetime: now,
+//             authRangesDto: {
+//               neighbor_id: firstRange.neighbor_id,
+//               init_date: new Date(firstRange.init_date),
+//               end_date: new Date(firstRange.end_date),
+//               allowedDaysDtos: firstRange.allowedDays || [],
+//             },
+//             observations: this.observations,
+//             newUserAllowedDto: {
+//               name: visitor.name,
+//               last_name: visitor.last_name,
+//               document: visitor.document,
+//               email: visitor.email,
+//               user_allowed_Type: visitor.userType,
+//               documentType: this.doument,
+//               vehicle: vehicless,
+//             }
+//           };
+    
+//           console.log('Observaciones:', this.movement.observations);
+    
+//           // Preparar mensaje del modal
+//           const modalMessage = `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`;
+//           document.getElementById('modalMessage')!.textContent = modalMessage;
+    
+//           // Obtener el modal usando el método correcto de Bootstrap 5
+//           const modalElement = document.getElementById('confirmIngresoModal')!;
+//           const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    
+//           // Configurar los eventos del modal antes de mostrarlo
+//           modalElement.addEventListener('hidden.bs.modal', () => {
+//             // Limpiar los event listeners cuando se cierra el modal
+//             const confirmButton = document.getElementById('confirmButton')!;
+//             const cancelButton = document.getElementById('cancelButton')!;
+//             confirmButton.onclick = null;
+//             cancelButton.onclick = null;
+//           });
+    
+//           // Configurar el botón de confirmación
+//           const confirmButton = document.getElementById('confirmButton')!;
+//           confirmButton.onclick = () => {
+//             this.ownerService.registerOwnerRenterEntry(this.movement).subscribe({
+//               next: (response) => {
+//                 console.log('Ingreso registrado con éxito:', response);
+//                 modal.hide();
+                
+//                 Swal.fire({
+//                   title: 'Registro Exitoso',
+//                   text: 'Registro de ingreso exitoso.',
+//                   icon: 'success',
+//                   confirmButtonText: 'Cerrar',
+//                 }).then(() => {
+//                   observer.next(true);
+//                   observer.complete();
+//                 });
+//               },
+//               error: (err) => {
+//                 console.error('Error al registrar la entrada:', err);
+//                 modal.hide();
+    
+//                 if (err.status !== 409) {
+//                   Swal.fire({
+//                     title: 'Error',
+//                     text: 'Error al cargar los datos. Intenta nuevamente.',
+//                     icon: 'error',
+//                     confirmButtonText: 'Cerrar',
+//                   }).then(() => {
+//                     observer.next(false);
+//                     observer.complete();
+//                   });
+//                 } else {
+//                   Swal.fire({
+//                     title: 'El Vecino tiene un Ingreso previo!',
+//                     text: 'El Vecino debe egresar antes de poder volver a entrar',
+//                     icon: 'error',
+//                     confirmButtonText: 'Cerrar',
+//                   }).then(() => {
+//                     observer.next(false);
+//                     observer.complete();
+//                   });
+//                 }
+//               }
+//             });
+//           };
+    
+//           // Configurar el botón de cancelar
+//           const cancelButton = document.getElementById('cancelButton')!;
+//           cancelButton.onclick = () => {
+//             modal.hide();
+//             observer.next(false);
+//             observer.complete();
+//           };
+    
+//           // Mostrar el modal
+//           modal.show();
+    
+//         } catch (error) {
+//           console.error('Error al preparar el movimiento:', error);
+//           observer.error(error);
+//         }
+//       });
+//     }
+    
+  
+// //Egreso con modal de bootstrap 
+// private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: string): Observable<boolean> {
+//   return new Observable<boolean>(observer => {
+//     try {
+//       // Preparar datos del movimiento
+//       const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
+//       const firstRange = visitor.authRanges[0];
+//       const now = new Date();
+
+//       // Construir objeto de movimiento
+//       this.movement = {
+//         movementDatetime: now,
+//         authRangesDto: {
+//           neighbor_id: firstRange.neighbor_id,
+//           init_date: new Date(firstRange.init_date),
+//           end_date: new Date(firstRange.end_date),
+//           allowedDaysDtos: firstRange.allowedDays || [],
+//         },
+//         observations: this.observations,
+//         newUserAllowedDto: {
+//           name: visitor.name,
+//           last_name: visitor.last_name,
+//           document: visitor.document,
+//           email: visitor.email,
+//           user_allowed_Type: visitor.userType,
+//           documentType: this.doument,
+//           vehicle: vehicless,
+//         }
+//       };
+
+//       console.log('Observaciones:', this.movement.observations);
+
+//       // Preparar mensaje del modal
+//       const modalMessage = `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`;
+//       document.getElementById('modalMessageEgreso')!.textContent = modalMessage;
+
+//       // Obtener el modal usando el método correcto de Bootstrap 5
+//       const modalElement = document.getElementById('confirmEgresoModal')!;
+//       const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+//       // Configurar los eventos del modal antes de mostrarlo
+//       modalElement.addEventListener('hidden.bs.modal', () => {
+//         // Limpiar los event listeners cuando se cierra el modal
+//         const confirmButton = document.getElementById('confirmEgresoButton')!;
+//         const cancelButton = document.getElementById('cancelEgresoButton')!;
+//         confirmButton.onclick = null;
+//         cancelButton.onclick = null;
+//       });
+
+//       // Configurar el botón de confirmación
+//       const confirmButton = document.getElementById('confirmEgresoButton')!;
+//       confirmButton.onclick = () => {
+//         const sub = this.ownerService.registerExitOwner(this.movement).subscribe({
+//           next: (response) => {
+//             console.log('Egreso registrado con éxito:', response);
+//             modal.hide();
+            
+//             Swal.fire({
+//               title: 'Registro Exitoso',
+//               text: 'Registro de egreso exitoso.',
+//               icon: 'success',
+//               confirmButtonText: 'Cerrar',
+//             }).then(() => {
+//               observer.next(true);
+//               observer.complete();
+//             });
+//           },
+//           error: (err) => {
+//             console.error('Error al registrar el egreso:', err);
+//             modal.hide();
+
+//             if (err.status !== 409) {
+//               Swal.fire({
+//                 title: 'Error',
+//                 text: 'Error al cargar los datos. Intenta nuevamente.',
+//                 icon: 'error',
+//                 confirmButtonText: 'Cerrar',
+//               }).then(() => {
+//                 observer.next(false);
+//                 observer.complete();
+//               });
+//             } else {
+//               Swal.fire({
+//                 title: 'El Vecino tiene un egreso previo!',
+//                 text: 'El Vecino debe ingresar antes de poder volver a salir',
+//                 icon: 'error',
+//                 confirmButtonText: 'Cerrar',
+//               }).then(() => {
+//                 observer.next(false);
+//                 observer.complete();
+//               });
+//             }
+//           }
+//         });
+//         this.subscription.add(sub);
+//       };
+
+//       // Configurar el botón de cancelar
+//       const cancelButton = document.getElementById('cancelEgresoButton')!;
+//       cancelButton.onclick = () => {
+//         modal.hide();
+//         observer.next(false);
+//         observer.complete();
+//       };
+
+//       // Mostrar el modal
+//       modal.show();
+
+//     } catch (error) {
+//       console.error('Error al preparar el movimiento:', error);
+//       observer.error(error);
+//     }
+//   });
+// }
+
+  
+  //Empleados
+  private userType: AccessUserAllowedTypeDto = {
+    description: 'Employeed',
+  };
+
+
+  // private prepareEntryMovementEmp(index : number, range : AccessAuthRangeInfoDtoOwner): Observable<boolean> {
+  //   return new Observable<boolean>(observer => {
+  //     try {
+  //       console.log("as")
+  //       // Preparar el objeto de movimiento
+  //       const mov = this.movements.at(index)
+  //       const movementS: AccessMovementEntryDto = {
+  //         description: String(this.observations || ''),
+  //         movementDatetime: new Date().toISOString(),
+  //         vehiclesId: mov?.plate,
+  //         document: this.extractNumber(mov?.visitorDocument + ''),
+  //         documentType: this.getDocumentType(mov?.visitorDocument + '') + ''
+  //       };
+        
+  //       // this.EmployedService.getAuthRangeByDoc(
+  //       //   this.extractNumber(mov?.visitorDocument + '').trim(),
+  //       //   this.getDocumentType(mov?.visitorDocument + ''.trim()) + ''
+  //       // ).subscribe(
+  //       //   (authRanges) => {
+  //       //     this.AuthRanges = authRanges; // Asigna el resultado a la variable AuthRanges
+  //       //   },
+  //       //   (error) => {
+  //       //     console.error('Error al obtener los rangos de autorización', error);
+  //       //   }
+  //       // );
+  //       console.log("se cargó todo¿")
+  
+  //       // Preparar mensaje del modal
+  //       const modalMessage = `¿Está seguro que desea registrar el ingreso de ${mov?.visitorName}?`;
+  //       document.getElementById('modalMessageIngresoEmp')!.textContent = modalMessage;
+  
+  //       // Obtener el modal
+  //       const modalElement = document.getElementById('confirmIngresoEmpModal')!;
+  //    //   const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  //       const modal = {
+  //         show: function() {
+  //           modalElement.style.display = 'block';
+  //         },
+  //         hide: function() {
+  //           modalElement.style.display = 'none';
+  //         }
+  //       };
+  
+  //       // Configurar los eventos del modal
+  //       modalElement.addEventListener('hidden.bs.modal', () => {
+  //         const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+  //         const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+  //         confirmButton.onclick = null;
+  //         cancelButton.onclick = null;
+  //       });
+  
+  //       // Configurar el botón de confirmación
+  //       const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+  //       confirmButton.onclick = () => {
+  //         const subscription = this.EmployedService.registerEmpSuppEntry(movementS).subscribe({
+  //           next: (response) => {
+  //             console.log('Respuesta de registro:', response);
+  //             console.log('Ingreso registrado con éxito:', response);
+  //             modal.hide();
+              
+  //             Swal.fire({
+  //               title: 'Registro Exitoso',
+  //               text: 'Registro de ingreso exitoso.',
+  //               icon: 'success',
+  //               confirmButtonText: 'Cerrar',
+  //             }).then(() => {
+  //               observer.next(true);
+  //               observer.complete();
+  //             });
+  //           },
+  //           error: (err) => {
+  //             console.error('Error al registrar la entrada:', err);
+  //             modal.hide();
+  
+  //             if (err.status === 403) {
+  //               const errorMessage = err.error.message;
+                
+  //               if (errorMessage === "The user does not have authorization range") {
+  //                 Swal.fire({
+  //                   title: 'Acceso Denegado',
+  //                   text: 'El usuario no tiene un rango de autorización asignado.',
+  //                   icon: 'error',
+  //                   confirmButtonText: 'Cerrar'
+  //                 });
+  //               } else if (errorMessage === "The user does not have authorization to entry for today") {
+  //                 this.helperService.entryOutOfAuthorizedHourRange(
+  //                   range.at(this.helperService.todayIsInDateRange(range))
+  //                 );
+  //               }
+  //               observer.next(false);
+  //               observer.complete();
+  //             } else if (err.status === 409) {
+  //               Swal.fire({
+  //                 title: 'Error',
+  //                 text: 'Tiene que salir antes de entrar.',
+  //                 icon: 'error',
+  //                 confirmButtonText: 'Cerrar',
+  //               }).then(() => {
+  //                 observer.next(false);
+  //                 observer.complete();
+  //               });
+  //             }
+  //           }
+  //         });
+  //         this.subscription.add(subscription);
+  //       };
+  
+  //       // Configurar el botón de cancelar
+  //       const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+  //       cancelButton.onclick = () => {
+  //         modal.hide();
+  //         observer.next(false);
+  //         observer.complete();
+  //       };
+  
+  //       // Mostrar el modal
+  //       modal.show();
+  
+  //     } catch (error) {
+  //       console.error('Error al preparar el movimiento:', error);
+  //       observer.error(error);
+  //       observer.complete();
+  //     }
+  //   });
+  // }
+  
+  // private prepareExitMovementEmp(index : number, range : AccessAuthRangeInfoDtoOwner[]): Observable<boolean> {
+  //   console.log("algo q")
+  //   return new Observable<boolean>(observer => {
+  //     try {
+  //       console.log("algo w")
+  //       // Preparar el objeto de movimiento
+  //       const mov = this.movements.at(index)
+  //       const movementS: AccessMovementEntryDto = {
+  //         description: String(this.observations || ''),
+  //         movementDatetime: new Date().toISOString(),
+  //         vehiclesId: mov?.plate,
+  //         document: this.extractNumber(mov?.visitorDocument + ''),
+  //         documentType: this.getDocumentType(mov?.visitorDocument + '') + ''
+  //       };
+  //       this.AuthRanges = [];
+  //       this.EmployedService.getAuthRangeByDoc(
+  //         this.extractNumber(mov?.visitorDocument + '').trim(),
+  //         this.getDocumentType(mov?.visitorDocument + ''.trim()) + ''
+  //       ).subscribe(
+  //         (authRanges) => {
+  //           this.AuthRanges = authRanges; // Asigna el resultado a la variable AuthRanges
+  //         },
+  //         (error) => {
+  //           console.error('Error al obtener los rangos de autorización', error);
+  //         }
+  //       );
+        
+  
+  //       // Preparar mensaje del modal
+  //       const modalMessage = `¿Está seguro que desea registrar el egreso de ${mov?.visitorName}?`;
+  //       document.getElementById('modalMessageEgresoEmp')!.textContent = modalMessage;
+  
+  //       // Obtener el modal
+  //       const modalElement = document.getElementById('confirmEgresoEmpModal')!;
+  //      // const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  //      const modal = {
+  //       show: function() {
+  //         modalElement.style.display = 'block';
+  //       },
+  //       hide: function() {
+  //         modalElement.style.display = 'none';
+  //       }
+  //     };
+  
+  //       // Configurar los eventos del modal
+  //       modalElement.addEventListener('hidden.bs.modal', () => {
+  //         const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+  //         const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+  //         confirmButton.onclick = null;
+  //         cancelButton.onclick = null;
+  //       });
+  
+  //       // Configurar el botón de confirmación
+  //       const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+  //       confirmButton.onclick = () => {
+  //         const sub = this.EmployedService.registerEmpSuppExit(movementS).subscribe({
+  //           next: (response) => {
+  //             console.log('Egreso registrado con éxito:', response);
+  //             modal.hide();
+              
+  //             Swal.fire({
+  //               title: 'Registro Exitoso',
+  //               text: 'Registro de egreso exitoso.',
+  //               icon: 'success',
+  //               confirmButtonText: 'Cerrar',
+  //             }).then(() => {
+  //               observer.next(true);
+  //               observer.complete();
+  //             });
+  //           },
+  //           error: (err) => {
+  //             console.error('Error al registrar el egreso:', err);
+  //             modal.hide();
+  
+  //             if (err.status != 409 && err.status != 403) {
+  //               Swal.fire({
+  //                 title: 'Error',
+  //                 text: 'Error al cargar los datos. Intenta nuevamente.',
+  //                 icon: 'error',
+  //                 confirmButtonText: 'Cerrar',
+  //               }).then(() => {
+  //                 observer.next(false);
+  //                 observer.complete();
+  //               });
+  //             } else if (err.status === 403) {
+  //               const errorMessage = err.error.message;
+                
+  //               if (errorMessage === "The user does not have authorization range") {
+  //                 Swal.fire({
+  //                   title: 'Acceso Denegado',
+  //                   text: 'El usuario no tiene un rango de autorización asignado para hoy.',
+  //                   icon: 'error',
+  //                   confirmButtonText: 'Cerrar'
+  //                 });
+  //               } else if (errorMessage === "The user does not have authorization to entry for today") {
+  //                 this.helperService.entryOutOfAuthorizedHourRange(
+  //                   range.at(this.helperService.todayIsInDateRange(range))
+  //                 );
+  //               }
+  //               observer.next(false);
+  //               observer.complete();
+  //             } else if (err.status === 409) {
+  //               Swal.fire({
+  //                 title: 'Error',
+  //                 text: 'Tiene que entrar antes de salir.',
+  //                 icon: 'error',
+  //                 confirmButtonText: 'Cerrar',
+  //               }).then(() => {
+  //                 observer.next(false);
+  //                 observer.complete();
+  //               });
+  //             }
+  //           }
+  //         });
+  //         this.subscription.add(sub);
+  //       };
+  
+  //       // Configurar el botón de cancelar
+  //       const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+  //       cancelButton.onclick = () => {
+  //         modal.hide();
+  //         observer.next(false);
+  //         observer.complete();
+  //       };
+  
+  //       // Mostrar el modal
+  //       modal.show();
+  
+  //     } catch (error) {
+  //       console.error('Error al preparar el movimiento:', error);
+  //       observer.error(error);
+  //       observer.complete();
+  //     }
+  //   });
+  // }
+
+  // prepareEntryVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean>{
+  //   return new Observable<boolean>((observer) => {
+  
+  //     try {
+  
+  //       // Preparar mensaje del modal
+  //       const modalMessage = `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`;
+  //       document.getElementById('modalMessageIngresoEmp')!.textContent = modalMessage;
+  
+  //       // Obtener el modal
+  //       const modalElement = document.getElementById('confirmIngresoEmpModal')!;
+  //       const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  
+  //       // Configurar los eventos del modal
+  //       modalElement.addEventListener('hidden.bs.modal', () => {
+  //         const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+  //         const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+  //         confirmButton.onclick = null;
+  //         cancelButton.onclick = null;
+  //       });
+  
+  //       // Configurar el botón de confirmación
+  //       const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+  //       confirmButton.onclick = () => {
+  //         const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate).subscribe({
+  //           next: (response) => {
+  //             console.log("respuesta: ", response);
+  //             modal.hide();
+  //             if(response){
+  //               observer.next(true);
+  //               observer.complete();
+  //             } else {
+  //               observer.next(false);
+  //               observer.complete();
+  //             }
+  //           },
+  //           error: (error) => {
+  //             console.error('Error al registrar egreso:', error);
+  //             modal.hide();
+  //             observer.next(false);
+  //             observer.complete();
+  //           }
+  //         });
+  //         this.subscription.add(sub);
+  //       };
+  
+  //       // Configurar el botón de cancelar
+  //       const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+  //       cancelButton.onclick = () => {
+  //         modal.hide();
+  //         observer.next(false);
+  //         observer.complete();
+  //       };
+  
+  //       // Mostrar el modal
+  //       modal.show();
+  
+  //     } catch (error) {
+  //       console.error('Error al preparar el movimiento:', error);
+  //       observer.error(error);
+  //       observer.complete();
+  //     }
+  //   });
+  
+  // }
+  
+  // prepareExitVisitor(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean>{
+  //   return new Observable<boolean>((observer) => {
+  
+  //     try {
+  
+  //       // Preparar mensaje del modal
+  //       const modalMessage = `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`;
+  //       document.getElementById('modalMessageEgresoEmp')!.textContent = modalMessage;
+  
+  //       // Obtener el modal
+  //       const modalElement = document.getElementById('confirmEgresoEmpModal')!;
+  //       const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+  
+  //       // Configurar los eventos del modal
+  //       modalElement.addEventListener('hidden.bs.modal', () => {
+  //         const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+  //         const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+  //         confirmButton.onclick = null;
+  //         cancelButton.onclick = null;
+  //       });
+  
+  //       // Configurar el botón de confirmación
+  //       const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+  //       confirmButton.onclick = () => {
+  //         const sub = this.visitorService.RegisterExit(visitor, vehiclePlate).subscribe({
+  //           next: (response) => {
+  //             console.log("respuesta: ", response);
+  //             modal.hide();
+  //             if(response){
+  //               observer.next(true);
+  //               observer.complete();
+  //             }
+  //             else {
+  //               observer.next(false);
+  //               observer.complete();
+  //             }
+  //           },
+  //           error: (error) => {
+  //             console.error('Error al registrar egreso:', error);
+  //             modal.hide();
+  //             observer.next(false);
+  //             observer.complete();
+  //           }
+  //         });
+  //         this.subscription.add(sub);
+  //       };
+  
+  //       // Configurar el botón de cancelar
+  //       const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+  //       cancelButton.onclick = () => {
+  //         modal.hide();
+  //         observer.next(false);
+  //         observer.complete();
+  //       };
+  
+  //       // Mostrar el modal
+  //       modal.show();
+  
+  //     } catch (error) {
+  //       console.error('Error al preparar el movimiento:', error);
+  //       observer.error(error);
+  //       observer.complete();
+  //     }
+  //   });
+  // }
+
+  public getDocumentType(input: string): string | null {
+    const firstLetter = input.charAt(0);
+    
+    if (firstLetter === 'D') {
+      return "DNI";
+    } else if (firstLetter === 'P') {
+      return "PASSPORT";
+    } else {
+      console.log("La primera letra no es D ni P");
+      return null; 
+    }
+  }
+
+
+  public extractNumber(input: string): string {
+    return input.substring(2).trim(); 
+  }
+
 }
