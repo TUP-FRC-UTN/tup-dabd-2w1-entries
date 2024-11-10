@@ -31,8 +31,29 @@ export class AccessMetricsService {
     return this.http.get<{ date: string, count: number }[]>(`${this.baseUrl}/daily-exit-count`);
   }
 
+  /* aca */
   getAccessCountByUserTypeForCurrentMonth(): Observable<{ userType: string, count: number }[]> {
     return this.http.get<{ userType: string, count: number }[]>(`${this.baseUrl}/access-count-by-user-type`);
+  }
+
+  /* aca */
+  getAccessAndExitByDayOfWeek(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/access-exit-count-by-day`);
+  }
+
+  /* filtro */
+
+  getMovementCountsFilter(year: number, startMonth: number, endMonth: number): Observable<any> {
+    return this.http.get(
+      `${this.baseUrl}/access-exit-count-by-day-filter`,
+      {
+        params: {
+          year: year.toString(),
+          startMonth: startMonth.toString(),
+          endMonth: endMonth.toString()
+        }
+      }
+    );
   }
 
   getAccessCountByWeekAndDayOfWeek(): Observable<DayOfWeekMetricEntryDTO> {
@@ -55,10 +76,6 @@ export class AccessMetricsService {
     return this.http.get<number>(`${this.baseUrl}/this-monthly-exit-count`);
   }
 
-
-  getAccessAndExitByDayOfWeek(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/access-exit-count-by-day`);
-  }
 
   getTotalEntriesForCurrentYear(): Observable<number> {
     return this.http.get<number>(this.baseUrl +'/total-entries-this-year');

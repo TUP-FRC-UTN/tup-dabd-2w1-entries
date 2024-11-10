@@ -46,8 +46,67 @@ interface TopExpenseKPIs {
 export class MetricsComponent implements OnInit{
 
 
-  constructor(private metricsService: AccessMetricsService) {}
+  constructor(private metricsService: AccessMetricsService) {
+    const now = new Date();
+    this.periodTo = this.formatYearMonth(now);
+    
+    // Fecha inicial por defecto (3 meses atrás)
+    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    this.periodFrom = this.formatYearMonth(threeMonthsAgo);
+    
+    // Fecha mínima permitida (por ejemplo, 1 año atrás)
+    const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), 1);
+    this.minDateFrom = this.formatYearMonth(oneYearAgo);
+  }
   
+
+  aplyFilters(): void {
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
+
+    this.metricsService.getMovementCountsFilter(
+      fromDate.year,
+      fromDate.month,
+      toDate.month
+    ).subscribe(data => {
+      console.log("Data filtrada recibida de la API:", data);
+
+      // Array con los nombres de los días de la semana, comenzando desde Lunes
+      const diasOrdenados = [
+        'Lunes', 'Martes', 'Miércoles', 'Jueves', 
+        'Viernes', 'Sábado', 'Domingo'
+      ];
+
+      // Crear el array de datos para el gráfico con cabeceras
+      this.columnChartData = [
+        ...diasOrdenados.map((dia, index) => {
+          const dayIndex = index === 6 ? 7 : index + 1;
+          const ingresos = data[dayIndex]?.entries || 0;
+          const egresos = data[dayIndex]?.exits || 0;
+
+          return [
+            dia,
+            ingresos,
+            egresos
+          ];
+        })
+      ];
+
+      console.log('Datos del gráfico filtrados:', this.columnChartData);
+    });
+  }
+
+
+  private formatYearMonth(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  // Convierte string YYYY-MM a objeto con año y mes
+  private parseYearMonth(yearMonth: string): { year: number, month: number } {
+    const [year, month] = yearMonth.split('-').map(num => parseInt(num));
+    return { year, month };
+  }
+
 
   dailyAccessCount: number = 0;
   dailyExitCount: number = 0;
@@ -73,6 +132,12 @@ export class MetricsComponent implements OnInit{
   entriesCount: number = 0;
   exitCount: number = 0;
 
+  periodFrom: string = this.getDefaultFromDate();
+  periodTo: string = this.getCurrentYearMonth();
+  minDateFrom: string = '2020-01';
+  topMethodName: string = "";
+
+
   ngOnInit() {
     this.fetchTodayAccessCount();
     this.loadAccessCounts();
@@ -86,7 +151,11 @@ export class MetricsComponent implements OnInit{
     this.fetchTodayExitCount();
     this.getThisMonthCountExit();
     this.getPeakDayExit();
+    this.aplyFilters()
   }
+
+
+
 
   getPeakDayExit(): void {
     this.metricsService.getExitCountByWeekAndDayOfWeek().subscribe((data) => {
@@ -266,31 +335,48 @@ export class MetricsComponent implements OnInit{
   };
 
 
+  getCurrentYearMonth(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  getDefaultFromDate(): string {
+    const now = new Date();
+    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    return `${threeMonthsAgo.getFullYear()}-${String(threeMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+
+
   private loadEntryExit(): void {
-    this.metricsService.getAccessAndExitByDayOfWeek().subscribe(data => {
+    // Obtener los valores de año y mes de los filtros
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
+
+    // Usar el nuevo método con filtros en lugar del original
+    this.metricsService.getMovementCountsFilter(
+      fromDate.year,
+      fromDate.month,
+      toDate.month
+    ).subscribe(data => {
       console.log("Data recibida de la API:", data);
-
-      // Array con los nombres de los días de la semana
+  
+      // Array con los nombres de los días de la semana, comenzando desde Lunes
       const diasOrdenados = [
-        'Sábado', 'Lunes', 'Martes', 'Miércoles', 
-        'Jueves', 'Viernes','Domingo'
+        'Lunes', 'Martes', 'Miércoles', 'Jueves', 
+        'Viernes', 'Sábado', 'Domingo'
       ];
-
-      // Crear el array de datos para el gráfico
+  
+      // Crear el array de datos para el gráfico con cabeceras
       this.columnChartData = [
-          // Cabeceras
         ...diasOrdenados.map((dia, index) => {
-          // El índice de la API empieza en 1 (1 = Domingo, 7 = Sábado)
-          const dayIndex = index + 1;
-
-          // Si el díaIndex es 7 (Sábado), lo mapeamos como 0 (Sábado en getDay())
-          const adjustedDayIndex = dayIndex === 7 ? 0 : dayIndex;
-
-          // Obtener los valores de ingresos y egresos para ese día
-          const ingresos = data[dayIndex] ? data[dayIndex].entries : 0;
-          const egresos = data[dayIndex] ? data[dayIndex].exits : 0;
-
-          // Devolver el formato adecuado para Google Charts
+          // Calcular el índice correcto para la API
+          const dayIndex = index === 6 ? 7 : index + 1;
+  
+          // Obtener los valores de ingresos y egresos para ese día desde la API
+          const ingresos = data[dayIndex]?.entries || 0;
+          const egresos = data[dayIndex]?.exits || 0;
+  
           return [
             dia,        // Nombre del día
             ingresos,   // Ingresos
@@ -298,12 +384,10 @@ export class MetricsComponent implements OnInit{
           ];
         })
       ];
-
-      // Verificar que los datos del gráfico estén correctamente formateados
+  
       console.log('Datos del gráfico formateados:', this.columnChartData);
     });
-  }
-  
+}
 
 
 
@@ -339,10 +423,7 @@ export class MetricsComponent implements OnInit{
   counterData: [] = [];
 
   status: number = 0;
-  periodFrom: string = this.getDefaultFromDate();
-  periodTo: string = this.getCurrentYearMonth();
-  minDateFrom: string = '2020-01';
-  topMethodName: string = "";
+ 
 
   paymentStatus: string = 'Aprobado';
   comparisonType: string = 'ingresos';
@@ -415,7 +496,7 @@ export class MetricsComponent implements OnInit{
 
 
 
-  getCurrentYearMonth(): string {
+/*   getCurrentYearMonth(): string {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   }
@@ -425,12 +506,12 @@ export class MetricsComponent implements OnInit{
     date.setMonth(date.getMonth() - 9);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
   }
-
-  aplyFilters() {
+ */
+/*   aplyFilters() {
     this.updateColumnChart();
     this.updatePieChart();
     this.updateTop5Chart();
-  }
+  } */
 
   private formatMonthYear(period: string): string {
     if (!period || !period.includes('-')) {
