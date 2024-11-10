@@ -325,6 +325,22 @@ loadUsersAllowedData(): Observable<boolean> {
                 `<button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
                   Ingreso
                 </button>`,
+                // `<div class="d-flex justify-content-center">
+                //   <div class="dropdown">
+                //     <button class="btn btn-light border border-2" 
+                //             type="button" 
+                //             data-bs-toggle="dropdown" 
+                //             aria-expanded="false">
+                //       <i class="bi bi-three-dots-vertical"></i> <!-- Tres puntos verticales -->
+                //     </button>
+                //     <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+                //       <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+
+                //       <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+                //       <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+                //     </ul>
+                //   </div>
+                // </div>`,
                 actionButtons,
               ];
             });
@@ -611,27 +627,27 @@ loadUsersAllowedData(): Observable<boolean> {
   getUserTypeIcon(descr : string){
     switch (descr){
       case "Employeed" : {    //naranja (orange)
-        return `<button style="background-color: #fd7e14;border: bisque;" class="btn btn-primary" title="Empleado">
+        return `<button style="background-color: #6F4F37;border: bisque;" class="btn btn-primary" title="Empleado">
                   <i class="bi bi-briefcase"></i>
                 </button>`
       }
       case "Supplier" : {   //turquesa / verde agua (teal)
-        return `<button style="background-color: #20c997;border: bisque;" class="btn btn-warning" title="Proveedor">
+        return `<button style="background-color: #6c757d;border: bisque;" class="btn btn-warning" title="Proveedor">
                   <i class="bi bi-truck"></i>
                 </button>`
       }
       case "Visitor" : {    //azul (blue)
-        return   `<button style="background-color: #0d6efd;border: bisque;" class="btn btn-primary" title="Visitante">
+        return   `<button style="background-color: #006400;border: bisque;" class="btn btn-primary" title="Visitante">
                     <i class="bi bi-person-raised-hand"></i>
                   </button> `
       }
       case "Owner" : {    //verde (green)
-        return  `<button style="background-color: #198754;border: bisque;" class="btn btn-primary" title="Vecino">
+        return  `<button style="background-color: #003366;border: bisque;" class="btn btn-primary" title="Vecino">
                     <i class="bi bi-house-fill"></i> 
                   </button>`
       }
       case "Tenant" : {   //verde (green)
-        return  `<button style="background-color: #198754;border: bisque;" class="btn btn-primary" title="Vecino">
+        return  `<button style="background-color: #003366;border: bisque;" class="btn btn-primary" title="Vecino">
                     <i class="bi bi-house-fill"></i> 
                   </button>`
       }
@@ -658,7 +674,7 @@ loadUsersAllowedData(): Observable<boolean> {
       }
 
       default : {
-      return  `<button style="background-color: grey;border: bisque;" class="btn btn-primary" title="???">
+      return  `<button style="background-color: #dc3545;border: bisque;" class="btn btn-primary" title="???">
                   <i class="bi bi-question-lg"></i>
                 </button> `
       }
