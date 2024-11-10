@@ -94,6 +94,8 @@ export class MetricsComponent implements OnInit{
 
       console.log('Datos del gráfico filtrados:', this.columnChartData);
     });
+    this.loadAccessCounts();
+
   }
 
 
@@ -276,10 +278,19 @@ export class MetricsComponent implements OnInit{
   }
 
   private loadAccessCounts(): void {
-    this.metricsService.getAccessCountByUserTypeForCurrentMonth().subscribe(data => {
-      this.pieChartData = data.map(item => [item.userType, item.count]);
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
+
+    this.metricsService.getAccessCountByUserTypeFilter(
+        fromDate.year,
+        fromDate.month,
+        toDate.month
+    ).subscribe(data => {
+        this.pieChartData = [
+            ...data.map(item => [item.userType, item.count])
+        ];
     });
-  }
+}
 
 
   pieChartType = ChartType.PieChart;

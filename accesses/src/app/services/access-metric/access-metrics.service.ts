@@ -35,6 +35,20 @@ export class AccessMetricsService {
   getAccessCountByUserTypeForCurrentMonth(): Observable<{ userType: string, count: number }[]> {
     return this.http.get<{ userType: string, count: number }[]>(`${this.baseUrl}/access-count-by-user-type`);
   }
+  
+  /* Filtro */
+  getAccessCountByUserTypeFilter(year: number, startMonth: number, endMonth: number): Observable<{ userType: string, count: number }[]> {
+    return this.http.get<{ userType: string, count: number }[]>(
+      `${this.baseUrl}/access-count-by-user-type-filter`,
+      {
+        params: {
+          year: year.toString(),
+          startMonth: startMonth.toString(),
+          endMonth: endMonth.toString()
+        }
+      }
+    );
+}
 
   /* aca */
   getAccessAndExitByDayOfWeek(): Observable<any[]> {
