@@ -109,8 +109,47 @@ export class AccessVisitorRegistryComponent
       }
     );
     this.subscription.add(subs)
+    const ub=this.subscription =this.ownerService.movementState$.subscribe(
+      (data: { document: string, movement: string ,plate:string}) => {
+        const { document, movement,plate } = data;
+        console.log('Documento:', document);
+        console.log('Movimiento:', movement);
+        this.onChangeMovement(document,movement,plate)
+      }
+    )
+    this.subscription.add(ub)
   }
+  onChangeMovement(doc:string,mov:string,plate:string){
+    console.log(mov)
+    console.log(plate)
+    const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(doc)
+    )
+    console.log(user)
+    console.log(user?.userType.description)
+    this.selectedVisitor=user||null 
+    if(this.selectedVisitor?.userType.description==='Tenant'&& mov==='salida'){
+      console.log('Llamando a prepareEntryMovement...');
+      this.prepareEntryMovement(this.selectedVisitor, plate).subscribe({
+        next: (result) => {
+          console.log('Resultado de prepareEntryMovement:', result);
+        },
+        error: (err) => {
+          console.error('Error en prepareEntryMovement:', err);
+        }
+      });
+    }
+    else if(this.selectedVisitor?.userType.description==='Tenant'&& mov==='entrada'){
+      this.prepareExitMovement(this.selectedVisitor,plate).subscribe({
+        next: (result) => {
+          console.log('Resultado de prepareEntryMovement:', result);
+        },
+        error: (err) => {
+          console.error('Error en prepareEntryMovement:', err);
+        }
+      });
+    }
 
+  }
   ngOnDestroy() {
     if (this.dataTable) {
       this.dataTable.destroy();
@@ -1204,6 +1243,7 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
   private prepareEntryMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: string): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
+        console.log('te llame')
         // Preparar datos del movimiento
         const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
         const firstRange = visitor.authRanges[0];

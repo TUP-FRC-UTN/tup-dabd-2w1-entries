@@ -148,6 +148,7 @@ private readonly registryUpdate = inject (AccessRegistryUpdateService);
       this.fetchData();
     });
     window.addEventListener('openModalInfo', this.handleOpenModal);
+    window.addEventListener('Movment', this.handleOpenMovement);
   }
 /**
    * Se manda el documento al servicio
@@ -157,6 +158,13 @@ private readonly registryUpdate = inject (AccessRegistryUpdateService);
     const visitorDocument = customEvent.detail;
     console.log("llamada")
     this.ownerService.openModal(visitorDocument);
+  };
+  private handleOpenMovement = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    const { document, type,plate } = customEvent.detail;
+    console.log("llamada")
+    console.log(plate)
+    this.ownerService.onMOvement(document,type,plate);
   };
 
   /**

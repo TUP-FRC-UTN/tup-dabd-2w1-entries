@@ -109,10 +109,34 @@ export class DataTableConfigService {
     private styleEntryExitColumn(table: any): void {
       $(table).find('td:nth-child(3)').each((_, element) => {
         const cellText = $(element).text().trim().toLowerCase();
+        const visitorDocument = $(element).closest('tr').find('td:nth-child(6)').text().trim();
+        const plate = $(element).closest('tr').find('td:nth-child(9)').text().trim(); 
         if (['entrada', 'salida'].includes(cellText)) {
           const style = this.ENTRY_STYLES[cellText as keyof typeof this.ENTRY_STYLES];
           this.applyBadgeStyle(element, style.color, style.text);
-        }
+
+          console.log('Añadiendo botón para el documento:', visitorDocument);
+          console.log('Placa:', plate);
+          const badgeHTML = `
+        <div class="d-flex justify-content-center">
+          <span class="badge rounded-pill" 
+                style="background-color: ${style.color}; color: white; cursor: pointer;"
+                onclick="window.dispatchEvent(new CustomEvent('Movment', { 
+                  detail: { 
+                    document: '${visitorDocument}', 
+                    type: '${cellText}', 
+                    plate: '${plate}' 
+                  }
+                }))"
+                title="Ver documento">
+            ${style.text}
+          </span>
+        </div>
+      `;
+      // Establecemos el badge como contenido de la celda
+      $(element).html(badgeHTML);
+     }
+        
       });
     }
   
