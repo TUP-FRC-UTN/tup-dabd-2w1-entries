@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { AccessMetricsService } from '../../../../services/access-metric/access-metrics.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DayOfWeekMetricDTO } from '../../../../models/access-metric/metris';
 
 
 
@@ -48,25 +47,65 @@ export class MetricsComponent implements OnInit{
 
 
   constructor(private metricsService: AccessMetricsService) {}
+  
 
   dailyAccessCount: number = 0;
+  dailyExitCount: number = 0;
+
+  totalAccesCount: number = 0;
+  totalExitCount: number = 0;
+
   today = new Date();
  
   dayWithMostAccesses: string = '';
-  accessCount:any
+  accessCount= 0;
 
-  public accessData: DayOfWeekMetricDTO[] = [];
+  dayWithMostExits: string = '';
+  exitsCountPeak = 0;
+
+  currentMonthAccessCount:number = 0;
+  currentMonthExitCount:number = 0;
+
+  //public accessData: DayOfWeekMetricDTO[] = [];
+
+  monthEntry: string = '';
+  monthExit: string = '';
+  entriesCount: number = 0;
+  exitCount: number = 0;
 
   ngOnInit() {
     this.fetchTodayAccessCount();
     this.loadAccessCounts();
     this.getPeakDayAccess();
-
+    this.getThisMonthCount()
+    this.loadEntryExit()
+    this.getTotalEntries()
+    this.getTotalExits();
+    this.getMostEntriesByMonth();
+    this.getMostExitsByMonth();
+    this.fetchTodayExitCount();
+    this.getThisMonthCountExit();
+    this.getPeakDayExit();
   }
+
+  getPeakDayExit(): void {
+    this.metricsService.getExitCountByWeekAndDayOfWeek().subscribe((data) => {
+      console.log(data, 'DATOS DE EGRESOS PICO');  // Verifica la estructura de la respuesta
+      if (data) {
+        this.dayWithMostExits = data.dayOfWeek;
+        this.exitsCountPeak = data.exitsCountPeak;
+        console.log('Día de egreso pico:', this.dayWithMostExits);
+        console.log('Cantidad de egresos:', this.exitsCountPeak);
+      }      
+    });
+  }
+  
+
+
 
   getPeakDayAccess(): void {
     this.metricsService.getAccessCountByWeekAndDayOfWeek().subscribe((data) => {
-      console.log(data);
+      
       if (data) {
         this.dayWithMostAccesses = data.dayOfWeek;
         this.accessCount = data.accessCount;
@@ -79,14 +118,93 @@ export class MetricsComponent implements OnInit{
 
   private fetchTodayAccessCount(): void {
     this.metricsService.getDailyAccessData().subscribe(data => {
-      console.log(data);
-      
-      let todayString = this.today.toISOString().slice(0, 10); // Formato 'YYYY-MM-DD'
+      let today = new Date();
+      let todayString = today.getFullYear() + '-' + 
+                        (today.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+                        today.getDate().toString().padStart(2, '0');
+      console.log('Fecha calculada en frontend (todayString):', todayString);
+      console.log('Fechas recibidas desde el backend:', data.map(item => item.date));
+    
       let todayData = data.find(item => item.date === todayString);
+      console.log('Datos encontrados para hoy:', todayData);
+      
       this.dailyAccessCount = todayData ? todayData.count : 0;
-    });
+      console.log('Cantidad de accesos hoy:', this.dailyAccessCount);
+    });    
   }
 
+  
+  private fetchTodayExitCount(): void {
+    this.metricsService.getDailyExitData().subscribe(data => {
+      let today = new Date();
+      let todayString = today.getFullYear() + '-' + 
+                        (today.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+                        today.getDate().toString().padStart(2, '0');
+      console.log('Fecha calculada en frontend (todayString):', todayString);
+      console.log('Fechas recibidas desde el backend:', data.map(item => item.date));
+    
+      let todayData = data.find(item => item.date === todayString);
+      console.log('Datos encontrados para hoy:', todayData);
+      
+      this.dailyExitCount = todayData ? todayData.count : 0;
+      console.log('Cantidad de accesos hoy:', this.dailyExitCount);
+    });    
+  }
+
+  getMostEntriesByMonth(){
+    this.metricsService.getMonthWithMostEntries().subscribe(
+      (data) => {
+        this.monthEntry = data.month;
+        this.entriesCount = data.entriesCount;
+      },
+      (error) => {
+        console.error('Error fetching data', error);
+      })
+  }
+
+  getMostExitsByMonth(){
+    this.metricsService.getMonthWithMostExitss().subscribe(
+      (data) => {
+        this.monthExit = data.month;
+        this.exitCount = data.exitsCount;
+      },
+      (error) => {
+        console.error('Error fetching data', error);
+      })
+  }
+
+
+  getTotalExits(){
+    this.metricsService.getTotalExitsForCurrentYear().subscribe((data) =>{
+      this.totalExitCount = data
+      console.log(data, 'Cantidad toaaaal');
+    })
+  }
+
+  
+  
+  getTotalEntries(){
+    this.metricsService.getTotalEntriesForCurrentYear().subscribe((data) =>{
+      this.totalAccesCount = data
+      console.log(data, 'Cantidad toaaaal');
+    })
+  }
+
+  getThisMonthCount():void{
+    this.metricsService.getThisMonthlyAccessCount().subscribe(data=>{
+      console.log("Data",data);
+      this.currentMonthAccessCount = data;
+      
+    })
+  }
+
+  getThisMonthCountExit():void{
+    this.metricsService.getThisMonthlyExitCount().subscribe(data=>{
+      console.log("Data",data);
+      this.currentMonthExitCount = data;
+      
+    })
+  }
 
   private loadAccessCounts(): void {
     this.metricsService.getAccessCountByUserTypeForCurrentMonth().subscribe(data => {
@@ -101,7 +219,11 @@ export class MetricsComponent implements OnInit{
     is3D: false,
     title: '',
     pieSliceText: 'value',
-    legend: { position: 'none' },
+    legend: {
+      position: 'right',
+      textStyle: { color: '#6c757d', fontSize: 17 }
+    },
+    chartArea: { width: '100%', height: '100%' },
     height: 300,
     width: 400,
     colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0']
@@ -109,6 +231,79 @@ export class MetricsComponent implements OnInit{
 
 
 
+  columnChartType = ChartType.ColumnChart;
+  columnChartData: any[] = ['Día', 'Ingresos', 'Egresos']; 
+  columnChartOptions = {
+    title: '',
+    legend: {
+      position: 'top',
+      textStyle: { color: '#6c757d', fontSize: 14 },
+      alignment: 'center',
+      maxLines: 2
+    },
+    bar: { groupWidth: '100%' },
+    height: 600,
+    width: '100%',
+    colors: ['#4caf50', '#f44336'],
+    hAxis: {
+      title: 'Días de la semana',
+      textStyle: { color: '#6c757d' }
+    },
+    vAxis: {
+      title: 'Cantidad',
+      textStyle: { color: '#6c757d' },
+      minValue: 0
+    },
+    animation: {
+      duration: 1000,
+      easing: 'out',
+      startup: true
+    },
+    series: {
+      0: { labelInLegend: 'Ingresos' },
+      1: { labelInLegend: 'Egresos' }
+    }
+  };
+
+
+  private loadEntryExit(): void {
+    this.metricsService.getAccessAndExitByDayOfWeek().subscribe(data => {
+      console.log("Data recibida de la API:", data);
+
+      // Array con los nombres de los días de la semana
+      const diasOrdenados = [
+        'Sábado', 'Lunes', 'Martes', 'Miércoles', 
+        'Jueves', 'Viernes','Domingo'
+      ];
+
+      // Crear el array de datos para el gráfico
+      this.columnChartData = [
+          // Cabeceras
+        ...diasOrdenados.map((dia, index) => {
+          // El índice de la API empieza en 1 (1 = Domingo, 7 = Sábado)
+          const dayIndex = index + 1;
+
+          // Si el díaIndex es 7 (Sábado), lo mapeamos como 0 (Sábado en getDay())
+          const adjustedDayIndex = dayIndex === 7 ? 0 : dayIndex;
+
+          // Obtener los valores de ingresos y egresos para ese día
+          const ingresos = data[dayIndex] ? data[dayIndex].entries : 0;
+          const egresos = data[dayIndex] ? data[dayIndex].exits : 0;
+
+          // Devolver el formato adecuado para Google Charts
+          return [
+            dia,        // Nombre del día
+            ingresos,   // Ingresos
+            egresos     // Egresos
+          ];
+        })
+      ];
+
+      // Verificar que los datos del gráfico estén correctamente formateados
+      console.log('Datos del gráfico formateados:', this.columnChartData);
+    });
+  }
+  
 
 
 
@@ -129,6 +324,17 @@ export class MetricsComponent implements OnInit{
 
 
 
+
+
+
+
+
+
+
+
+
+  barChartType:any
+  //columnChartType:any;
 
   counterData: [] = [];
 
@@ -143,12 +349,11 @@ export class MetricsComponent implements OnInit{
   morosos: number = 0;
 
   lineChartData: any[] = [];
-  columnChartData: any[] = [];
+  //columnChartData: any[] = [];
   top5ChartData: any[] = [];
 
 
-  columnChartType = ChartType.ColumnChart;
-  barChartType = ChartType.BarChart;
+
 
 
 
@@ -208,37 +413,6 @@ export class MetricsComponent implements OnInit{
 
 
 
-  columnChartOptions = {
-    backgroundColor: 'transparent',
-    colors: ['#24473f'],
-    legend: { position: 'none' },
-    chartArea: { width: '80%', height: '75%' },
-    vAxis: {
-      textStyle: {
-        color: '#6c757d',
-        fontSize: 12  // Tamaño de fuente más pequeño
-      },
-      // Formato personalizado para mostrar los valores en miles
-      format: 'currency',
-      formatOptions: {
-        // Muestra solo miles, sin decimales
-        notation: 'compact',
-        compactDisplay: 'short',
-        maximumFractionDigits: 0
-      }
-    },
-    hAxis: {
-      textStyle: { color: '#6c757d' },
-    },
-    animation: {
-      duration: 1000,
-      easing: 'out',
-      startup: true
-    },
-    height: 600,
-    width: '100%',
-    bar: { groupWidth: '70%' }
-  };
 
 
   getCurrentYearMonth(): string {

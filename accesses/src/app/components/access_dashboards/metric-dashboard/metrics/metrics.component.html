@@ -55,7 +55,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h5 class="card-title text-secondary mb-1  d-flex justify-content-center">Cantidad de ingresos mensuales</h5>
+                                <h5 class="card-title text-secondary mb-1  d-flex justify-content-center">Cantidad de ingresos-egresos</h5>
                                 <small class="text-secondary d-flex justify-content-center">Rendimiento por
                                     periodo</small>
                             </div>
@@ -69,19 +69,30 @@
 
             <!-- KPIs para el gráfico de columnas cuando es grande-->
             <div class="col-md-3" *ngIf="status === 1">
+                <div class="row">
+                    <div class="col">
+                        <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(1)">
+                          <div class="card-body">
+                            <h6 class="text-secondary mb-2">Ingresos del Mes Actual</h6>
+                            <h3 class="mb-0">{{ currentMonthAccessCount }}</h3>
+                            <small class="text-muted">Mes Actual</small>
+                          </div>
+                        </div>
+                      </div>                  
+                </div>
+
                 <!-- Total Recaudado/Morosos -->
                 <div class="row">
                     <div class="col mb-3">
                         <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
                             style="background-color: #d8ffedde;">
                             <div class="card-body position-relative">
-                                <i class="bi bi-cash-stack position-absolute top-50 end-0 translate-middle-y me-4"
-                                    style="font-size: 2.5rem; color: #198754; opacity: 0.8;"></i>
+                                <i class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4"
+                                style="font-size: 2.5rem; color: #198754; opacity: 0.8;"></i>
                                 <div class="pe-5">
-                                    <h6 class="text-secondary mb-2">{{ paymentStatus === 'Aprobado' ? 'Total Recaudado'
-                                        : 'Total Morosos'}}</h6>
-                                    <h3 class="mb-0">{{ columnKPIs.totalPeriod | number:'1.0-0' }}
-                                        <small class="text-muted">{{ paymentStatus === 'Aprobado' ? '$' : '' }}</small>
+                                    <h6 class="text-secondary mb-2">Total de ingresos anuales</h6>
+                                    <h3 class="mb-0 text-muted">
+                                        Cantidad:  {{totalAccesCount}}
                                     </h3>
                                 </div>
                             </div>
@@ -95,12 +106,32 @@
                         <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
                             style="background-color: #e8f5e9;">
                             <div class="card-body position-relative">
-                                <i class="bi bi-calendar3 position-absolute top-50 end-0 translate-middle-y me-4"
-                                    style="font-size: 2.5rem; color: #2e7d32; opacity: 0.8;"></i>
+                                <i class="bi bi-star position-absolute top-50 end-0 translate-middle-y me-4"
+                                style="font-size: 2.5rem; color: #2e7d32; opacity: 0.8;"></i>
+                            
                                 <div class="pe-5">
-                                    <h6 class="text-secondary mb-2">Promedio Mensual</h6>
-                                    <h3 class="mb-0">{{ columnKPIs.monthlyAverage | number:'1.0-0' }}
-                                        <small class="text-muted">{{ paymentStatus === 'Aprobado' ? '$' : '' }}</small>
+                                    <h6 class="text-secondary mb-2">Mes con mayor ingresos</h6>
+                                    <h3 class="mb-0">{{ monthEntry }} <small class="text-muted">Cantidad: {{ entriesCount }}</small>
+                                    </h3>
+                                    
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col mb-3">
+                        <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
+                            style="background-color: #f8d7da;">
+                            <div class="card-body position-relative">
+                                <i class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4"
+                                style="font-size: 2.5rem; color: #721c24; opacity: 0.8;"></i>
+                                <div class="pe-5">
+                                    <h6 class="text-secondary mb-2">Total de egresos anuales</h6>
+                                    <h3 class="mb-0 text-muted">
+                                        Cantidad:  {{totalExitCount}}
                                     </h3>
                                 </div>
                             </div>
@@ -108,25 +139,26 @@
                     </div>
                 </div>
 
-                <!-- Mejor Mes -->
                 <div class="row">
                     <div class="col mb-3">
                         <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
-                            style="background-color: #e3f2fd;">
+                            style="background-color: #f8d7da;">
                             <div class="card-body position-relative">
-                                <i class="bi bi-trophy position-absolute top-50 end-0 translate-middle-y me-4"
-                                    style="font-size: 2.5rem; color: #1565c0; opacity: 0.8;"></i>
+                                <i class="bi bi-star position-absolute top-50 end-0 translate-middle-y me-4"
+                                style="font-size: 2.5rem; color: #721c24; opacity: 0.8;"></i>
+                            
                                 <div class="pe-5">
-                                    <h6 class="text-secondary mb-2">Mejor Mes</h6>
-                                    <h3 class="mb-0">{{ columnKPIs.bestMonth.value | number:'1.0-0' }}
-                                        <small class="text-muted">{{ paymentStatus === 'Aprobado' ? '$' : '' }}</small>
+                                    <h6 class="text-secondary mb-2">Mes con mayor egresos</h6>
+                                    <h3 class="mb-0">{{ monthExit }} <small class="text-muted">Cantidad: {{ exitCount }}</small>
                                     </h3>
-                                    <small class="text-muted">{{ columnKPIs.bestMonth.month }}</small>
+                                    
+
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <!-- KPIs para el gráfico de pie cuando el grafico es grande -->
@@ -315,31 +347,52 @@
             <div class="row">
                 <div class="col">
                     <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(1)"
-                      style="background-color: #d8ffedde;">
-                      <div class="card-body position-relative">
-                        <!-- Icono de  -->
-                        <i class="bi bi-person-check-fill position-absolute top-50 end-0 translate-middle-y me-4"
-                        style="font-size: 2.5rem; color: #198754; opacity: 0.8;"></i>
-                        <!-- Contenido existente -->
-                        <div class="pe-5"> <!-- Añadimos padding-end para dar espacio al icono -->
-                          <h6 class="text-secondary mb-2">Ingresos diarios</h6>
-                          <h3 class="mb-0">
-                            {{dailyAccessCount}}
-                          </h3>
+                        style="background-color: #d4edda;"> <!-- Color de fondo verde claro -->
+                        <div class="card-body position-relative">
+                            <!-- Icono de Ingreso (entrada) -->
+                            <i class="bi bi-arrow-right-circle-fill position-absolute top-50 end-0 translate-middle-y me-4"
+                                style="font-size: 2.5rem; color: #155724; opacity: 0.8;"></i> <!-- Icono de ingreso en color verde oscuro -->
+                            <!-- Contenido existente -->
+                            <div class="pe-5"> <!-- Añadimos padding-end para dar espacio al icono -->
+                                <h6 class="text-secondary mb-2">Ingresos diarios</h6>
+                                <h3 class="mb-0">
+                                    {{currentMonthAccessCount}}
+                                </h3>
+                            </div>
                         </div>
-                      </div>
                     </div>
-                  </div>
-                  
-
+                </div>
             </div>
+            
+            
+            <!-- KPI General para Columnas -->
+            <div class="row">
+                <div class="col">
+                    <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(1)"
+                        style="background-color: #f8d7da;"> <!-- Color de fondo rojo claro -->
+                        <div class="card-body position-relative">
+                            <!-- Icono de Egreso (salida) -->
+                            <i class="bi bi-arrow-left-circle-fill position-absolute top-50 end-0 translate-middle-y me-4"
+                                style="font-size: 2.5rem; color: #721c24; opacity: 0.8;"></i> <!-- Icono de egreso en color rojo oscuro -->
+                            <!-- Contenido existente -->
+                            <div class="pe-5"> <!-- Añadimos padding-end para dar espacio al icono -->
+                                <h6 class="text-secondary mb-2">Egresos diarios</h6>
+                                <h3 class="mb-0">
+                                    {{currentMonthExitCount}}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
 
             <!-- KPI General para ingresos pico por día de la semana -->
             <div class="row">
                 <div class="col">
                     <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(2)">
                       <div class="card-body">
-                        <h6 class="text-secondary mb-2">Ingreso Pico de la Semana</h6>
+                        <h6 class="text-secondary mb-2">Pico de ingresos de esta Semana</h6>
                         <h3 class="mb-0">{{ accessCount }}</h3>
                         <small class="text-muted">Día de la semana:  </small>
                         <span>{{ dayWithMostAccesses }}</span>
@@ -348,52 +401,19 @@
                   </div>
                   
             </div>
-
-            <!-- KPI Boleta más alta -->
             <div class="row">
                 <div class="col">
-                    <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(3)"
-                        style="background-color: #fff3cd;">
-                        <div class="card-body position-relative">
-                            <i class="bi bi-receipt position-absolute top-50 end-0 translate-middle-y me-4"
-                                style="font-size: 2.5rem; color: #856404; opacity: 0.8;"></i>
-                            <div class="pe-5">
-                                <h6 class="text-secondary mb-2">Boleta más alta</h6>
-                                <h3 class="mb-0">{{ topExpenseKPIs.highestAmount | number:'1.0-0' }}
-                                    <small class="text-muted">$</small>
-                                </h3>
-                                <small class="text-muted">Promedio Top 5: {{ topExpenseKPIs.averageTop5 | number:'1.0-0'
-                                    }}$</small>
-                            </div>
-                        </div>
+                    <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(2)">
+                      <div class="card-body">
+                        <h6 class="text-secondary mb-2">Pico de egresos de esta Semana</h6>
+                        <h3 class="mb-0">{{ exitsCountPeak }}</h3>
+                        <small class="text-muted">Día de la semana:  </small>
+                        <span>{{ dayWithMostExits }}</span>
+                      </div>
                     </div>
-                </div>
+                  </div>
+                  
             </div>
-
-            <!--  KPI Método más usado con promedio -->
-            <div class="row">
-                <div class="col">
-                    <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(2)"
-                        style="background-color: #e7f1ff;">
-                        <div class="card-body position-relative">
-                            <i class="bi bi-graph-up position-absolute top-50 end-0 translate-middle-y me-4"
-                                style="font-size: 2.5rem; color: #004085; opacity: 0.8;"></i>
-                            <div class="pe-5">
-                                <h6 class="text-secondary mb-2">{{ pieKPIs.topMethod.name }} - Promedio</h6>
-                                <h3 class="mb-0">{{ pieKPIs.averagePerMethod[pieKPIs.topMethod.name] | number:'1.0-0' }}
-                                    <small class="text-muted">$</small>
-                                </h3>
-                                <small class="text-muted">{{ pieKPIs.topMethod.percentage | number:'1.0-1' }}% de las
-                                    transacciones</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-
-
         </div>
 
 
@@ -406,10 +426,12 @@
                             <h5 class="card-title  text-secondary mb-1">Comparacion de Ingresos/Egresos</h5>
                         </div>
                     </div>
-
-                    <google-chart [type]="columnChartType" [data]="columnChartData" [options]="columnChartOptions"
-                        class="w-100">
-                    </google-chart>
+                    <google-chart
+                    [type]="columnChartType"
+                    [data]="columnChartData"
+                    [options]="columnChartOptions">
+                  </google-chart>
+                  
                 </div>
             </div>
         </div>

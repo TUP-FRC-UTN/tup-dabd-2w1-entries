@@ -21,7 +21,13 @@ export interface AccessMetricsDTO {
     count: number;
   }
 
-  export interface DayOfWeekMetricDTO {
+  export interface DayOfWeekMetricEntryDTO {
     accessCount: number;  
     dayOfWeek: string;      
   }
+
+  export interface DayOfWeekMetricExitDTO {
+    dayOfWeek: string;
+    exitsCountPeak: number;
+  }
+  
