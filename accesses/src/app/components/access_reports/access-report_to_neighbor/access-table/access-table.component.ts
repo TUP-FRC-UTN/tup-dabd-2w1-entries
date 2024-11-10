@@ -164,7 +164,9 @@ private readonly registryUpdate = inject (AccessRegistryUpdateService);
     const { document, type,plate } = customEvent.detail;
     console.log("llamada")
     console.log(plate)
+    console.log(document)
     this.ownerService.onMOvement(document,type,plate);
+    
   };
 
   /**
@@ -310,7 +312,7 @@ private disableExportButtons(): void {
       const transformations: Observable<string>[] = [
         of(movement.day + '/' + movement.month + '/' + movement.year),
         of(movement.hour || ''),
-        of(movement.entryOrExit || ''),
+        of((movement.entryOrExit || '') + '!-' + (movement.isLastMovement)),
         of(movement.entryType || ''),
         this.userService.transformNameOrId(movement.visitorName || ''),
         of(movement.visitorDocument || ''),

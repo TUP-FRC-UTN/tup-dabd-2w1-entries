@@ -45,6 +45,8 @@ import {
 import { AccessVisitorHelperService } from '../../../services/access_visitors/access-visitor-helper.service';
 import { AccessOwnerRenterserviceService } from '../../../services/access-owner/access-owner-renterservice.service';
 import { AccessUserServiceService } from '../../../services/access-user/access-user-service.service';
+import { AccessEmergenciesService } from '../../../services/access-emergencies/access-emergencies.service';
+import { AccessNewEmergencyDto } from '../../../models/access-emergencies/access-new-emergecy-dto';
 declare var bootstrap: any;
 @Component({
   selector: 'access-app-visitor-registry',
@@ -73,7 +75,7 @@ export class AccessVisitorRegistryComponent
     AccessOwnerRenterserviceService
   );
   private observations: string = '';
-  constructor(private userService: AccessUserServiceService) {}
+  constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService) {}
 
   dataTable: any;
 
@@ -141,14 +143,99 @@ export class AccessVisitorRegistryComponent
     else if(this.selectedVisitor?.userType.description==='Tenant'&& mov==='entrada'){
       this.prepareExitMovement(this.selectedVisitor,plate).subscribe({
         next: (result) => {
-          console.log('Resultado de prepareEntryMovement:', result);
+          console.log('Resultado de prepareExitMovement:', result);
         },
         error: (err) => {
-          console.error('Error en prepareEntryMovement:', err);
+          console.error('Error en prepareExitMovement:', err);
         }
       });
     }
-
+    else if((this.selectedVisitor?.userType.description==='Employeed' || this.selectedVisitor?.userType.description==='Supplier')&& mov==='entrada'){
+      this.prepareExitMovementEmp(this.selectedVisitor,plate).subscribe({
+        next: (result) => {
+          console.log('Resultado de prepareExitMovementEmp:', result);
+        },
+        error: (err) => {
+          console.error('Error en prepareExitMovementEmp:', err);
+        }
+      });
+    }
+    else if((this.selectedVisitor?.userType.description==='Employeed' || this.selectedVisitor?.userType.description==='Supplier') && mov==='salida'){
+      this.prepareEntryMovementEmp(this.selectedVisitor,plate).subscribe({
+        next: (result) => {
+          console.log('Resultado de prepareEntryMovementEmp:', result);
+        },
+        error: (err) => {
+          console.error('Error en prepareEntryMovementEmp:', err);
+        }
+      });
+    }
+    else if(this.selectedVisitor?.userType.description==='Owner'&& mov==='salida'){
+      console.log('Llamando a prepareEntryMovement...');
+      this.prepareEntryVisitor(this.selectedVisitor, plate).subscribe({
+        next: (result) => {
+          console.log('Resultado de prepareEntryVisitor:', result);
+        },
+        error: (err) => {
+          console.error('Error en prepareEntryVisitor:', err);
+        }
+      });
+    }
+    else if(this.selectedVisitor?.userType.description==='Owner'&& mov==='entrada'){
+      this.prepareExitVisitor(this.selectedVisitor,plate).subscribe({
+        next: (result) => {
+          console.log('Resultado de prepareExitVisitor:', result);
+        },
+        error: (err) => {
+          console.error('Error en prepareExitVisitor:', err);
+        }
+      });
+    }
+    else if(this.selectedVisitor?.userType.description==='Emergency'&& mov==='salida'){
+      console.log('Llamando a prepareEntryMovement...');
+      this.prepareEntryMovementEmergency(this.selectedVisitor, plate).subscribe({
+        next: (result) => {
+          console.log('Resultado de prepareEntryMovementEmergency:', result);
+        },
+        error: (err) => {
+          console.error('Error en prepareEntryMovementEmergency:', err);
+        }
+      });
+    }
+    else if(this.selectedVisitor?.userType.description==='Emergency'&& mov==='entrada'){
+      this.prepareExitMovementEmergency(this.selectedVisitor,plate).subscribe({
+        next: (result) => {
+          console.log('Resultado de prepareExitMovementEmergency:', result);
+        },
+        error: (err) => {
+          console.error('Error en prepareExitMovementEmergency:', err);
+        }
+      })
+    }
+    else {
+      if(this.selectedVisitor){
+        if(mov==='entrada'){
+          this.prepareExitVisitor(this.selectedVisitor,plate).subscribe({
+            next: (result) => {
+              console.log('Resultado de prepareExitVisitor:', result);
+            },
+            error: (err) => {
+              console.error('Error en prepareExitVisitor:', err);
+            }
+          });
+        }
+        else {
+          this.prepareEntryVisitor(this.selectedVisitor,plate).subscribe({
+            next: (result) => {
+              console.log('Resultado de prepareEntryVisitor:', result);
+            },
+            error: (err) => {
+              console.error('Error en prepareEntryVisitor:', err);
+            }
+          });
+        }
+      }
+  }
   }
   ngOnDestroy() {
     if (this.dataTable) {
@@ -387,205 +474,7 @@ loadUsersAllowedData(): Observable<boolean> {
             this.dataTable.clear().rows.add(formattedData).draw();
           });
           this.addEventListeners();
-        // if(this.allEmployersChecked){
-        //   this.ngZone.runOutsideAngular(() => {
-        //     const formattedData = this.employers.map((visitor, index) => {
-        //       const status = this.visitorStatus[visitor.document] || 'En espera';
-    
-        //       let statusButton = '';
-        //       let actionButtons = '';
-    
-        //       switch (status) {
-        //         case 'Ingresado':
-        //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
-        //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
-        //           break;
-        //         case 'Egresado':
-        //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
-        //           break;
-        //         case 'En espera':
-        //         default:
-        //           statusButton = `<button class="btn btn-warning">En espera</button>`;
-        //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
-        //           break;
-        //       }
-    
-        //       return [
-        //         `${visitor.last_name} ${visitor.name}`,
-        //         this.getUserTypeIcon(visitor.userType.description),
-        //       `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
-        //         `<div class="text-start">
-        //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-        //             <option value="" disabled selected>Seleccione un vehículo</option>
-        //             ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
-        //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
-        //                 === 'Car' ? 'Coche' : 
-        //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-        //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-        //             vehicle.vehicle_Type.description } </option>
-        //             `).join('') : ''}
-        //             <option value="sin_vehiculo">Sin vehículo</option>
-        //         </select>
-        //     </div>`,
-        //         `<div class="d-flex justify-content-center">
-        //           <div class="dropdown">
-        //             <button class="btn btn-white dropdown-toggle p-0" 
-        //                     type="button" 
-        //                     data-bs-toggle="dropdown" 
-        //                     aria-expanded="false">
-        //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-        //             </button>
-        //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-        //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-    
-        //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-        //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-        //             </ul>
-        //           </div>
-        //         </div>`,
-        //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-        //         statusButton,
-        //         actionButtons,
-        //       ];
-        //     });
-    
-        //     this.dataTable.clear().rows.add(formattedData).draw();
-        //   });
-        //   this.addEventListeners();
-        // } 
-        // else if(this.allVisitorsChecked){
-        //   this.ngZone.runOutsideAngular(() => {
-        //     const formattedData = this.visitors.map((visitor, index) => {
-        //       const status = this.visitorStatus[visitor.document] || 'En espera';
-    
-        //       let statusButton = '';
-        //       let actionButtons = '';
-    
-        //       switch (status) {
-        //         case 'Ingresado':
-        //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
-        //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
-        //           break;
-        //         case 'Egresado':
-        //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
-        //           break;
-        //         case 'En espera':
-        //         default:
-        //           statusButton = `<button class="btn btn-warning">En espera</button>`;
-        //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
-        //           break;
-        //       }
-    
-        //       return [
-        //         `${visitor.last_name} ${visitor.name}`,
-        //         this.getUserTypeIcon(visitor.userType.description),
-        //       `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
-        //         `<div class="text-start">
-        //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-        //             <option value="" disabled selected>Seleccione un vehículo</option>
-        //             ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
-        //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
-        //                 === 'Car' ? 'Coche' : 
-        //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-        //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-        //             vehicle.vehicle_Type.description } </option>
-        //             `).join('') : ''}
-        //             <option value="sin_vehiculo">Sin vehículo</option>
-        //         </select>
-        //     </div>`,
-        //         `<div class="d-flex justify-content-center">
-        //           <div class="dropdown">
-        //             <button class="btn btn-white dropdown-toggle p-0" 
-        //                     type="button" 
-        //                     data-bs-toggle="dropdown" 
-        //                     aria-expanded="false">
-        //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-        //             </button>
-        //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-        //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-    
-        //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-        //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-        //             </ul>
-        //           </div>
-        //         </div>`,
-        //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-        //         statusButton,
-        //         actionButtons,
-        //       ];
-        //     });
-    
-        //     this.dataTable.clear().rows.add(formattedData).draw();
-        //   });
-        //   this.addEventListeners();
-        // }
-        // else if(this.allOwnersChecked){
-        //   this.ngZone.runOutsideAngular(() => {
-        //     const formattedData = this.owners.map((visitor, index) => {
-        //       const status = this.visitorStatus[visitor.document] || 'En espera';
-    
-        //       let statusButton = '';
-        //       let actionButtons = '';
-    
-        //       switch (status) {
-        //         case 'Ingresado':
-        //           statusButton = `<button class="btn btn-success">Ingresado</button>`;
-        //           actionButtons = `<button class="btn btn-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</button>`;
-        //           break;
-        //         case 'Egresado':
-        //           statusButton = `<button class="btn btn-danger">Egresado</button>`;
-        //           break;
-        //         case 'En espera':
-        //         default:
-        //           statusButton = `<button class="btn btn-warning">En espera</button>`;
-        //           actionButtons = `<button class="btn btn-info" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</button>`;
-        //           break;
-        //       }
-    
-        //       return [
-        //         `${visitor.last_name} ${visitor.name}`,
-        //         this.getUserTypeIcon(visitor.userType.description),
-        //     //   `<div class="text-start">${this.getDocumentType(visitor) + " " +visitor.document}</div>`,
-        //     `<div class="text-start">${"D " +visitor.document}</div>`,
-        //         `<div class="text-start">
-        //         <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-        //             <option value="" disabled selected>Seleccione un vehículo</option>
-        //             ${visitor.vehicles.length > 0 ? visitor.vehicles.map(vehicle => `
-        //                 <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description 
-        //                 === 'Car' ? 'Coche' : 
-        //             vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-        //             vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-        //             vehicle.vehicle_Type.description } </option>
-        //             `).join('') : ''}
-        //             <option value="sin_vehiculo">Sin vehículo</option>
-        //         </select>
-        //     </div>`,
-        //         `<div class="d-flex justify-content-center">
-        //           <div class="dropdown">
-        //             <button class="btn btn-white dropdown-toggle p-0" 
-        //                     type="button" 
-        //                     data-bs-toggle="dropdown" 
-        //                     aria-expanded="false">
-        //                 <i class="fas fa-ellipsis-v" style="color: black;"></i> <!-- Tres puntos verticales -->
-        //             </button>
-        //             <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-        //               <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-    
-        //               <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-        //               <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-        //             </ul>
-        //           </div>
-        //         </div>`,
-        //         `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-        //         statusButton,
-        //         actionButtons,
-        //       ];
-        //     });
-    
-        //     this.dataTable.clear().rows.add(formattedData).draw();
-        //   });
-        //   this.addEventListeners();
-        // }
+       
       }
     }
 
@@ -774,130 +663,6 @@ loadUsersAllowedData(): Observable<boolean> {
     this.updateDataTable();
   }
 
-  // onCheckboxChange(event: Event): void {
-  //   const checkbox = event.target as HTMLInputElement;
-  //   const value = checkbox.value;
-
-  //   if (checkbox.checked) {
-  //     this.selectedFilterValues.push(value); // Agregar el valor si está seleccionado
-  //   } else {
-  //     this.selectedFilterValues = this.selectedFilterValues.filter(val => val !== value); // Eliminar el valor si está deseleccionado
-  //   }
-
-  //   console.log(this.selectedFilterValues); // Puedes ver el resultado actual en la consola
-  //   this.applyFilter(); // Llama al método de filtro si necesitas hacerlo automáticamente
-  // }
-
-//   applyFilter(): void {
-//     this.filteredAllPeopleAllowed = []; // Resetea la lista "comun" (donde estan todos los userAllowed) 
-//                                 // antes de aplicar el filtro
-//     //console.log("visitors list actual: ", this.allPeopleAllowed)
-
-//     if (this.selectedFilterValues.length > 0) {        
-//         for (let value of this.selectedFilterValues) {
-//             switch (value) {
-//                 case "neighbour": {
-//                   this.loadUsersAllowedData();
-//                   let neighbours = this.allPeopleAllowed.filter(x => x.userType.description === 'Owner' || x.userType.description === 'Tenant')
-//                   for (let user of neighbours) {
-//                       const owner: AccessUserAllowedInfoDto = {
-//                           ...user,  // Copia los campos de `user`
-//                           neighbor_id: 0  // Agrega el campo `neighbor_id` con un valor por defecto
-//                       };
-//                       this.filteredAllPeopleAllowed.push(owner);
-//                   }
-//                   break;
-//                 }
-//                 case "visitor": {
-//                   this.loadUsersAllowedData();
-//                   let visitors = this.allPeopleAllowed.filter(x => x.userType.description === 'Visitor')
-//                   for (let user of visitors) {
-//                       this.filteredAllPeopleAllowed.push(user);
-//                   }
-//                   break;
-//                 }
-//                 case "employee": {
-//                   this.loadUsersAllowedData();
-//                   //lista de SOLO empleados
-//                   let employees = this.allPeopleAllowed.filter(x => x.userType.description === 'Employeed')
-//                   for (let user of employees) {
-//                       this.filteredAllPeopleAllowed.push(user);
-//                   }
-//                   break; 
-//                 }
-//                 case "service": {
-//                   this.loadUsersAllowedData();
-//                   //lista de "servicios" (Proveedor / Obrero / Delivery / P. de Limpieza / Jardinero)
-//                   let services = this.allPeopleAllowed.filter(x => x.userType.description === 'Supplier' ||
-//                                                                    x.userType.description === 'Worker' ||
-//                                                                    x.userType.description === 'Delivery' ||
-//                                                                    x.userType.description === 'Cleaning' ||
-//                                                                    x.userType.description === 'Gardener'
-//                   )
-//                   for (let user of services) {
-//                       this.filteredAllPeopleAllowed.push(user);
-//                   }
-//                   break; 
-//                 }
-//                 case "supplier": {
-//                   this.loadUsersAllowedData();
-//                   //lista de SOLO proveedores
-//                   let suppliers = this.allPeopleAllowed.filter(x => x.userType.description === 'Supplier')
-//                   for (let user of suppliers) {
-//                       this.filteredAllPeopleAllowed.push(user);
-//                   }
-//                   break;
-//                 }
-//                 case "worker": {
-//                   this.loadUsersAllowedData();
-//                   //lista de SOLO proveedores
-//                   let workers = this.allPeopleAllowed.filter(x => x.userType.description === 'Worker')
-//                   for (let user of workers) {
-//                       this.filteredAllPeopleAllowed.push(user);
-//                   }
-//                   break;
-//                 }
-//                 case "delivery": {
-//                   this.loadUsersAllowedData();
-//                   //lista de SOLO proveedores
-//                   let deliveries = this.allPeopleAllowed.filter(x => x.userType.description === 'Delivery')
-//                   for (let user of deliveries) {
-//                       this.filteredAllPeopleAllowed.push(user);
-//                   }
-//                   break;
-//                 }
-//                 case "cleaning": {
-//                   this.loadUsersAllowedData();
-//                   //lista de SOLO proveedores
-//                   let cleaningS = this.allPeopleAllowed.filter(x => x.userType.description === 'Cleaning')
-//                   for (let user of cleaningS) {
-//                       this.filteredAllPeopleAllowed.push(user);
-//                   }
-//                   break;
-//                 }
-//                 case "gardener": {
-//                   this.loadUsersAllowedData();
-//                   //lista de SOLO proveedores
-//                   let gardeners = this.allPeopleAllowed.filter(x => x.userType.description === 'Gardener')
-//                   for (let user of gardeners) {
-//                       this.filteredAllPeopleAllowed.push(user);
-//                   }
-//                   break;
-//                 }
-//             }
-//         }
-//      } else {
-//         //si no hay ninguno seleccionado, cargamos todos los tipos
-//         this.loadUsersAllowedData();
-//         for (let user of this.allPeopleAllowed) {
-//             this.filteredAllPeopleAllowed.push(user);
-//         }
-//      }
-
-//     console.log("visitors list filtrada: ", this.filteredAllPeopleAllowed)
-
-//     this.updateDataTable(); 
-// }
 
 
   onSelectionChange(event: Event, visitor: AccessUserAllowedInfoDto,vehiclePlate:string) {
@@ -1355,106 +1120,6 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
   }
   
 
-  //LO DEJO COMENTADO EN CASO DE QUE EL METODO QUE CAMBIO A MODAL DE BOOTSTRAP ROMPA ALGO
-/*   private prepareEntryMovement(visitor: AccessUserAllowedInfoDtoOwner,plate:string): Observable<boolean> {
-    return new Observable<boolean>(observer => {
-      try {
-        // Preparar datos del movimiento
-        const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
-        const firstRange = visitor.authRanges[0];
-        const now = new Date();
-  
-        // Construir objeto de movimiento
-        this.movement = {
-          movementDatetime: now,
-          authRangesDto: {
-            neighbor_id: firstRange.neighbor_id,
-            init_date: new Date(firstRange.init_date),
-            end_date: new Date(firstRange.end_date),
-            allowedDaysDtos: firstRange.allowedDays || [],
-          },
-          observations: this.observations,
-          newUserAllowedDto: {
-            name: visitor.name,
-            last_name: visitor.last_name,
-            document: visitor.document,
-            email: visitor.email,
-            user_allowed_Type: visitor.userType,
-            documentType: this.doument,
-            vehicle: vehicless,
-          }
-        };
-  
-        console.log('Observaciones:', this.movement.observations);
-  
-        // Mostrar diálogo de confirmación
-        Swal.fire({
-          title: 'Confirmar Ingreso',
-          text: `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`,
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Sí',
-          cancelButtonText: 'Cancelar',
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // Realizar el registro solo si se confirma
-            this.ownerService.registerOwnerRenterEntry(this.movement)
-              .subscribe({
-                next: (response) => {
-                  console.log('Ingreso registrado con éxito:', response);
-                  Swal.fire({
-                    title: 'Registro Exitoso',
-                    text: 'Registro de ingreso exitoso.',
-                    icon: 'success',
-                    confirmButtonText: 'Cerrar',
-                  })
-                  .then(() => {
-                    observer.next(true);
-                    observer.complete();
-                  });
-                },
-                error: (err) => {
-                  console.error('Error al registrar la entrada:', err);
-                  if (err.status !== 409) {
-                    Swal.fire({
-                      title: 'Error',
-                      text: 'Error al cargar los datos. Intenta nuevamente.',
-                      icon: 'error',
-                      confirmButtonText: 'Cerrar',
-                    }).then(() => {
-                      observer.next(false);
-                      observer.complete();
-                    });
-                  } else {
-                    Swal.fire({
-                      title: 'El Vecino tiene un Ingreso previo!',
-                      text: 'El Vecino debe egresar antes de poder volver a entrar',
-                      icon: 'error',
-                      confirmButtonText: 'Cerrar',
-                    }).then(() => {
-                      observer.next(false);
-                      observer.complete();
-                    });
-                  }
-                }
-              });
-          } else {
-            // Si se cancela la confirmación
-            observer.next(false);
-            observer.complete();
-          }
-        }).catch(error => {
-          console.error('Error en el diálogo de confirmación:', error);
-          observer.error(error);
-        });
-      } catch (error) {
-        console.error('Error al preparar el movimiento:', error);
-        observer.error(error);
-      }
-    });
-  } */
-  
-
 
 
 //Egreso con modal de bootstrap 
@@ -1574,87 +1239,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
 
 
 
-  //Egreso original comentado por las dudas que el que tiene modal de bootstrap rompa algo
-/*   private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner,plate:string): Observable<boolean> {
-
-    return new Observable<boolean>((observer) => {
-      const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
-      const now = new Date();
-      this.movement.movementDatetime = now;
-      const firstRange = visitor.authRanges[0];
-      this.movement.authRangesDto = {
-        neighbor_id: firstRange.neighbor_id,
-        init_date: new Date(firstRange.init_date),
-        end_date: new Date(firstRange.end_date),
-        allowedDaysDtos: firstRange.allowedDays || [],
-      };
-      this.movement.observations = this.observations;
-      this.movement.newUserAllowedDto = {
-        name: visitor.name,
-        last_name: visitor.last_name,
-        document: visitor.document,
-        email: visitor.email,
-        user_allowed_Type: visitor.userType,
-        documentType: this.doument,
-        vehicle: vehicless,
-      };
-      Swal.fire({
-        title: 'Confirmar Egreso',
-        text: `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí',
-        cancelButtonText: 'Cancelar',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const sub = this.ownerService
-            .registerExitOwner(this.movement)
-            .subscribe({
-              next: (response) => {
-                console.log('Egreso registrado con éxito:', response);
-                Swal.fire({
-                  title: 'Registro Exitoso',
-                  text: 'Registro de egreso exitoso.',
-                  icon: 'success',
-                  confirmButtonText: 'Cerrar',
-                });
-                //return true;
-                observer.next(true);
-                observer.complete();
-              },
-              error: (err) => {
-                console.error('Error al registrar el egreso:', err);
-                if(err.status != 409){
-                  Swal.fire({
-                    title: 'Error',
-                    text: 'Error al cargar los datos. Intenta nuevamente.',
-                    icon: 'error',
-                    confirmButtonText: 'Cerrar',
-                  });
-                  //return false;
-                  observer.next(false);
-                  observer.complete();
-                } else {
-                  Swal.fire({
-                    title: 'El Vecino tiene un egreso previo!',
-                    text: 'El Vecino debe ingresar antes de poder volver a salir',
-                    icon: 'error',
-                    confirmButtonText: 'Cerrar',
-                  });
-                  //return false;
-                  observer.next(false);
-                  observer.complete();
-                }
-              },
-            });
-          this.subscription.add(sub);
-        }
-
-      });
-
-    });
-} */
-
+ 
   //Empleados
   private userType: AccessUserAllowedTypeDto = {
     description: 'Employeed',
@@ -2008,202 +1593,265 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
     });
   }
 
-
-  //INGRESO ORIGINAL CON MODAL DE SWEET ALERT COMENTADO
-/*   private prepareEntryMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
-    return new Observable<boolean>(observer => {
-        try {
-          
-            // Preparar el objeto de movimiento
-            const movementS: AccessMovementEntryDto = {
-                description: String(this.observations || ''),
-                movementDatetime: new Date().toISOString(),
-                vehiclesId: 0,
-                document: visitor.document,
-            };
-
-            // Mostrar diálogo de confirmación
-            Swal.fire({
-                title: 'Confirmar Ingreso',
-                text: `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sí',
-                cancelButtonText: 'Cancelar',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Realizar el registro solo si se confirma
-                    const subscription = this.userService.registerEmpSuppEntry(movementS)
-                        .subscribe({
-                            next: (response) => {
-                                // Log de la respuesta recibida para verificar
-                                console.log('Respuesta de registro:', response);
-                                
-                                console.log('Ingreso registrado con éxito:', response);
-                                Swal.fire({
-                                    title: 'Registro Exitoso',
-                                    text: 'Registro de ingreso exitoso.',
-                                    icon: 'success',
-                                    confirmButtonText: 'Cerrar',
-                                }).then(() => {
-                                    observer.next(true);
-                                    observer.complete();
-                                });
-                            },
-                            error: (err) => {
-                                console.error('Error al registrar la entrada:', err);
-
-                                if (err.status === 403) {
-                                  const errorMessage = err.error.message;
-                              
-                                  // Verifica el mensaje de error específico para mostrar una alerta distinta
-                                  if (errorMessage === "The user does not have authorization range") {
-                                      Swal.fire({
-                                          title: 'Acceso Denegado',
-                                          text: 'El usuario no tiene un rango de autorización asignado.',
-                                          icon: 'error',
-                                          confirmButtonText: 'Cerrar'
-                                      });
-                                  } else if (errorMessage === "The user does not have authorization to entry for today") {
-                                    this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
-                                  }
-                              
-                                  // Ejecuta la lógica de manejo del observador
-                                  observer.next(false);
-                                  observer.complete();
-                              }
-                              else if (err.status === 409){
-                                Swal.fire({
-                                  title: 'Error',
-                                  text: 'Tiene que salir antes de entrar.',
-                                  icon: 'error',
-                                  confirmButtonText: 'Cerrar',
-                                }).then(() => {
-                                    observer.next(false);
-                                    observer.complete();
-                                });
-                              }}
-                        });
-
-                    // Agregar la suscripción al gestor de suscripciones
-                    this.subscription.add(subscription);
-                    
-                } else {
-                    // Si se cancela la confirmación
-                    observer.next(false);
-                    observer.complete();
-                }
-            }).catch(error => {
-                console.error('Error en el diálogo de confirmación:', error);
-                observer.error(error);
-                observer.complete();
-            });
-
-        } catch (error) {
-            console.error('Error al preparar el movimiento:', error);
-            observer.error(error);
-            observer.complete();
-        }
-    });
-} */
-
-//EGRESO ORIGINAL COMENTADO
-/*   private prepareExitMovementEmp(visitor: AccessUserAllowedInfoDtoOwner): Observable<boolean> {
-
-    return new Observable<boolean>((observer) => {
-
-      const movementS: AccessMovementEntryDto = {
-        description: String(this.observations || ''),
-        movementDatetime: new Date().toISOString(),
-        vehiclesId: 0,
-        document: visitor.document,
+//---------- EMERGENCIAS --------
+private prepareExitMovementEmergency(visitor: AccessUserAllowedInfoDtoOwner, platee : string): Observable<boolean> {
+  return new Observable<boolean>(observer => {
+    try {
+      // Preparar el objeto de movimiento
+      const movementS: AccessNewEmergencyDto = {
+        people: [
+          {
+            document: {
+              type: visitor.documentTypeDto,
+              number: visitor.document,
+          },
+          name: visitor.name,
+          lastName: visitor.last_name,
+          }
+        ],
+        vehicle:   null,
+        observations: this.observations,
+        loggedUserId: 1,
       };
-  
-      Swal.fire({
-        title: 'Confirmar Egreso',
-        text: `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí',
-        cancelButtonText: 'Cancelar',
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const sub = this.userService.registerEmpSuppExit(movementS).subscribe({
-            next: (response) => {
-              console.log('Egreso registrado con éxito:', response);
+
+      // Preparar mensaje del modal
+      const modalMessage = `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`;
+      document.getElementById('modalMessageIngresoEmp')!.textContent = modalMessage;
+
+      // Obtener el modal
+      const modalElement = document.getElementById('confirmIngresoEmpModal')!;
+      const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+      // Configurar los eventos del modal
+      modalElement.addEventListener('hidden.bs.modal', () => {
+        const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+        const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+        confirmButton.onclick = null;
+        cancelButton.onclick = null;
+      });
+
+      // Configurar el botón de confirmación
+      const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
+      confirmButton.onclick = () => {
+        const subscription = this.emergencyService.registerEmergencyExit(movementS).subscribe({
+          next: (response) => {
+
+            console.log('Respuesta de registro:', response);
+            console.log('Ingreso registrado con éxito:', response);
+            modal.hide();
+            if(response.at(0)?.state === 'SUCCESSFUL'){
               Swal.fire({
                 title: 'Registro Exitoso',
-                text: 'Registro de egreso exitoso.',
+                text: 'Registro de egreso exitoso',
                 icon: 'success',
                 confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(true);
+                observer.complete();
               });
-              //return true;
-              observer.next(true);
-              observer.complete(); 
-            },
-            error: (err) => {
-              console.error('Error al registrar el egreso:', err);
-              if(err.status != 409 && err.status != 403){
-                Swal.fire({
-                  title: 'Error',
-                  text: 'Error al cargar los datos. Intenta nuevamente.',
-                  icon: 'error',
-                  confirmButtonText: 'Cerrar',
-                });
-                //return false;
-                observer.next(false);
-                observer.complete(); 
-
-              } else if (err.status === 403) {
-                const errorMessage = err.error.message;
-            
-                // Verifica el mensaje de error específico para mostrar una alerta distinta
-                if (errorMessage === "The user does not have authorization range") {
-                    Swal.fire({
-                        title: 'Acceso Denegado',
-                        text: 'El usuario no tiene un rango de autorización asignado para hoy.',
-                        icon: 'error',
-                        confirmButtonText: 'Cerrar'
-                    });
-                } else if (errorMessage === "The user does not have authorization to entry for today") {
-                  this.helperService.entryOutOfAuthorizedHourRange(visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges)))
-                }
-            
-                // Ejecuta la lógica de manejo del observador
+            }
+            else {
+              const state = this.getState(response.at(0)?.state +'')
+              Swal.fire({
+                title: 'Registro inválido',
+                text: state,
+                icon: 'error',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
                 observer.next(false);
                 observer.complete();
+              });
             }
-              else if (err.status === 409){
-                Swal.fire({
-                  title: 'Error',
-                  text: 'Tiene que entrar antes de salir.',
-                  icon: 'error',
-                  confirmButtonText: 'Cerrar',
-                });
-                //return false;
-                observer.next(false);
-                observer.complete(); 
-              }
-               else {
-                Swal.fire({
-                  title: 'El Empleado tiene un Egreso previo!',
-                  text: 'El Empleado debe ingresar antes de poder volver a salir',
-                  icon: 'error',
-                  confirmButtonText: 'Cerrar',
-                });
-                //return false;
-                observer.next(false);
-                observer.complete(); 
-              }
-            },
-          });
-  
-          this.subscription.add(sub);
-        }
+          },
+          error: (err) => {
+            console.error('Error al registrar la entrada:', err);
+            modal.hide();
+          }
+        });
+        this.subscription.add(subscription);
+      };
 
+      // Configurar el botón de cancelar
+      const cancelButton = document.getElementById('cancelIngresoEmpButton')!;
+      cancelButton.onclick = () => {
+        modal.hide();
+        observer.next(false);
+        observer.complete();
+      };
+
+      // Mostrar el modal
+      modal.show();
+
+    } catch (error) {
+      console.error('Error al preparar el movimiento:', error);
+      observer.error(error);
+      observer.complete();
+    }
+  });
+}
+
+private prepareEntryMovementEmergency(visitor: AccessUserAllowedInfoDtoOwner, platee : string): Observable<boolean> {
+  return new Observable<boolean>(observer => {
+    try {
+      // Preparar el objeto de movimiento
+      const movementS: AccessNewEmergencyDto = {
+        people: [
+          {
+            document: {
+              type: visitor.documentTypeDto,
+              number: visitor.document,
+          },
+          name: visitor.name,
+          lastName: visitor.last_name,
+          }
+        ],
+        vehicle: {
+          plate: platee,
+          vehicle_Type: visitor.vehicles.find((a) => a.plate === platee)?.vehicle_Type ?? {
+            description: ''
+          },
+        },
+        observations: this.observations,
+        loggedUserId: 1,
+      };
+
+      // Preparar mensaje del modal
+      const modalMessage = `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`;
+      document.getElementById('modalMessageEgresoEmp')!.textContent = modalMessage;
+
+      // Obtener el modal
+      const modalElement = document.getElementById('confirmEgresoEmpModal')!;
+      const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+      // Configurar los eventos del modal
+      modalElement.addEventListener('hidden.bs.modal', () => {
+        const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+        const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+        confirmButton.onclick = null;
+        cancelButton.onclick = null;
       });
-      
-    });
-    
-  } */
+
+      // Configurar el botón de confirmación
+      const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
+      confirmButton.onclick = () => {
+        const sub = this.emergencyService.registerEmergencyEntry(movementS).subscribe({
+          next: (response) => {
+
+            console.log('Respuesta de registro:', response);
+            console.log('Ingreso registrado con éxito:', response);
+            modal.hide();
+            if(response.at(0)?.state === 'SUCCESSFUL'){
+              Swal.fire({
+                title: 'Registro Exitoso',
+                text: 'Registro de ingreso exitoso.',
+                icon: 'success',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(true);
+                observer.complete();
+              });
+            }
+            else {
+              const state = this.getState(response.at(0)?.state +'')
+              Swal.fire({
+                title: 'Registro inválido',
+                text: state,
+                icon: 'error',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(false);
+                observer.complete();
+              });
+            }
+          },
+          error: (err) => {
+            console.error('Error al registrar el egreso:', err);
+            modal.hide();
+
+            if (err.status != 409 && err.status != 403) {
+              Swal.fire({
+                title: 'Error',
+                text: 'Error al cargar los datos. Intenta nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(false);
+                observer.complete();
+              });
+            } else if (err.status === 403) {
+              const errorMessage = err.error.message;
+              
+              if (errorMessage === "The user does not have authorization range") {
+                Swal.fire({
+                  title: 'Acceso Denegado',
+                  text: 'El usuario no tiene un rango de autorización asignado para hoy.',
+                  icon: 'error',
+                  confirmButtonText: 'Cerrar'
+                });
+              } else if (errorMessage === "The user does not have authorization to entry for today") {
+                this.helperService.entryOutOfAuthorizedHourRange(
+                  visitor.authRanges.at(this.helperService.todayIsInDateRange(visitor.authRanges))
+                );
+              }
+              observer.next(false);
+              observer.complete();
+            } else if (err.status === 409) {
+              Swal.fire({
+                title: 'Error',
+                text: 'Tiene que entrar antes de salir.',
+                icon: 'error',
+                confirmButtonText: 'Cerrar',
+              }).then(() => {
+                observer.next(false);
+                observer.complete();
+              });
+            }
+          }
+        });
+        this.subscription.add(sub);
+      };
+
+      // Configurar el botón de cancelar
+      const cancelButton = document.getElementById('cancelEgresoEmpButton')!;
+      cancelButton.onclick = () => {
+        modal.hide();
+        observer.next(false);
+        observer.complete();
+      };
+
+      // Mostrar el modal
+      modal.show();
+
+    } catch (error) {
+      console.error('Error al preparar el movimiento:', error);
+      observer.error(error);
+      observer.complete();
+    }
+  });
+}
+
+private getState(state : string) : string{
+  let text = '';
+  switch (state) {
+    case 'UNAUTHORIZED':
+      text = 'El usuario no está autorizado a ingresar.';
+      break;
+    case 'WITHOUT_USER':
+      text =  'No existe un usuario con el documento provisto.';
+      break;
+    case 'WITHOUT_EXIT':
+      text =  'Tiene que salir antes de entrar';
+      break;
+    case 'WITHOUT_ENTRY':
+      text =  'Tiene que entrar antes de salir.';
+      break;
+    case 'FAILED':
+      text =  'Error al cargar los datos.';
+      break;
+    case null:
+    default:
+      return '';
+  }    
+  return text
+}
 }
