@@ -140,11 +140,6 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
    * Carga las opciones de los selectores y obtiene los datos iniciales
    */
   ngOnInit(): void {
-   
-    this.registryUpdate.getObservable().subscribe(() => {
-      this.loadSelectOptions();
-      this.fetchData();
-    });
     window.addEventListener('openModalInfo', this.handleOpenModal);
   }
 /**
@@ -421,6 +416,10 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     setTimeout(() => {
       this.initializeDataTable();
       this.setupFilters();
+      this.registryUpdate.getObservable().subscribe(() => {
+        this.loadSelectOptions();
+        this.fetchData();
+      });
     });
   }
 
