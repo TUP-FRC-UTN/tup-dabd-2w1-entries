@@ -304,9 +304,8 @@ loadUsersAllowedData(): Observable<boolean> {
               </span>`;
               console.log('Generando ícono con documento:', visitor.document, userTypeIconWithClick);
               return [
-                statusButton,
+                // statusButton, //no se muestra mas el Estado (ej: "En espera")
                 `${visitor.last_name}, ${visitor.name}`,
-                // "PASSPORT" se muestre como "Pasaporte"
                 userTypeIconWithClick,
                 `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
                 `<div class="text-start">
@@ -323,24 +322,9 @@ loadUsersAllowedData(): Observable<boolean> {
                 </select>
             </div>`,
             `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-                `<div class="d-flex justify-content-center">
-                  <div class="dropdown">
-                    <button class="btn btn-light border border-2" 
-                            type="button" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false">
-                      <i class="bi bi-three-dots-vertical"></i> <!-- Tres puntos verticales -->
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-                      <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-
-                      <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-                      <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-                    </ul>
-                  </div>
-                </div>`,
-                
-
+                `<button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
+                  Ingreso
+                </button>`,
                 actionButtons,
               ];
             });
