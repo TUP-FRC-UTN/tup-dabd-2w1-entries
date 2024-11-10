@@ -16,28 +16,28 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
       export const USER_TYPE_MAPPINGS: { [key: string]: UserTypeMapping } = {
         Empleado: {
           icon: 'bi bi-briefcase',
-          color: '#fd7e14',
+          color: '#6F4F37 ',
           title: 'Empleado',
           filterValue: 'employee',
           columnValue: 'empleado'
         },
         Proveedor: {
           icon: 'bi bi-truck',
-          color: '#20c997',
+          color: '#6c757d ',
           title: 'Proveedor',
           filterValue: 'suplier',
           columnValue: 'proveedor'
         },
         Visitante: {
           icon: 'bi bi-person-raised-hand',
-          color: '#0d6efd',
+          color: '#006400  ',
           title: 'Visitante',
           filterValue: 'visitor',
           columnValue: 'visitante'
         },
         Vecino: {
-          icon: 'bi bi-house-fill',
-          color: '#198754',
+          icon: 'bi-house',
+          color: '#003366  ',
           title: 'Vecino',
           filterValue: 'neighbour',
           columnValue: 'vecino'

@@ -161,7 +161,7 @@ export class ExportService {
             }
 
             // Para la columna con los guiones
-            if (column === 9) {
+            if (column === 8) {
               // Si incluye el div con clase text-center
               if (strData.includes('text-center')) {
                 return '------';
@@ -187,20 +187,18 @@ export class ExportService {
           cell.color = '#FFFFFF';
         });
 
-        // Ajustar los anchos de las columnas
+        // Ajustar los anchos de las columnas actualizados para 10 columnas
         doc.content[1].table.widths = [
           'auto',  // Fecha
           'auto',  // Hora
           'auto',  // Tipo
           'auto',  // Ingresante
-          50,      // Nombre
+          100,      // Nombre
           100,     // Documento
-          100,     // Observaciones
           'auto',  // Vehículo
           'auto',  // Placa
           'auto',  // Propietario
-          'auto',  // Guardia
-          'auto'   // Estado
+          'auto'   // Guardia
         ];
 
         // Título principal
