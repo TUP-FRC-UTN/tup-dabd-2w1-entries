@@ -1,0 +1,283 @@
+<!-- Modal de Visitantes -->
+<div class="modal fade" id="visitorListModal" tabindex="-1" aria-labelledby="visitorListModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl" style="max-width: 95vw; margin: 10px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="visitorListModalLabel">Lista de Visitantes</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid p-1 mt-2 mb-2">
+          <div class="container-fluid m-1 p-2">
+            <div class="container-fluid shadow p-3 mb-5 bg-body rounded"> <!-- Removida la clase col-10 -->
+             
+              <div class="mb-3">
+              </div>
+              <!-- Contenedor para todos los controles -->
+              <div class="row g-3 mb-3 align-items-center">
+                <!-- Campo de búsqueda -->
+                <div class="col-md-2 pe-0">
+                  <div class="search-box">
+                    <input type="search" 
+                           class="form-control" 
+                           placeholder="Buscar"
+                           id="customSearch">
+                  </div>
+                </div>
+ 
+                <!-- Selector de Tipo de Ingresante -->
+                <div class="col-md-3 pe-0">
+                  <div class="d-flex align-items-center flex-nowrap">
+                    <label class="form-label mb-0 me-2 text-nowrap">Tipo de ingresante:</label>
+                    <ng-select
+                     class="flex-grow-1"
+                      [items]="userTypeOptions"
+                      [multiple]="true"
+                      [closeOnSelect]="false"
+                      [searchable]="true"
+                      bindLabel="label"
+                      bindValue="value"
+                      [clearable]="false"
+                      placeholder=""
+                      [(ngModel)]="selectedUserTypes"
+                      (change)="onFilterSelectionChange()">
+                      
+                      <ng-template ng-multi-label-tmp let-items="items" let-clear="clear">
+                        <span>({{items.length}}) Seleccionados </span>
+                      </ng-template>
+                      
+                      <ng-template ng-option-tmp let-item="item" let-item$="item$" let-index="index">
+                        <input id="type-{{item.value}}" 
+                              type="checkbox" 
+                              [checked]="item$.selected"
+                              class="form-check-input me-2"/>
+                        <span>{{item.label}}</span>
+                      </ng-template>
+                    </ng-select>
+                  </div>
+                </div>
+ 
+                <!-- Espacio flexible -->
+                <div class="col">
+                </div>
+ 
+                <!-- Botones de acción -->
+                <div class="col-4 d-flex justify-content-end">
+                  <button class="btn btn-secondary action-btn me-2" (click)="clearFilters()" title="Limpiar filtros">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  
+                  <button
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#qrScannerModal">
+                    <i class="bi bi-qr-code-scan"></i>
+                  </button>
+                </div>
+              </div>
+ 
+              <!-- Tabla -->
+              <table id="visitorsTable" class="table table-hover table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Documento</th>
+                    <th scope="col">Vehículos</th>
+                    <th scope="col">Observaciones</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Aquí iría la lógica para mostrar los visitantes -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+ </div>
+ 
+ <!-- Modal del escáner QR -->
+ <div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="qrScannerModalLabel">Escanear Código QR</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="stopScanner()"></button>
+      </div>
+      <div class="modal-body">
+        <ngx-scanner-qrcode #scanner (event)="handleQrScan($event)"></ngx-scanner-qrcode>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="stopScanner()">
+          Cerrar
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="startScanner()">
+          Escanear
+        </button>
+      </div>
+    </div>
+  </div>
+ </div>
+ 
+ <!-- Modal de Información del Visitante -->
+ <div class="modal" id="visitorInfoModal" tabindex="-1" aria-labelledby="visitorInfoModalLabel" aria-hidden="true" [class.show]="isModalOpen">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="visitorInfoModalLabel">Información de la Persona</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="selectedVisitor">
+          <p><strong>Nombre:</strong> {{ selectedVisitor.name }} {{ selectedVisitor.last_name }}</p>
+          <p><strong>Tipo de Persona:</strong> 
+            {{ 
+              selectedVisitor.userType.description === 'Employeed' ? 'Empleado' : 
+              selectedVisitor.userType.description === 'Visitor' ? 'Visitante' : 
+              selectedVisitor.userType.description === 'Owner' ? 'Propietario' : 
+              selectedVisitor.userType.description === 'Tenant' ? 'Inquilino' : 
+              selectedVisitor.userType.description === 'Supplier' ? 'Proveedor':
+              selectedVisitor.userType.description
+            }}
+          </p>
+          <p><strong>Tipo de documento:</strong> {{ getDocumentType(selectedVisitor) }}</p>
+          <p><strong>Documento:</strong> {{ selectedVisitor.document }}</p>
+          <p><strong>Email:</strong> {{ selectedVisitor.email }}</p>
+ 
+          <p><strong>Información del vehículo:</strong></p>
+          <div *ngIf="hasVehicles(selectedVisitor); else noVehicle">
+            <ul *ngFor="let vehicle of getVehicles(selectedVisitor)">
+              <li><strong>Patente:</strong> {{ vehicle.plate }}</li>
+              <li><strong>Tipo:</strong> 
+                {{ 
+                  vehicle.vehicle_Type.description === 'Car' ? 'Coche' : 
+                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                  vehicle.vehicle_Type.description 
+                }}
+              </li>
+            </ul>
+          </div>
+          <ng-template #noVehicle>
+            <p>No tiene registro</p>
+          </ng-template>
+ 
+          <p><strong>Rango de fechas:</strong></p>
+          <div *ngIf="selectedVisitor.authRanges.length > 0; else noDays">
+            <ul *ngFor="let auth of selectedVisitor.authRanges">
+              <li><strong>Desde:</strong> {{ auth.init_date | date : "dd/MM/yyyy" }}</li>
+              <li><strong>Hasta:</strong> {{ auth.end_date | date : "dd/MM/yyyy" }}</li>
+            </ul>
+          </div>
+          <ng-template #noDays>
+            <p>No hay fecha cargada.</p>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+ </div>
+ 
+ <!-- Modal de Confirmación de Ingreso vecino -->
+ <div class="modal fade" id="confirmIngresoModal" tabindex="-1" aria-labelledby="confirmIngresoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmIngresoModalLabel">Confirmar Ingreso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage">¿Está seguro que desea registrar el ingreso?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelButton" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmButton">Aceptar</button>
+      </div>
+    </div>
+  </div>
+ </div>
+ 
+ <!-- Modal de Confirmación de Egreso -->
+ <div class="modal fade" id="confirmEgresoModal" tabindex="-1" aria-labelledby="confirmEgresoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmEgresoModalLabel">Confirmar Egreso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessageEgreso">¿Está seguro que desea registrar el egreso?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelEgresoButton" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmEgresoButton">Confirmar</button>
+      </div>
+    </div>
+  </div>
+ </div>
+ 
+ <!-- Modal de Confirmación de Ingreso Empleado -->
+ <div class="modal fade" id="confirmIngresoEmpModal" tabindex="-1" aria-labelledby="confirmIngresoEmpModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmIngresoEmpModalLabel">Confirmar Ingreso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessageIngresoEmp">¿Está seguro que desea registrar el ingreso?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelIngresoEmpButton" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmIngresoEmpButton">Confirmar</button>
+      </div>
+    </div>
+  </div>
+ </div>
+ 
+ <!-- Modal de Confirmación de Egreso Empleado -->
+ <div class="modal fade" id="confirmEgresoEmpModal" tabindex="-1" aria-labelledby="confirmEgresoEmpModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmEgresoEmpModalLabel">Confirmar Egreso</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessageEgresoEmp">¿Está seguro que desea registrar el egreso?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="cancelEgresoEmpButton" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmEgresoEmpButton">Confirmar</button>
+      </div>
+    </div>
+  </div>
+ </div>
+ 
+ <!-- Modal de confirmación -->
+ <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary">Sí</button>
+      </div>
+    </div>
+  </div>
+ </div>
+
+ 
