@@ -39,7 +39,9 @@ export class VisitorsService {
   getAllUserAllowedData(): Observable<AccessUserAllowedInfoDto[]> {
     return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_UsersAllowedWithoutMovements);
   }
-
+  getAllUserAllowedModal():Observable<AccessUserAllowedInfoDto[]> {
+    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_UsersAllowed);
+  }
   // METODO: registerMovement_Entry(@RequestBody NewMovements_EntryDto movementsEntryDto)
   postVisitorEntry(movement: AccessNewMovementsEntryDto): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });

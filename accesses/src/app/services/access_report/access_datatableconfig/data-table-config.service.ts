@@ -71,18 +71,18 @@ export class DataTableConfigService {
         //ACA SE CONFIGURAN LOS otomes de las columnas
       targets: 3,
       className: 'text-center',
-      render: (data: string) => {
+      render: (data: string, type: any, row: any) => {
         // Busca la configuración del tipo de usuario en USER_TYPE_ICONS
         const typeConfig = this.USER_TYPE_ICONS[data as keyof typeof this.USER_TYPE_ICONS] || {
           icon: 'bi bi-question-lg',
           color: 'grey',
           title: 'Desconocido'
         };
-
+        const visitorDocument = row[5];
         return `
           <button style="background-color: ${typeConfig.color}; border: none;" 
-                  class="btn btn-primary " 
-                  name 
+                  class="btn btn-primary" 
+                  onclick="window.dispatchEvent(new CustomEvent('openModalInfo', { detail: '${visitorDocument}' }))"
                   title="${typeConfig.title}">
             <i class="${typeConfig.icon}"><div class="d-none">${typeConfig.title}</div></i>
           </button>`;

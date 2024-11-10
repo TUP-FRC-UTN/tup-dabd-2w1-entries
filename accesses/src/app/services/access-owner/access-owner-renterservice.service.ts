@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { Observable, take, tap } from 'rxjs';
+import { Observable, Subject, take, tap } from 'rxjs';
 import { AccessNewMovementsEntryDtoOwner, AccessUserAllowedInfoDtoOwner } from '../../models/access-visitors/interface/access-owner';
 import { AccessRegistryUpdateService } from '../access-registry-update/access-registry-update.service';
 
@@ -15,6 +15,21 @@ export class AccessOwnerRenterserviceService {
   private URL_POST_OwnerExit="http://localhost:8090/movements_exit/registerOwnerExit"
   private httpClient:HttpClient=inject(HttpClient)
   private readonly registryUpdate = inject(AccessRegistryUpdateService);
+
+  private modalSubject = new Subject<string>();
+  modalState$ = this.modalSubject.asObservable();
+
+  openModal(visitorDocument: string) {
+    console.log(visitorDocument)
+    const cleanedDocument = visitorDocument
+    .replace(/^[DP]-/, "")  // Elimina "D-" o "P-" al principio
+    .replace(/-/g, "")       // Elimina todos los guiones
+    .trim(); 
+
+console.log(cleanedDocument); 
+    this.modalSubject.next(cleanedDocument);
+  }
+
 
   constructor(){}
   registerOwnerRenterEntry(movement:AccessNewMovementsEntryDtoOwner): Observable<any>{

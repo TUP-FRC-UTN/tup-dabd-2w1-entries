@@ -9,12 +9,17 @@ import { forkJoin, Observable, of, firstValueFrom } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
+
+
+
 import { FilterValues, Movement } from '../../../../models/access-report/Types';
 import { DataTableConfigService } from '../../../../services/access_report/access_datatableconfig/data-table-config.service';
 import { ExportService } from '../../../../services/access_report/access-export/export.service';
-import { ENTRY_EXIT_OPTIONS, TIPOS_INGRESANTE, TIPOS_VEHICULO, USER_TYPE_MAPPINGS, VALUE_MAPPINGS } from '../../../../models/access-report/constants';
+import { ENTRY_EXIT_OPTIONS, ESTADO_HORARIO_OPTIONS, TIPOS_INGRESANTE, TIPOS_VEHICULO, USER_TYPE_MAPPINGS, VALUE_MAPPINGS } from '../../../../models/access-report/constants';
 import { AccessRegistryUpdateService } from '../../../../services/access-registry-update/access-registry-update.service';
 import { AccessVisitorRegistryComponent } from '../../../access_visitors/access-visitor-registry/access-visitor-registry.component';
+import { AccessUserAllowedInfoDto } from '../../../../models/access-visitors/access-visitors-models';
+import { AccessOwnerRenterserviceService } from '../../../../services/access-owner/access-owner-renterservice.service';
 
 @Component({
   selector: 'app-access-table',
@@ -40,6 +45,9 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   movements: Movement[] = [];
   table: any = null;
   exportButtonsEnabled: boolean = false;
+
+  
+  private readonly ownerService=inject(AccessOwnerRenterserviceService)
 
   // Opciones para selectores
   propietariosOptions: any[] = [];
@@ -132,11 +140,22 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
    * Carga las opciones de los selectores y obtiene los datos iniciales
    */
   ngOnInit(): void {
+   
     this.registryUpdate.getObservable().subscribe(() => {
       this.loadSelectOptions();
       this.fetchData();
     });
+    window.addEventListener('openModalInfo', this.handleOpenModal);
   }
+/**
+   * Se manda el documento al servicio
+   */
+  private handleOpenModal = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    const visitorDocument = customEvent.detail;
+    console.log("llamada")
+    this.ownerService.openModal(visitorDocument);
+  };
 
   /**
    * Carga las opciones para los selectores de propietarios y guardias

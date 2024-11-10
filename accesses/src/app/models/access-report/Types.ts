@@ -68,7 +68,7 @@ export interface FilterValues {
   export interface ColumnDef {
     targets: number;
     className?: string;
-    render?: (data: any) => string;
+    render?: (data: any, type?: any, row?: any) => string;
   }
   
   /**

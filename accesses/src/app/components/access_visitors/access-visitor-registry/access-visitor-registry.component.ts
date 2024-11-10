@@ -78,13 +78,15 @@ export class AccessVisitorRegistryComponent
   dataTable: any;
 
   isModalOpen = false;
-
+  showModal = false;
+  visitorDocument: string = '';
   private readonly ngZone: NgZone = inject(NgZone);
-
+  userAllowedGetAll:AccessUserAllowedInfoDto[] = [];
   modalValid: boolean = false;
 
   //carga TODOS los invitados al iniciar la pantalla
   ngOnInit(): void {
+    this.userAllowedModal()
     //DATOS
     //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
     const sub = this.loadUsersAllowedData().subscribe({
@@ -100,6 +102,13 @@ export class AccessVisitorRegistryComponent
       }
     }); 
     this.subscription.add(sub);
+    const subs=this.subscription = this.ownerService.modalState$.subscribe(
+      (document: string) => {
+        this.visitorDocument = document;
+        this.ModalDocument(document)
+      }
+    );
+    this.subscription.add(subs)
   }
 
   ngOnDestroy() {
@@ -123,6 +132,17 @@ export class AccessVisitorRegistryComponent
         this.dataTable.search(searchTerm).draw();
       });
     });
+  }
+
+  userAllowedModal(){
+    const sub=this.visitorService.getAllUserAllowedModal().subscribe({
+      next:(data)=>{
+        this.userAllowedGetAll=data
+      },error:(error)=>{
+        console.log(error)
+      }
+    })
+    this.subscription.add(sub)
   }
 
   //metodos para limpiar los filtros
@@ -255,75 +275,79 @@ loadUsersAllowedData(): Observable<boolean> {
 }
 
 
-    updateDataTable(): void {
-      if (this.dataTable) {
-        this.ngZone.runOutsideAngular(() => {
-          const formattedData = this.filteredAllPeopleAllowed.map((visitor, index) => {
-            const status = this.visitorStatus[visitor.document] || 'En espera';
+      updateDataTable(): void {
+        if (this.dataTable) {
+          this.ngZone.runOutsideAngular(() => {
+            const formattedData = this.filteredAllPeopleAllowed.map((visitor, index) => {
+              const status = this.visitorStatus[visitor.document] || 'En espera';
+              const userTypeIcon = this.getUserTypeIcon(visitor.userType.description);//icono
+              let statusButton = '';
+              let actionButtons = '';
 
-            let statusButton = '';
-            let actionButtons = '';
+              switch (status) {
+                case 'Ingresado':
+                  statusButton = `<span class="badge  text-bg-success">Ingresado</span>`;
+                  actionButtons = `<span class="badge  text-bg-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</span>`;
+                  break;
+                case 'Egresado':
+                  statusButton = `<span class="badge  text-bg-danger">Egresado</span>`;
+                  break;
+                case 'En espera':
+                default:
+                  statusButton = `<span class="badge text-bg-warning">En espera</span>`;
+                  actionButtons = `<span class="badge  text-bg-success" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</span>`;
+                  break;
+              }
+              const userTypeIconWithClick = `
+              <span class="user-type-icon" data-document="${visitor.document}"style="cursor:pointer;">
+                ${userTypeIcon}
+              </span>`;
+              console.log('Generando ícono con documento:', visitor.document, userTypeIconWithClick);
+              return [
+                statusButton,
+                `${visitor.last_name}, ${visitor.name}`,
+                // "PASSPORT" se muestre como "Pasaporte"
+                userTypeIconWithClick,
+                `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
+                `<div class="text-start">
+                <select class="form-select" id="vehicles${index}" name="vehicles${index}">
+                    <option value="" disabled selected>Seleccione un vehículo</option>
+                    ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
+                        <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
+                        === 'Car' ? 'Coche' : 
+                      vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                      vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                      vehicle.vehicle_Type.description } </option>
+                    `).join('') : ''}
+                    <option value="sin_vehiculo">Sin vehículo</option>
+                </select>
+            </div>`,
+            `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+                `<div class="d-flex justify-content-center">
+                  <div class="dropdown">
+                    <button class="btn btn-light border border-2" 
+                            type="button" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
+                      <i class="bi bi-three-dots-vertical"></i> <!-- Tres puntos verticales -->
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
+                      <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
 
-            switch (status) {
-              case 'Ingresado':
-                statusButton = `<span class="badge  text-bg-success">Ingresado</span>`;
-                actionButtons = `<span class="badge  text-bg-danger" data-index="${index}" onclick="RegisterExit(${visitor})">Egresar</span>`;
-                break;
-              case 'Egresado':
-                statusButton = `<span class="badge  text-bg-danger">Egresado</span>`;
-                break;
-              case 'En espera':
-              default:
-                statusButton = `<span class="badge text-bg-warning">En espera</span>`;
-                actionButtons = `<span class="badge  text-bg-success" data-index="${index}" onclick="RegisterAccess(${visitor})">Ingresar</span>`;
-                break;
-            }
+                      <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
+                      <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
+                    </ul>
+                  </div>
+                </div>`,
+                
 
-            return [
-              statusButton,
-              `${visitor.last_name}, ${visitor.name}`,
-              // "PASSPORT" se muestre como "Pasaporte"
-              this.getUserTypeIcon(visitor.userType.description),
-              `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
-              `<div class="text-start">
-              <select class="form-select" id="vehicles${index}" name="vehicles${index}">
-                  <option value="" disabled selected>Seleccione un vehículo</option>
-                  ${visitor.vehicles?.length > 0 ? visitor.vehicles.map(vehicle => `
-                      <option value="${vehicle.plate}">${vehicle.plate} ${vehicle.vehicle_Type.description
-                      === 'Car' ? 'Coche' : 
-                    vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-                    vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-                    vehicle.vehicle_Type.description } </option>
-                  `).join('') : ''}
-                  <option value="sin_vehiculo">Sin vehículo</option>
-              </select>
-          </div>`,
-          `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-              `<div class="d-flex justify-content-center">
-                <div class="dropdown">
-                  <button class="btn btn-light border border-2" 
-                          type="button" 
-                          data-bs-toggle="dropdown" 
-                          aria-expanded="false">
-                    <i class="bi bi-three-dots-vertical"></i> <!-- Tres puntos verticales -->
-                  </button>
-                  <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-                    <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
+                actionButtons,
+              ];
+            });
 
-                    <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-                    <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-                  </ul>
-                </div>
-              </div>`,
-              
-
-              actionButtons,
-            ];
+            this.dataTable.clear().rows.add(formattedData).draw();
           });
-
-          this.dataTable.clear().rows.add(formattedData).draw();
-        });
-        this.addEventListeners();
+          this.addEventListeners();
         // if(this.allEmployersChecked){
         //   this.ngZone.runOutsideAngular(() => {
         //     const formattedData = this.employers.map((visitor, index) => {
@@ -528,12 +552,24 @@ loadUsersAllowedData(): Observable<boolean> {
 
   // Actualizar el método addEventListeners para manejar los clicks en el nuevo menú
   addEventListeners(): void {
-    const tableBody = document.querySelector('#visitorsTable tbody');
 
+    const tableBody = document.querySelector('#visitorsTable tbody');
+   const tdata=$('#visitorsTable tbody');
+      // Delegación de eventos para los clics en los íconos de los usuarios
+      tdata?.on('click', '.user-type-icon', (event: JQuery.TriggeredEvent) => {
+        const document = $(event.currentTarget).data('document'); // Obtener el documento del data-atributo
+        console.log('Clic en el ícono de usuario. Documento:', document);
+        
+        // Llamar a ModalDocument pasando el documento
+        this.ModalDocument(document);
+      });
+    
+    console.log('tableBody:', tableBody)
     if (tableBody) {
       tableBody.addEventListener('click', (event) => {
         const target = event.target as HTMLElement;
-
+        
+       // Verificar si el clic ocurrió en un ícono de tipo de usuario
         // Manejar el botón "Ver más" en el menú desplegable
         if (target.classList.contains('select-action')) {
           const index = target.getAttribute('data-index');
@@ -993,7 +1029,18 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     this.selectedVisitor = visitor; // Guardar el visitante seleccionado
     this.openModal(); // Abrir el modal
   }
-
+  
+  ModalDocument(document:string){
+    console.log("me han llamado")
+    
+    console.log("people",this.userAllowedGetAll)
+    const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(document)
+    )
+    console.log(user)
+    this.selectedVisitor=user||null 
+    console.log(this.selectedVisitor)
+    this.openModal()
+  }
 
   // Función para actualizar el estado del visitante
   updateVisitorStatus(
