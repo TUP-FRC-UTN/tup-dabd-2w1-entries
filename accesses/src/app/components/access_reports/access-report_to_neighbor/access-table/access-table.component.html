@@ -3,7 +3,7 @@
     <!-- Búsqueda unificada con botones de filtro -->
     <!-- Botones de filtro -->
     <div class="col-auto">
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-1">
             <button class="btn btn-secondary action-btn" (click)="clearFilters()" title="Limpiar filtros">
                 <i class="bi bi-trash"></i>
             </button>
@@ -14,7 +14,7 @@
     </div>
     
 <!-- Búsqueda unificada -->
-<div class="col-md-2 pe-0">
+<div class="col-1 pe-0 pl-0">
     <div class="input-group">
         <input type="text" class="form-control" id="unifiedSearchFilter" placeholder="Buscar">
     </div>
@@ -43,13 +43,9 @@
             [max]="today | date:'yyyy-MM-dd'">
     </div>
 </div>
-    <!-- Espacio flexible -->
-    <div class="col">
-    </div>
-
     <!-- Botones de acción -->
     <div class="col-auto ms-auto">
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-1">
             <!-- Botones de tipo de usuario -->
             <button class="btn btn-primary action-btn" 
                 style="border: none"
