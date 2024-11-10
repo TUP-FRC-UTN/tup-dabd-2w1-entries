@@ -58,12 +58,10 @@ export class DataTableConfigService {
   
     private getColumnDefs() {
       return [
-        { 
-          targets: 11,
-          className: 'text-center'
-        },
+        
+    
         {
-          targets: 9,
+          targets: 8,
           render: (data: any) => {
             return data === '------' ? '<div class="text-center">------</div>' : data;
           }
@@ -91,7 +89,9 @@ export class DataTableConfigService {
       }
     }
   ];
+  []
     }
+   
     /**
      * Aplica los estilos a las columnas después de cada redibujado de la tabla
      * @param settings Configuración de la tabla
