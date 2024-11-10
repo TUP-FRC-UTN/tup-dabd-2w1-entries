@@ -298,9 +298,12 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
         of(movement.visitorDocument || ''),
         of(movement.carType || ''),
         of(movement.plate || ''),
-        this.userService.getUserById(movement.neighborId),
+        // Verificar si neighborId es "null" y asignar "------" si es así
+        of(movement.neighborId === "null" ? "------" : movement.neighborId || ''),
+        // this.userService.getUserById(movement.neighborId),
         this.userService.getUserById(movement.securityId)
       ];
+  
 
       return await firstValueFrom(forkJoin(transformations));
     } catch {
@@ -343,7 +346,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setupExportButtonListeners();
   }
 
-  /**
+    /**
    * Configura los listeners para los botones de exportación
    */
   private setupExportButtonListeners(): void {

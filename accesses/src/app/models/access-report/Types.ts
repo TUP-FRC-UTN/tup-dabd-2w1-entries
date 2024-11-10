@@ -35,7 +35,7 @@ export interface FilterValues {
     observations: string;
     carType: string;
     plate: string;
-    neighborId: number;
+    neighborId: string;
     securityId: number;
     lateOrNot: string;
   }
