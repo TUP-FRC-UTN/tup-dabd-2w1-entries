@@ -31,3 +31,9 @@ export interface AccessMetricsDTO {
     exitsCountPeak: number;
   }
   
+  export interface TopUser {
+    fullName: string;
+    userType: string;
+    entryCount: number;
+    exitCount: number;
+  }

@@ -3,6 +3,7 @@ import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { AccessMetricsService } from '../../../../services/access-metric/access-metrics.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TopUser } from '../../../../models/access-metric/metris';
 
 
 
@@ -26,6 +27,8 @@ interface PieChartKPIs {
     [key: string]: number;
   };
 }
+
+
 
 interface TopExpenseKPIs {
   highestAmount: number;
@@ -59,6 +62,26 @@ export class MetricsComponent implements OnInit{
     this.minDateFrom = this.formatYearMonth(oneYearAgo);
   }
   
+
+  topUser: any[] = []
+
+
+
+  roleTranslations: { [key: string]: string } = {
+    'Employeed': 'Empleado',
+    'Tenant': 'Inquilino',
+    'Supplier': 'Proveedor',
+    'Visitor': 'Visitante',
+    'Owner':'Vecino',
+    'Gardener':'Jardinero',
+    'Service':'Servicios',
+    'Cleaning': 'Limpieza',
+    'Worker': 'Trabajador',
+  };
+
+  translateRole(role: string): string {
+    return this.roleTranslations[role] || role; 
+  }
 
   aplyFilters(): void {
     const fromDate = this.parseYearMonth(this.periodFrom);
@@ -94,6 +117,19 @@ export class MetricsComponent implements OnInit{
 
       console.log('Datos del gráfico filtrados:', this.columnChartData);
     });
+
+
+    const fromDateObj = this.parseYearMonth(this.periodFrom);
+    const toDateObj = this.parseYearMonth(this.periodTo);
+    
+    // Supongamos que quieres obtener los top 5 usuarios entre el mes de inicio y el mes final
+    this.metricsService.getTopUsers(fromDateObj.month, toDateObj.month, fromDateObj.year).subscribe(topUsers => {
+      console.log('Top 5 usuarios:', topUsers);
+      this.topUser = topUsers.slice(0, 5); // Limita a los primeros 5 usuarios
+      console.log('TOP USUARIO ARRAY', this.topUser);
+    });
+    
+
     this.loadAccessCounts();
 
   }
@@ -126,6 +162,8 @@ export class MetricsComponent implements OnInit{
 
   currentMonthAccessCount:number = 0;
   currentMonthExitCount:number = 0;
+
+
 
   //public accessData: DayOfWeekMetricDTO[] = [];
 
@@ -287,7 +325,7 @@ export class MetricsComponent implements OnInit{
         toDate.month
     ).subscribe(data => {
         this.pieChartData = [
-            ...data.map(item => [item.userType, item.count])
+            ...data.map(item => [this.translateRole(item.userType), item.count])
         ];
     });
 }
@@ -304,8 +342,7 @@ export class MetricsComponent implements OnInit{
       textStyle: { color: '#6c757d', fontSize: 17 }
     },
     chartArea: { width: '100%', height: '100%' },
-    height: 300,
-    width: 400,
+
     colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0']
   };
 

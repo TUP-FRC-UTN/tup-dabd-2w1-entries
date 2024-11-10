@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AccessMetricsDTO, DayOfWeekMetricEntryDTO, DayOfWeekMetricExitDTO, HourlyMetricDTO, UserTypeMetricDTO } from '../../models/access-metric/metris';
+import { AccessMetricsDTO, DayOfWeekMetricEntryDTO, DayOfWeekMetricExitDTO, HourlyMetricDTO, TopUser, UserTypeMetricDTO } from '../../models/access-metric/metris';
 @Injectable({
   providedIn: 'root'
 })
@@ -109,6 +109,15 @@ export class AccessMetricsService {
     return this.http.get<any>(this.baseUrl + "/month-with-most-exits");
   }
 
+
+  getTopUsers(startMonth: number, endMonth: number, year: number): Observable<TopUser[]> {
+    const params = {
+      startMonth: startMonth.toString(),
+      endMonth: endMonth.toString(),
+      year: year.toString()
+    };
+    return this.http.get<TopUser[]>(this.baseUrl + '/top-users-entries-exits', { params });
+  }
 
 
 }
