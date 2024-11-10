@@ -263,7 +263,7 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
 
   vehicleTypeChanged() {
     const plateControl = this.form.controls.vehicle.controls.plate;
-    const platePattern = '(^[A-Z]{2}\\d{3}[A-Z]{2}$)|(^[A-Z]{3}\\d{3}$)';
+    const platePattern = /(^[A-Z]{2}\d{3}[A-Z]{2}$)|(^[A-Z]{3}\d{3,4}$)|(^[A-Z]{3}\d{4}$)/;
 
     if (this.form.value.vehicle?.type != '') {
       setTimeout(() => {

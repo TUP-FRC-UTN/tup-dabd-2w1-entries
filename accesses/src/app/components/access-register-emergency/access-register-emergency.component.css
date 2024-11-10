@@ -25,6 +25,7 @@
     border-color: var(--bs-form-valid-border-color)!important;
     box-shadow: 0 0 0 .25rem rgba(var(--bs-success-rgb), .25)!important;
   }
+  
   .ng-select.is-invalid ::ng-deep .ng-select-container {
     border-color: var(--bs-form-invalid-border-color)!important;
     padding-right: calc(1.5em + .75rem);
