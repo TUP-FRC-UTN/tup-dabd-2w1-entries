@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AccessMetricsDTO, DayOfWeekMetricEntryDTO, DayOfWeekMetricExitDTO, HourlyMetricDTO, TopUser, UserTypeMetricDTO } from '../../models/access-metric/metris';
+import { AccessMetricsDTO, DayOfWeekMetricEntryDTO, DayOfWeekMetricExitDTO, HourlyMetricDTO, TopUser, UserTypeMetricDTO, UtilizationRateResponse } from '../../models/access-metric/metris';
 @Injectable({
   providedIn: 'root'
 })
@@ -118,6 +118,19 @@ export class AccessMetricsService {
     };
     return this.http.get<TopUser[]>(this.baseUrl + '/top-users-entries-exits', { params });
   }
+
+
+
+  getUtilizationRate(startMonth?: number, endMonth?: number, year?: number): Observable<UtilizationRateResponse> {
+    let params = new HttpParams();
+    
+    if (startMonth) params = params.set('startMonth', startMonth.toString());
+    if (endMonth) params = params.set('endMonth', endMonth.toString());
+    if (year) params = params.set('year', year.toString());
+
+    return this.http.get<UtilizationRateResponse>(this.baseUrl+'/utilization-rate', { params });
+  }
+
 
 
 }

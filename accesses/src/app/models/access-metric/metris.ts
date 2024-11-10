@@ -37,3 +37,19 @@ export interface AccessMetricsDTO {
     entryCount: number;
     exitCount: number;
   }
+
+  export interface UtilizationRate {
+    userType: string;
+    accessCount: number;
+    utilizationPercentage: number;
+  }
+  
+  export interface UtilizationRateResponse {
+    data: UtilizationRate[];
+    filters: {
+      startMonth: number;
+      endMonth: number;
+      year: number;
+    };
+    timestamp: number[];
+  }

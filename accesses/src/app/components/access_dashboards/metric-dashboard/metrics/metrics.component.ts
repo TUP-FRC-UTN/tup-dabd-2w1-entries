@@ -3,7 +3,7 @@ import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { AccessMetricsService } from '../../../../services/access-metric/access-metrics.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TopUser } from '../../../../models/access-metric/metris';
+import { TopUser, UtilizationRate } from '../../../../models/access-metric/metris';
 
 
 
@@ -130,6 +130,8 @@ export class MetricsComponent implements OnInit{
     });
     
 
+    this.loadUtilizationData(fromDate.month, toDate.month, fromDate.year);
+
     this.loadAccessCounts();
 
   }
@@ -192,6 +194,8 @@ export class MetricsComponent implements OnInit{
     this.getThisMonthCountExit();
     this.getPeakDayExit();
     this.aplyFilters()
+    this.loadUtilizationData();
+
   }
 
 
@@ -314,6 +318,32 @@ export class MetricsComponent implements OnInit{
       
     })
   }
+
+  utilizationData: UtilizationRate[] = [];
+  loading = true;
+  error: string | null = null;
+
+  loadUtilizationData(startMonth?: number, endMonth?: number, year?: number): void {
+    this.loading = true;
+    this.error = null;
+
+    this.metricsService.getUtilizationRate(startMonth, endMonth, year)
+      .subscribe({
+        next: (response) => {
+          this.utilizationData = response.data;
+          this.loading = false;
+          console.log(this.utilizationData, 'KPIS');
+          
+        },
+        error: (err) => {
+          this.error = 'Error al cargar los datos de utilización';
+          this.loading = false;
+          console.error('Error:', err);
+        }
+      });
+  }
+
+  
 
   private loadAccessCounts(): void {
     const fromDate = this.parseYearMonth(this.periodFrom);
