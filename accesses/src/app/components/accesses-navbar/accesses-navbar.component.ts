@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { SideButton } from '../../models/navbar/SideButton';
 import { Router } from '@angular/router';
 import { AccessesSideButtonComponent } from '../accesses-side-button/accesses-side-button.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-accesses-navbar',
   standalone: true,
-  imports: [AccessesSideButtonComponent],
+  imports: [AccessesSideButtonComponent, CommonModule],
   templateUrl: './accesses-navbar.component.html',
   styleUrl: './accesses-navbar.component.css'
 })
@@ -73,21 +74,6 @@ export class AccessesNavbarComponent {
           route: "vehicleAdd",
           roles: ["SuperAdmin", "Gerente","Security"]
          },
-         /* ACA ESTO de abajo es temporal, es para ubicar temporalmente al dashboar */
-         {
-           icon: "bi bi-question-diamond-fill",
-           title: "Entradas Diarias",
-           route: "dashboards",
-           roles: ["SuperAdmin", "Gerente","Security"]
-         },
-
-         /* DEFINIR COMO HACER CON EL INGRESO DE EMERGENCIA */
-        /*  {
-           icon: "bi bi-hospital-fill",
-           title: "Añadir visitante",
-           route: "visitor/register",
-           roles: ["Security"]
-         }, */
        ]
      },
 
@@ -120,4 +106,13 @@ export class AccessesNavbarComponent {
  selectRole(role : string){
    this.actualRole = role;
  }
+
+
+
+//Pära ir al dashboard provisorio
+redirectToDashboard(): void {
+  this.router.navigate(['/dashboards']);  // Redirige al componente de dashboard
+}
+
+
 }
