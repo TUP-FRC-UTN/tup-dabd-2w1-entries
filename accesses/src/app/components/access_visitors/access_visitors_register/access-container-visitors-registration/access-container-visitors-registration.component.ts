@@ -25,10 +25,9 @@ import Swal from 'sweetalert2';
 export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnDestroy {
   indexUserType?:number;
   onAuthorizedTypeChange(event: Event): void {
-    const selectedIndex = (event.target as HTMLSelectElement).value;
-    if (selectedIndex !== "") {
-        const index = parseInt(selectedIndex, 10);
-        this.indexUserType = index + 1; 
+    const selectedValue = (event.target as HTMLSelectElement).value;
+    if (selectedValue !== "") {
+        this.indexUserType = parseInt(selectedValue, 10); 
         console.log(this.indexUserType);
     }
 }
@@ -49,6 +48,7 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   visitorRecord?:AccessVisitorRecord;
   vehicleTypes: string[] = ['Car', 'Motorbike', 'Truck', 'Van']; 
   usersType:UserType[]=[];
+  isRegisterButtonVisible: boolean = true;
 
   vehicleTypeMapping: { [key: string]: string } = {
     'Car': 'Auto',
@@ -73,7 +73,6 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
 
 
   downloadQRCode(): void {
-    console.log(this.qrCodeId);
     if (!this.qrCodeId) {
         Swal.fire({
             icon: 'warning',
@@ -95,7 +94,8 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
             window.URL.revokeObjectURL(url);
 
             this.resetEverything();
-            this.isQRCodeAvailable=false;
+            this.isQRCodeAvailable = false;
+            this.isRegisterButtonVisible = true; // Mostrar botón registrar
             Swal.fire({
                 icon: 'success',
                 title: 'QR Descargado',
@@ -132,12 +132,13 @@ setNameQr(): void {
 
 
 
-  private resetEverything(): void {
-    this.resetFormComplete();
-    this.qrCodeId = undefined;
-    this.visitorRecord = undefined;
-    this.visitorService.resetAllData();
-  }
+private resetEverything(): void {
+  this.resetFormComplete();
+  this.qrCodeId = undefined;
+  this.visitorRecord = undefined;
+  this.visitorService.resetAllData();
+  this.isRegisterButtonVisible = true; 
+}
 
   sendVisitorRecord(): void {
     if (this.visitorRecord) {
@@ -163,12 +164,12 @@ setNameQr(): void {
         this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
             next: (response) => {
                 if (this.indexUserType === 1) {
-                  
                     if (response.id) {
                         this.qrCodeId = response.id;
                     } 
                     if (this.qrCodeId) {
                         this.isQRCodeAvailable = true;
+                        this.isRegisterButtonVisible = false; // Ocultar botón registrar
                         this.setNameQr();
                     } else {
                         Swal.fire({
@@ -202,7 +203,6 @@ setNameQr(): void {
         });
     }
 }
-  
 
   initVisitorRecord(): void {
     combineLatest([

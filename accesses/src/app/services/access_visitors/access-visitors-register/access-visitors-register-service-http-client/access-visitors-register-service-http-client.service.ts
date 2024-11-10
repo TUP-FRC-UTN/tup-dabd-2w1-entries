@@ -57,26 +57,21 @@ export class AccessVisitorsRegisterServiceHttpClientService {
   }
   private userTypeMapping: { [key: string]: string } = {
     'Visitor': 'Visitante',
-    'Employeed': 'Empleado',
-    'Supplier': 'Proveedor',
-    'Owner': 'Propietario',
-    'Tenant': 'Inquilino',
-    'Emergency': 'Emergencia',
-    'Worker': 'Trabajador',
     'Delivery': 'Delivery',
     'Taxi': 'Taxi',
-    'Cleaning': 'Limpieza',
-    'Gardener': 'Jardinero'
+    'Gardener': 'Jardinero',
+    'Other':'Otro'
   };
 
   getUsersType(): Observable<UserType[]> {
-    const url = 'http://localhost:8090/users_Type'; 
-    return this.http.get<any[]>(url).pipe(
+    const url = 'http://localhost:8090/users_Type';
+    
+    return this.http.get<UserType[]>(url).pipe(
       tap(response => console.log('Respuesta completa del servidor:', response)),
       map(response => {
         if (Array.isArray(response)) {
-          return response.map((item, index) => ({
-            id: index,
+          return response.map(item => ({
+            id: item.id, // Preserve the original ID
             description: this.userTypeMapping[item.description] || item.description
           }));
         } else {
@@ -86,6 +81,8 @@ export class AccessVisitorsRegisterServiceHttpClientService {
       })
     );
   }
+
+  
   private readonly usersApiUrl = 'https://my-json-server.typicode.com/405786MoroBenjamin/users-responses/users';
 
   getUsers(): Observable<AccessUser[]> {
