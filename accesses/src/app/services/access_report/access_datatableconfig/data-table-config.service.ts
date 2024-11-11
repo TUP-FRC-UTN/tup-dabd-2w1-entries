@@ -86,7 +86,7 @@ export class DataTableConfigService {
               <span class="badge rounded-pill user-select-none" 
                     style="background-color: ${style.color}; color: white;"
                     ${lastMovement ? buttonAddition : ''}
-                    title="Ver documento">
+                    title="Registrar ${style.text == 'Entrada' ? 'salida' : 'entrada'}">
                 ${style.text}
               </span>
             </div>
