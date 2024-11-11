@@ -98,11 +98,9 @@ export class AccessVisitorRegistryComponent
     //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
     const sub = this.loadUsersAllowedData().subscribe({
       next: () => {
-        console.log("allPeopleAllowed: ", this.allPeopleAllowed)
+        //console.log("allPeopleAllowed: ", this.allPeopleAllowed)
         this.filteredAllPeopleAllowed = this.allPeopleAllowed;
-        console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
-        
-
+        //console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
       },
       error: (err) => {
         console.log(err);
@@ -387,8 +385,10 @@ loadUsersAllowedData(): Observable<boolean> {
               });
             });
 
-            //console.log('Loaded owner/renter list:', this.visitors);
-            //this.updateDataTable();
+            console.log("allPeopleAllowed: ", this.allPeopleAllowed)
+            this.allPeopleAllowed = this.helperService.reverseArray(this.allPeopleAllowed);
+            console.log("allPeopleAllowed en orden inverso: ", this.allPeopleAllowed)
+
             observer.next(true);
             observer.complete();
           });
@@ -435,7 +435,7 @@ loadUsersAllowedData(): Observable<boolean> {
                 ${userTypeIcon}
               </span> 
               </div>`;
-              console.log('Generando ícono con documento:', visitor.document, userTypeIconWithClick);
+              //console.log('Generando ícono con documento:', visitor.document, userTypeIconWithClick);
               return [
                 // statusButton, //no se muestra mas el Estado (ej: "En espera")
                 `${visitor.last_name}, ${visitor.name}`,
@@ -796,6 +796,8 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
             });
 
             console.log('allPeopleAllowed actualizada (luego del registro o cambio de filtro):', this.allPeopleAllowed);
+            this.allPeopleAllowed = this.helperService.reverseArray(this.allPeopleAllowed);
+            console.log("allPeopleAllowed en orden inverso: ", this.allPeopleAllowed)
             //this.updateDataTable();
             observer.next(true);
             observer.complete();
