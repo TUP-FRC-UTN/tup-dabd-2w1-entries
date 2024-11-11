@@ -109,6 +109,8 @@ export class DataTableConfigService {
         return `
           <button style="background-color: ${typeConfig.color}; border: none;" 
                   class="btn btn-primary" 
+                  data-bs-toggle="modal"
+                  data-bs-target="#visitorInfoModal"
                   onclick="window.dispatchEvent(new CustomEvent('openModalInfo', { detail: '${visitorDocument}' }))"
                   title="${typeConfig.title}">
             <i class="${typeConfig.icon}"><div class="d-none">${typeConfig.title}</div></i>

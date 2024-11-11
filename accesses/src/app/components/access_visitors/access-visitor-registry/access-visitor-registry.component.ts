@@ -47,6 +47,7 @@ import { AccessOwnerRenterserviceService } from '../../../services/access-owner/
 import { AccessUserServiceService } from '../../../services/access-user/access-user-service.service';
 import { AccessEmergenciesService } from '../../../services/access-emergencies/access-emergencies.service';
 import { AccessNewEmergencyDto } from '../../../models/access-emergencies/access-new-emergecy-dto';
+import { AccessRegistryUpdateService } from '../../../services/access-registry-update/access-registry-update.service';
 declare var bootstrap: any;
 @Component({
   selector: 'access-app-visitor-registry',
@@ -74,12 +75,12 @@ export class AccessVisitorRegistryComponent
   private readonly ownerService: AccessOwnerRenterserviceService = inject(
     AccessOwnerRenterserviceService
   );
+  private readonly registryUpdateService = inject(AccessRegistryUpdateService);
   private observations: string = '';
   constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService) {}
 
   dataTable: any;
 
-  isModalOpen = false;
   showModal = false;
   visitorDocument: string = '';
   private readonly ngZone: NgZone = inject(NgZone);
@@ -88,7 +89,11 @@ export class AccessVisitorRegistryComponent
 
   //carga TODOS los invitados al iniciar la pantalla
   ngOnInit(): void {
-    this.userAllowedModal()
+    const registryUpdated = this.registryUpdateService.getObservable().subscribe({
+      next: v => {
+          this.userAllowedModal()
+      }
+    });
     //DATOS
     //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
     const sub = this.loadUsersAllowedData().subscribe({
@@ -103,6 +108,7 @@ export class AccessVisitorRegistryComponent
         console.log(err);
       }
     }); 
+    this.subscription.add(registryUpdated);
     this.subscription.add(sub);
     const subs=this.subscription = this.ownerService.modalState$.subscribe(
       (document: string) => {
@@ -831,7 +837,6 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
   // Método para abrir el modal y establecer el visitante seleccionado
   MoreInfo(visitor: AccessUserAllowedInfoDto) {
     this.selectedVisitor = visitor; // Guardar el visitante seleccionado
-    this.openModal(); // Abrir el modal
   }
   
   ModalDocument(document:string){
@@ -843,7 +848,6 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     console.log(user)
     this.selectedVisitor=user||null 
     console.log(this.selectedVisitor)
-    this.openModal()
   }
 
   // Función para actualizar el estado del visitante
@@ -865,15 +869,6 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     //      }
     //    } /* tiempo en ms */
     //  );
-  }
-
-  openModal(): void {
-    this.isModalOpen = true; // Abre el modal
-  }
-
-  closeModal(): void {
-    this.isModalOpen = false; // Cierra el modal
-    this.stopScanner(); // Detiene el escáner cuando se cierra
   }
 
   // Datos de escaneo
@@ -945,7 +940,7 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
         this.updateDataTable(); // Actualiza la tabla de visitantes
 
         // Cerrar el modal si hay uno abierto
-        this.closeModal();
+        this.stopScanner();
       } catch (error) {
         console.error('Error al parsear el código QR:', error);
         Swal.fire({
