@@ -70,7 +70,7 @@ export class AccessVisitorRegistryComponent
 
   subscription = new Subscription();
 
-  private readonly helperService = inject(AccessVisitorHelperService);
+  protected readonly helperService = inject(AccessVisitorHelperService);
   private readonly visitorService = inject(VisitorsService);
   private readonly ownerService: AccessOwnerRenterserviceService = inject(
     AccessOwnerRenterserviceService
@@ -437,7 +437,7 @@ loadUsersAllowedData(): Observable<boolean> {
               return [
                 // statusButton, //no se muestra mas el Estado (ej: "En espera")
                 `${visitor.last_name}, ${visitor.name}`,
-                userTypeIconWithClick,
+                //userTypeIconWithClick,
                 `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
                 `<div class="text-start">
                 <select class="form-select" id="vehicles${index}" name="vehicles${index}">
@@ -452,7 +452,7 @@ loadUsersAllowedData(): Observable<boolean> {
                     <option value="sin_vehiculo">Sin vehículo</option>
                 </select>
             </div>`,
-            `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+            //`<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
                 `<button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
                   Ingreso
                 </button>`,
