@@ -161,6 +161,7 @@ export class AccessVisitorHelperService {
     let todayDate = new Date();
     //fecha a comparar
     let beforeDate = new Date(date);
+    beforeDate.setMinutes(beforeDate.getMinutes() + beforeDate.getTimezoneOffset());
     //console.log(beforeDate, " | hoy -> ", todayDate)
 
     return beforeDate <= todayDate;
@@ -168,14 +169,15 @@ export class AccessVisitorHelperService {
 
   isDateAfterToday(date: Date | undefined): boolean {
     if (date == undefined) {
-      // Si date es undefined, devolver false
+      // Si date es undefined, devolver false 
       return false;
     }
     //fecha actual, para poder comparar
     let todayDate = new Date();
     //fecha a comparar
-    let afterDate = new Date(date);
-    afterDate.setHours(23, 59, 59, 999);
+    let afterDate = new Date(date + "T23:59:59.999Z");
+    afterDate.setMinutes(afterDate.getMinutes() + afterDate.getTimezoneOffset());
+    
     //console.log(afterDate, " | hoy -> ", todayDate)
     
     return afterDate >= todayDate;
