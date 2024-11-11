@@ -44,15 +44,10 @@ export class AccessesNavbarComponent {
        title: "Accesos",
        roles: ["SuperAdmin", "Gerente","Propietario"],
        childButtons: [
+
          {
            icon: "bi bi-person-lines-fill",
-           title: "Registro de Ingreso/Egreso",
-           route: "visitors",
-           roles: ["SuperAdmin", "Gerente","Security"]
-         },
-         {
-           icon: "bi bi-list-check",
-           title: "Informe de ingresos/egresos mensuales",
+           title: "Informe de ingresos/egresos",
            route: "reports",
            roles: ["SuperAdmin", "Gerente"]
          },
@@ -61,12 +56,6 @@ export class AccessesNavbarComponent {
            title: "Añadir visitante",
            route: "visitor/register",
            roles: ["SuperAdmin", "Gerente","Propietario","Security"]
-         },
-         {
-           icon: "bi bi-pencil-square",
-           title: "Editar visitante",
-           route: "edit",
-           roles: ["SuperAdmin", "Gerente","Propietario"]
          },
          {
           icon: "bi bi-car-front-fill",
