@@ -160,6 +160,14 @@ export class ExportService {
               return 'Desconocido';
             }
 
+            if (column === 2) {
+              const titleMatch = strData.match(/data-title="([^"]+)"/);
+              if (titleMatch && titleMatch[1]) {
+                return titleMatch[1];
+              }
+              return 'Desconocido';
+            }
+
             // Para la columna con los guiones
             if (column === 8) {
               // Si incluye el div con clase text-center
