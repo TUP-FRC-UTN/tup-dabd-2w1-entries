@@ -315,6 +315,7 @@ export class AccessVisitorRegistryComponent
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
       this.dataTable = ($('#visitorsTable') as any).DataTable({
+        order: [], //asi no filtra por orden en la 1er columna, de esta forma muestra el ultimo userAllowed creado 
         paging: true,
         ordering: true,
         pageLength: 5,
