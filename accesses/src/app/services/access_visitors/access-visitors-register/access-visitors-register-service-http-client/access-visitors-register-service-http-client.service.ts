@@ -60,7 +60,7 @@ export class AccessVisitorsRegisterServiceHttpClientService {
     'Delivery': 'Delivery',
     'Taxi': 'Taxi',
     'Gardener': 'Jardinero',
-    'Worker':'Trabajador',
+    'Worker':'Obrero',
     'Cleaning':'Personal de limpieza'
   };
 
