@@ -204,7 +204,7 @@ export interface AccessUserAllowedInfoDto2 {
   name: string;
   last_name: string;
   email: string;
-  authId : string;
+  authId : string ;
   authRange: AccessAuthRangeInfoDto2;
   vehicle: AccessNewVehicleDto2 | null;
   visitorId: number | null;
@@ -239,3 +239,4 @@ export interface Owner {
   documentTypeDto : AccessDocumentTypeDto;
   neighbor_id : number| null;
 }
+
