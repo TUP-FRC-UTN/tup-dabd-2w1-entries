@@ -484,8 +484,10 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Verificar filtro de entrada/salida
     if (this.filterValues.entryOrExit.length > 0) {
-      if (!this.filterValues.entryOrExit.some(value => 
-        tipoEntrada.toLowerCase() === VALUE_MAPPINGS[value].toLowerCase())) {
+      if (!this.filterValues.entryOrExit.some(value => {
+        return tipoEntrada.trim().toLowerCase() === VALUE_MAPPINGS[value].toLowerCase();
+      }
+      )) {
         return false;
       }
     }
