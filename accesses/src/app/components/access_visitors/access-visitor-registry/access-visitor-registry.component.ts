@@ -98,11 +98,9 @@ export class AccessVisitorRegistryComponent
     //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
     const sub = this.loadUsersAllowedData().subscribe({
       next: () => {
-        console.log("allPeopleAllowed: ", this.allPeopleAllowed)
+        //console.log("allPeopleAllowed: ", this.allPeopleAllowed)
         this.filteredAllPeopleAllowed = this.allPeopleAllowed;
-        console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
-        
-
+        //console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
       },
       error: (err) => {
         console.log(err);
@@ -317,6 +315,7 @@ export class AccessVisitorRegistryComponent
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
       this.dataTable = ($('#visitorsTable') as any).DataTable({
+        order: [], //asi no filtra por orden en la 1er columna, de esta forma muestra el ultimo userAllowed creado 
         paging: true,
         ordering: true,
         pageLength: 5,
@@ -387,8 +386,10 @@ loadUsersAllowedData(): Observable<boolean> {
               });
             });
 
-            //console.log('Loaded owner/renter list:', this.visitors);
-            //this.updateDataTable();
+            console.log("allPeopleAllowed: ", this.allPeopleAllowed)
+            this.allPeopleAllowed = this.helperService.reverseArray(this.allPeopleAllowed);
+            console.log("allPeopleAllowed en orden inverso: ", this.allPeopleAllowed)
+
             observer.next(true);
             observer.complete();
           });
@@ -430,14 +431,16 @@ loadUsersAllowedData(): Observable<boolean> {
                   break;
               }
               const userTypeIconWithClick = `
+              <div class="text-center"> 
               <span class="user-type-icon" data-document="${visitor.document}"style="cursor:pointer;">
                 ${userTypeIcon}
-              </span>`;
-              console.log('Generando ícono con documento:', visitor.document, userTypeIconWithClick);
+              </span> 
+              </div>`;
+              //console.log('Generando ícono con documento:', visitor.document, userTypeIconWithClick);
               return [
                 // statusButton, //no se muestra mas el Estado (ej: "En espera")
                 `${visitor.last_name}, ${visitor.name}`,
-                //userTypeIconWithClick,
+                userTypeIconWithClick,
                 `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
                 `<div class="text-start">
                 <select class="form-select" id="vehicles${index}" name="vehicles${index}">
@@ -453,9 +456,12 @@ loadUsersAllowedData(): Observable<boolean> {
                 </select>
             </div>`,
             //`<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-                `<button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
+                `<div class="text-center">
+                <button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
                   Ingreso
-                </button>`,
+                </button>
+                </div>
+                `,
                 // `<div class="d-flex justify-content-center">
                 //   <div class="dropdown">
                 //     <button class="btn btn-light border border-2" 
@@ -532,16 +538,17 @@ loadUsersAllowedData(): Observable<boolean> {
             if (value === 'verMas') {
               this.MoreInfo(selectedOwner);
             } else {
-              // Manejar otras acciones (Ingreso/Egreso)
+/*               // Manejar otras acciones (Ingreso/Egreso)
               const textareaElement = document.getElementById(
                 'observations' + index
               ) as HTMLTextAreaElement;
 
-              selectedOwner.observations = textareaElement.value || '';
+              selectedOwner.observations = textareaElement?.value || '';
 
               if (this.observations===''){
-                this.observations=textareaElement.value
-              }
+                this.observations=textareaElement?.value ?? ''
+              } */
+              selectedOwner.observations = '';
               
               const mockEvent = {
                 target: { value: value },
@@ -791,6 +798,8 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
             });
 
             console.log('allPeopleAllowed actualizada (luego del registro o cambio de filtro):', this.allPeopleAllowed);
+            this.allPeopleAllowed = this.helperService.reverseArray(this.allPeopleAllowed);
+            console.log("allPeopleAllowed en orden inverso: ", this.allPeopleAllowed)
             //this.updateDataTable();
             observer.next(true);
             observer.complete();

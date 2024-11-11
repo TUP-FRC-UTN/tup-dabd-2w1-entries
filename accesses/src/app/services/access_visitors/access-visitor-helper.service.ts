@@ -135,8 +135,6 @@ export class AccessVisitorHelperService {
 
 
 
-
-
   // funciones para comparar FECHAS
   // verifica si la fecha actual esta dentro de alguno de los AuthRangeInfoDto del Visitor
   todayIsInDateRange(listAuthRangeInfoDto: AuthRangeInfoDto[]): number{
@@ -788,5 +786,11 @@ export class AccessVisitorHelperService {
   }
   //FIN Alerts para registerEntry()
 // FIN ALERTS de SweetAlert
+
+
+//Metodo para invertir el orden de los elementos en un array
+reverseArray<T>(array: T[]): T[] {
+  return array.slice().reverse();
+}
 
 }
