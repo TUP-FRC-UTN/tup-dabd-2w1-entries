@@ -430,14 +430,16 @@ loadUsersAllowedData(): Observable<boolean> {
                   break;
               }
               const userTypeIconWithClick = `
+              <div class="text-center"> 
               <span class="user-type-icon" data-document="${visitor.document}"style="cursor:pointer;">
                 ${userTypeIcon}
-              </span>`;
+              </span> 
+              </div>`;
               console.log('Generando ícono con documento:', visitor.document, userTypeIconWithClick);
               return [
                 // statusButton, //no se muestra mas el Estado (ej: "En espera")
                 `${visitor.last_name}, ${visitor.name}`,
-                //userTypeIconWithClick,
+                userTypeIconWithClick,
                 `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
                 `<div class="text-start">
                 <select class="form-select" id="vehicles${index}" name="vehicles${index}">
@@ -453,9 +455,12 @@ loadUsersAllowedData(): Observable<boolean> {
                 </select>
             </div>`,
             //`<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
-                `<button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
+                `<div class="text-center">
+                <button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
                   Ingreso
-                </button>`,
+                </button>
+                </div>
+                `,
                 // `<div class="d-flex justify-content-center">
                 //   <div class="dropdown">
                 //     <button class="btn btn-light border border-2" 
