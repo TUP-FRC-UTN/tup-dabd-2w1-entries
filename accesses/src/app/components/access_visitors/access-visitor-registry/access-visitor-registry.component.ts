@@ -49,6 +49,7 @@ import { AccessEmergenciesService } from '../../../services/access-emergencies/a
 import { AccessNewEmergencyDto } from '../../../models/access-emergencies/access-new-emergecy-dto';
 import { AccessRegistryUpdateService } from '../../../services/access-registry-update/access-registry-update.service';
 declare var bootstrap: any;
+import { AccesesVisitorsTempComponent } from '../acceses-visitors-temp/acceses-visitors-temp.component';
 @Component({
   selector: 'access-app-visitor-registry',
   standalone: true,
@@ -57,7 +58,8 @@ declare var bootstrap: any;
     FormsModule,
     RouterModule,
     NgxScannerQrcodeModule,
-    NgSelectModule
+    NgSelectModule,
+    AccesesVisitorsTempComponent
   ],
   providers: [DatePipe, VisitorsService, CommonModule],
   templateUrl: './access-visitor-registry.component.html',

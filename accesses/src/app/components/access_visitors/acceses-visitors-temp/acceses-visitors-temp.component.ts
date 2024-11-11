@@ -9,7 +9,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { AccessUserReportService } from '../../../services/access_report/access-user-report.service';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
-
+declare var bootstrap: any; 
 @Component({
   selector: 'app-acceses-visitors-temp',
   standalone: true,
@@ -108,6 +108,16 @@ ngOnDestroy(): void {
     // Limpieza de subscripciones
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+}
+
+private switchModals(): void {
+  // Close the current visitor modal
+  const currentModal = bootstrap.Modal.getInstance(document.getElementById('visitorModal'));
+  currentModal.hide();
+
+  // Open the visitor list modal
+  const listModal = new bootstrap.Modal(document.getElementById('visitorListModal'));
+  listModal.show();
 }
 initForm(): void {
   this.visitorForm = this.fb.group({
@@ -227,11 +237,11 @@ sendVisitor(): void {
       next: (response) => {
         Swal.fire({
           icon: 'success',
-          title: 'success',
-          text: 'Se envio el visitante',   
+          title: 'Exito',
+          text: 'Se envio el visitante Correctamente',   
       }).then(() => {
-        // After the Swal alert is closed, switch the modals
-     //   this.switchModals();
+
+        this.switchModals();
       });
       },
       error: (error) => {
