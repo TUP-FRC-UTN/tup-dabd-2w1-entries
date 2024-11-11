@@ -1672,7 +1672,12 @@ private prepareExitMovementEmergency(visitor: AccessUserAllowedInfoDtoOwner, pla
           lastName: visitor.last_name,
           }
         ],
-        vehicle:   null,
+        vehicle:   {
+          plate: platee,
+          vehicle_Type: visitor.vehicles.find((a) => a.plate === platee)?.vehicle_Type ?? {
+            description: ''
+          }
+        },
         observations: this.observations,
         loggedUserId: 1,
         neighborId: 0
