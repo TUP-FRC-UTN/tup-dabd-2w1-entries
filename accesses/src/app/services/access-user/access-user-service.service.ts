@@ -3,6 +3,7 @@ import { AccessMovementEntryDto,AccessMovementExitDto,AccessSuppEmpDto } from '.
 import { HttpClient, HttpHeaders,  } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AccessUserAllowedInfoDto } from '../../models/access-visitors/access-VisitorsModels';
+import { AccessAuthRangeInfoDtoOwner } from '../../models/access-visitors/interface/access-owner';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ export class AccessUserServiceService {
   private apiUrlPostEntry = 'http://localhost:8090/movements_entry/registerEmpSupp';
   private apiUrlPostExit = 'http://localhost:8090/movements_exit/registerEmpSupp'
   private apiUrl = 'http://localhost:8090/GetSuppliesAndEmployeers';
+  private apiUrlGeneric = 'http://localhost:8090';
 
   constructor(private http: HttpClient) {
     this.loadSuppEmpData();
@@ -31,6 +33,11 @@ export class AccessUserServiceService {
   registerEmpSuppExit(movement: AccessMovementExitDto): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.post<any>(this.apiUrlPostExit, movement, { headers });
+  }
+
+  getAuthRangeByDoc(document: string, documentType: string): Observable<AccessAuthRangeInfoDtoOwner[]> {
+    const url = `${this.apiUrl}/GetAuthRangeByDoc/${document}/${documentType}`;
+    return this.http.get<AccessAuthRangeInfoDtoOwner[]>(url);
   }
 
   loadSuppEmpData(): void {

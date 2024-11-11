@@ -343,11 +343,50 @@
     vertical-align: middle;
 }
 
-/* Estilos para el modal */
+S
 .modal-dialog.modal-lg {
     max-width: 800px;
 }
 
 .modal-body {
     padding: 20px;
+}
+
+.modal-dialog.modal-lg {
+    max-width: 800px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+
+/* Estilos para los botones de acción */
+.action-btn {
+    transition: all 0.3s ease;
+    position: relative;
+    outline: 2px solid transparent;
+    margin: 2px;
+}
+
+.action-btn.active {
+    outline-color: rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+    transform: scale(1.05);
+    box-shadow: 
+      0 4px 8px rgba(0, 0, 0, 0.3),  /* Sombra base más oscura */
+      0 6px 12px rgba(0, 0, 0, 0.2),  /* Sombra secundaria para más profundidad */
+      0 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.action-btn.active:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 
+      0 6px 12px rgba(0, 0, 0, 0.4),  /* Sombra más pronunciada en hover */
+      0 8px 16px rgba(0, 0, 0, 0.2),
+      0 0 0 4px rgba(255, 255, 255, 0.2);
 }

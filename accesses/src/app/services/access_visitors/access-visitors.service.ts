@@ -1,92 +1,47 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders} from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { AccessAllowedDaysDto, AuthRangeInfoDto, AccessDocumentTypeDto, AccessLastEntryUserAllowedDto, AccessLastExitUserAllowedDto, AccessNewAuthRangeDto, AccessNewMovementExitDto, AccessNewMovementsEntryDto, AccessNewUserAllowedDto, AccessNewVehicleDto, AccessUserAllowedInfoDto, AccessUserAllowedTypeDto, VehicleTypeDto, AccessVisitor } from '../../models/access-visitors/access-VisitorsModels';
 import { DatePipe } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { AccessVisitorHelperService } from './access-visitor-helper.service';
 import Swal from 'sweetalert2';
 import { error } from 'jquery';
+import { AccessRegistryUpdateService } from '../access-registry-update/access-registry-update.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VisitorsService {
 
-  private URL_GET_ALL_Visitors = "http://localhost:8090/user_Allowed/visitors/Visitor";
+  // trae TODOS los q NO TIENEN movimientos (Ingresos o Egresos) y SI TIENEN un authRange
+  private URL_GET_ALL_UsersAllowedWithoutMovements = "http://localhost:8090/user_Allowed/getAllUsersAllowed/WithAuthRangeWithoutMovements";
   private URL_POST_ENTRY_VisitorInList = "http://localhost:8090/movements_entry/register";
   private URL_POST_EXIT_VisitorInList = "http://localhost:8090/movements_exit/register";
-  private URL_GET_LastEntryByDocument = "http://localhost:8090/movements_entry/last_entry_by_document?document=";
-  private URL_GET_LastExitByDocument = "http://localhost:8090/movements_exit/last_exit_by_document?document=";
-  private URL_GET_ALL_UserAllowed = "http://localhost:8090/user_Allowed/getAllUsersAllowed";
+  //trae TODOS
+  private URL_GET_ALL_UsersAllowed = "http://localhost:8090/user_Allowed/getAllUsersAllowed";
 
   private URL_POST_VALIDATE_QR = 'http://localhost:8090/visitor-qr';
 
-  //URL para la pantalla (registrar invitado que no esta en la lista)
-  private URL_POST_ENTRY_VisitorNotInList = "http://localhost:8090/movements_entry/register_if_not_exists";
 
   private readonly http: HttpClient = inject(HttpClient);
   private readonly helperService = inject(AccessVisitorHelperService);
-  constructor() {
-    this.loadVisitorsData();
-  }
+  private readonly registryUpdate = inject(AccessRegistryUpdateService);
 
-  //lista de Visitors
-  visitorslist : AccessUserAllowedInfoDto[] = [];
+  constructor() {}
 
   validateQrCode(qrCode: string): Observable<boolean> {
     return this.http.post<boolean>(`${this.URL_POST_VALIDATE_QR}/validate`, { qrCode });
   }
 
-
+  //Llamadas a Endpoints de la API:
   //trae TODOS los UserAllowed
   getAllUserAllowedData(): Observable<AccessUserAllowedInfoDto[]> {
-    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_UserAllowed);
+    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_UsersAllowedWithoutMovements);
   }
-
-  loadVisitorsData(): void {
-
-    this.getVisitorsData().subscribe({
-      next: (data: AccessUserAllowedInfoDto[]) => {
-        this.visitorslist = data; // Asigna los datos una vez que se reciban
-        //console.log("data en el service: ", data);
-        //console.log("visitorslist en el service: ", this.visitorslist);
-
-      },
-      error: (error) => {
-        console.error('Error al cargar los datos de los Visitors:', error);
-      }
-    });
+  getAllUserAllowedModal():Observable<AccessUserAllowedInfoDto[]> {
+    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_UsersAllowed);
   }
-
-  GetVisitorsList(): AccessUserAllowedInfoDto[]{
-    return [...this.visitorslist]
-  }
-
-  //filtra la list de Visitors
-  getVisitorByParam(parameter: string): AccessUserAllowedInfoDto[] {
-
-    //console.log("el cambio: " + parameter);
-
-    if (parameter != null && parameter.length > 2) {
-      let param = parameter.toLowerCase();
-
-      return this.visitorslist.filter(v =>
-        v.document.toLowerCase().includes(param) ||
-        v.name.toLowerCase().includes(param) ||
-        v.last_name.toLowerCase().includes(param)
-      );
-    } else {
-      return this.visitorslist;
-    }
-  }
-
-  //Llamadas a Endpoints de la API:
-  // METODO: getAllUserAllowedVisitors(@PathVariable String visitor)
-  getVisitorsData(): Observable<AccessUserAllowedInfoDto[]> {
-    return this.http.get<AccessUserAllowedInfoDto[]>(this.URL_GET_ALL_Visitors);
-  }
-
   // METODO: registerMovement_Entry(@RequestBody NewMovements_EntryDto movementsEntryDto)
   postVisitorEntry(movement: AccessNewMovementsEntryDto): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
@@ -99,35 +54,7 @@ export class VisitorsService {
     return this.http.post<any>(this.URL_POST_EXIT_VisitorInList, movement, { headers });
   }
 
-  // METODO: getUserAllowedLastEntryByDocument(@RequestParam String document)
-  getVisitorLastEntry(document: string): Observable<any> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    const url = `${this.URL_GET_LastEntryByDocument}${encodeURIComponent(document)}`;
-    return this.http.get<any>(url, { headers });
-  }
 
-    // METODO: getUserAllowedLastExitByDocument(@RequestParam String document)
-    getVisitorLastExit(document: string): Observable<any> {
-      const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-      const url = `${this.URL_GET_LastExitByDocument}${encodeURIComponent(document)}`;
-      return this.http.get<any>(url, { headers });
-    }
-
-
-  // METODO: registerMovementEntryIfNotExists(
-    // @RequestParam String documento,
-    // @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate date,
-    // @RequestBody(required = false) NewMovements_EntryDto movementsEntryDto) {
-  postUnregisteredVisitorEntry(document: string, date: string, movement: AccessNewMovementsEntryDto): Observable<any> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  
-    // los parametros de consulta (documento y date) los pone en la URL
-    // ejemplo URL completa: http://localhost:8090/movements_entry/register_if_not_exists?documento=99887766&date=2024-10-11
-    const url = `${this.URL_POST_ENTRY_VisitorNotInList}?documento=${encodeURIComponent(document)}&date=${encodeURIComponent(date)}`;
-  
-    // hace el POST con movement en el body
-    return this.http.post<any>(url, movement, { headers });
-  }  
 
 
 
@@ -135,16 +62,6 @@ export class VisitorsService {
   RegisterExit(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
     return new Observable<boolean>((observer) => {
 
-      // Mostrar diálogo de confirmación
-      Swal.fire({
-        title: 'Confirmar Engreso',
-        text: `¿Está seguro que desea registrar el egreso de ${visitor.name} ${visitor.last_name}?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí',
-        cancelButtonText: 'Cancelar',
-      }).then((result) => {
-        if (result.isConfirmed) {
           // proceso de registro
           if (visitor.observations == undefined) {
             visitor.observations = "";
@@ -169,7 +86,7 @@ export class VisitorsService {
                     observer.next(true);
                     observer.complete();
                   } else {
-                    this.helperService.registerExitError();
+                    this.helperService.exitNotAllowed();
                     //return false;
                     observer.next(false);
                     observer.complete();
@@ -204,7 +121,7 @@ export class VisitorsService {
                     observer.next(true);
                     observer.complete();
                   } else {
-                    this.helperService.registerExitError();
+                    this.helperService.exitNotAllowed();
                     //return false;
                     observer.next(false);
                     observer.complete();
@@ -240,7 +157,7 @@ export class VisitorsService {
                     observer.next(true);
                     observer.complete();
                   } else {
-                    this.helperService.registerExitError();
+                    this.helperService.exitNotAllowed();
                     //return false;
                     observer.next(false);
                     observer.complete();
@@ -264,19 +181,12 @@ export class VisitorsService {
                 }
               });
           }
-
-        } else {
-          // Si se cancela la confirmación
-          observer.next(false);
-          observer.complete();
-        }
-      }).catch(error => {
-        console.error('Error en el diálogo de confirmación:', error);
-        observer.error(error);
-        observer.complete();
-      });
-
-    });
+    })
+    .pipe(
+      tap(() => {
+        this.registryUpdate.updateTable(true);
+      })
+    );
   }
   
 
@@ -288,16 +198,6 @@ export class VisitorsService {
 RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
   return new Observable<boolean>((observer) => {
 
-    // Mostrar diálogo de confirmación
-    Swal.fire({
-      title: 'Confirmar Ingreso',
-      text: `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
           // proceso de registro
           //verifica observations
           if(visitor.observations == undefined){
@@ -334,7 +234,7 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
                     observer.complete();   
 
                   } else {
-                    this.helperService.registerEntryError();
+                    this.helperService.entryNotAllowed();
                     //return false;
                     observer.next(false);
                     observer.complete();
@@ -374,18 +274,12 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
             observer.next(false);
             observer.complete();
           }
-    
-      } else {
-        // Si se cancela la confirmación
-        observer.next(false);
-        observer.complete();
-      }
-    }).catch(error => {
-      console.error('Error en el diálogo de confirmación:', error);
-      observer.error(error);
-      observer.complete();
-    });
-  });
+  })
+  .pipe(
+    tap(() => {
+      this.registryUpdate.updateTable(true);
+    })
+  );
 }
   // FIN Registrar INGRESO de un visitante
 // FIN METODOS (para registrar Ingresos y Egresos)

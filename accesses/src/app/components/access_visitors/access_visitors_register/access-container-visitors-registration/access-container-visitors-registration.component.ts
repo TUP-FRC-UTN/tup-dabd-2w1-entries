@@ -5,7 +5,7 @@ import { Subject, combineLatest } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AccessVisitorsRegisterServiceService } from '../../../../services/access_visitors/access-visitors-register/access-visitors-register-service/access-visitors-register-service.service';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
-import { AccessVisitor, AccessVisitorRecord, AccessAuthRange, AccessVehicle,AccessUser } from '../../../../models/access-visitors/access-visitors-models';
+import { AccessVisitor, AccessVisitorRecord, AccessAuthRange, AccessVehicle,AccessUser, UserType } from '../../../../models/access-visitors/access-visitors-models';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AccessTimeRangeVisitorsRegistrationComponent } from '../access-time-range-visitors-registration/access-time-range-visitors-registration.component';
 import { AccessGridVisitorsRegistrationComponent } from '../access-grid-visitors-registration/access-grid-visitors-registration.component';
@@ -25,11 +25,10 @@ import Swal from 'sweetalert2';
 export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnDestroy {
   indexUserType?:number;
   onAuthorizedTypeChange(event: Event): void {
-    console.log("tipo antes",this.indexUserType);
     const selectedValue = (event.target as HTMLSelectElement).value;
     if (selectedValue !== "") {
         this.indexUserType = parseInt(selectedValue, 10); 
-        console.log("tipo despues",this.indexUserType);
+        console.log(this.indexUserType);
     }
 }
 
@@ -41,13 +40,15 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   }
   uid?:string;
   qrCodeId?:string;
-  isQRCodeAvailable?: boolean;
+  isQRCodeAvailable: boolean = false; 
   visitorForm!: FormGroup; 
   vehicleType: string[] = [];
   patentePattern = '^[A-Z]{1,3}\\d{3}[A-Z]{0,3}$';
   private unsubscribe$ = new Subject<void>();
   visitorRecord?:AccessVisitorRecord;
   vehicleTypes: string[] = ['Car', 'Motorbike', 'Truck', 'Van']; 
+  usersType:UserType[]=[];
+  isRegisterButtonVisible: boolean = true;
 
   vehicleTypeMapping: { [key: string]: string } = {
     'Car': 'Auto',
@@ -93,6 +94,8 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
             window.URL.revokeObjectURL(url);
 
             this.resetEverything();
+            this.isQRCodeAvailable = false;
+            this.isRegisterButtonVisible = true; // Mostrar botón registrar
             Swal.fire({
                 icon: 'success',
                 title: 'QR Descargado',
@@ -129,54 +132,77 @@ setNameQr(): void {
 
 
 
-  private resetEverything(): void {
-    this.resetForm();
-    this.qrCodeId = undefined;
-    this.isQRCodeAvailable = false;
-    this.visitorRecord = undefined;
-    this.visitorService.resetAllData();
-  }
-
+private resetEverything(): void {
+  this.resetFormComplete();
+  this.qrCodeId = undefined;
+  this.visitorRecord = undefined;
+  this.visitorService.resetAllData();
+  this.isRegisterButtonVisible = true; 
+}
 
   sendVisitorRecord(): void {
     if (this.visitorRecord) {
-      if(this.visitorRecord.visitors.length<=0){
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se puede enviar el registro: ingrese un visitante por lo menos.',
+        if (this.visitorRecord.visitors.length <= 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se puede enviar el registro: ingrese un autorizado.',
+            });
+            return;
+        }
+
+        if (!this.visitorRecord.authRange || this.visitorRecord.authRange == null) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se puede enviar el registro: ingrese un rango de fechas con al menos un día permitido.',
+            });
+            this.isQRCodeAvailable = false;
+            return;
+        }
+
+        this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
+            next: (response) => {
+                if (this.indexUserType === 1) {
+                    if (response.id) {
+                        this.qrCodeId = response.id;
+                    } 
+                    if (this.qrCodeId) {
+                        this.isQRCodeAvailable = true;
+                        this.isRegisterButtonVisible = false; // Ocultar botón registrar
+                        this.setNameQr();
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Advertencia',
+                            text: 'El registro se creó pero no se generó el código QR.',
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registro enviado correctamente',
+                        text: 'El registro de autorización se ha enviado exitosamente.',
+                    });
+                    this.isQRCodeAvailable = false;
+                }
+                if (!this.isQRCodeAvailable) {
+                    this.resetEverything();
+                }
+            },
+            error: (error) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se puede enviar el registro.',
+                });
+                console.error('Error sending visitor record', error);
+                this.isQRCodeAvailable = false;
+                this.resetEverything();
+            }
         });
-      }
-      if (!this.visitorRecord.authRange || this.visitorRecord.authRange ==null) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se puede enviar el registro: ingrese un rango de fechas con al menos un dia permitido.',
-        });
-      
-        this.isQRCodeAvailable = false;
-        return;
-      }
-  
-      this.visitorHttpService.postVisitorRecord(this.visitorRecord).subscribe({
-        next: (response) => {
-          this.qrCodeId = response.qrCodeId || response.id; 
-          this.setNameQr();
-          this.isQRCodeAvailable = !!this.qrCodeId;
-      },
-      error: (error) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se puede enviar el registro.',
-        });
-          console.error('Error sending visitor record', error);
-          this.isQRCodeAvailable = false;
-      }
-      });
     }
-  }
-  
+}
 
   initVisitorRecord(): void {
     combineLatest([
@@ -196,14 +222,15 @@ setNameQr(): void {
     };
   }
   ngOnInit(): void {
-
     this.initForm();
     this.loadVehicleTypes();
     this.listenToHasVehicleChanges();
     this.initVisitorRecord();
+    this.loadUsersType();  
   }
   initForm(): void {
     this.visitorForm = this.fb.group({
+      authorizedType: ['', Validators.required],
       firstName: ['', [Validators.required, Validators.maxLength(45)]],
       lastName: ['', [Validators.required, Validators.maxLength(45)]],
       document: ['', [
@@ -235,7 +262,19 @@ loadVehicleTypes(): void {
     }
   });
 }
-
+loadUsersType(): void {
+  this.visitorHttpService.getUsersType().pipe(
+    takeUntil(this.unsubscribe$)
+  ).subscribe({
+    next: (types: UserType[]) => {
+      this.usersType = types;
+      console.log('Tipos de usuario cargados:', this.usersType);
+    },
+    error: (error) => {
+      console.error('Error al cargar tipos de usuarios:', error);
+    }
+  });
+}
 listenToHasVehicleChanges(): void {
   const hasVehicleControl = this.visitorForm.get('hasVehicle');
   if (hasVehicleControl) {
@@ -297,10 +336,11 @@ sendVisitorWithoutRH(): void {
       documentType: visitantData.documentType || undefined,
       vehicle: vehicle,
       neighborLastName: this.user?.lastname,
-      neighborName: this.user?.name
+      neighborName: this.user?.name,
+      userType:this.indexUserType
     };
+  
     if (!this.visitorService.addVisitorsTemporalsSubject(visitor)) {
-    
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -347,7 +387,9 @@ onDocumentInput(event: Event): void {
 }
 
 resetForm(): void {
+  const currentAuthorizedType = this.visitorForm.get('authorizedType')?.value;
   this.visitorForm.reset({
+    authorizedType: currentAuthorizedType, 
     firstName: '',
     lastName: '',
     document: '',
@@ -357,7 +399,20 @@ resetForm(): void {
     vehicleType: ''
   });
 }
-
+resetFormComplete(): void {
+  this.visitorForm.reset({
+    authorizedType: '',
+    firstName: '',
+    lastName: '',
+    document: '',
+    documentType: '',
+    email: '',
+    hasVehicle: false,
+    licensePlate: '',
+    vehicleType: '',
+    insurance: ''
+  });
+}
 ngOnDestroy(): void {
   this.unsubscribe$.next();
   this.unsubscribe$.complete();

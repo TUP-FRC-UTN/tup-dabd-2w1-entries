@@ -63,15 +63,9 @@ export class AccessGridVisitorsEditComponent implements OnInit, OnDestroy{
         visitor.document,
         `${visitor.last_name}, ${visitor.name}`,  // Combinamos apellido y nombre
         visitor.vehicle ? visitor.vehicle?.plate : 'Sin vehículo', 
-        `<div class="dropdown">
-          <button class="btn btn-light dropdown-toggle" type="button" id="actionMenu${index}" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-ellipsis-v" style="color: black;"></i>
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="actionMenuButton-${visitor.document}">
-            <li><a role="button" class="dropdown-item update-visitor-btn" data-index="${index}">Modificar</a></li>
-            <li><a role="button" class="dropdown-item text-danger delete-visitor-btn" data-index="${index}">Eliminar</a></li>
-          </ul>
-        </div>`
+        `<button class="btn btn-light update-visitor-btn" data-index="${index}">
+         <i class="fas fa-edit" style="color: black;"></i> Modificar
+       </button>`
       ]);
     });
     
@@ -91,16 +85,17 @@ initializeDataTable(): void {
     paging: true,
     ordering: true,
     pageLength: 5,
+    lengthMenu: [5, 10, 25, 50],
     lengthChange: true,
     searching: true,
     info: true,
     autoWidth: false,
     language: {
       lengthMenu: " _MENU_ ",
-      zeroRecords: "No se encontraron invitaciones",
+      zeroRecords: "No se encontraron invitados",
       search: "", 
       searchPlaceholder: "Buscar",
-      emptyTable: "No hay invitaciones cargadas",
+      emptyTable: "No hay invitados cargados",
       info: "",
       infoEmpty: "",
       infoFiltered: ""

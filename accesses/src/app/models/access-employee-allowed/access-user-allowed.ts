@@ -29,13 +29,15 @@ export interface AccessAllowedDaysDto {
 export interface AccessMovementEntryDto {
   description: string;
   movementDatetime: string; //string reprecenta LocalDateTime
-  vehiclesId: number;
+  vehiclesId?: string;
   document: string;
+  documentType: string;
 }
 
 export interface AccessMovementExitDto {
   description: string;
   movementDatetime: string; //string reprecenta LocalDateTime
-  vehiclesId: number;
+  vehiclesId?: string;
   document: string;
+  documentType: string;
 }

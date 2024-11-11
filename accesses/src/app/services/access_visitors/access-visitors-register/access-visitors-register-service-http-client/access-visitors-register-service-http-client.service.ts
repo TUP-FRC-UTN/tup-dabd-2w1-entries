@@ -11,7 +11,7 @@ import { QrDto } from '../../../../models/access-visitors/access-visitors-models
 export class AccessVisitorsRegisterServiceHttpClientService {
   private readonly http: HttpClient = inject(HttpClient);
   private apiUrl = 'http://localhost:8090';
- 
+  
   private dayMapping: { [key: string]: string } = {
     'Lun': 'MONDAY',
     'Mar': 'TUESDAY',
@@ -21,11 +21,12 @@ export class AccessVisitorsRegisterServiceHttpClientService {
     'Sáb': 'SATURDAY',
     'Dom': 'SUNDAY'
   };
+  
   getQRCode(visitorId: string): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/visitor-qr/image/${visitorId}`, {
       responseType: 'blob' 
-    });
-  }
+    })
+  };
 
   getUidQrByQrId(visitorId: string): Observable<QrDto> {
     return this.http.post<QrDto>(`${this.apiUrl}/visitor-qr/${visitorId}`, null).pipe(
@@ -35,10 +36,8 @@ export class AccessVisitorsRegisterServiceHttpClientService {
       map(response => {
         return response; 
       })
-    );
-  }
-
-
+    )
+  };
 
   getVehicleTypes(): Observable<string[]> {
     const url = 'http://localhost:8090/getAll/vehiclesType'; 
@@ -52,8 +51,36 @@ export class AccessVisitorsRegisterServiceHttpClientService {
           return [];
         }
       })
+    )
+  };
+  private userTypeMapping: { [key: string]: string } = {
+    'Visitor': 'Visitante',
+    'Delivery': 'Delivery',
+    'Taxi': 'Taxi',
+    'Gardener': 'Jardinero',
+    'Worker':'Trabajador',
+    'Cleaning':'Personal de limpieza'
+  };
+
+  getUsersType(): Observable<UserType[]> {
+    const url = 'http://localhost:8090/users_Type';
+    
+    return this.http.get<UserType[]>(url).pipe(
+      tap(response => console.log('Respuesta completa del servidor:', response)),
+      map(response => {
+        if (Array.isArray(response)) {
+          return response.map(item => ({
+            id: item.id, // Preserve the original ID
+            description: this.userTypeMapping[item.description] || item.description
+          }));
+        } else {
+          console.error('La respuesta no es un array:', response);
+          return [];
+        }
+      })
     );
-  }
+  };
+
   private readonly usersApiUrl = 'https://my-json-server.typicode.com/405786MoroBenjamin/users-responses/users';
 
   getUsers(): Observable<AccessUser[]> {
@@ -68,21 +95,21 @@ export class AccessVisitorsRegisterServiceHttpClientService {
         return users;
       }),
     
-    );
-  }
+    )
+  };
   
   postVisitorRecord(visitorRecord: AccessVisitorRecord): Observable<any> {
     console.log('Enviando registro de visitantes:', visitorRecord);
     const transformedData = this.transformVisitorRecord(visitorRecord);
     console.log('Datos transformados:', transformedData);
     return this.http.post(`${this.apiUrl}/visitor-qr/generate`, transformedData);
-  }
+  };
 private transformVisitorRecord(visitorRecord: AccessVisitorRecord): any[] {
     return visitorRecord.visitors.map(visitor => ({
         document: visitor.document,
         name: visitor.firstName,
         last_name: visitor.lastName,
-        userType: 0,
+        userType: visitor.userType,
         documentType: visitor.documentType,
         email: visitor.email,
         emailSent: false,
@@ -94,8 +121,8 @@ private transformVisitorRecord(visitorRecord: AccessVisitorRecord): any[] {
             vehicle_Type: visitor.vehicle?.vehicleType,
             insurance: visitor.vehicle?.insurance
         } : null
-    }));
-}
+    }))
+};
 
 
   private transformAuthRange(authRange: AccessAuthRange | null): any {
@@ -106,20 +133,20 @@ private transformVisitorRecord(visitorRecord: AccessVisitorRecord): any[] {
       init_date: this.formatDate(authRange.initDate),
       end_date: this.formatDate(authRange.endDate),
       allowedDaysDtos: authRange.allowedDays.map(this.transformAllowedDay.bind(this))
-    };
-  }
+    }
+  };
 
   private transformAllowedDay(allowedDay: AccessAllowedDay): any {
     return {
       day: this.dayMapping[allowedDay.day.name] || allowedDay.day.name,
       init_hour: this.transformTime(allowedDay.startTime),
       end_hour: this.transformTime(allowedDay.endTime)
-    };
-  }
+    }
+  };
 
   private transformTime(date: Date): string {
     return date.toTimeString().slice(0, 8); 
-  }
+  };
 
   private formatDate(date: Date): string {
     return date.toISOString().split('T')[0]; 
