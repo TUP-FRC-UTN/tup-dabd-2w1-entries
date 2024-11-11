@@ -185,9 +185,10 @@
                   [(ngModel)]="selectedVehiclePlate"
                   (change)="onVehicleChange(vehicle.plate)">
                   <label class="form-check-label" [for]="'vehicle-' + vehicle.plate">
-                    <strong>Patente:</strong> {{ vehicle.plate }} - 
-                    <br>
+                    <strong>Patente:</strong> {{ vehicle.plate }}  
                   </label>
+                  <br>
+
                   <strong>Tipo:</strong> 
                     {{ 
                       vehicle.vehicle_Type.description === 'Car' ? 'Coche' : 
@@ -203,6 +204,7 @@
               <ng-template #noVehicle>
                 <p class="mb-1">No tiene registro</p>
               </ng-template>
+              <br>
 
               <!-- Rango de fechas autorizado -->
               <p class="fw-bold mb-1">Rango de Fechas Autorizado:</p>
