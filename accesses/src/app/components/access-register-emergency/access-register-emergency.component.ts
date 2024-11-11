@@ -134,7 +134,7 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
       title: 'Éxito',
       icon: 'success',
       text: 'La emergencia fue registrada.',
-    });
+    }).finally(() => this.resetForm());
   }
   private fireError() {
     Swal.fire({

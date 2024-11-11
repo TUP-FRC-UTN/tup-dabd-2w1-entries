@@ -403,7 +403,7 @@ loadUsersAllowedData(): Observable<boolean> {
       });
     this.subscription.add(subscriptionAll);
 
-  });
+  });     
 }
 
 
@@ -1046,7 +1046,7 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
             document: visitor.document,
             email: visitor.email,
             user_allowed_Type: visitor.userType,
-            documentType: this.doument,
+            documentType: visitor.documentTypeDto,
             vehicle: vehicless,
           }
         };
@@ -1163,7 +1163,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           document: visitor.document,
           email: visitor.email,
           user_allowed_Type: visitor.userType,
-          documentType: this.doument,
+          documentType: visitor.documentTypeDto,
           vehicle: vehicless,
         }
       };
