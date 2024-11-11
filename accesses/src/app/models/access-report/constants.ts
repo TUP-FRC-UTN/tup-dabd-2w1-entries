@@ -63,7 +63,7 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
           filterValue: 'cleaning',
           columnValue: 'personal de limpieza'
         },
-        Jardinero: {
+        Gardener: {
           icon: 'bi bi-gear-wide-connected',
           color: '#ffc107',
           title: 'Jardinero',
