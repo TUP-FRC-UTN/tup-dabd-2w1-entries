@@ -57,7 +57,8 @@ import {
 import { AccessVisitorHelperService } from '../../../services/access_visitors/access-visitor-helper.service';
 import { AccessOwnerRenterserviceService } from '../../../services/access-owner/access-owner-renterservice.service';
 import { AccessUserServiceService } from '../../../services/access-user/access-user-service.service';
-
+import { AccesesVisitorsTempComponent } from '../acceses-visitors-temp/acceses-visitors-temp.component';
+declare var bootstrap: any;
 @Component({
   selector: 'access-app-visitor-registry',
   standalone: true,
@@ -67,6 +68,8 @@ import { AccessUserServiceService } from '../../../services/access-user/access-u
     AccessAutosizeTextareaDirective,
     RouterModule,
     NgxScannerQrcodeModule,
+    NgSelectModule,
+    AccesesVisitorsTempComponent
   ],
   providers: [DatePipe, VisitorsService, CommonModule],
   templateUrl: './access-visitor-registry.component.html',

@@ -23,6 +23,17 @@ import Swal from 'sweetalert2';
   ],
 })
 export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnDestroy {
+  indexUserType?:number;
+  onAuthorizedTypeChange(event: Event): void {
+    console.log("tipo antes",this.indexUserType);
+    const selectedValue = (event.target as HTMLSelectElement).value;
+    if (selectedValue !== "") {
+        this.indexUserType = parseInt(selectedValue, 10); 
+        console.log("tipo despues",this.indexUserType);
+    }
+}
+
+
   user?: AccessUser;
   handleSelectedUser(user: AccessUser): void {
     this.user = user; 

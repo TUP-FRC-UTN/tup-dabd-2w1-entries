@@ -3,7 +3,7 @@ import { HttpClient  } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, tap} from 'rxjs/operators';
 import { inject } from '@angular/core';
-import { AccessVisitorRecord, AccessAuthRange, AccessAllowedDay, AccessUser } from '../../../../models/access-visitors/access-visitors-models';
+import { AccessVisitorRecord, AccessAuthRange, AccessAllowedDay, AccessUser, UserType, accessTempRegist } from '../../../../models/access-visitors/access-visitors-models';
 import { QrDto } from '../../../../models/access-visitors/access-visitors-models';
 @Injectable({
   providedIn: 'root'
@@ -72,7 +72,9 @@ export class AccessVisitorsRegisterServiceHttpClientService {
   }
   
   postVisitorRecord(visitorRecord: AccessVisitorRecord): Observable<any> {
+    console.log('Enviando registro de visitantes:', visitorRecord);
     const transformedData = this.transformVisitorRecord(visitorRecord);
+    console.log('Datos transformados:', transformedData);
     return this.http.post(`${this.apiUrl}/visitor-qr/generate`, transformedData);
   }
 private transformVisitorRecord(visitorRecord: AccessVisitorRecord): any[] {
@@ -121,5 +123,11 @@ private transformVisitorRecord(visitorRecord: AccessVisitorRecord): any[] {
 
   private formatDate(date: Date): string {
     return date.toISOString().split('T')[0]; 
+  }
+  giveTempRange(visitor: accessTempRegist): Observable<any> {
+    const url = 'http://localhost:8090/user_Allowed/giveTempRange';
+   
+    console.log('Cuerpo de la solicitud:', visitor);
+    return this.http.put(url, visitor);
   }
 }

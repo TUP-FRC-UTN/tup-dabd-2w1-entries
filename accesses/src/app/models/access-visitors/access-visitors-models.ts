@@ -162,3 +162,23 @@ export interface AccessUser{
     }
 
 // FIN CLASES del back necesarias para ciertos METODOS
+export interface accessTempRegist {
+  visitor: AccessVisitor3
+  guard_Id: number
+  neighbor_Id: number
+}
+
+export interface AccessVisitor3 {
+  firstName: string;
+  lastName: string;
+  document: string;
+  documentType:number;
+  email: string;
+  vehicle?: AccessVehicle2 | null;
+  userType?: number;
+}
+export interface AccessVehicle2 {
+  plate: string; 
+  vehicle_Type: AccessVehicleType; 
+  insurance: string;
+}
