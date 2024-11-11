@@ -538,16 +538,17 @@ loadUsersAllowedData(): Observable<boolean> {
             if (value === 'verMas') {
               this.MoreInfo(selectedOwner);
             } else {
-              // Manejar otras acciones (Ingreso/Egreso)
+/*               // Manejar otras acciones (Ingreso/Egreso)
               const textareaElement = document.getElementById(
                 'observations' + index
               ) as HTMLTextAreaElement;
 
-              selectedOwner.observations = textareaElement.value || '';
+              selectedOwner.observations = textareaElement?.value || '';
 
               if (this.observations===''){
-                this.observations=textareaElement.value
-              }
+                this.observations=textareaElement?.value ?? ''
+              } */
+              selectedOwner.observations = '';
               
               const mockEvent = {
                 target: { value: value },
