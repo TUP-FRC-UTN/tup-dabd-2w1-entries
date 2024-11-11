@@ -22,6 +22,7 @@ import { AccessUserAllowedInfoDto } from '../../../../models/access-visitors/acc
 import { AccessOwnerRenterserviceService } from '../../../../services/access-owner/access-owner-renterservice.service';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 import { QRData } from '../../../../models/access-visitors/access-VisitorsModels';
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-access-table',
@@ -267,6 +268,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     window.addEventListener('openModalInfo', this.handleOpenModal);
     window.addEventListener('Movment', this.handleOpenMovement);
   }
+  
 /**
    * Se manda el documento al servicio
    */

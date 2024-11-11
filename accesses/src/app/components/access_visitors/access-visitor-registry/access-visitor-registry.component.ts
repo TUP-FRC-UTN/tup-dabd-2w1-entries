@@ -885,14 +885,19 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     this.selectedVisitor = visitor; // Guardar el visitante seleccionado
   }
   
-  ModalDocument(document:string){
+  ModalDocument(documentData:string){
     console.log("me han llamado")
     
     console.log("people",this.userAllowedGetAll)
-    const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(document)
+    const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(documentData)
     )
     console.log(user)
-    this.selectedVisitor=user||null 
+    this.selectedVisitor=user||null;
+
+    const modalElement = document.getElementById('visitorInfoModal')!;
+    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modal.show();
+    
     console.log(this.selectedVisitor)
   }
 
