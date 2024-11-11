@@ -93,11 +93,22 @@ export class AccessVisitorRegistryComponent
   ngOnInit(): void {
     const registryUpdated = this.registryUpdateService.getObservable().subscribe({
       next: v => {
-          this.userAllowedModal();
-      }
-    });
+      //lo siguiente carga a TODOS en la lista "comun" (donde estan todos los userAllowed)
+        const sub = this.loadUsersAllowedData().subscribe({
+          next: () => {
+            this.filteredAllPeopleAllowed = this.allPeopleAllowed;
+            this.userAllowedModal();
+          },
+          error: (err) => {
+            console.log(err);
+          }
+        }); 
+        this.subscription.add(sub);          
+        }
+      });
+
     //DATOS
-    //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
+    //lo siguiente carga a TODOS en la lista "comun" (donde estan todos los userAllowed)
     const sub = this.loadUsersAllowedData().subscribe({
       next: () => {
         //console.log("allPeopleAllowed: ", this.allPeopleAllowed)
@@ -128,6 +139,8 @@ export class AccessVisitorRegistryComponent
 
     this.subscription.add(registryUpdated);
   }
+
+
   onChangeMovement(doc:string,mov:string,plate:string){
     console.log(mov)
     console.log(plate)
@@ -374,6 +387,8 @@ loadUsersAllowedData(): Observable<boolean> {
       .subscribe({
         next: (list: AccessUserAllowedInfoDto[]) => {
 
+          this.allPeopleAllowed = []; //limpiar lista
+
           this.ngZone.run(() => {
             list.forEach((userAllowed) => {
               this.allPeopleAllowed.push({ //lo agrega a la lista "comun" donde estan TODOS los autorizados a ingresar
@@ -594,24 +609,29 @@ loadUsersAllowedData(): Observable<boolean> {
                   </button>`
       }
 
-      case "Worker" : {   //rojo (red)
+      case "Worker" : {   //rojo (red) <i class="bi bi-tools"></i> 
         return  `<button style="background-color: #dc3545;border: bisque;" class="btn btn-primary" title="Obrero">
-                    <i class="bi bi-tools"></i> 
+                    <i class='bi bi-gear-wide-connected'></i> 
                   </button>`
       }
-      case "Delivery" : {   //violeta (indigo)
+      case "Delivery" : {   //violeta (indigo) <i class="bi bi-box-seam"></i> 
         return  `<button style="background-color: purple;border: bisque;" class="btn btn-primary" title="Delivery">
-                    <i class="bi bi-box-seam"></i> 
+                    <i class='bi bi-gear-wide-connected'></i> 
                   </button>`
       }
-      case "Cleaning" : {   //rosa (pink)
+      case "Cleaning" : {   //rosa (pink) <i class="bi bi-stars"></i>
         return  `<button style="background-color: #d63384;border: bisque;" class="btn btn-primary" title="P. de Limpieza">
-                    <i class="bi bi-stars"></i>
+                    <i class='bi bi-gear-wide-connected'></i> 
                   </button>`
       }
-      case "Gardener" : { //celeste (cyan)
+      case "Gardener" : { //celeste (cyan) <i class="bi bi-flower1"></i>
         return  `<button style="background-color: #0dcaf0;border: bisque;" class="btn btn-primary" title="Jardinero">
-                    <i class="bi bi-flower1"></i>
+                    <i class='bi bi-gear-wide-connected'></i> 
+                  </button>`
+      }
+      case "Taxi" : { //
+        return  `<button class="btn btn-warning" title="Taxi">
+                    <i class='bi bi-gear-wide-connected'></i> 
                   </button>`
       }
 
