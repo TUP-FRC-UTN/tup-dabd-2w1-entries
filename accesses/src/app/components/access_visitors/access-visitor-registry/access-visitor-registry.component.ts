@@ -70,7 +70,7 @@ export class AccessVisitorRegistryComponent
 
   subscription = new Subscription();
 
-  private readonly helperService = inject(AccessVisitorHelperService);
+  protected readonly helperService = inject(AccessVisitorHelperService);
   private readonly visitorService = inject(VisitorsService);
   private readonly ownerService: AccessOwnerRenterserviceService = inject(
     AccessOwnerRenterserviceService
@@ -309,11 +309,10 @@ export class AccessVisitorRegistryComponent
   //Estado del visitante
   visitorStatus: { [document: string]: string } = {}; // Estado de cada visitante
 
-  uploadQrImage() {
-    // Abre el cuadro de diálogo de selección de archivo
+/*   uploadQrImage() {
     this.qrInput.nativeElement.click();
   }
-
+ */
 
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
@@ -438,7 +437,7 @@ loadUsersAllowedData(): Observable<boolean> {
               return [
                 // statusButton, //no se muestra mas el Estado (ej: "En espera")
                 `${visitor.last_name}, ${visitor.name}`,
-                userTypeIconWithClick,
+                //userTypeIconWithClick,
                 `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
                 `<div class="text-start">
                 <select class="form-select" id="vehicles${index}" name="vehicles${index}">
@@ -453,7 +452,7 @@ loadUsersAllowedData(): Observable<boolean> {
                     <option value="sin_vehiculo">Sin vehículo</option>
                 </select>
             </div>`,
-            `<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
+            //`<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
                 `<button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
                   Ingreso
                 </button>`,
@@ -480,7 +479,7 @@ loadUsersAllowedData(): Observable<boolean> {
             this.dataTable.clear().rows.add(formattedData).draw();
           });
           this.addEventListeners();
-       
+  
       }
     }
 
@@ -894,53 +893,58 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
   }
 
 
-  
+  private scannedUid: string | null = null;
+  private visitorsByUid: { [key: string]: any[] } = {};
 
   handleQrScan(data: any): void {
-    const scannedData = data[0]?.value; // Obtiene el valor escaneado
+    const scannedData = data[0]?.value;
     if (scannedData) {
       console.log('Código QR escaneado:', scannedData);
-
-      // Detener el scanner inmediatamente después de escanear
       this.stopScanner();
-
+  
       try {
-        // Parsear el JSON escaneado
-        const visitorData = JSON.parse(scannedData)[0]; // Asumimos que siempre hay un elemento
-
-        // Crear el nuevo visitante sin validar en el backend
-        const newVisitor: AccessUserAllowedInfoDto = {
-          document: visitorData.document,
-          name: visitorData.name,
-          last_name: visitorData.lastName,
-          email: 'email@example.com', // Asignar un valor por defecto si no se proporciona
-          vehicles: [], // Aquí podrías llenar la lista de vehículos si se necesita
-          userType: { description: 'Visitante' },
-          authRanges: [
-            {
-              init_date: visitorData.init_date,
-              end_date: visitorData.end_date,
-              neighbor_id: visitorData.neighborId || 0,
-              allowedDays: [
-                {
-                  day: visitorData.init_hour,
-                  init_hour: visitorData.init_hour,
-                  end_hour: visitorData.end_hour,
-                },
-              ],
-            },
-          ],
-          observations: '', // Asigna observaciones si están disponibles
-          documentTypeDto: { description: visitorData.documentType || 'DNI' },
-          neighbor_id: visitorData.neighborId || 0,
-        };
-
-        // Agregar el visitante a la lista y actualizar el DataTable
-        this.filteredAllPeopleAllowed.push(newVisitor); //CHEQUEAR con vic a q lista le gustaria añadirlo
-        this.updateDataTable(); // Actualiza la tabla de visitantes
-
-        // Cerrar el modal si hay uno abierto
-        this.stopScanner();
+        const visitorsData = JSON.parse(scannedData);
+        if (visitorsData.length === 0) {
+          throw new Error('No hay datos de visitantes en el QR');
+        }
+  
+        // Obtener el UID del primer visitante (todos tienen el mismo UID)
+        const uid = visitorsData[0].uid;
+        this.scannedUid = uid;
+  
+        // Filtrar solo los visitantes que aún están en `filteredAllPeopleAllowed`
+        const existingVisitors = visitorsData.filter((visitorData: AccessUserAllowedInfoDto) =>
+          this.filteredAllPeopleAllowed.some(existingVisitor => existingVisitor.document === visitorData.document)
+        );
+  
+        if (existingVisitors.length === 0) {
+          Swal.fire({
+            title: 'Usuario no encontrado',
+            text: 'No se encontró ningún usuario registrado con los datos escaneados.',
+            icon: 'warning',
+            confirmButtonText: 'Aceptar',
+            showCancelButton: false,
+            showCloseButton: true,
+            confirmButtonColor: '#3085d6',
+          });
+          return; // Detener el proceso aquí si no se encuentra ningún visitante
+        }
+  
+        // Filtrar la DataTable usando los documentos de los visitantes existentes
+        this.filteredAllPeopleAllowed = this.filteredAllPeopleAllowed.filter(visitor =>
+          existingVisitors.some((v: AccessUserAllowedInfoDto) => v.document === visitor.document)
+        );
+  
+        // Actualizar la tabla con los datos filtrados
+        this.updateDataTable();
+  
+        Swal.fire({
+          title: 'Éxito',
+          text: `Se han filtrado ${existingVisitors.length} visitante(s).`,
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+        });
+  
       } catch (error) {
         console.error('Error al parsear el código QR:', error);
         Swal.fire({
@@ -953,6 +957,14 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     } else {
       console.warn('No se encontraron datos en el escaneo.');
     }
+  }
+  
+  
+
+
+  // Método para obtener todos los visitantes de un UID específico
+  getVisitorsByUid(uid: string): AccessUserAllowedInfoDto[] {
+    return this.visitorsByUid[uid] || [];
   }
 
   setupModalEventListeners() {
