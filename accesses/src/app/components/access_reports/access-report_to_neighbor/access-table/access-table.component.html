@@ -21,14 +21,21 @@
 </div>
 
 <div class="col-auto ps-2">
-    <div class="d-flex align-items-center">
-        <label class="form-label mb-0 me-1 small">Desde:</label>
-        <input 
-            type="date" 
-            class="form-control form-control-sm" 
-            [ngModel]="startDate | date:'yyyy-MM-dd'" 
-            (ngModelChange)="onStartDateChange($event)"
-            [max]="today | date:'yyyy-MM-dd'">
+    <div class="d-flex flex-column">
+        <div class="d-flex align-items-center">
+            <label class="form-label mb-0 me-1 small">Desde:</label>
+            <input 
+                type="date" 
+                class="form-control form-control-sm" 
+                [ngModel]="startDate | date:'yyyy-MM-dd'" 
+                (ngModelChange)="onStartDateChange($event)"
+                [max]="today | date:'yyyy-MM-dd'"
+                [class.is-invalid]="dateError">
+        </div>
+        <!-- Mensaje de error de fechas debajo del input "desde" -->
+        <div *ngIf="dateError" class="invalid-feedback d-block" style="font-size: 0.75rem; white-space: nowrap;">
+            {{ dateError }}
+        </div>
     </div>
 </div>
 
