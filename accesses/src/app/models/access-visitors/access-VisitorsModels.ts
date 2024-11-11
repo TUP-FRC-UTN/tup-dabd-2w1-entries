@@ -75,20 +75,24 @@
     }
 
 
-    export interface AccesUserQrDTO {
-      uid:string;
-      document: string;
+    export interface QRData {
+      neighborId: number;
+      neighborName: string;
+      neighborNameLastName: string;
       name: string;
-      last_name: string;
-      email: string;
-      vehicles: AccessNewVehicleDto[]; 
-      userType: AccessUserAllowedTypeDto;
-      authRanges: AuthRangeInfoDto[]; 
-      observations?: string; 
-      documentTypeDto: AccessDocumentTypeDto; 
-      neighbor_id: number;
+      lastName: string;
+      document: string;
+      documentType: string;
+      vehicleType: string;
+      plate: string;
+      uid: string;
+      init_date: string;
+      end_date: string;
+      init_hour: string;
+      end_hour: string;
+      generatedDate: string;
     }
-
+    
 
     
     export interface AuthRangeInfoDto {
