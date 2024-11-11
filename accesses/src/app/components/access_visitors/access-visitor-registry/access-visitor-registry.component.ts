@@ -80,9 +80,9 @@ export class AccessVisitorRegistryComponent
   private readonly registryUpdateService = inject(AccessRegistryUpdateService);
   private observations: string = '';
   constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService) {}
-
+  selectedVehiclePlate: string ='';
   dataTable: any;
-
+  plateVehicle:string='';
   showModal = false;
   visitorDocument: string = '';
   private readonly ngZone: NgZone = inject(NgZone);
@@ -140,9 +140,25 @@ export class AccessVisitorRegistryComponent
     this.subscription.add(registryUpdated);
   }
 
-
+  onVehicleChange(plate: string): void {
+     // Si la patente seleccionada es la misma que la actual, la desmarcamos
+     if (this.selectedVehiclePlate === plate) {
+      console.log(this.selectedVehiclePlate);
+      this.selectedVehiclePlate=plate
+      this.plateVehicle=plate
+ // Deseleccionamos
+    } else {
+      // Si se selecciona una nueva patente, la guardamos
+      this.selectedVehiclePlate = plate;
+      this.plateVehicle=plate
+    }
+  
+    console.log(this.selectedVehiclePlate);
+  }
   onChangeMovement(doc:string,mov:string,plate:string){
     console.log(mov)
+    console.log(plate)
+    plate=this.selectedVehiclePlate
     console.log(plate)
     const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(doc)
     )
@@ -1047,6 +1063,10 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
         console.log('te llame')
+        console.log('lamamndo el vehiculo',this.plateVehicle)
+
+          plate=this.plateVehicle
+        
         // Preparar datos del movimiento
         const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
         const firstRange = visitor.authRanges[0];
@@ -1164,8 +1184,9 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
 private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: string): Observable<boolean> {
   return new Observable<boolean>(observer => {
     try {
+     
       // Preparar datos del movimiento
-      const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
+      const vehicless = this.selectedVehiclePlate ? visitor.vehicles.find(v => v.plate === this.selectedVehiclePlate) || undefined : undefined;
       const firstRange = visitor.authRanges[0];
       const now = new Date();
 

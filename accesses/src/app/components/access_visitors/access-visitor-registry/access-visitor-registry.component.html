@@ -176,18 +176,30 @@
             <div class="col-md-6">
               <p class="mb-1"><strong>Información del vehículo:</strong></p>
               <div *ngIf="hasVehicles(selectedVisitor); else noVehicle">
-                <ul *ngFor="let vehicle of getVehicles(selectedVisitor)" class="list-unstyled">
-                  <li><strong>Patente:</strong> {{ vehicle.plate }}</li>
-                  <li><strong>Tipo:</strong> 
+                <div *ngFor="let vehicle of getVehicles(selectedVisitor)" class="form-check">
+                  <input 
+                  class="form-check-input" 
+                  type="radio" 
+                  [id]="'vehicle-' + vehicle.plate"
+                  [value]="vehicle.plate" 
+                  [(ngModel)]="selectedVehiclePlate"
+                  (change)="onVehicleChange(vehicle.plate)">
+                  <label class="form-check-label" [for]="'vehicle-' + vehicle.plate">
+                    <strong>Patente:</strong> {{ vehicle.plate }} - 
+                    <br>
+                  </label>
+                  <strong>Tipo:</strong> 
                     {{ 
                       vehicle.vehicle_Type.description === 'Car' ? 'Coche' : 
                       vehicle.vehicle_Type.description === 'Motorbike' ? 'Motocicleta' : 
                       vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
                       vehicle.vehicle_Type.description 
                     }}
-                  </li>
-                </ul>
+                </div>
               </div>
+              <ng-template #noVehicle>
+                <p class="mb-1">No tiene registro</p>
+              </ng-template>
               <ng-template #noVehicle>
                 <p class="mb-1">No tiene registro</p>
               </ng-template>
