@@ -206,7 +206,6 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
           // verifica si esta dentro de rango (fechas permitidas)
           let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
           if(indexAuthRange >= 0){
-
             // verifica si esta dentro de rango (dia y horario permitido)
             let indexDayAllowed = this.helperService.todayIsAllowedDay(visitor.authRanges.at(indexAuthRange));
             console.log("(registrando el ingreso) indexDayAllowed:", indexDayAllowed);

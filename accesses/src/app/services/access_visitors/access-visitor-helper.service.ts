@@ -142,7 +142,6 @@ export class AccessVisitorHelperService {
 
       let initDate: Date | undefined = listAuthRangeInfoDto.at(i)?.init_date;
       let endDate: Date | undefined  = listAuthRangeInfoDto.at(i)?.end_date;
-  
 
       if(this.isDateBeforeToday(initDate) && this.isDateAfterToday(endDate)){
         return i; // devuelve el indice donde esta el AuthRangeInfoDto valido
@@ -172,13 +171,13 @@ export class AccessVisitorHelperService {
       // Si date es undefined, devolver false
       return false;
     }
-
     //fecha actual, para poder comparar
     let todayDate = new Date();
     //fecha a comparar
     let afterDate = new Date(date);
+    afterDate.setHours(23, 59, 59, 999);
     //console.log(afterDate, " | hoy -> ", todayDate)
-
+    
     return afterDate >= todayDate;
   }
 

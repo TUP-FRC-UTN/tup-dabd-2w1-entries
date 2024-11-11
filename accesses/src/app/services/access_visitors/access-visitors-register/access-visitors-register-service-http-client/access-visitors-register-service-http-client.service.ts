@@ -156,7 +156,8 @@ private transformVisitorRecord(visitorRecord: AccessVisitorRecord): any[] {
   giveTempRange(visitor: accessTempRegist): Observable<any> {
     const url = 'http://localhost:8090/user_Allowed/giveTempRange';
    
-    return this.http.put(url, visitor).pipe(tap(response => {
+    return this.http.put(url, visitor).pipe(
+      tap(response => {
       this.registryUpdatedService.updateTable(true);
     }));
   }

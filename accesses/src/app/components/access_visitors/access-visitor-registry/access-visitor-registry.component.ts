@@ -93,39 +93,40 @@ export class AccessVisitorRegistryComponent
   ngOnInit(): void {
     const registryUpdated = this.registryUpdateService.getObservable().subscribe({
       next: v => {
-          this.userAllowedModal()
+          this.userAllowedModal();
+              //DATOS
+          //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
+          const sub = this.loadUsersAllowedData().subscribe({
+            next: () => {
+              //console.log("allPeopleAllowed: ", this.allPeopleAllowed)
+              this.filteredAllPeopleAllowed = this.allPeopleAllowed;
+              //console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
+            },
+            error: (err) => {
+              console.log(err);
+            }
+          }); 
+          this.subscription.add(sub);
+          const subs=this.subscription = this.ownerService.modalState$.subscribe(
+            (document: string) => {
+              this.visitorDocument = document;
+              this.ModalDocument(document)
+            }
+          );
+          this.subscription.add(subs)
+          const ub=this.subscription =this.ownerService.movementState$.subscribe(
+            (data: { document: string, movement: string ,plate:string}) => {
+              const { document, movement,plate } = data;
+              console.log('Documento:', document);
+              console.log('Movimiento:', movement);
+              this.onChangeMovement(document,movement,plate)
+            }
+          )
+          this.subscription.add(ub)
       }
     });
-    //DATOS
-    //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
-    const sub = this.loadUsersAllowedData().subscribe({
-      next: () => {
-        //console.log("allPeopleAllowed: ", this.allPeopleAllowed)
-        this.filteredAllPeopleAllowed = this.allPeopleAllowed;
-        //console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    }); 
+
     this.subscription.add(registryUpdated);
-    this.subscription.add(sub);
-    const subs=this.subscription = this.ownerService.modalState$.subscribe(
-      (document: string) => {
-        this.visitorDocument = document;
-        this.ModalDocument(document)
-      }
-    );
-    this.subscription.add(subs)
-    const ub=this.subscription =this.ownerService.movementState$.subscribe(
-      (data: { document: string, movement: string ,plate:string}) => {
-        const { document, movement,plate } = data;
-        console.log('Documento:', document);
-        console.log('Movimiento:', movement);
-        this.onChangeMovement(document,movement,plate)
-      }
-    )
-    this.subscription.add(ub)
   }
   onChangeMovement(doc:string,mov:string,plate:string){
     console.log(mov)
@@ -267,9 +268,9 @@ export class AccessVisitorRegistryComponent
   }
 
   userAllowedModal(){
-    const sub=this.visitorService.getAllUserAllowedModal().subscribe({
+    const sub = this.visitorService.getAllUserAllowedModal().subscribe({
       next:(data)=>{
-        this.userAllowedGetAll=data
+        this.userAllowedGetAll=data;
       },error:(error)=>{
         console.log(error)
       }
@@ -487,7 +488,6 @@ loadUsersAllowedData(): Observable<boolean> {
             this.dataTable.clear().rows.add(formattedData).draw();
           });
           this.addEventListeners();
-  
       }
     }
 
@@ -495,7 +495,7 @@ loadUsersAllowedData(): Observable<boolean> {
   addEventListeners(): void {
 
     const tableBody = document.querySelector('#visitorsTable tbody');
-   const tdata=$('#visitorsTable tbody');
+    const tdata=$('#visitorsTable tbody');
       // Delegación de eventos para los clics en los íconos de los usuarios
       tdata?.on('click', '.user-type-icon', (event: JQuery.TriggeredEvent) => {
         const document = $(event.currentTarget).data('document'); // Obtener el documento del data-atributo
@@ -1483,7 +1483,6 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
     return new Observable<boolean>((observer) => {
   
       try {
-  
         // Preparar mensaje del modal
         const modalMessage = `¿Está seguro que desea registrar el ingreso de ${visitor.name} ${visitor.last_name}?`;
         document.getElementById('modalMessageIngresoEmp')!.textContent = modalMessage;
