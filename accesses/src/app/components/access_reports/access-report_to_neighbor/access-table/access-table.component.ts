@@ -141,6 +141,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   ngOnInit(): void {
     window.addEventListener('openModalInfo', this.handleOpenModal);
+    window.addEventListener('Movment', this.handleOpenMovement);
   }
 /**
    * Se manda el documento al servicio
@@ -150,6 +151,15 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const visitorDocument = customEvent.detail;
     console.log("llamada")
     this.ownerService.openModal(visitorDocument);
+  };
+  private handleOpenMovement = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    const { document, type,plate } = customEvent.detail;
+    console.log("llamada")
+    console.log(plate)
+    console.log(document)
+    this.ownerService.onMOvement(document,type,plate);
+    
   };
 
   /**
@@ -287,7 +297,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       const transformations: Observable<string>[] = [
         of(movement.day + '/' + movement.month + '/' + movement.year),
         of(movement.hour || ''),
-        of(movement.entryOrExit || ''),
+        of((movement.entryOrExit || '') + '!-' + (movement.isLastMovement)),
         of(movement.entryType || ''),
         this.userService.transformNameOrId(movement.visitorName || ''),
         of(movement.visitorDocument || ''),

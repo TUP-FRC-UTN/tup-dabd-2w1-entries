@@ -58,6 +58,7 @@
     //METODO getAllUserAllowedVisitors(@PathVariable String visitor)
     //Clase necesaria (para recibir la data): User_AllowedInfoDto
     export interface AccessUserAllowedInfoDto {
+      
       document: string;
       name: string;
       last_name: string;
@@ -73,6 +74,23 @@
       neighbor_id: number; //se necesita para el post del Visitor
     }
 
+
+    export interface AccesUserQrDTO {
+      uid:string;
+      document: string;
+      name: string;
+      last_name: string;
+      email: string;
+      vehicles: AccessNewVehicleDto[]; 
+      userType: AccessUserAllowedTypeDto;
+      authRanges: AuthRangeInfoDto[]; 
+      observations?: string; 
+      documentTypeDto: AccessDocumentTypeDto; 
+      neighbor_id: number;
+    }
+
+
+    
     export interface AuthRangeInfoDto {
       neighbor_id: number;
       init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")

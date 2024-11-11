@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 
-import { Observable, Subject, take, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, take, tap } from 'rxjs';
 import { AccessNewMovementsEntryDtoOwner, AccessUserAllowedInfoDtoOwner } from '../../models/access-visitors/interface/access-owner';
 import { AccessRegistryUpdateService } from '../access-registry-update/access-registry-update.service';
 
@@ -15,10 +15,14 @@ export class AccessOwnerRenterserviceService {
   private URL_POST_OwnerExit="http://localhost:8090/movements_exit/registerOwnerExit"
   private httpClient:HttpClient=inject(HttpClient)
   private readonly registryUpdate = inject(AccessRegistryUpdateService);
-
+  private movemenSubject =  new BehaviorSubject<{ document: string, movement: string, plate: string }>({
+    document: '',
+    movement: '',
+    plate: ''
+  });
   private modalSubject = new Subject<string>();
   modalState$ = this.modalSubject.asObservable();
-
+  movementState$=this.movemenSubject.asObservable()
   openModal(visitorDocument: string) {
     console.log(visitorDocument)
     const cleanedDocument = visitorDocument
@@ -29,8 +33,19 @@ export class AccessOwnerRenterserviceService {
 console.log(cleanedDocument); 
     this.modalSubject.next(cleanedDocument);
   }
+  
+  onMOvement(visitorDocument: string,movement:string, plate: string) {
+    console.log(visitorDocument)
+    console.log('Tipo de movimiento:', movement);
+    console.log('plaquita',plate)
+    const cleanedDocument = visitorDocument
+    .replace(/^[DP]-/, "")  // Elimina "D-" o "P-" al principio
+    .replace(/-/g, "")       // Elimina todos los guiones
+    .trim(); 
 
-
+console.log(cleanedDocument); 
+this.movemenSubject.next({ document: cleanedDocument, movement: movement, plate: plate  });
+  }
   constructor(){}
   registerOwnerRenterEntry(movement:AccessNewMovementsEntryDtoOwner): Observable<any>{
     const headers=new HttpHeaders({'Content-Type': 'application/json'});
