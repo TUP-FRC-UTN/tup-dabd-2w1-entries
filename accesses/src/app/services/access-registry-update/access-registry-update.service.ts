@@ -6,7 +6,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 })
 export class AccessRegistryUpdateService {
   private registryBehaviorSubject = new BehaviorSubject<boolean>(true);
-  private registryUserAllowedSubject = new BehaviorSubject<boolean>(true);
 
   constructor() { }
 
@@ -15,14 +14,6 @@ export class AccessRegistryUpdateService {
   }
   
   getObservable(): Observable<boolean> {
-    return this.registryBehaviorSubject.asObservable();
-  }
-
-  updateUsersAllowed(forceUpdate: boolean): void {
-    this.registryUserAllowedSubject.next(forceUpdate);
-  }
-
-  getUserAllowedObservable(): Observable<boolean> {
     return this.registryBehaviorSubject.asObservable();
   }
 }
