@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { AccessMovementEntryDto,AccessMovementExitDto,AccessSuppEmpDto } from '../../models/access-employee-allowed/access-user-allowed';
 import { HttpClient, HttpHeaders,  } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { AccessUserAllowedInfoDto } from '../../models/access-visitors/access-VisitorsModels';
+import { AccessRegistryUpdateService } from '../access-registry-update/access-registry-update.service';
 import { AccessAuthRangeInfoDtoOwner } from '../../models/access-visitors/interface/access-owner';
 
 @Injectable({
@@ -15,7 +16,7 @@ export class AccessUserServiceService {
   private apiUrl = 'http://localhost:8090/GetSuppliesAndEmployeers';
   private apiUrlGeneric = 'http://localhost:8090';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private  accesRegisterUpdate: AccessRegistryUpdateService) {
     this.loadSuppEmpData();
   }
 
@@ -27,12 +28,20 @@ export class AccessUserServiceService {
 
   registerEmpSuppEntry(movement: AccessMovementEntryDto): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(this.apiUrlPostEntry, movement, { headers });
+    return this.http.post<any>(this.apiUrlPostEntry, movement, { headers }).pipe(
+      tap(() => {
+        this.accesRegisterUpdate.updateTable(true);
+      })
+    );
   }
 
   registerEmpSuppExit(movement: AccessMovementExitDto): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(this.apiUrlPostExit, movement, { headers });
+    return this.http.post<any>(this.apiUrlPostExit, movement, { headers }).pipe(
+      tap(() => {
+        this.accesRegisterUpdate.updateTable(true);
+      })
+    );;
   }
 
   getAuthRangeByDoc(document: string, documentType: string): Observable<AccessAuthRangeInfoDtoOwner[]> {

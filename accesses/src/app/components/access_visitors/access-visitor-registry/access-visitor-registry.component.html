@@ -127,12 +127,12 @@
  </div>
  
  <!-- Modal de Información del Visitante -->
- <div class="modal" id="visitorInfoModal" tabindex="-1" aria-labelledby="visitorInfoModalLabel" aria-hidden="true" [class.show]="isModalOpen">
+ <div class="modal fade" id="visitorInfoModal" tabindex="-1" aria-labelledby="visitorInfoModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="visitorInfoModalLabel">Información de la Persona</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeModal()"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div *ngIf="selectedVisitor">
@@ -144,13 +144,15 @@
               selectedVisitor.userType.description === 'Owner' ? 'Propietario' : 
               selectedVisitor.userType.description === 'Tenant' ? 'Inquilino' : 
               selectedVisitor.userType.description === 'Supplier' ? 'Proveedor':
+              selectedVisitor.userType.description === 'Emergency' ? 'Emergencia':
               selectedVisitor.userType.description
             }}
           </p>
           <p><strong>Tipo de documento:</strong> {{ getDocumentType(selectedVisitor) }}</p>
           <p><strong>Documento:</strong> {{ selectedVisitor.document }}</p>
-          <p><strong>Email:</strong> {{ selectedVisitor.email }}</p>
- 
+          @if (selectedVisitor.userType.description !== 'Emergency') {
+            <p><strong>Email:</strong> {{ selectedVisitor.email }}</p>
+          }
           <p><strong>Información del vehículo:</strong></p>
           <div *ngIf="hasVehicles(selectedVisitor); else noVehicle">
             <ul *ngFor="let vehicle of getVehicles(selectedVisitor)">
