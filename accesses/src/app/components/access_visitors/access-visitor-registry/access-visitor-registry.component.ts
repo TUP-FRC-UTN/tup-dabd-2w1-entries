@@ -94,37 +94,37 @@ export class AccessVisitorRegistryComponent
     const registryUpdated = this.registryUpdateService.getObservable().subscribe({
       next: v => {
           this.userAllowedModal();
-              //DATOS
-          //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
-          const sub = this.loadUsersAllowedData().subscribe({
-            next: () => {
-              //console.log("allPeopleAllowed: ", this.allPeopleAllowed)
-              this.filteredAllPeopleAllowed = this.allPeopleAllowed;
-              //console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
-            },
-            error: (err) => {
-              console.log(err);
-            }
-          }); 
-          this.subscription.add(sub);
-          const subs=this.subscription = this.ownerService.modalState$.subscribe(
-            (document: string) => {
-              this.visitorDocument = document;
-              this.ModalDocument(document)
-            }
-          );
-          this.subscription.add(subs)
-          const ub=this.subscription =this.ownerService.movementState$.subscribe(
-            (data: { document: string, movement: string ,plate:string}) => {
-              const { document, movement,plate } = data;
-              console.log('Documento:', document);
-              console.log('Movimiento:', movement);
-              this.onChangeMovement(document,movement,plate)
-            }
-          )
-          this.subscription.add(ub)
       }
     });
+    //DATOS
+    //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
+    const sub = this.loadUsersAllowedData().subscribe({
+      next: () => {
+        //console.log("allPeopleAllowed: ", this.allPeopleAllowed)
+        this.filteredAllPeopleAllowed = this.allPeopleAllowed;
+        //console.log("filteredAllPeopleAllowed: ", this.filteredAllPeopleAllowed)
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    }); 
+    this.subscription.add(sub);
+    const subs=this.subscription = this.ownerService.modalState$.subscribe(
+      (document: string) => {
+        this.visitorDocument = document;
+        this.ModalDocument(document)
+      }
+    );
+    this.subscription.add(subs)
+    const ub=this.subscription =this.ownerService.movementState$.subscribe(
+      (data: { document: string, movement: string ,plate:string}) => {
+        const { document, movement,plate } = data;
+        console.log('Documento:', document);
+        console.log('Movimiento:', movement);
+        this.onChangeMovement(document,movement,plate)
+      }
+    )
+    this.subscription.add(ub)
 
     this.subscription.add(registryUpdated);
   }

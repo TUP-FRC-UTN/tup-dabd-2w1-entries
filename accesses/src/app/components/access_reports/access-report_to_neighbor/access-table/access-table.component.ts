@@ -427,8 +427,16 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
         of(movement.visitorDocument || ''),
         of(movement.carType || ''),
         of(movement.plate || ''),
-        this.userService.getUserById(movement.neighborId),
-        this.userService.getUserById(movement.securityId)
+        
+        // Manejo de condiciones para neighborId
+        movement.neighborId === "null"
+        ? of("------")
+        : /^\d+$/.test(movement.neighborId) // Si es un número en tipo string
+          ? this.userService.getUserById(parseInt(movement.neighborId, 10)) // Parsear a número
+          : of(movement.neighborId || ''), // Si es una cadena de texto
+
+        //this.userService.getUserById(movement.securityId)
+        this.userService.getUserById(9)
       ];
 
       return await firstValueFrom(forkJoin(transformations));
