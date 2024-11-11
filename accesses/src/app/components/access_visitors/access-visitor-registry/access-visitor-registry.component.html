@@ -3,7 +3,7 @@
   <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable" style="max-width: 95vw; margin: 10px;">
     <div class="modal-content h-100">
       <div class="modal-header">
-        <h5 class="modal-title" id="visitorListModalLabel">Lista de Visitantes</h5>
+        <h5 class="modal-title" id="visitorListModalLabel">Lista de Personas Autorizadas</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -23,7 +23,7 @@
                 </div>
  
                 <!-- Selector de Tipo de Ingresante -->
-                <div class="col-4 pe-0">
+                <!-- <div class="col-4 pe-0">
                   <div class="d-flex align-items-center flex-nowrap">
                     <label class="form-label mb-0 me-2 text-nowrap">Tipo de ingresante:</label>
                     <ng-select
@@ -52,7 +52,7 @@
                       </ng-template>
                     </ng-select>
                   </div>
-                </div>
+                </div> -->
  
                 <!-- Espacio flexible -->
                 <div class="col">
@@ -64,9 +64,20 @@
                     <i class="bi bi-trash"></i>
                   </button>
                   
+                    <button class="btn text-light action-btn me-2"
+            style="border:none"
+                title="Buscar"
+                style="background-color: #0d6efd;"
+                data-bs-toggle="modal" 
+                data-bs-target="#visitorModal">
+                <i class="bi bi-plus-lg"></i>
+            </button>
+                  
+                  
                   <button
                     class="btn btn-primary"
                     data-bs-toggle="modal"
+                    style="background-color: #444444; border: none;"
                     data-bs-target="#qrScannerModal">
                     <i class="bi bi-qr-code-scan"></i>
                   </button>
@@ -79,10 +90,10 @@
                   <tr>
                     <!-- <th scope="col">Estado</th> -->
                     <th scope="col">Nombre</th>
-                    <th scope="col">Tipo</th>
+                    <th scope="col">Tipo Ingresante</th>
                     <th scope="col">Documento</th>
                     <th scope="col">Vehículos</th>
-                    <th scope="col">Observaciones</th>
+                    <!-- <th scope="col">Observaciones</th> -->
                     <th scope="col">Acciones</th>
                   </tr>
                 </thead>
@@ -127,63 +138,106 @@
  </div>
  
  <!-- Modal de Información del Visitante -->
- <div class="modal" id="visitorInfoModal" tabindex="-1" aria-labelledby="visitorInfoModalLabel" aria-hidden="true" [class.show]="isModalOpen">
-  <div class="modal-dialog">
+ <div class="modal fade" id="visitorInfoModal" tabindex="-1" aria-labelledby="visitorInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="visitorInfoModalLabel">Información de la Persona</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="closeModal()"></button>
+        <h5 class="modal-title" id="visitorInfoModalLabel">Más Información</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div *ngIf="selectedVisitor">
-          <p><strong>Nombre:</strong> {{ selectedVisitor.name }} {{ selectedVisitor.last_name }}</p>
-          <p><strong>Tipo de Persona:</strong> 
-            {{ 
-              selectedVisitor.userType.description === 'Employeed' ? 'Empleado' : 
-              selectedVisitor.userType.description === 'Visitor' ? 'Visitante' : 
-              selectedVisitor.userType.description === 'Owner' ? 'Propietario' : 
-              selectedVisitor.userType.description === 'Tenant' ? 'Inquilino' : 
-              selectedVisitor.userType.description === 'Supplier' ? 'Proveedor':
-              selectedVisitor.userType.description
-            }}
-          </p>
-          <p><strong>Tipo de documento:</strong> {{ getDocumentType(selectedVisitor) }}</p>
-          <p><strong>Documento:</strong> {{ selectedVisitor.document }}</p>
-          <p><strong>Email:</strong> {{ selectedVisitor.email }}</p>
- 
-          <p><strong>Información del vehículo:</strong></p>
-          <div *ngIf="hasVehicles(selectedVisitor); else noVehicle">
-            <ul *ngFor="let vehicle of getVehicles(selectedVisitor)">
-              <li><strong>Patente:</strong> {{ vehicle.plate }}</li>
-              <li><strong>Tipo:</strong> 
+          <!-- Información del visitante en 2 columnas -->
+          <div class="row mb-2">
+            <div class="col-md-6">
+              <p class="mb-1"><strong>Nombre:</strong> {{ selectedVisitor.name }} {{ selectedVisitor.last_name }}</p>
+              <p class="mb-1"><strong>Tipo:</strong> 
                 {{ 
-                  vehicle.vehicle_Type.description === 'Car' ? 'Coche' : 
-                  vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
-                  vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
-                  vehicle.vehicle_Type.description 
+                  selectedVisitor.userType.description === 'Employeed' ? 'Empleado' : 
+                  selectedVisitor.userType.description === 'Visitor' ? 'Visitante' : 
+                  selectedVisitor.userType.description === 'Owner' ? 'Propietario' : 
+                  selectedVisitor.userType.description === 'Tenant' ? 'Inquilino' : 
+                  selectedVisitor.userType.description === 'Supplier' ? 'Proveedor':
+                  selectedVisitor.userType.description === 'Emergency' ? 'Emergencia':
+                  selectedVisitor.userType.description === 'Worker' ? 'Obrero' : 
+                  selectedVisitor.userType.description === 'Delivery' ? 'Delivery' : 
+                  selectedVisitor.userType.description === 'Taxi' ? 'Taxi' : 
+                  selectedVisitor.userType.description === 'Cleaning' ? 'P. de Limpieza' : 
+                  selectedVisitor.userType.description === 'Gardener' ? 'Jardinero' : 
+                  selectedVisitor.userType.description
                 }}
-              </li>
-            </ul>
+              </p>
+              <p class="mb-1"><strong>Tipo de Documento:</strong> {{ getDocumentType(selectedVisitor) }}</p>
+              <p class="mb-1"><strong>Documento:</strong> {{ selectedVisitor.document }}</p>
+              @if (selectedVisitor.userType.description !== 'Emergency') {
+                <p class="mb-1"><strong>Email:</strong> {{ selectedVisitor.email }}</p>
+              }
+            </div>
+            
+            <div class="col-md-6">
+              <p class="mb-1"><strong>Información del vehículo:</strong></p>
+              <div *ngIf="hasVehicles(selectedVisitor); else noVehicle">
+                <ul *ngFor="let vehicle of getVehicles(selectedVisitor)" class="list-unstyled">
+                  <li><strong>Patente:</strong> {{ vehicle.plate }}</li>
+                  <li><strong>Tipo:</strong> 
+                    {{ 
+                      vehicle.vehicle_Type.description === 'Car' ? 'Coche' : 
+                      vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                      vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
+                      vehicle.vehicle_Type.description 
+                    }}
+                  </li>
+                </ul>
+              </div>
+              <ng-template #noVehicle>
+                <p class="mb-1">No tiene registro</p>
+              </ng-template>
+
+              <!-- Rango de fechas autorizado -->
+              <p class="fw-bold mb-1">Rango de Fechas Autorizado:</p>
+              <div *ngIf="selectedVisitor.authRanges.length > 0; else noDays">
+                <ul class="list-unstyled">
+                  <li><strong>Desde:</strong> {{ selectedVisitor.authRanges.at(selectedVisitor.authRanges.length-1)?.init_date| date : "dd/MM/yyyy" }}</li>
+                  <li><strong>Hasta:</strong> {{ selectedVisitor.authRanges.at(selectedVisitor.authRanges.length-1)?.end_date | date : "dd/MM/yyyy" }}</li>
+                </ul>
+              </div>
+              <ng-template #noDays>
+                <p class="mb-1">No hay rango de fechas cargado.</p>
+              </ng-template>
+            </div>
           </div>
-          <ng-template #noVehicle>
-            <p>No tiene registro</p>
-          </ng-template>
- 
-          <p><strong>Rango de fechas:</strong></p>
-          <div *ngIf="selectedVisitor.authRanges.length > 0; else noDays">
-            <ul *ngFor="let auth of selectedVisitor.authRanges">
-              <li><strong>Desde:</strong> {{ auth.init_date | date : "dd/MM/yyyy" }}</li>
-              <li><strong>Hasta:</strong> {{ auth.end_date | date : "dd/MM/yyyy" }}</li>
-            </ul>
+
+          <hr>
+
+          <!-- Rango horario autorizado en 3 columnas -->
+          <div class="col-12">
+            <div class="row">
+              @if (selectedVisitor.authRanges.length > 0 &&
+                   selectedVisitor.authRanges.at(selectedVisitor.authRanges.length-1)?.allowedDays &&
+                   selectedVisitor.authRanges.at(selectedVisitor.authRanges.length-1)!.allowedDays.length > 0) {
+                <p class="fw-bold">Rango Horario Autorizado:</p>
+                @for (aDay of selectedVisitor.authRanges.at(selectedVisitor.authRanges.length-1)!.allowedDays;track $index) {
+                  <div class="col-md-4 mb-2">
+                    <p class="fw-bold mb-1">{{this.helperService.translateDay(aDay.day)}}</p>
+                    <ul class="list-unstyled">
+                      <li><strong>Desde:</strong> {{helperService.stringToHour(aDay, true)}}</li>
+                      <li><strong>Hasta:</strong>  {{helperService.stringToHour(aDay, false)}}</li>
+                    </ul>
+                  </div>
+                }
+              } @else {
+                <div class="col-12">
+                  <p>No hay rango horario cargado.</p>
+                </div>
+              }
+            </div>
           </div>
-          <ng-template #noDays>
-            <p>No hay fecha cargada.</p>
-          </ng-template>
-        </div>
+          
       </div>
     </div>
   </div>
- </div>
+</div>
+</div>
  
  <!-- Modal de Confirmación de Ingreso vecino -->
  <div class="modal fade" id="confirmIngresoModal" tabindex="-1" aria-labelledby="confirmIngresoModalLabel" aria-hidden="true">
@@ -280,3 +334,4 @@
  </div>
 
  
+ <app-acceses-visitors-temp></app-acceses-visitors-temp>  

@@ -58,6 +58,7 @@
     //METODO getAllUserAllowedVisitors(@PathVariable String visitor)
     //Clase necesaria (para recibir la data): User_AllowedInfoDto
     export interface AccessUserAllowedInfoDto {
+      
       document: string;
       name: string;
       last_name: string;
@@ -73,6 +74,27 @@
       neighbor_id: number; //se necesita para el post del Visitor
     }
 
+
+    export interface QRData {
+      neighborId: number;
+      neighborName: string;
+      neighborNameLastName: string;
+      name: string;
+      lastName: string;
+      document: string;
+      documentType: string;
+      vehicleType: string;
+      plate: string;
+      uid: string;
+      init_date: string;
+      end_date: string;
+      init_hour: string;
+      end_hour: string;
+      generatedDate: string;
+    }
+    
+
+    
     export interface AuthRangeInfoDto {
       neighbor_id: number;
       init_date: Date; //LocalDate (EJ: "2024-10-10" / "yyyy-MM-dd")
@@ -182,7 +204,7 @@ export interface AccessUserAllowedInfoDto2 {
   name: string;
   last_name: string;
   email: string;
-  authId : string;
+  authId : string ;
   authRange: AccessAuthRangeInfoDto2;
   vehicle: AccessNewVehicleDto2 | null;
   visitorId: number | null;
@@ -217,3 +239,4 @@ export interface Owner {
   documentTypeDto : AccessDocumentTypeDto;
   neighbor_id : number| null;
 }
+

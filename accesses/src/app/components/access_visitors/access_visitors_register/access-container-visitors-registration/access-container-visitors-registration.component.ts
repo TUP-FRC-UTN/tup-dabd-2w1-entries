@@ -43,7 +43,7 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   isQRCodeAvailable: boolean = false; 
   visitorForm!: FormGroup; 
   vehicleType: string[] = [];
-  patentePattern = '^[A-Z]{1,3}\\d{3}[A-Z]{0,3}$';
+  patentePattern = /(^[A-Z]{2}\d{3}[A-Z]{2}$)|(^[A-Z]{3}\d{3,4}$)|(^[A-Z]{3}\d{4}$)/;
   private unsubscribe$ = new Subject<void>();
   visitorRecord?:AccessVisitorRecord;
   vehicleTypes: string[] = ['Car', 'Motorbike', 'Truck', 'Van']; 

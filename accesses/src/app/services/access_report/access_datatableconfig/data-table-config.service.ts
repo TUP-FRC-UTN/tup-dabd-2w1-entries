@@ -10,7 +10,6 @@ import { DataTableConfig, ColumnDef } from "../../../models/access-report/Types"
 export class DataTableConfigService {
   
   public readonly USER_TYPE_ICONS = USER_TYPE_MAPPINGS;
-  public readonly ENTRY_STYLES = ENTRY_STYLES;
   public readonly STATUS_STYLES = STATUS_STYLES;
 
   
@@ -34,10 +33,7 @@ export class DataTableConfigService {
         autoWidth: false,
         language: this.getLanguageConfig(),
         responsive: true,
-        dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">',
-        drawCallback: (settings: any) => {
-          this.styleColumns(settings);
-        }
+        dom: 'rt<"bottom d-flex justify-content-between align-items-center"<"d-flex align-items-center gap-3"l i> p><"clear">'
       };
     }
   
@@ -57,13 +53,45 @@ export class DataTableConfigService {
     }
   
     private getColumnDefs() {
-      return [
-        
-    
+      return [    
         {
           targets: 8,
           render: (data: any) => {
             return data === '------' ? '<div class="text-center">------</div>' : data;
+          }
+        },
+        {
+          targets: 2,
+          render: (data: string, type: any, row: any) => {
+            const visitorDocument = row[5];
+            const plate = row[7];
+            const splitedData = data.split('!-');
+
+            const movementType = splitedData.at(0) + '';
+            const lastMovement = (splitedData.at(1) + '') === 'true'; 
+
+            const style = ENTRY_STYLES[movementType.toLocaleLowerCase() as keyof typeof ENTRY_STYLES];
+            const buttonAddition = `
+            role="button" onclick="window.dispatchEvent(new CustomEvent('Movment', { 
+                    detail: { 
+                      document: '${visitorDocument}', 
+                      type: '${movementType.toLocaleLowerCase()}', 
+                      plate: '${plate}' 
+                    }
+                  }))"
+            `
+            
+            return `
+            <div class="d-flex justify-content-center">
+              <span class="badge rounded-pill user-select-none" 
+                    style="background-color: ${style.color}; color: white;"
+                    ${lastMovement ? buttonAddition : ''}
+                    title="Registrar ${style.text == 'Entrada' ? 'salida' : 'entrada'}"
+                    data-title="${style.text}">
+                ${style.text}
+              </span>
+            </div>
+            `;
           }
         },
         {
@@ -82,6 +110,8 @@ export class DataTableConfigService {
         return `
           <button style="background-color: ${typeConfig.color}; border: none;" 
                   class="btn btn-primary" 
+                  data-bs-toggle="modal"
+                  data-bs-target="#visitorInfoModal"
                   onclick="window.dispatchEvent(new CustomEvent('openModalInfo', { detail: '${visitorDocument}' }))"
                   title="${typeConfig.title}">
             <i class="${typeConfig.icon}"><div class="d-none">${typeConfig.title}</div></i>
@@ -90,68 +120,6 @@ export class DataTableConfigService {
     }
   ];
   []
-    }
-   
-    /**
-     * Aplica los estilos a las columnas después de cada redibujado de la tabla
-     * @param settings Configuración de la tabla
-     */
-    private styleColumns(settings: any): void {
-      const table = settings.nTable;
-      this.styleEntryExitColumn(table);
-      this.styleStatusColumn(table);
-    }
-  
-    /**
-     * Aplica estilos a la columna de entrada/salida
-     * @param table Elemento de la tabla
-     */
-    private styleEntryExitColumn(table: any): void {
-      $(table).find('td:nth-child(3)').each((_, element) => {
-        const cellText = $(element).text().trim().toLowerCase();
-        if (['entrada', 'salida'].includes(cellText)) {
-          const style = this.ENTRY_STYLES[cellText as keyof typeof this.ENTRY_STYLES];
-          this.applyBadgeStyle(element, style.color, style.text);
-        }
-      });
-    }
-  
-    /**
-     * Aplica estilos a la columna de estado
-     * @param table Elemento de la tabla
-     */
-    private styleStatusColumn(table: any): void {
-      $(table).find('td:nth-child(12)').each((_, element) => {
-        const estadoText = $(element).text().trim().toLowerCase();
-        
-        // Busca el estado correspondiente en el mapeo de valores
-        const matchingStatus = Object.entries(VALUE_MAPPINGS).find(([key, value]) => 
-          value.toLowerCase() === estadoText || key.toLowerCase() === estadoText
-        );
-  
-        if (matchingStatus) {
-          const [statusKey] = matchingStatus;
-          const style = statusKey === 'late' ? this.STATUS_STYLES.late : this.STATUS_STYLES.inrange;
-          this.applyBadgeStyle(element, style.color, style.text);
-        }
-      });
-    }
-  
-    /**
-     * Aplica el estilo de badge a un elemento
-     * @param element Elemento al que se aplicará el estilo
-     * @param color Color del badge
-     * @param text Texto que se mostrará
-     */
-    private applyBadgeStyle(element: any, color: string, text: string): void {
-      $(element).html(`
-        <div class="d-flex justify-content-center">
-          <span class="badge rounded-pill d-flex align-items-center justify-content-center" 
-                style="background-color: ${color}; color: white; border: none;">
-            <span style="white-space: nowrap; display: inline-block;">${text}</span>
-          </span>
-        </div>
-      `);
     }
 }
 

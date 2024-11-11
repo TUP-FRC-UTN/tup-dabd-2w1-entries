@@ -6,6 +6,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 })
 export class AccessRegistryUpdateService {
   private registryBehaviorSubject = new BehaviorSubject<boolean>(true);
+
   constructor() { }
 
   updateTable(forceUpdate: boolean): void {

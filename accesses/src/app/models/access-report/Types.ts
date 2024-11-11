@@ -38,6 +38,7 @@ export interface FilterValues {
     neighborId: string;
     securityId: number;
     lateOrNot: string;
+    isLastMovement : boolean;
   }
   
   /**

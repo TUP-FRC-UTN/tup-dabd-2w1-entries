@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, AfterViewInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterViewInit, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
 import { DataTablesModule } from 'angular-datatables';
@@ -20,11 +20,14 @@ import { AccessRegistryUpdateService } from '../../../../services/access-registr
 import { AccessVisitorRegistryComponent } from '../../../access_visitors/access-visitor-registry/access-visitor-registry.component';
 import { AccessUserAllowedInfoDto } from '../../../../models/access-visitors/access-visitors-models';
 import { AccessOwnerRenterserviceService } from '../../../../services/access-owner/access-owner-renterservice.service';
+import { NgxScannerQrcodeComponent, NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
+import { QRData } from '../../../../models/access-visitors/access-VisitorsModels';
 
 @Component({
   selector: 'app-access-table',
   standalone: true,
-  imports: [DataTablesModule, CommonModule, HttpClientModule, NgSelectModule, FormsModule, AccessVisitorRegistryComponent],
+  imports: [DataTablesModule, CommonModule, HttpClientModule, NgSelectModule, FormsModule, AccessVisitorRegistryComponent,NgxScannerQrcodeModule,
+    NgSelectModule],
   templateUrl: './access-table.component.html',
   styleUrls: ['./access-table.component.css']
 })
@@ -77,6 +80,127 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initializeDates();
   }
  
+  @ViewChild('scanner') scanner!: NgxScannerQrcodeComponent; // Referencia al escáner QR
+
+  isScanning: boolean = false; // Variable para controlar si el escáner está activo
+  scannedResult: string = ''; // Resultado del QR escaneado
+
+  // Activar el escáner y mostrar el modal
+  ScanQR() {
+    this.isScanning = true; // Activar el escáner
+    this.startScanner(); // Iniciar el escáner
+  }
+
+  // Método para iniciar el escáner
+  startScanner(): void {
+    if (!this.scanner.isStart) {
+      this.scanner.start();
+    }
+  }
+  onModalOpened(): void {
+    this.startScanner(); 
+  }
+
+  // Método para detener el escáner
+  stopScanner(): void {
+    if (this.scanner.isStart) {
+      this.scanner.stop();
+      this.isScanning = false;
+    }
+  }
+
+  dataTable: any; 
+  users: any[] = [];  
+
+
+
+  handleQrScan(event: any): void {
+    try {
+      // Obtener el valor del QR escaneado
+      this.scannedResult = event[0].value;
+      
+      // Parsear los datos del QR
+      const qrData: QRData[] = JSON.parse(this.scannedResult);
+      
+      // Obtener todos los documentos únicos del QR
+      const documents = new Set(qrData.map(item => item.document));
+      
+      // Filtrar la DataTable
+      this.filterTableByDocuments(Array.from(documents));
+      
+      // Detener el scanner
+      this.stopScanner();
+      
+    } catch (error) {
+      console.error('Error al procesar el QR:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'El código QR no tiene un formato válido'
+      });
+    }
+  }
+
+  
+
+
+  private filterTableByDocuments(documents: string[]): void {
+    if (!this.table) return;
+  
+    // Guardar la función de búsqueda original
+    const originalSearchFunction = $.fn.dataTable.ext.search.pop();
+  
+    // Agregar función de filtrado temporal
+    $.fn.dataTable.ext.search.push((settings: any, data: string[]) => {
+      // El documento está en la columna 5 (índice 5)
+      const rowDocument = data[5];
+      
+      // Verificar si el documento de la fila está en la lista de documentos del QR
+      const documentMatch = documents.some(doc => rowDocument.includes(doc));
+      
+      // Si hay una función de búsqueda original, combinar los resultados
+      if (originalSearchFunction) {
+        return documentMatch && originalSearchFunction(settings, data, undefined);
+      }
+      
+      return documentMatch;
+    });
+  
+    // Redibujar la tabla con el filtro aplicado
+    this.table.draw();
+  
+    // Mostrar mensaje con el resultado
+    const filteredRows = this.table.rows({ search: 'applied' }).count();
+  
+    // Restaurar la función de búsqueda original después del filtrado
+    $.fn.dataTable.ext.search.pop();
+    if (originalSearchFunction) {
+      $.fn.dataTable.ext.search.push(originalSearchFunction);
+    }
+  }
+  
+
+  clearQRFilter(): void {
+    if (!this.table) return;
+    
+    this.table.draw();
+  }
+
+
+  
+  
+  updateDataTable(filteredUsers: any[]): void {
+    if (this.table) {
+      this.table.clear(); // Limpiar la tabla actual
+      if (filteredUsers.length > 0) {
+        this.table.rows.add(filteredUsers); // Añadir los usuarios encontrados
+      }
+      this.table.draw(); // Redibujar la tabla
+    }
+  }
+  
+  
+
   /**
    * Inicializa las fechas por defecto (último mes)
    */
@@ -141,6 +265,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   ngOnInit(): void {
     window.addEventListener('openModalInfo', this.handleOpenModal);
+    window.addEventListener('Movment', this.handleOpenMovement);
   }
 /**
    * Se manda el documento al servicio
@@ -150,6 +275,15 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     const visitorDocument = customEvent.detail;
     console.log("llamada")
     this.ownerService.openModal(visitorDocument);
+  };
+  private handleOpenMovement = (event: Event) => {
+    const customEvent = event as CustomEvent;
+    const { document, type,plate } = customEvent.detail;
+    console.log("llamada")
+    console.log(plate)
+    console.log(document)
+    this.ownerService.onMOvement(document,type,plate);
+    
   };
 
   /**
@@ -287,7 +421,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       const transformations: Observable<string>[] = [
         of(movement.day + '/' + movement.month + '/' + movement.year),
         of(movement.hour || ''),
-        of(movement.entryOrExit || ''),
+        of((movement.entryOrExit || '') + '!-' + (movement.isLastMovement)),
         of(movement.entryType || ''),
         this.userService.transformNameOrId(movement.visitorName || ''),
         of(movement.visitorDocument || ''),
@@ -482,8 +616,10 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Verificar filtro de entrada/salida
     if (this.filterValues.entryOrExit.length > 0) {
-      if (!this.filterValues.entryOrExit.some(value => 
-        tipoEntrada.toLowerCase() === VALUE_MAPPINGS[value].toLowerCase())) {
+      if (!this.filterValues.entryOrExit.some(value => {
+        return tipoEntrada.trim().toLowerCase() === VALUE_MAPPINGS[value].toLowerCase();
+      }
+      )) {
         return false;
       }
     }

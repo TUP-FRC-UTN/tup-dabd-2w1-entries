@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AccessPiechartComponent } from './access-piechart.component';
+import { MetricsComponent } from './metrics.component';
 
-describe('AccessPiechartComponent', () => {
-  let component: AccessPiechartComponent;
-  let fixture: ComponentFixture<AccessPiechartComponent>;
+describe('MetricsComponent', () => {
+  let component: MetricsComponent;
+  let fixture: ComponentFixture<MetricsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AccessPiechartComponent]
+      imports: [MetricsComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AccessPiechartComponent);
+    fixture = TestBed.createComponent(MetricsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
