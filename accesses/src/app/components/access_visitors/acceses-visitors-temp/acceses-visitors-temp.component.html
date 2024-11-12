@@ -21,7 +21,8 @@
                       {{ type.description }}
                     </option>
                   </select>
-                  <div class="invalid-feedback" *ngIf="visitorForm.get('authorizedType')?.errors && visitorForm.get('authorizedType')?.touched">
+                  <div class="invalid-feedback"
+                    *ngIf="visitorForm.get('authorizedType')?.errors && visitorForm.get('authorizedType')?.touched">
                     <div *ngIf="visitorForm.get('authorizedType')?.errors?.['required']">
                       El Tipo de Ingresante es Requerido
                     </div>
@@ -32,9 +33,8 @@
               <div class="form-group row mb-3">
                 <label class="col-4 col-form-label">Propietario</label>
                 <div class="col-8">
-                  <ng-select class="w-100" [items]="propietariosOptions" [multiple]="false"
-                    [closeOnSelect]="true" [searchable]="true" bindLabel="label" bindValue="id"
-                    formControlName="propietario"
+                  <ng-select class="w-100" [items]="propietariosOptions" [multiple]="false" [closeOnSelect]="true"
+                    [searchable]="true" bindLabel="label" bindValue="id" formControlName="propietario"
                     [ngClass]="{'is-invalid': visitorForm.get('propietario')?.invalid && visitorForm.get('propietario')?.touched}"
                     (change)="onPropietarioChange($event)"
                     [placeholder]="SelectedNeighborhood ? '' : 'Buscar propietario'">
@@ -42,7 +42,8 @@
                       {{ item.label }}
                     </ng-template>
                   </ng-select>
-                  <div class="invalid-feedback" *ngIf="visitorForm.get('propietario')?.invalid && visitorForm.get('propietario')?.touched">
+                  <div class="invalid-feedback"
+                    *ngIf="visitorForm.get('propietario')?.invalid && visitorForm.get('propietario')?.touched">
                     Debe seleccionar un propietario
                   </div>
                 </div>
@@ -62,7 +63,8 @@
                             (input)="onDocumentInput($event)"
                             [class.is-valid]="visitorForm.get('document')?.valid && visitorForm.get('document')?.touched"
                             [class.is-invalid]="visitorForm.get('document')?.invalid && visitorForm.get('document')?.touched" />
-                          <div class="invalid-feedback" *ngIf="visitorForm.get('document')?.errors && visitorForm.get('document')?.touched">
+                          <div class="invalid-feedback"
+                            *ngIf="visitorForm.get('document')?.errors && visitorForm.get('document')?.touched">
                             <div *ngIf="visitorForm.get('document')?.errors?.['required']">
                               El documento es requerido.
                             </div>
@@ -85,7 +87,8 @@
                             <option value="1">DNI</option>
                             <option value="2">Pasaporte</option>
                           </select>
-                          <div class="invalid-feedback" *ngIf="visitorForm.get('documentType')?.errors && visitorForm.get('documentType')?.touched">
+                          <div class="invalid-feedback"
+                            *ngIf="visitorForm.get('documentType')?.errors && visitorForm.get('documentType')?.touched">
                             <div *ngIf="visitorForm.get('documentType')?.errors?.['required']">
                               El Tipo de Documento es requerido.
                             </div>
@@ -102,7 +105,8 @@
                           <input type="text" class="form-control" id="firstName" formControlName="firstName"
                             [class.is-valid]="visitorForm.get('firstName')?.valid && visitorForm.get('firstName')?.touched"
                             [class.is-invalid]="visitorForm.get('firstName')?.invalid && visitorForm.get('firstName')?.touched" />
-                          <div class="invalid-feedback" *ngIf="visitorForm.get('firstName')?.errors && visitorForm.get('firstName')?.touched">
+                          <div class="invalid-feedback"
+                            *ngIf="visitorForm.get('firstName')?.errors && visitorForm.get('firstName')?.touched">
                             <div *ngIf="visitorForm.get('firstName')?.errors?.['required']">
                               El nombre es requerido.
                             </div>
@@ -118,7 +122,8 @@
                           <input type="text" class="form-control" id="lastName" formControlName="lastName"
                             [class.is-valid]="visitorForm.get('lastName')?.valid && visitorForm.get('lastName')?.touched"
                             [class.is-invalid]="visitorForm.get('lastName')?.invalid && visitorForm.get('lastName')?.touched" />
-                          <div class="invalid-feedback" *ngIf="visitorForm.get('lastName')?.errors && visitorForm.get('lastName')?.touched">
+                          <div class="invalid-feedback"
+                            *ngIf="visitorForm.get('lastName')?.errors && visitorForm.get('lastName')?.touched">
                             <div *ngIf="visitorForm.get('lastName')?.errors?.['required']">
                               El apellido es requerido.
                             </div>
@@ -126,8 +131,7 @@
                         </div>
                       </div>
                     </div>
-
-                    <!-- Email Field -->
+                    @if (this.indexUserType===1) {
                     <div class="col-12 col-md-6">
                       <div class="form-group row mb-3">
                         <label for="email" class="col-4 col-form-label">Email</label>
@@ -135,7 +139,8 @@
                           <input type="email" class="form-control" id="email" formControlName="email"
                             [class.is-valid]="visitorForm.get('email')?.valid && visitorForm.get('email')?.touched"
                             [class.is-invalid]="visitorForm.get('email')?.invalid && visitorForm.get('email')?.touched" />
-                          <div class="invalid-feedback" *ngIf="visitorForm.get('email')?.errors && visitorForm.get('email')?.touched">
+                          <div class="invalid-feedback"
+                            *ngIf="visitorForm.get('email')?.errors && visitorForm.get('email')?.touched">
                             <div *ngIf="visitorForm.get('email')?.errors?.['required']">
                               El email es requerido.
                             </div>
@@ -143,7 +148,7 @@
                         </div>
                       </div>
                     </div>
-
+                    }
                     <!-- Vehicle Switch -->
                     <div class="col-12 col-md-6">
                       <div class="form-group row mb-3">
@@ -168,7 +173,8 @@
                               (input)="onLicensePlateInput($event)"
                               [class.is-valid]="visitorForm.get('licensePlate')?.valid && visitorForm.get('licensePlate')?.touched"
                               [class.is-invalid]="visitorForm.get('licensePlate')?.invalid && visitorForm.get('licensePlate')?.touched" />
-                            <div class="invalid-feedback" *ngIf="visitorForm.get('licensePlate')?.errors && visitorForm.get('licensePlate')?.touched">
+                            <div class="invalid-feedback"
+                              *ngIf="visitorForm.get('licensePlate')?.errors && visitorForm.get('licensePlate')?.touched">
                               <div *ngIf="visitorForm.get('licensePlate')?.errors?.['required']">
                                 La patente es requerida.
                               </div>
@@ -188,7 +194,8 @@
                                 {{ option.label }}
                               </option>
                             </select>
-                            <div class="invalid-feedback" *ngIf="visitorForm.get('vehicleType')?.errors && visitorForm.get('vehicleType')?.touched">
+                            <div class="invalid-feedback"
+                              *ngIf="visitorForm.get('vehicleType')?.errors && visitorForm.get('vehicleType')?.touched">
                               <div *ngIf="visitorForm.get('vehicleType')?.errors?.['required']">
                                 El tipo de vehículo es requerido.
                               </div>
@@ -209,7 +216,8 @@
                               <option value="La Segunda">La Segunda</option>
                               <!-- ... resto de las opciones ... -->
                             </select>
-                            <div class="invalid-feedback" *ngIf="visitorForm.get('insurance')?.errors && visitorForm.get('insurance')?.touched">
+                            <div class="invalid-feedback"
+                              *ngIf="visitorForm.get('insurance')?.errors && visitorForm.get('insurance')?.touched">
                               <div *ngIf="visitorForm.get('insurance')?.errors?.['required']">
                                 El seguro es requerido.
                               </div>
