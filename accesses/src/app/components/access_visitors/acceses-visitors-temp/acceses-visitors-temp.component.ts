@@ -204,7 +204,7 @@ onAuthorizedTypeChange(event: Event): void {
 
     // Aplica la validación de `required` solo si `indexUserType` es `1`
     if (this.indexUserType === 1) {
-      emailControl?.setValidators([Validators.required, Validators.email, Validators.maxLength(70)]);
+    emailControl?.setValidators([Validators.email, Validators.maxLength(70)]);
     } else {
       // Elimina la validación de `required` si `indexUserType` no es `1`
       emailControl?.setValidators([Validators.email, Validators.maxLength(70)]);
