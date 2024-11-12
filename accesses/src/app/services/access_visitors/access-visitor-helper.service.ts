@@ -160,7 +160,7 @@ export class AccessVisitorHelperService {
     //fecha actual, para poder comparar
     let todayDate = new Date();
     //fecha a comparar
-    let beforeDate = new Date(date);
+    let beforeDate = this.getFixedDate(date)
     //console.log(beforeDate, " | hoy -> ", todayDate)
 
     return beforeDate <= todayDate;
@@ -171,19 +171,37 @@ export class AccessVisitorHelperService {
       // Si date es undefined, devolver false 
       return false;
     }
+
+    
     //fecha actual, para poder comparar
     let todayDate = new Date();
     //fecha a comparar
-    let afterDate = new Date(date);
+    let afterDate = this.getFixedDate(date);
+
     afterDate.setHours(23, 59, 59, 999);
     
-   /*  console.log(date);
+    /* console.log(date);
     console.log(afterDate, " | hoy -> ", todayDate)
-    console.log(afterDate >= todayDate) */
+    console.log(afterDate >= todayDate)  */
     
     return afterDate >= todayDate;
   }
 
+  private getFixedDate(date: Date): Date {
+    let afterDate = new Date(date);
+
+    if (typeof(date) === 'string') {
+      const splitedDate = (date as string).split("-");
+      const splitedDateNumbers = splitedDate.map(v => Number.parseInt(v));
+      afterDate.setFullYear(
+        splitedDateNumbers[0],
+        splitedDateNumbers[1],
+        splitedDateNumbers[2]
+      );
+    }
+
+    return afterDate;
+  }
   // procesa un array de numeros (number[]) y devuelve un objeto Date
   processDate(movementDatetime: number[] | null): Date | null {
     if (!movementDatetime || movementDatetime.length < 6) {
