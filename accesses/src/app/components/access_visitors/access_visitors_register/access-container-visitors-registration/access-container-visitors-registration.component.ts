@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Subject, combineLatest } from 'rxjs';
+import { Observable, Subject, combineLatest } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AccessVisitorsRegisterServiceService } from '../../../../services/access_visitors/access-visitors-register/access-visitors-register-service/access-visitors-register-service.service';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
@@ -27,10 +27,24 @@ export class AccessContainerVisitorsRegistrationComponent implements OnInit, OnD
   onAuthorizedTypeChange(event: Event): void {
     const selectedValue = (event.target as HTMLSelectElement).value;
     if (selectedValue !== "") {
-        this.indexUserType = parseInt(selectedValue, 10); 
-        console.log(this.indexUserType);
+      this.indexUserType = parseInt(selectedValue, 10);
+      console.log(this.indexUserType);
+  
+      // Obtén la referencia al control `email`
+      const emailControl = this.visitorForm.get('email');
+  
+      // Aplica la validación de `required` solo si `indexUserType` es `1`
+      if (this.indexUserType === 1) {
+        emailControl?.setValidators([Validators.required, Validators.email, Validators.maxLength(70)]);
+      } else {
+        // Elimina la validación de `required` si `indexUserType` no es `1`
+        emailControl?.setValidators([Validators.email, Validators.maxLength(70)]);
+      }
+      // Actualiza el estado de validación del control
+      emailControl?.updateValueAndValidity();
     }
-}
+  }
+  
 
 
   user?: AccessUser;
@@ -240,13 +254,14 @@ private resetEverything(): void {
         Validators.pattern('^[A-Za-z0-9]{8,15}$'), 
       ]],
       documentType:['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email, Validators.maxLength(70)]],
+      email: [''],
       hasVehicle: [false],
       licensePlate: [''],
       vehicleType: [''],
       insurance: ['']
     });
   }
+
 
   
 
