@@ -132,7 +132,7 @@ initForm(): void {
           Validators.pattern('^[A-Za-z0-9]{8,15}$')
       ]],
       documentType:['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email, Validators.maxLength(70)]],
+      email: [''],
       hasVehicle: [false],
       licensePlate: [''],
       vehicleType: [''],
@@ -194,13 +194,26 @@ onDocumentInput(event: Event): void {
 
 // Actualiza el tipo de usuario autorizado
 onAuthorizedTypeChange(event: Event): void {
-  console.log("tipo antes",this.indexUserType);
-    const selectedValue = (event.target as HTMLSelectElement).value;
-    if (selectedValue !== "") {
-        this.indexUserType = parseInt(selectedValue, 10); 
-        console.log("tipo despues",this.indexUserType);
+  const selectedValue = (event.target as HTMLSelectElement).value;
+  if (selectedValue !== "") {
+    this.indexUserType = parseInt(selectedValue, 10);
+    console.log(this.indexUserType);
+
+    // Obtén la referencia al control `email`
+    const emailControl = this.visitorForm.get('email');
+
+    // Aplica la validación de `required` solo si `indexUserType` es `1`
+    if (this.indexUserType === 1) {
+      emailControl?.setValidators([Validators.required, Validators.email, Validators.maxLength(70)]);
+    } else {
+      // Elimina la validación de `required` si `indexUserType` no es `1`
+      emailControl?.setValidators([Validators.email, Validators.maxLength(70)]);
     }
+    // Actualiza el estado de validación del control
+    emailControl?.updateValueAndValidity();
+  }
 }
+
 sendVisitor(): void {
   console.log('Formulario de visitante:', this.visitorForm.value);
 
