@@ -208,7 +208,7 @@ export class AccessVisitorRegistryComponent
     }
     else if(this.selectedVisitor?.userType.description==='Owner'&& mov==='salida'){
       console.log('Llamando a prepareEntryMovement...');
-      this.prepareEntryVisitor(this.selectedVisitor, plate).subscribe({
+      this.prepareEntryMovement(this.selectedVisitor, plate).subscribe({
         next: (result) => {
           console.log('Resultado de prepareEntryVisitor:', result);
         },
@@ -218,7 +218,7 @@ export class AccessVisitorRegistryComponent
       });
     }
     else if(this.selectedVisitor?.userType.description==='Owner'&& mov==='entrada'){
-      this.prepareExitVisitor(this.selectedVisitor,plate).subscribe({
+      this.prepareExitMovement(this.selectedVisitor,plate).subscribe({
         next: (result) => {
           console.log('Resultado de prepareExitVisitor:', result);
         },
@@ -1194,7 +1194,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
       const vehicless = this.selectedVehiclePlate ? visitor.vehicles.find(v => v.plate === this.selectedVehiclePlate) || undefined : undefined;
       const firstRange = visitor.authRanges[0];
       const now = new Date();
-
+      console.log("authRanges",firstRange)
       // Construir objeto de movimiento
       this.movement = {
         movementDatetime: now,
