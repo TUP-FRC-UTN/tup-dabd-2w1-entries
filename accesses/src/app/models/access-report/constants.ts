@@ -42,26 +42,26 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
           filterValue: 'neighbour',
           columnValue: 'vecino'
         },
-        Obrero: {
+        Worker: {
           icon: 'bi bi-tools',
-          color: '#dc3545',
+          color: '#ffc107',
           title: 'Obrero',
-          filterValue: 'constructionworker',
-          columnValue: 'obrero'
+          filterValue: 'worker',
+          columnValue: 'Obrero'
         },
         Delivery: {
-          icon: 'bi bi-gear-wide-connected',
+          icon: 'bi bi-box-seam',
           color: '#ffc107',
           title: 'Delivery',
           filterValue: 'delivery',
           columnValue: 'delivery'
         },
         Cleaning: {
-          icon: 'bi bi-gear-wide-connected',
+          icon: 'bi bi-stars',
           color: '#ffc107',
           title: 'P. de Limpieza',
           filterValue: 'cleaning',
-          columnValue: 'personal de limpieza'
+          columnValue: 'P. de Limpieza'
         },
         Gardener: {
           icon: 'bi bi-gear-wide-connected',
@@ -71,7 +71,7 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
           columnValue: 'jardinero'
         },        
         Taxi: {
-          icon: 'bi bi-gear-wide-connected',
+          icon: 'bi bi-taxi-front-fill',
           color: '#ffc107',
           title: 'Taxi',
           filterValue: 'taxi',
@@ -97,14 +97,14 @@ export const ENTRY_EXIT_OPTIONS: SelectOption[] = [
  * Opciones para el tipo de persona que ingresa
  */
 export const TIPOS_INGRESANTE: SelectOption[] = [
-  { value: 'neighbour', label: 'Vecino' },
-  { value: 'visitor', label: 'Visitante' },
+
+
   { value: 'delivery', label: 'Delivery' },
-  { value: 'constructionworker', label: 'Obrero' },
-  { value: 'suplier', label: 'Proveedor' },
-  { value: 'employee', label: 'Empleado' },
-  { value: 'services', label: 'Servicios' },
-  { value: 'cleaning', label: 'Personal de Limpieza' },
+  { value: 'worker', label: 'Obrero' },
+  
+   { value: 'taxi', label: 'Taxi'},
+
+  { value: 'cleaning', label: 'P. de Limpieza' },
   { value: 'gardener', label: 'Jardinero' }
 ];
 
@@ -140,7 +140,7 @@ export const VALUE_MAPPINGS: { [key: string]: string } = {
   neighbour: 'vecino',
   visitor: 'visitante',
   delivery: 'delivery',
-  constructionworker: 'obrero',
+  worker: 'obrero',
   suplier: 'proveedor',
   employee: 'empleado',
   services: 'servicios',

@@ -627,17 +627,17 @@ loadUsersAllowedData(): Observable<boolean> {
 
       case "Worker" : {   //rojo (red) <i class="bi bi-tools"></i> 
         return  `<button style="background-color: #ffc107;border: bisque;" class="btn btn-primary" title="Obrero">
-                    <i class='bi bi-gear-wide-connected'></i> 
+                    <i class='bi bi-tools'></i> 
                   </button>`
       }
       case "Delivery" : {   //violeta (indigo) <i class="bi bi-box-seam"></i> 
         return  `<button style="background-color: #ffc107;border: bisque;" class="btn btn-primary" title="Delivery">
-                    <i class='bi bi-gear-wide-connected'></i> 
+                    <i class='bi bi-box-seam'></i> 
                   </button>`
       }
       case "Cleaning" : {   //rosa (pink) <i class="bi bi-stars"></i>
         return  `<button style="background-color: #ffc107;border: bisque;" class="btn btn-primary" title="P. de Limpieza">
-                    <i class='bi bi-gear-wide-connected'></i> 
+                    <i class='bi bi-stars'></i> 
                   </button>`
       }
       case "Gardener" : { //celeste (cyan) <i class="bi bi-flower1"></i>
@@ -647,7 +647,7 @@ loadUsersAllowedData(): Observable<boolean> {
       }
       case "Taxi" : { //
         return  `<button style="background-color: #ffc107;border: bisque;" class="btn btn-primary" title="Taxi">
-                    <i class='bi bi-gear-wide-connected'></i> 
+                   <i class="bi bi-taxi-front-fill"></i>
                   </button>`
       }
 

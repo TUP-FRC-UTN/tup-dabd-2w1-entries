@@ -234,56 +234,53 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     // Calcular la fecha de inicio (un mes antes)
     this.startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
   }
-
-  /**
+/**
    * Manejadores para los cambios de fecha
    */
-  dateError: string = '';
-
-  onStartDateChange(date: string): void {
-    const selectedDate = new Date(date);
-    
-    // Validar que la fecha no sea mayor que hoy
-    if (selectedDate > this.today) {
-      this.startDate = this.today;
-      this.dateError = 'La fecha desde no puede ser mayor a la fecha actual';
-      return;
-    }
-    
-    // Validar que la fecha desde no sea mayor que la fecha hasta
-    if (this.endDate && selectedDate > this.endDate) {
-      this.startDate = this.endDate;
-      this.dateError = 'La fecha desde no puede ser mayor a la fecha hasta';
-      return;
-    }
-
-    this.dateError = ''; 
-    this.startDate = selectedDate;
-    this.fetchData();
+dateError: string = '';
+onStartDateChange(date: string): void {
+  const selectedDate = new Date(date);
+  
+  // Validar que la fecha no sea mayor que hoy
+  if (selectedDate > this.today) {
+    this.startDate = this.today;
+    this.dateError = 'La fecha desde no puede ser mayor a la fecha actual';
+    return;
+  }
+  
+  // Validar que la fecha desde no sea mayor que la fecha hasta
+  if (this.endDate && selectedDate > this.endDate) {
+    this.startDate = this.endDate;
+    this.dateError = 'La fecha desde no puede ser mayor a la fecha hasta';
+    return;
   }
 
-  onEndDateChange(date: string): void {
-    const selectedDate = new Date(date);
-    
-    // Validar que la fecha no sea mayor que hoy
-    if (selectedDate > this.today) {
-      this.endDate = this.today;
-      this.dateError = 'La fecha hasta no puede ser mayor a la fecha actual';
-      return;
-    }
-    
-    // Validar que la fecha hasta no sea menor que la fecha desde
-    if (this.startDate && selectedDate < this.startDate) {
-      this.endDate = this.startDate;
-      this.dateError = 'La fecha hasta no puede ser menor a la fecha desde';
-      return;
-    }
+  this.dateError = ''; // Limpiar error si todo está bien
+  this.startDate = selectedDate;
+  this.fetchData();
+}
 
-    this.dateError = ''; // Limpiar error si todo está bien
-    this.endDate = selectedDate;
-    this.fetchData();
+onEndDateChange(date: string): void {
+  const selectedDate = new Date(date);
+  
+  // Validar que la fecha no sea mayor que hoy
+  if (selectedDate > this.today) {
+    this.endDate = this.today;
+    this.dateError = 'La fecha hasta no puede ser mayor a la fecha actual';
+    return;
+  }
+  
+  // Validar que la fecha hasta no sea menor que la fecha desde
+  if (this.startDate && selectedDate < this.startDate) {
+    this.endDate = this.startDate;
+    this.dateError = 'La fecha hasta no puede ser menor a la fecha desde';
+    return;
   }
 
+  this.dateError = ''; // Limpiar error si todo está bien
+  this.endDate = selectedDate;
+  this.fetchData();
+  }
 
 
   

@@ -19,7 +19,6 @@
         <input type="text" class="form-control" id="unifiedSearchFilter" placeholder="Buscar">
     </div>
 </div>
-
 <div class="col-auto ps-2">
     <div class="d-flex flex-column">
         <div class="d-flex align-items-center">
@@ -48,7 +47,7 @@
             [ngModel]="endDate | date:'yyyy-MM-dd'" 
             (ngModelChange)="onEndDateChange($event)"
             [max]="today | date:'yyyy-MM-dd'">
-    </div>
+    </div>
 </div>
     <!-- Botones de acción -->
     <div class="col-auto ms-auto">
