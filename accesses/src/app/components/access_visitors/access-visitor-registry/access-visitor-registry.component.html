@@ -64,20 +64,19 @@
                     <i class="bi bi-trash"></i>
                   </button>
                   
-                    <button class="btn text-light action-btn me-2"
-            style="border:none"
-                title="Buscar"
-                style="background-color: #0d6efd;"
-                data-bs-toggle="modal" 
-                data-bs-target="#visitorModal">
-                <i class="bi bi-plus-lg"></i>
-            </button>
-                  
+                  <button class="btn text-light action-btn me-2"
+                          style="border:none"
+                          title="Buscar"
+                          style="background-color: #0d6efd;"
+                          data-bs-toggle="modal" 
+                          data-bs-target="#visitorModal">
+                          <i class="bi bi-plus-lg"></i>
+                  </button>
                   
                   <button
                     class="btn btn-primary"
-                    data-bs-toggle="modal"
                     style="background-color: #444444; border: none;"
+                    data-bs-toggle="modal"
                     data-bs-target="#qrScannerModal">
                     <i class="bi bi-qr-code-scan"></i>
                   </button>
@@ -110,7 +109,7 @@
  
  <!-- Modal del escáner QR -->
  <div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="qrScannerModalLabel">Escanear Código QR</h5>
@@ -139,7 +138,7 @@
  
  <!-- Modal de Información del Visitante -->
  <div class="modal fade" id="visitorInfoModal" tabindex="-1" aria-labelledby="visitorInfoModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="visitorInfoModalLabel">Más Información</h5>
@@ -177,21 +176,35 @@
             <div class="col-md-6">
               <p class="mb-1"><strong>Información del vehículo:</strong></p>
               <div *ngIf="hasVehicles(selectedVisitor); else noVehicle">
-                <ul *ngFor="let vehicle of getVehicles(selectedVisitor)" class="list-unstyled">
-                  <li><strong>Patente:</strong> {{ vehicle.plate }}</li>
-                  <li><strong>Tipo:</strong> 
+                <div *ngFor="let vehicle of getVehicles(selectedVisitor)" class="form-check">
+                  <input 
+                  class="form-check-input" 
+                  type="radio" 
+                  [id]="'vehicle-' + vehicle.plate"
+                  [value]="vehicle.plate" 
+                  [(ngModel)]="selectedVehiclePlate"
+                  (change)="onVehicleChange(vehicle.plate)">
+                  <label class="form-check-label" [for]="'vehicle-' + vehicle.plate">
+                    <strong>Patente:</strong> {{ vehicle.plate }}  
+                  </label>
+                  <br>
+
+                  <strong>Tipo:</strong> 
                     {{ 
                       vehicle.vehicle_Type.description === 'Car' ? 'Coche' : 
-                      vehicle.vehicle_Type.description === 'MotorBike' ? 'Motocicleta' : 
+                      vehicle.vehicle_Type.description === 'Motorbike' ? 'Motocicleta' : 
                       vehicle.vehicle_Type.description === 'Truck' ? 'Camión' : 
                       vehicle.vehicle_Type.description 
                     }}
-                  </li>
-                </ul>
+                </div>
               </div>
               <ng-template #noVehicle>
                 <p class="mb-1">No tiene registro</p>
               </ng-template>
+              <ng-template #noVehicle>
+                <p class="mb-1">No tiene registro</p>
+              </ng-template>
+              <br>
 
               <!-- Rango de fechas autorizado -->
               <p class="fw-bold mb-1">Rango de Fechas Autorizado:</p>
@@ -241,7 +254,7 @@
  
  <!-- Modal de Confirmación de Ingreso vecino -->
  <div class="modal fade" id="confirmIngresoModal" tabindex="-1" aria-labelledby="confirmIngresoModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="confirmIngresoModalLabel">Confirmar Ingreso</h5>
@@ -260,7 +273,7 @@
  
  <!-- Modal de Confirmación de Egreso -->
  <div class="modal fade" id="confirmEgresoModal" tabindex="-1" aria-labelledby="confirmEgresoModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="confirmEgresoModalLabel">Confirmar Egreso</h5>
@@ -279,7 +292,7 @@
  
  <!-- Modal de Confirmación de Ingreso Empleado -->
  <div class="modal fade" id="confirmIngresoEmpModal" tabindex="-1" aria-labelledby="confirmIngresoEmpModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="confirmIngresoEmpModalLabel">Confirmar Ingreso</h5>
@@ -298,7 +311,7 @@
  
  <!-- Modal de Confirmación de Egreso Empleado -->
  <div class="modal fade" id="confirmEgresoEmpModal" tabindex="-1" aria-labelledby="confirmEgresoEmpModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="confirmEgresoEmpModalLabel">Confirmar Egreso</h5>
@@ -317,7 +330,7 @@
  
  <!-- Modal de confirmación -->
  <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="confirmationModalLabel"></h5>

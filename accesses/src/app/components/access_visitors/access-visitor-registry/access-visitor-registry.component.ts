@@ -80,9 +80,9 @@ export class AccessVisitorRegistryComponent
   private readonly registryUpdateService = inject(AccessRegistryUpdateService);
   private observations: string = '';
   constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService) {}
-
+  selectedVehiclePlate: string ='';
   dataTable: any;
-
+  plateVehicle:string='';
   showModal = false;
   visitorDocument: string = '';
   private readonly ngZone: NgZone = inject(NgZone);
@@ -93,11 +93,22 @@ export class AccessVisitorRegistryComponent
   ngOnInit(): void {
     const registryUpdated = this.registryUpdateService.getObservable().subscribe({
       next: v => {
-          this.userAllowedModal();
-      }
-    });
+      //lo siguiente carga a TODOS en la lista "comun" (donde estan todos los userAllowed)
+        const sub = this.loadUsersAllowedData().subscribe({
+          next: () => {
+            this.filteredAllPeopleAllowed = this.allPeopleAllowed;
+            this.userAllowedModal();
+          },
+          error: (err) => {
+            console.log(err);
+          }
+        }); 
+        this.subscription.add(sub);          
+        }
+      });
+
     //DATOS
-    //los 3 siguientes cargan a TODOS en la lista "comun" (donde estan todos los userAllowed)
+    //lo siguiente carga a TODOS en la lista "comun" (donde estan todos los userAllowed)
     const sub = this.loadUsersAllowedData().subscribe({
       next: () => {
         //console.log("allPeopleAllowed: ", this.allPeopleAllowed)
@@ -128,8 +139,26 @@ export class AccessVisitorRegistryComponent
 
     this.subscription.add(registryUpdated);
   }
+
+  onVehicleChange(plate: string): void {
+     // Si la patente seleccionada es la misma que la actual, la desmarcamos
+     if (this.selectedVehiclePlate === plate) {
+      console.log(this.selectedVehiclePlate);
+      this.selectedVehiclePlate=plate
+      this.plateVehicle=plate
+ // Deseleccionamos
+    } else {
+      // Si se selecciona una nueva patente, la guardamos
+      this.selectedVehiclePlate = plate;
+      this.plateVehicle=plate
+    }
+  
+    console.log(this.selectedVehiclePlate);
+  }
   onChangeMovement(doc:string,mov:string,plate:string){
     console.log(mov)
+    console.log(plate)
+    plate=this.selectedVehiclePlate
     console.log(plate)
     const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(doc)
     )
@@ -374,6 +403,8 @@ loadUsersAllowedData(): Observable<boolean> {
       .subscribe({
         next: (list: AccessUserAllowedInfoDto[]) => {
 
+          this.allPeopleAllowed = []; //limpiar lista
+
           this.ngZone.run(() => {
             list.forEach((userAllowed) => {
               this.allPeopleAllowed.push({ //lo agrega a la lista "comun" donde estan TODOS los autorizados a ingresar
@@ -594,24 +625,29 @@ loadUsersAllowedData(): Observable<boolean> {
                   </button>`
       }
 
-      case "Worker" : {   //rojo (red)
-        return  `<button style="background-color: #dc3545;border: bisque;" class="btn btn-primary" title="Obrero">
-                    <i class="bi bi-tools"></i> 
+      case "Worker" : {   //rojo (red) <i class="bi bi-tools"></i> 
+        return  `<button style="background-color: #ffc107;border: bisque;" class="btn btn-primary" title="Obrero">
+                    <i class='bi bi-gear-wide-connected'></i> 
                   </button>`
       }
-      case "Delivery" : {   //violeta (indigo)
-        return  `<button style="background-color: purple;border: bisque;" class="btn btn-primary" title="Delivery">
-                    <i class="bi bi-box-seam"></i> 
+      case "Delivery" : {   //violeta (indigo) <i class="bi bi-box-seam"></i> 
+        return  `<button style="background-color: #ffc107;border: bisque;" class="btn btn-primary" title="Delivery">
+                    <i class='bi bi-gear-wide-connected'></i> 
                   </button>`
       }
-      case "Cleaning" : {   //rosa (pink)
-        return  `<button style="background-color: #d63384;border: bisque;" class="btn btn-primary" title="P. de Limpieza">
-                    <i class="bi bi-stars"></i>
+      case "Cleaning" : {   //rosa (pink) <i class="bi bi-stars"></i>
+        return  `<button style="background-color: #ffc107;border: bisque;" class="btn btn-primary" title="P. de Limpieza">
+                    <i class='bi bi-gear-wide-connected'></i> 
                   </button>`
       }
-      case "Gardener" : { //celeste (cyan)
-        return  `<button style="background-color: #0dcaf0;border: bisque;" class="btn btn-primary" title="Jardinero">
-                    <i class="bi bi-flower1"></i>
+      case "Gardener" : { //celeste (cyan) <i class="bi bi-flower1"></i>
+        return  `<button style="background-color: #ffc107;border: bisque;" class="btn btn-primary" title="Jardinero">
+                    <i class='bi bi-gear-wide-connected'></i> 
+                  </button>`
+      }
+      case "Taxi" : { //
+        return  `<button style="background-color: #ffc107;border: bisque;" class="btn btn-primary" title="Taxi">
+                    <i class='bi bi-gear-wide-connected'></i> 
                   </button>`
       }
 
@@ -849,14 +885,19 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     this.selectedVisitor = visitor; // Guardar el visitante seleccionado
   }
   
-  ModalDocument(document:string){
+  ModalDocument(documentData:string){
     console.log("me han llamado")
     
     console.log("people",this.userAllowedGetAll)
-    const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(document)
+    const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(documentData)
     )
     console.log(user)
-    this.selectedVisitor=user||null 
+    this.selectedVisitor=user||null;
+
+    const modalElement = document.getElementById('visitorInfoModal')!;
+    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modal.show();
+    
     console.log(this.selectedVisitor)
   }
 
@@ -1027,6 +1068,10 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     return new Observable<boolean>(observer => {
       try {
         console.log('te llame')
+        console.log('lamamndo el vehiculo',this.plateVehicle)
+
+          plate=this.plateVehicle
+        
         // Preparar datos del movimiento
         const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
         const firstRange = visitor.authRanges[0];
@@ -1144,8 +1189,9 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
 private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: string): Observable<boolean> {
   return new Observable<boolean>(observer => {
     try {
+     
       // Preparar datos del movimiento
-      const vehicless = plate ? visitor.vehicles.find(v => v.plate === plate) || undefined : undefined;
+      const vehicless = this.selectedVehiclePlate ? visitor.vehicles.find(v => v.plate === this.selectedVehiclePlate) || undefined : undefined;
       const firstRange = visitor.authRanges[0];
       const now = new Date();
 
@@ -1626,7 +1672,12 @@ private prepareExitMovementEmergency(visitor: AccessUserAllowedInfoDtoOwner, pla
           lastName: visitor.last_name,
           }
         ],
-        vehicle:   null,
+        vehicle:   {
+          plate: platee,
+          vehicle_Type: visitor.vehicles.find((a) => a.plate === platee)?.vehicle_Type ?? {
+            description: ''
+          }
+        },
         observations: this.observations,
         loggedUserId: 1,
         neighborId: 0

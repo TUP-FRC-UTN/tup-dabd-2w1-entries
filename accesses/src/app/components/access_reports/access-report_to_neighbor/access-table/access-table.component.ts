@@ -22,6 +22,7 @@ import { AccessUserAllowedInfoDto } from '../../../../models/access-visitors/acc
 import { AccessOwnerRenterserviceService } from '../../../../services/access-owner/access-owner-renterservice.service';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 import { QRData } from '../../../../models/access-visitors/access-VisitorsModels';
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-access-table',
@@ -126,8 +127,31 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       const documents = new Set(qrData.map(item => item.document));
       
       // Filtrar la DataTable
-      this.filterTableByDocuments(Array.from(documents));
+      const filteredDocumentsCount = this.filterTableByDocuments(Array.from(documents));
       
+      const filteredDocumentsCountSize = documents.size;
+
+
+      // Verificar si se encontraron registros
+      if (filteredDocumentsCount === 0) {
+        Swal.fire({
+            title: 'Usuario no encontrado',
+            text: 'No se encontró ningún usuario registrado con los datos escaneados.',
+            icon: 'warning',
+            confirmButtonText: 'Aceptar',
+            showCancelButton: false,
+            showCloseButton: true,
+            confirmButtonColor: '#3085d6',
+          });
+      } else {
+        Swal.fire({
+          title: 'Éxito',
+          text: `Se han filtrado ${filteredDocumentsCountSize} usuario(s).`,
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+        });
+      }
+  
       // Detener el scanner
       this.stopScanner();
       
@@ -140,12 +164,9 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     }
   }
-
   
-
-
-  private filterTableByDocuments(documents: string[]): void {
-    if (!this.table) return;
+  private filterTableByDocuments(documents: string[]): number {
+    if (!this.table) return 0;
   
     // Guardar la función de búsqueda original
     const originalSearchFunction = $.fn.dataTable.ext.search.pop();
@@ -154,22 +175,22 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     $.fn.dataTable.ext.search.push((settings: any, data: string[]) => {
       // El documento está en la columna 5 (índice 5)
       const rowDocument = data[5];
-      
+  
       // Verificar si el documento de la fila está en la lista de documentos del QR
       const documentMatch = documents.some(doc => rowDocument.includes(doc));
-      
+  
       // Si hay una función de búsqueda original, combinar los resultados
       if (originalSearchFunction) {
         return documentMatch && originalSearchFunction(settings, data, undefined);
       }
-      
+  
       return documentMatch;
     });
   
     // Redibujar la tabla con el filtro aplicado
     this.table.draw();
   
-    // Mostrar mensaje con el resultado
+    // Obtener la cantidad de filas filtradas
     const filteredRows = this.table.rows({ search: 'applied' }).count();
   
     // Restaurar la función de búsqueda original después del filtrado
@@ -177,6 +198,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     if (originalSearchFunction) {
       $.fn.dataTable.ext.search.push(originalSearchFunction);
     }
+  
+    return filteredRows;
   }
   
 
@@ -215,26 +238,55 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Manejadores para los cambios de fecha
    */
+  dateError: string = '';
+
   onStartDateChange(date: string): void {
     const selectedDate = new Date(date);
+    
+    // Validar que la fecha no sea mayor que hoy
     if (selectedDate > this.today) {
       this.startDate = this.today;
-    } else {
-      this.startDate = selectedDate;
+      this.dateError = 'La fecha desde no puede ser mayor a la fecha actual';
+      return;
     }
+    
+    // Validar que la fecha desde no sea mayor que la fecha hasta
+    if (this.endDate && selectedDate > this.endDate) {
+      this.startDate = this.endDate;
+      this.dateError = 'La fecha desde no puede ser mayor a la fecha hasta';
+      return;
+    }
+
+    this.dateError = ''; 
+    this.startDate = selectedDate;
     this.fetchData();
   }
 
   onEndDateChange(date: string): void {
     const selectedDate = new Date(date);
+    
+    // Validar que la fecha no sea mayor que hoy
     if (selectedDate > this.today) {
       this.endDate = this.today;
-    } else {
-      this.endDate = selectedDate;
+      this.dateError = 'La fecha hasta no puede ser mayor a la fecha actual';
+      return;
     }
+    
+    // Validar que la fecha hasta no sea menor que la fecha desde
+    if (this.startDate && selectedDate < this.startDate) {
+      this.endDate = this.startDate;
+      this.dateError = 'La fecha hasta no puede ser menor a la fecha desde';
+      return;
+    }
+
+    this.dateError = ''; // Limpiar error si todo está bien
+    this.endDate = selectedDate;
     this.fetchData();
   }
 
+
+
+  
   toggleUserTypeFilter(userType: string): void {
     if (this.activeUserTypeFilters.has(userType)) {
       this.activeUserTypeFilters.delete(userType);
@@ -267,6 +319,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     window.addEventListener('openModalInfo', this.handleOpenModal);
     window.addEventListener('Movment', this.handleOpenMovement);
   }
+  
 /**
    * Se manda el documento al servicio
    */
