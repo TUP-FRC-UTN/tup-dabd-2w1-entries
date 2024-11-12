@@ -131,31 +131,7 @@
                         </div>
                       </div>
                     </div>
-                    @if (this.indexUserType === 1) {
-                      <div class="col-12 col-md-6">
-                        <div class="form-group row mb-3">
-                          <label for="email" class="col-4 col-form-label">Email</label>
-                          <div class="col-8">
-                            <input 
-                              type="email" 
-                              class="form-control" 
-                              id="email" 
-                              formControlName="email"
-                              [class.is-valid]="visitorForm.get('email')?.valid && visitorForm.get('email')?.touched"
-                              [class.is-invalid]="visitorForm.get('email')?.invalid && visitorForm.get('email')?.touched" 
-                            />
-                            <div class="invalid-feedback" *ngIf="visitorForm.get('email')?.errors && visitorForm.get('email')?.touched">
-                              <div *ngIf="visitorForm.get('email')?.errors?.['email']">
-                                Debe ser un email válido.
-                              </div>
-                              <div *ngIf="visitorForm.get('email')?.errors?.['maxlength']">
-                                El email no puede exceder 70 caracteres.
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    }                    
+
                     <!-- Vehicle Switch -->
                     <div class="col-12 col-md-6">
                       <div class="form-group row mb-3">
@@ -245,7 +221,7 @@
           Cerrar
         </button>
         <button type="submit" class="btn btn-primary btn-sm" style="margin-bottom: 2px" (click)="sendVisitor()"
-          [disabled]="!(visitorForm.get('document')?.valid && visitorForm.get('firstName')?.valid && visitorForm.get('lastName')?.valid && visitorForm.get('email')?.valid && visitorForm.get('propietario')?.valid)">
+          [disabled]="!(visitorForm.get('document')?.valid && visitorForm.get('firstName')?.valid && visitorForm.get('lastName')?.valid && visitorForm.get('propietario')?.valid)">
           Registrar
         </button>
       </div>
