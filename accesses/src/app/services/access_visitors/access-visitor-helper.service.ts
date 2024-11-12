@@ -161,7 +161,6 @@ export class AccessVisitorHelperService {
     let todayDate = new Date();
     //fecha a comparar
     let beforeDate = new Date(date);
-    beforeDate.setMinutes(beforeDate.getMinutes() + beforeDate.getTimezoneOffset());
     //console.log(beforeDate, " | hoy -> ", todayDate)
 
     return beforeDate <= todayDate;
@@ -175,10 +174,12 @@ export class AccessVisitorHelperService {
     //fecha actual, para poder comparar
     let todayDate = new Date();
     //fecha a comparar
-    let afterDate = new Date(date + "T23:59:59.999Z");
-    afterDate.setMinutes(afterDate.getMinutes() + afterDate.getTimezoneOffset());
+    let afterDate = new Date(date);
+    afterDate.setHours(23, 59, 59, 999);
     
-    //console.log(afterDate, " | hoy -> ", todayDate)
+   /*  console.log(date);
+    console.log(afterDate, " | hoy -> ", todayDate)
+    console.log(afterDate >= todayDate) */
     
     return afterDate >= todayDate;
   }
