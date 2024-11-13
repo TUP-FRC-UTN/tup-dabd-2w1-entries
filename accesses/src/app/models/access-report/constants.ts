@@ -71,7 +71,7 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
           columnValue: 'jardinero'
         },        
         Taxi: {
-          icon: 'bi bi-taxi-front-fill',
+          icon: 'bi bi-taxi-front-fill text-dark',
           color: '#FFDAB9',
           title: 'Taxi',
           filterValue: 'taxi',
