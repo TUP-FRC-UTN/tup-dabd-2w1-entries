@@ -21,7 +21,7 @@
                     <select id="chartType" [(ngModel)]="chartType" (change)="onChartTypeChange()">
                       <option value="ingresos">Ingresos</option>
                       <option value="egresos">Egresos</option>
-                      <option value="">NOSE</option>
+                      <option value="">Total</option>
                     </select>
                   </div>
                   
@@ -68,8 +68,9 @@
                                     día de semana</small>
                             </div>
                         </div>
+                        <!-- Importante dejar el height en 70% para que no se vaya agrandando sin sentido -->
                         <google-chart [type]="columnChartType" [data]="columnChartData" [options]="columnChartOptions"
-                            class="expanded-chart-content" style="width: 100%; height: 100%;">
+                            class="expanded-chart-content" style="width: 100%; height: 70%;">
                         </google-chart>
                     </div>
                 </div>

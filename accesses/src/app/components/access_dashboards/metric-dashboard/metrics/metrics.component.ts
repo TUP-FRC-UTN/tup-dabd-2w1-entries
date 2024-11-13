@@ -609,27 +609,6 @@ export class MetricsComponent implements OnInit{
     return `${threeMonthsAgo.getFullYear()}-${String(threeMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
   }
 
-
-
-
-
-  pieChartType = ChartType.PieChart;
-  pieChartData: any[] = [];
-  pieChartOptions = {
-    is3D: false,
-    title: '',
-    pieSliceText: 'value',
-    legend: {
-      position: 'right',
-      textStyle: { color: '#6c757d', fontSize: 17 }
-    },
-    chartArea: { width: '100%', height: '100%' },
-
-    colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0']
-  };
-
-
-
   columnChartType = ChartType.ColumnChart;
   columnChartData: any[] = [];  
   columnChartOptions = {
@@ -641,7 +620,7 @@ export class MetricsComponent implements OnInit{
       maxLines: 2
     },
     
-    bar: { groupWidth: 900 },
+    bar: { groupWidth: '100%' },
     hAxis: {
       title: 'Días de la semana',
       textStyle: { color: '#6c757d' }
