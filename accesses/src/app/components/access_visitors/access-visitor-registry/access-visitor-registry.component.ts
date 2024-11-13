@@ -420,9 +420,9 @@ loadUsersAllowedData(): Observable<boolean> {
               });
             });
 
-            console.log("allPeopleAllowed: ", this.allPeopleAllowed)
+            //console.log("allPeopleAllowed: ", this.allPeopleAllowed)
             this.allPeopleAllowed = this.helperService.reverseArray(this.allPeopleAllowed);
-            console.log("allPeopleAllowed en orden inverso: ", this.allPeopleAllowed)
+            //console.log("allPeopleAllowed en orden inverso: ", this.allPeopleAllowed)
 
             observer.next(true);
             observer.complete();
@@ -536,7 +536,7 @@ loadUsersAllowedData(): Observable<boolean> {
         this.ModalDocument(document);
       });
     
-    console.log('tableBody:', tableBody)
+    //console.log('tableBody:', tableBody)
     if (tableBody) {
       tableBody.addEventListener('click', (event) => {
         const target = event.target as HTMLElement;
@@ -605,7 +605,7 @@ loadUsersAllowedData(): Observable<boolean> {
                 </button>`
       }
       case "Supplier" : {   //turquesa / verde agua (teal)
-        return `<button style="background-color: #6c757d;border: bisque;" class="btn btn-warning" title="Proveedor">
+        return `<button style="background-color: #6c757d;border: bisque;" class="btn btn-primary" title="Proveedor">
                   <i class="bi bi-truck"></i>
                 </button>`
       }
@@ -709,7 +709,7 @@ loadUsersAllowedData(): Observable<boolean> {
       this.filteredAllPeopleAllowed = [...this.allPeopleAllowed];
     }
 
-    console.log("Lista filtrada:", this.filteredAllPeopleAllowed);
+    //console.log("Lista filtrada:", this.filteredAllPeopleAllowed);
     this.updateDataTable();
   }
 
@@ -735,7 +735,7 @@ loadUsersAllowedData(): Observable<boolean> {
         const sub = accessObservable.subscribe({
           next: (success) => {
             if (success) {
-              console.log('Se registró el Egreso correctamente');
+              console.log('Se registró el Ingreso correctamente');
 
               const sub2 = this.loadUsersAllowedAfterRegistrationData().subscribe({
                 next: (response) => {
@@ -747,7 +747,7 @@ loadUsersAllowedData(): Observable<boolean> {
               this.subscription.add(sub2);
 
             } else {
-              console.log('Falló al registrar egreso');
+              console.log('Falló al registrar ingreso');
             }
           },
           error: (error) => {
@@ -835,9 +835,9 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
               });
             });
 
-            console.log('allPeopleAllowed actualizada (luego del registro o cambio de filtro):', this.allPeopleAllowed);
+            //console.log('allPeopleAllowed actualizada (luego del registro o cambio de filtro):', this.allPeopleAllowed);
             this.allPeopleAllowed = this.helperService.reverseArray(this.allPeopleAllowed);
-            console.log("allPeopleAllowed en orden inverso: ", this.allPeopleAllowed)
+            //console.log("allPeopleAllowed en orden inverso: ", this.allPeopleAllowed)
             //this.updateDataTable();
             observer.next(true);
             observer.complete();
