@@ -5,7 +5,7 @@ import { AccessFilterComponent } from '../access-filter/access-filter.component'
 @Component({
   selector: 'access-app-report-neighboor',
   standalone: true,
-  imports: [AccessTableComponent, AccessFilterComponent],
+  imports: [AccessTableComponent],
   templateUrl: './access-report-neighboor.component.html',
   styleUrl: './access-report-neighboor.component.css'
 })

@@ -1,17 +1,18 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { AccessMetricsService } from '../../../../services/access-metric/access-metrics.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { MetricUser, RedirectKpis, TopUser, UtilizationRate } from '../../../../models/access-metric/metris';
-import { AccessUserReportService } from '../../../../services/access_report/access-user-report.service';
+import { AccessUserReportService } from '../../../../services/access_report/access_httpclient/access_usersApi/access-user-report.service';
 import { Router } from '@angular/router';
 
 
 @Component({
   selector: 'app-metrics',
   standalone: true,
-  imports: [GoogleChartsModule, NgIf,CommonModule,FormsModule],
+  imports: [GoogleChartsModule, NgIf,CommonModule,FormsModule,NgSelectModule],
   templateUrl: './metrics.component.html',
   styleUrl: './metrics.component.css'
 })
@@ -19,7 +20,7 @@ import { Router } from '@angular/router';
 export class MetricsComponent implements OnInit {
 
 
-  constructor(private metricsService: AccessMetricsService, private userService: AccessUserReportService, private router: Router) {
+  constructor(private metricsService: AccessMetricsService, private userService: AccessUserReportService, private router: Router, private cdr: ChangeDetectorRef) {
     const now = new Date();
     this.periodTo = this.formatYearMonth(now);
     
@@ -54,7 +55,8 @@ export class MetricsComponent implements OnInit {
     return this.roleTranslations[role] || role; 
   }
 
-  aplyFilters(): void {
+  applyFilters(): void {
+    // Obtener los valores de año y mes de los filtros
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
 
@@ -100,67 +102,103 @@ export class MetricsComponent implements OnInit {
         });
     });
 
+  
+    // Primero, aplicar el filtro de movimiento (ingresos o egresos) y QUE SE MANTENGA SEGUN LO SELECCIONADO -- ARREGLAR CODIGO PARA NO REPETIR MISMAS LINEAS DE CODIGO A LA HORA DE RENDERIZAR 
+    // ANDA TODO EL FILTRO POR LAS DUDAS ACLARO
     this.metricsService.getMovementCountsFilter(
       fromDate.year,
       fromDate.month,
-      toDate.month
+      toDate.month,
+      this.chartType // 'ingresos' o 'egresos'
     ).subscribe(data => {
-      console.log("Data filtrada recibida de la API:", data);
-
-      // Array con los nombres de los días de la semana, comenzando desde Lunes
+      console.log("Data recibida de la API:", data);
+  
       const diasOrdenados = [
         'Lunes', 'Martes', 'Miércoles', 'Jueves', 
         'Viernes', 'Sábado', 'Domingo'
       ];
-
+  
       // Crear el array de datos para el gráfico con cabeceras
-      this.columnChartData = [
-        ...diasOrdenados.map((dia, index) => {
-          const dayIndex = index === 6 ? 7 : index + 1;
-          const ingresos = data[dayIndex]?.entries || 0;
-          const egresos = data[dayIndex]?.exits || 0;
+      if (this.chartType === 'ingresos') {
+        // Mostrar solo ingresos
+        this.columnChartOptions.series[0].labelInLegend = "ingresos"
+        this.columnChartOptions.colors[0] = '#4caf50'
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+            const ingresos = data[dayIndex]?.entries || 0;
+  
+            return [
+              dia,            // Día de la semana
+              ingresos        // Solo ingresos
+            ];
+          })
+        ];
+      } else if (this.chartType === 'egresos') {
+        // Mostrar solo egresos
+          this.columnChartOptions.series[0].labelInLegend = "egresos"
+          this.columnChartOptions.colors[0] = '#f44336'
 
-          return [
-            dia,
-            ingresos,
-            egresos
-          ];
-        })
-      ];
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+            const egresos = data[dayIndex]?.exits || 0;
+  
+            return [
+              dia,            // Día de la semana
+              egresos         // Solo egresos
+            ];
+          })
+        ];
+      } else{
 
-      console.log('Datos del gráfico filtrados:', this.columnChartData);
+          this.columnChartOptions.series[0].labelInLegend = "egresos"
+          this.columnChartOptions.series[1].labelInLegend = "ingresos"
+
+          this.columnChartOptions.colors[0] = '#f44336'
+          this.columnChartOptions.colors[1] = '#4caf50'
+
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+    
+            const ingresos = data[dayIndex]?.entries || 0;
+            const egresos = data[dayIndex]?.exits || 0;
+    
+            return [
+              dia,        // Nombre del día
+              ingresos,   // Ingresos
+              egresos     // Egresos
+            ];
+          })
+        ];
+      }
+  
+     
+      console.log('Datos del gráfico formateados:', this.columnChartData);
     });
-
-
+    // Obtener los datos de los usuarios top
     const fromDateObj = this.parseYearMonth(this.periodFrom);
     const toDateObj = this.parseYearMonth(this.periodTo);
     
-    // Supongamos que quieres obtener los top 5 usuarios entre el mes de inicio y el mes final
     this.metricsService.getTopUsers(fromDateObj.month, toDateObj.month, fromDateObj.year).subscribe(topUsers => {
       console.log('Top 5 usuarios:', topUsers);
       this.topUser = topUsers.slice(0, 5); // Limita a los primeros 5 usuarios
       console.log('TOP USUARIO ARRAY', this.topUser);
     });
     
-
-    this.loadUtilizationData(fromDate.month, toDate.month, fromDate.year);
-
+    // Cargar los datos de utilización dependiendo de si es ingresos o egresos
+    if (this.chartType === 'ingresos') {
+      this.loadUtilizationData(fromDate.year, fromDate.month, toDate.month);
+    } else {
+      this.loadUtilizationExitData(fromDate.year, fromDate.month, toDate.month);
+    }
+  
+    // Cargar la cuenta de accesos
     this.loadAccessCounts();
 
   }
 
-  redirect(metricUser: MetricUser, redirectType: string) {
-    const fromDate = this.parseYearMonth(this.periodFrom);
-    const toDate = this.parseYearMonth(this.periodTo);
-    this.router.navigate(['reports'], { state: {
-      data: metricUser,
-      type: redirectType,
-      startMonth: fromDate.month,
-      startYear: fromDate.year,
-      endMonth: toDate.month,
-      endYear: toDate.year
-    }});
-  }
 
   private formatYearMonth(date: Date): string {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -235,9 +273,28 @@ export class MetricsComponent implements OnInit {
     this.fetchTodayExitCount();
     this.getThisMonthCountExit();
     this.getPeakDayExit();
-    this.aplyFilters()
-    this.loadUtilizationData();
+    this.applyFilters()
   }
+
+  private getMonthsRange(start: number, end: number): number[] {
+    const months = [];
+    for (let i = start; i <= end; i++) {
+      months.push(i);
+    }
+    return months;
+  }
+
+  private getMonthName(month: number): string {
+    const months = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    return months[month - 1];
+  }
+
+
+
+
 
   getPeakDayExit(): void {
     this.metricsService.getExitCountByWeekAndDayOfWeek().subscribe((data) => {
@@ -357,100 +414,295 @@ export class MetricsComponent implements OnInit {
     })
   }
 
-  utilizationData: UtilizationRate[] = [];
+  utilizationData: any;
   loading = true;
   error: string | null = null;
 
-  loadUtilizationData(startMonth?: number, endMonth?: number, year?: number): void {
+  loadUtilizationData(year: number, startMonth: number, endMonth: number): void {
     this.loading = true;
     this.error = null;
-
-    this.metricsService.getUtilizationRate(startMonth, endMonth, year)
+  
+    this.metricsService.getAccessCountByUserTypeFilter(year, startMonth, endMonth)
       .subscribe({
         next: (response) => {
-          this.utilizationData = response.data;
+          this.utilizationData = response;
+          this.calculatePercentages(this.utilizationData, 'ingresos');
           this.loading = false;
-          console.log(this.utilizationData, 'KPIS');
-          
         },
         error: (err) => {
-          this.error = 'Error al cargar los datos de utilización';
+          this.error = 'Error al cargar los datos de ingresos';
+          this.loading = false;
+          console.error('Error:', err);
+        }
+      });
+  }
+  
+
+
+  loadUtilizationExitData(year: number, startMonth: number, endMonth: number): void {
+    this.loading = true;
+    this.error = null;
+  
+    this.metricsService.getExitCountByUserTypeFilter(year, startMonth, endMonth)
+      .subscribe({
+        next: (response) => {
+          this.utilizationData = response;
+          this.calculatePercentages(this.utilizationData, 'egresos');
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = 'Error al cargar los datos de egresos';
           this.loading = false;
           console.error('Error:', err);
         }
       });
   }
 
+  uniqueData: UtilizationRate[] = [];
+
+  calculatePercentages(data: UtilizationRate[], type: 'ingresos' | 'egresos'): void {
+    // Agrupar los datos por tipo de usuario
+    const groupedData = data.reduce<{ [key: string]: UtilizationRate }>((acc, item) => {
+      // Aquí le decimos a TypeScript que 'acc' es un objeto con claves de tipo string y valores de tipo 'UtilizationRate'
+      if (acc[item.userType]) {
+        acc[item.userType].count += item.count;
+      } else {
+        acc[item.userType] = { userType: item.userType, count: item.count };
+      }
+      return acc;
+    }, {}); // El objeto vacío se tipa como un acumulador de tipo { [key: string]: UtilizationRate }
+  
+    // Convertir el objeto agrupado en un array
+    const uniqueData = Object.values(groupedData);
+  
+    // Calcular el total de accesos (o salidas)
+    const totalCount = uniqueData.reduce((sum, item) => sum + item.count, 0);
+  
+    // Calcular el porcentaje por tipo de usuario
+    uniqueData.forEach(item => {
+      item.percentage = parseFloat(((item.count / totalCount) * 100).toFixed(2)); // Formatear a dos decimales
+    });
+
+    this.uniqueData = Object.values(groupedData);
+
+    console.log(`${type.charAt(0).toUpperCase() + type.slice(1)} por usuario:`, uniqueData);
+  }
+  
   
 
+  
+  groupByUserType(data: any[]): any[] {
+    const groupedData: { [key: string]: { userType: string, accessCount: number, utilizationPercentage: number } } = {};
+  
+    // Agrupar los datos por "userType"
+    data.forEach(item => {
+      if (groupedData[item.userType]) {
+        // Si el tipo de usuario ya existe, sumamos los accesos
+        groupedData[item.userType].accessCount += item.accessCount;
+      } else {
+        // Si es un tipo de usuario nuevo, lo agregamos
+        groupedData[item.userType] = { 
+          userType: item.userType,
+          accessCount: item.accessCount,
+          utilizationPercentage: item.utilizationPercentage 
+        };
+      }
+    });
+  
+    // Convertimos el objeto agrupado de vuelta a un array
+    return Object.values(groupedData);
+  }
+  
+
+
+  
   private loadAccessCounts(): void {
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
-
+  
     this.metricsService.getAccessCountByUserTypeFilter(
-        fromDate.year,
-        fromDate.month,
-        toDate.month
+      fromDate.year,
+      fromDate.month,
+      toDate.month
     ).subscribe(data => {
-        this.pieChartData = [
-            ...data.map(item => [this.translateRole(item.userType), item.count])
-        ];
+      console.log(data, "DATA FILTRADA DE GRAFICO DE COLUMNAS");
+  
+      const chartData: any[] = [];
+  
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  
+      const userTypesData: { [key: string]: number[] } = {};
+      const userTypes: string[] = [];  
+      const tooltips: string[][] = []; 
+  
+      data.forEach(item => {
+        const month = item.month - 1; 
+        const userType = item.userType;  
+  
+        if (!userTypesData[userType]) {
+          userTypesData[userType] = new Array(12).fill(0); 
+          userTypes.push(userType); 
+        }
+  
+        userTypesData[userType][month] = item.count;
+      });
+  
+      const filteredMonths = months.slice(fromDate.month - 1, toDate.month); 
+      filteredMonths.forEach((month, i) => {
+        const row: (string | number)[] = [month]; 
+  
+        userTypes.forEach(userType => {
+          const count = userTypesData[userType][fromDate.month - 1 + i] || 0; 
+          row.push(count);
+        });
+  
+        chartData.push(row);
+      });
+  
+      this.barChartData = chartData;
+  
+      console.log('Datos del gráfico de columnas:', this.barChartData);
+  
+      const series: { [key: number]: { labelInLegend: string, type: string } } = userTypes.reduce((acc: { [key: number]: { labelInLegend: string, type: string } }, userType, index) => {
+        acc[index] = {
+          labelInLegend: this.translateRole(userType), 
+          type: 'column', 
+        };
+        return acc;
+      }, {} as { [key: number]: { labelInLegend: string, type: string } });
+  
+      this.barChartOptions = {
+        title: 'Comparación de Ingresos por Tipo de Usuario',
+        legend: {
+          position: 'bottom',
+          textStyle: { color: '#6c757d', fontSize: 14 }
+        },
+        colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
+        hAxis: {
+          title: 'Meses',  
+          textStyle: { color: '#6c757d' },
+          slantedText: true, 
+        },
+        vAxis: {
+          title: 'Cantidad de Ingresos', 
+          textStyle: { color: '#6c757d' },
+          minValue: 0,
+          format: '', 
+        },
+        animation: {
+          duration: 1000,
+          easing: 'out',
+          startup: true
+        },
+        series, 
+
+      };
     });
-}
+  }
+  
+  chartType: 'ingresos' | 'egresos' = 'ingresos';
+  barChartType = ChartType.ColumnChart;  
+  barChartData: any[] = [];
+  barChartOptions: any = {};
 
+  selectedUserTypes: string[] = [];
+  availableUserTypes = [
+    { label: 'Empleado', value: 'Employeed' },
+    { label: 'Proveedor', value: 'Supplier' },
+    { label: 'Vecino', value: 'Owner' },
+    { label: 'Inquilino', value: 'Tenant' },
+    { label: 'Visitante', value: 'Visitor' }
+  ];
 
-  pieChartType = ChartType.PieChart;
-  pieChartData: any[] = [];
-  pieChartOptions = {
-    is3D: false,
-    title: '',
-    pieSliceText: 'value',
-    legend: {
-      position: 'right',
-      textStyle: { color: '#6c757d', fontSize: 17 }
-    },
-    chartArea: { width: '100%', height: '100%' },
+  onChartTypeChange() {
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
+  
+    this.loadData();
+    this.loadEntryExit();  
 
-    colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0']
-  };
-
-
-
-  columnChartType = ChartType.ColumnChart;
-  columnChartData: any[] = ['Día', 'Ingresos', 'Egresos']; 
-  columnChartOptions = {
-    title: '',
-    legend: {
-      position: 'top',
-      textStyle: { color: '#6c757d', fontSize: 14 },
-      alignment: 'center',
-      maxLines: 2
-    },
-    bar: { groupWidth: '100%' },
-    height: 600,
-    width: '100%',
-    colors: ['#4caf50', '#f44336'],
-    hAxis: {
-      title: 'Días de la semana',
-      textStyle: { color: '#6c757d' }
-    },
-    vAxis: {
-      title: 'Cantidad',
-      textStyle: { color: '#6c757d' },
-      minValue: 0
-    },
-    animation: {
-      duration: 1000,
-      easing: 'out',
-      startup: true
-    },
-    series: {
-      0: { labelInLegend: 'Ingresos' },
-      1: { labelInLegend: 'Egresos' }
+  
+    if (this.chartType === 'ingresos') {
+      this.loadUtilizationData(fromDate.year, fromDate.month, toDate.month);
+    } else {
+      this.loadUtilizationExitData(fromDate.year, fromDate.month, toDate.month);
     }
-  };
+  }
+  
 
+  private loadData(): void {
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
 
+    const service = this.chartType === 'ingresos'
+      ? this.metricsService.getAccessCountByUserTypeFilter(fromDate.year, fromDate.month, toDate.month)
+      : this.metricsService.getExitCountByUserTypeFilter(fromDate.year, fromDate.month, toDate.month);
+
+    service.subscribe(data => {
+      // Filtrar por los tipos seleccionados o mostrar todos si no hay selección
+      const filteredData = this.selectedUserTypes.length > 0
+        ? data.filter(item => this.selectedUserTypes.includes(item.userType))
+        : data;
+
+      console.log('Datos filtrados:', filteredData);
+
+      const userTypesData: { [key: string]: number[] } = {};
+      const userTypes: string[] = [];
+
+      filteredData.forEach(item => {
+        const month = item.month - 1;
+        const userType = item.userType;
+
+        if (!userTypesData[userType]) {
+          userTypesData[userType] = new Array(12).fill(0);
+          userTypes.push(userType);
+        }
+
+        userTypesData[userType][month] = item.count;
+      });
+
+      this.updateChartData(userTypesData, userTypes, fromDate, toDate);
+    });
+  }
+  private updateChartData(userTypesData: any, userTypes: string[], fromDate: any, toDate: any): void {
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const chartData: any[] = [];
+    const filteredMonths = months.slice(fromDate.month - 1, toDate.month);
+  
+    filteredMonths.forEach((month, i) => {
+      const row: (string | number)[] = [month];
+      userTypes.forEach(userType => {
+        const count = userTypesData[userType][fromDate.month - 1 + i] || 0;
+        row.push(count);
+      });
+      chartData.push(row);
+    });
+  
+    this.barChartData = chartData;
+    this.updateChartOptions(userTypes);
+  }
+  
+  private updateChartOptions(userTypes: string[]): void {
+    this.barChartOptions = {
+      title: `Comparación de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'} por Tipo de Usuario`,
+      legend: { position: 'bottom', textStyle: { color: '#6c757d', fontSize: 14 } },
+      colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
+      hAxis: { title: 'Meses', textStyle: { color: '#6c757d' }, slantedText: true },
+      vAxis: { title: `Cantidad de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'}`, textStyle: { color: '#6c757d' }, minValue: 0, format: '' },
+      animation: { duration: 1000, easing: 'out', startup: true },
+      series: userTypes.reduce((acc: any, userType: string, index: number) => {
+        acc[index] = { labelInLegend: this.translateRole(userType), type: 'column' };
+        return acc;
+      }, {})
+    };
+  }
+  onUserTypeChange(): void {
+    console.log('Tipos seleccionados:', this.selectedUserTypes);
+    this.loadData();
+  }
+
+  
+  
   getCurrentYearMonth(): string {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -462,48 +714,122 @@ export class MetricsComponent implements OnInit {
     return `${threeMonthsAgo.getFullYear()}-${String(threeMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
   }
 
+  columnChartType = ChartType.ColumnChart;
+  columnChartData: any[] = [];  
+  columnChartOptions = {
+    title: '',
+    legend: {
+      position: 'top',
+      textStyle: { color: '#6c757d', fontSize: 14 },
+      alignment: 'center',
+      maxLines: 2
+    },
+    
+    bar: { groupWidth: '100%' },
+    hAxis: {
+      title: 'Días de la semana',
+      textStyle: { color: '#6c757d' }
+    },
+    vAxis: {
+      title: 'Cantidad',
+      textStyle: { color: '#6c757d' },
+      minValue: 0,
+      format: ''
+    },
+    animation: {
+      duration: 1000,
+      easing: 'out',
+      startup: true
+    },
+    series: {
+      0: { labelInLegend: '' },
+      1: { labelInLegend: '' },
+
+    },
+     colors: ['','']
+  };
 
 
   private loadEntryExit(): void {
-    // Obtener los valores de año y mes de los filtros
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
-
-    // Usar el nuevo método con filtros en lugar del original
+  
     this.metricsService.getMovementCountsFilter(
       fromDate.year,
       fromDate.month,
-      toDate.month
+      toDate.month,
+      this.chartType // 'ingresos' o 'egresos'
     ).subscribe(data => {
       console.log("Data recibida de la API:", data);
   
-      // Array con los nombres de los días de la semana, comenzando desde Lunes
       const diasOrdenados = [
         'Lunes', 'Martes', 'Miércoles', 'Jueves', 
         'Viernes', 'Sábado', 'Domingo'
       ];
   
       // Crear el array de datos para el gráfico con cabeceras
-      this.columnChartData = [
-        ...diasOrdenados.map((dia, index) => {
-          // Calcular el índice correcto para la API
-          const dayIndex = index === 6 ? 7 : index + 1;
+      if (this.chartType === 'ingresos') {
+        // Mostrar solo ingresos
+        this.columnChartOptions.series[0].labelInLegend = "ingresos"
+        this.columnChartOptions.colors[0] = '#4caf50'
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+            const ingresos = data[dayIndex]?.entries || 0;
   
-          // Obtener los valores de ingresos y egresos para ese día desde la API
-          const ingresos = data[dayIndex]?.entries || 0;
-          const egresos = data[dayIndex]?.exits || 0;
+            return [
+              dia,            // Día de la semana
+              ingresos        // Solo ingresos
+            ];
+          })
+        ];
+      } else if (this.chartType === 'egresos') {
+        // Mostrar solo egresos
+          this.columnChartOptions.series[0].labelInLegend = "egresos"
+          this.columnChartOptions.colors[0] = '#f44336'
+
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+            const egresos = data[dayIndex]?.exits || 0;
   
-          return [
-            dia,        // Nombre del día
-            ingresos,   // Ingresos
-            egresos     // Egresos
-          ];
-        })
-      ];
+            return [
+              dia,            // Día de la semana
+              egresos         // Solo egresos
+            ];
+          })
+        ];
+      } else{
+
+          this.columnChartOptions.series[0].labelInLegend = "egresos"
+          this.columnChartOptions.series[1].labelInLegend = "ingresos"
+
+          this.columnChartOptions.colors[0] = '#f44336'
+          this.columnChartOptions.colors[1] = '#4caf50'
+
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+    
+            const ingresos = data[dayIndex]?.entries || 0;
+            const egresos = data[dayIndex]?.exits || 0;
+    
+            return [
+              dia,        // Nombre del día
+              ingresos,   // Ingresos
+              egresos     // Egresos
+            ];
+          })
+        ];
+      }
   
+     
       console.log('Datos del gráfico formateados:', this.columnChartData);
     });
-}
+  }
+  
+  
+
 
   makeBig(nro: number) {
     this.status = nro;

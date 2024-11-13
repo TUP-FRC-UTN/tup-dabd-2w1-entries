@@ -40,17 +40,10 @@ export class AccessVisitorsRegisterServiceService {
 
   addVisitorsTemporalsSubject(visitor: AccessVisitor): boolean {
     const currentVisitors = this.visitorsSubject.value;
-    
     // Verifica si el documento ya existe
     const documentExists = currentVisitors.some(v => v.document === visitor.document);
-  
-  
-  
-    // Verifica si el correo electrónico ya existe
-    const emailExists = currentVisitors.some(v => v.email === visitor.email);
-  
     // Si el documento, matrícula o correo ya existen, rechaza la adición
-    if (documentExists || emailExists) {
+    if (documentExists) {
       return false;
     }
   

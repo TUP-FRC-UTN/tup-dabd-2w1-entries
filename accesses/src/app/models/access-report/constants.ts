@@ -15,64 +15,64 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
    */
       export const USER_TYPE_MAPPINGS: { [key: string]: UserTypeMapping } = {
         Empleado: {
-          icon: 'bi bi-briefcase',
-          color: '#6F4F37 ',
+          icon: 'bi bi-briefcase text-dark', 
+          color: '#FFDAB9 ',
           title: 'Empleado',
           filterValue: 'employee',
           columnValue: 'empleado'
         },
         Proveedor: {
-          icon: 'bi bi-truck',
-          color: '#6c757d ',
+          icon: 'bi bi-truck text-dark',
+          color: '#FFCECE  ',
           title: 'Proveedor',
           filterValue: 'suplier',
           columnValue: 'proveedor'
         },
         Visitante: {
-          icon: 'bi bi-person-raised-hand',
-          color: '#006400  ',
+          icon: 'bi bi-person-raised-hand text-dark',
+          color: '#B0E0E6  ',
           title: 'Visitante',
           filterValue: 'visitor',
           columnValue: 'visitante'
         },
         Vecino: {
-          icon: 'bi-house',
-          color: '#003366  ',
+          icon: 'bi-house text-dark',
+          color: '#9FD8AB  ',
           title: 'Vecino',
           filterValue: 'neighbour',
           columnValue: 'vecino'
         },
-        Obrero: {
-          icon: 'bi bi-tools',
-          color: '#dc3545',
+        Worker: {
+          icon: 'bi bi-tools text-dark',
+          color: '#FFDAB9',
           title: 'Obrero',
-          filterValue: 'constructionworker',
-          columnValue: 'obrero'
+          filterValue: 'worker',
+          columnValue: 'Obrero'
         },
         Delivery: {
-          icon: 'bi bi-gear-wide-connected',
-          color: '#ffc107',
+          icon: 'bi bi-box-seam text-dark',
+          color: '#FFB0B0',
           title: 'Delivery',
           filterValue: 'delivery',
           columnValue: 'delivery'
         },
         Cleaning: {
-          icon: 'bi bi-gear-wide-connected',
-          color: '#ffc107',
+          icon: 'bi-droplet text-dark',
+          color: '#FFB0B0',
           title: 'P. de Limpieza',
           filterValue: 'cleaning',
-          columnValue: 'personal de limpieza'
+          columnValue: 'P. de Limpieza'
         },
         Gardener: {
-          icon: 'bi bi-gear-wide-connected',
-          color: '#ffc107',
+          icon: 'bi-scissors text-dark',
+          color: '#FFB0B0',
           title: 'Jardinero',
           filterValue: 'gardener',
           columnValue: 'jardinero'
         },        
         Taxi: {
-          icon: 'bi bi-gear-wide-connected',
-          color: '#ffc107',
+          icon: 'bi bi-taxi-front-fill text-dark',
+          color: '#FFB0B0',
           title: 'Taxi',
           filterValue: 'taxi',
           columnValue: 'taxi'
@@ -82,7 +82,7 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
           color: '#dc3545',
           title: 'Emergencias',
           filterValue: 'services',
-          columnValue: 'emergencias'
+          columnValue: 'Emergencias'
         }
       };
 /**
@@ -97,14 +97,14 @@ export const ENTRY_EXIT_OPTIONS: SelectOption[] = [
  * Opciones para el tipo de persona que ingresa
  */
 export const TIPOS_INGRESANTE: SelectOption[] = [
-  { value: 'neighbour', label: 'Vecino' },
-  { value: 'visitor', label: 'Visitante' },
+
+
   { value: 'delivery', label: 'Delivery' },
-  { value: 'constructionworker', label: 'Obrero' },
-  { value: 'suplier', label: 'Proveedor' },
-  { value: 'employee', label: 'Empleado' },
-  { value: 'services', label: 'Servicios' },
-  { value: 'cleaning', label: 'Personal de Limpieza' },
+  { value: 'worker', label: 'Obrero' },
+  { value: 'services', label: 'Emergencias' },
+   { value: 'taxi', label: 'Taxi'},
+
+  { value: 'cleaning', label: 'P. de Limpieza' },
   { value: 'gardener', label: 'Jardinero' }
 ];
 
@@ -140,7 +140,7 @@ export const VALUE_MAPPINGS: { [key: string]: string } = {
   neighbour: 'vecino',
   visitor: 'visitante',
   delivery: 'delivery',
-  constructionworker: 'obrero',
+  worker: 'obrero',
   suplier: 'proveedor',
   employee: 'empleado',
   services: 'servicios',

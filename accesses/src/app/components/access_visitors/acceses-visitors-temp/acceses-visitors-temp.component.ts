@@ -6,10 +6,11 @@ import { AccessVisitorsRegisterServiceService } from '../../../services/access_v
 import { Subject, takeUntil } from 'rxjs';
 import { accessTempRegist, AccessUser, AccessVisitor3, AccessVisitorRecord, UserType } from '../../../models/access-visitors/access-visitors-models';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { AccessUserReportService } from '../../../services/access_report/access-user-report.service';
+import { AccessUserReportService } from '../../../services/access_report/access_httpclient/access_usersApi/access-user-report.service';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 declare var bootstrap: any; 
+
 @Component({
   selector: 'app-acceses-visitors-temp',
   standalone: true,

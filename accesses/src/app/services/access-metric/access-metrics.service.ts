@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { AccessMetricsDTO, DayOfWeekMetricEntryDTO, DayOfWeekMetricExitDTO, HourlyMetricDTO, TopUser, UserTypeMetricDTO, UtilizationRateResponse } from '../../models/access-metric/metris';
+import { AccessCount, AccessMetricsDTO, DayOfWeekMetricEntryDTO, DayOfWeekMetricExitDTO, HourlyMetricDTO, TopUser, UserTypeMetricDTO, UtilizationRateResponse } from '../../models/access-metric/metris';
 @Injectable({
   providedIn: 'root'
 })
@@ -37,8 +37,12 @@ export class AccessMetricsService {
   }
   
   /* Filtro */
-  getAccessCountByUserTypeFilter(year: number, startMonth: number, endMonth: number): Observable<{ userType: string, count: number }[]> {
-    return this.http.get<{ userType: string, count: number }[]>(
+  getAccessCountByUserTypeFilter(
+    year: number,
+    startMonth: number,
+    endMonth: number
+  ): Observable<AccessCount[]> {
+    return this.http.get<AccessCount[]>(
       `${this.baseUrl}/access-count-by-user-type-filter`,
       {
         params: {
@@ -48,18 +52,15 @@ export class AccessMetricsService {
         }
       }
     );
-}
-
-  /* aca */
-  getAccessAndExitByDayOfWeek(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/access-exit-count-by-day`);
   }
-
-  /* filtro */
-
-  getMovementCountsFilter(year: number, startMonth: number, endMonth: number): Observable<any> {
-    return this.http.get(
-      `${this.baseUrl}/access-exit-count-by-day-filter`,
+  
+  getExitCountByUserTypeFilter(
+    year: number,
+    startMonth: number,
+    endMonth: number
+  ): Observable<AccessCount[]> {
+    return this.http.get<AccessCount[]>(
+      `${this.baseUrl}/exit-count-by-user-type-filter`,
       {
         params: {
           year: year.toString(),
@@ -69,6 +70,71 @@ export class AccessMetricsService {
       }
     );
   }
+  
+
+getTotalCountsMovementsByFilter(   
+  year: number,
+  startMonth: number,
+  endMonth: number
+): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.baseUrl}/total-access-and-exit-counts`,
+    {
+      params: {
+        year: year.toString(),
+        startMonth: startMonth.toString(),
+        endMonth: endMonth.toString()
+      }
+    }
+  );
+}
+  /* aca */
+  getAccessAndExitByDayOfWeek(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/access-exit-count-by-day`);
+  }
+
+  /* filtro */
+//CAMBIAR EN EL BACK Y EN EL FRONT SI O SI
+  getMovementCountsFilter(
+    year: number, 
+    startMonth: number, 
+    endMonth: number, 
+    filterType: 'ingresos' | 'egresos'
+  ): Observable<any> {
+    return this.http.get(
+      `${this.baseUrl}/access-exit-count-by-day-filter`,
+      {
+        params: {
+          year: year.toString(),
+          startMonth: startMonth.toString(),
+          endMonth: endMonth.toString(),
+          filterType: filterType // Parámetro para filtrar ingresos o egresos
+        }
+      }
+    );
+  }
+
+
+
+  
+
+
+  getStatsTypeUsers(fromMonth?: number, toMonth?: number, year?: number): Observable<any[]> {
+    let params = new HttpParams();
+    
+    if (fromMonth !== undefined) {
+      params = params.set('fromMonth', fromMonth.toString());
+    }
+    if (toMonth !== undefined) {
+      params = params.set('toMonth', toMonth.toString());
+    }
+    if (year !== undefined) {
+      params = params.set('year', year.toString());
+    }
+
+    return this.http.get<any[]>(this.baseUrl+ '/stats-type-users', { params });
+  }
+
 
   getAccessCountByWeekAndDayOfWeek(): Observable<DayOfWeekMetricEntryDTO> {
     return this.http.get<DayOfWeekMetricEntryDTO>(`${this.baseUrl}/day-with-most-accesses`);
@@ -119,17 +185,25 @@ export class AccessMetricsService {
     return this.http.get<TopUser[]>(this.baseUrl + '/top-users-entries-exits', { params });
   }
 
-  getUtilizationRate(startMonth?: number, endMonth?: number, year?: number): Observable<UtilizationRateResponse> {
+  getUtilizationRateEntries(startMonth?: number, endMonth?: number, year?: number): Observable<UtilizationRateResponse> {
     let params = new HttpParams();
     
     if (startMonth) params = params.set('startMonth', startMonth.toString());
     if (endMonth) params = params.set('endMonth', endMonth.toString());
     if (year) params = params.set('year', year.toString());
 
-    return this.http.get<UtilizationRateResponse>(this.baseUrl+'/utilization-rate', { params });
+    return this.http.get<UtilizationRateResponse>(this.baseUrl+'/utilization-rate-entries', { params });
   }
 
-  getGuardWithMostExits(startYear: number, startMonth: number, endYear: number, endMonth: number): Observable<any> {
+  getUtilizationRateExit(startMonth?: number, endMonth?: number, year?: number): Observable<UtilizationRateResponse> {
+    let params = new HttpParams();
+    
+    if (startMonth) params = params.set('startMonth', startMonth.toString());
+    if (endMonth) params = params.set('endMonth', endMonth.toString());
+    if (year) params = params.set('year', year.toString());
+
+    return this.http.get<UtilizationRateResponse>(this.baseUrl+'/utilization-rate-exits', { params });
+  }  getGuardWithMostExits(startYear: number, startMonth: number, endYear: number, endMonth: number): Observable<any> {
     return this.http.get<any>(this.baseUrl + '/guard-with-most-exits', {
       params: {
         startYear: startYear.toString(),
