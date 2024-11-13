@@ -22,6 +22,8 @@ import { AccessUserAllowedInfoDto } from '../../../../models/access-visitors/acc
 import { AccessOwnerRenterserviceService } from '../../../../services/access-owner/access-owner-renterservice.service';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 import { QRData } from '../../../../models/access-visitors/access-VisitorsModels';
+import { Router } from '@angular/router';
+import { MetricUser, RedirectInfo, RedirectKpis } from '../../../../models/access-metric/metris';
 declare var bootstrap: any;
 
 @Component({
@@ -34,8 +36,8 @@ declare var bootstrap: any;
 })
 export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   // Propiedades para manejo de fechas
-  anios: number[] = [];
-  meses: number[] = [];
+  years: number[] = [];
+  months: number[] = [];
   startDate: Date | null = null;
   endDate: Date | null = null;
   today: Date = new Date(); 
@@ -50,8 +52,17 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   table: any = null;
   exportButtonsEnabled: boolean = false;
 
-  
   private readonly ownerService=inject(AccessOwnerRenterserviceService)
+  private readonly router = inject(Router);
+
+  redirectInfo: RedirectInfo = {
+    data: this.router.getCurrentNavigation()?.extras?.state?.['data'],
+    type: this.router.getCurrentNavigation()?.extras?.state?.['type'],
+    startMonth: this.router.getCurrentNavigation()?.extras?.state?.['startMonth'],
+    startYear: this.router.getCurrentNavigation()?.extras?.state?.['startYear'],
+    endMonth: this.router.getCurrentNavigation()?.extras?.state?.['endMonth'],
+    endYear: this.router.getCurrentNavigation()?.extras?.state?.['endYear']
+  }
 
   // Opciones para selectores
   propietariosOptions: any[] = [];
@@ -318,6 +329,12 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     window.addEventListener('openModalInfo', this.handleOpenModal);
     window.addEventListener('Movment', this.handleOpenMovement);
+    if (this.redirectInfo.startMonth && this.redirectInfo.startYear) {
+      this.startDate = new Date(this.redirectInfo.startYear, this.redirectInfo.startMonth - 1, 1, 0, 0, 0, 0);
+    }
+    if (this.redirectInfo.endMonth && this.redirectInfo.endYear) {
+      this.endDate = new Date(this.redirectInfo.endYear, this.redirectInfo.endMonth, 0, 23, 59, 59, 999)
+    }
   }
   
 /**
@@ -345,12 +362,33 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private loadSelectOptions(): void {
     this.userService.getPropietariosForSelect().subscribe(
-      options => this.propietariosOptions = options
-    );
+      options => {
+        this.propietariosOptions = options;
+        this.applyRedirectFilters();
+      });
 
     this.userService.getGuardiasForSelect().subscribe(
-      options => this.guardiasOptions = options
-    );
+      options => {
+        this.guardiasOptions = options;
+        this.applyRedirectFilters();
+      });
+  }
+
+  applyRedirectFilters() {
+    if (this.redirectInfo.data && this.redirectInfo.type) {
+      if (this.redirectInfo.type === 'guardEntries' && this.redirectInfo.data.id) {
+        this.filterValues.entryOrExit = ['entrada'];
+        this.filterValues.selectedGuardia = [this.redirectInfo.data.id];
+      }
+      else if (this.redirectInfo.type === 'guardExits' && this.redirectInfo.data.id) {
+        this.filterValues.entryOrExit = ['salida'];
+        this.filterValues.selectedGuardia = [this.redirectInfo.data.id];
+      }
+      else if (this.redirectInfo.type === 'neighborAuthorizations' && this.redirectInfo.data.id) {
+        this.filterValues.selectedPropietario = [this.redirectInfo.data.id];
+      }
+      this.applyFilters();
+    }
   }
 
   /**
@@ -657,7 +695,6 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
   private filterRow(data: string[]): boolean {
     const [fecha, , tipoEntrada, tipoIngresante, nombre, documento,
            tipoVehiculo, placa, propietario, guardia] = data;
-
     // Búsqueda unificada
     if (this.filterValues.unifiedSearch) {
       const searchTerm = this.filterValues.unifiedSearch.toLowerCase();

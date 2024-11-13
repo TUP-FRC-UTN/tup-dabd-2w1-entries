@@ -3,39 +3,9 @@ import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { AccessMetricsService } from '../../../../services/access-metric/access-metrics.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TopUser, UtilizationRate } from '../../../../models/access-metric/metris';
-
-
-
-// Interfaces para los KPIs
-interface ColumnChartKPIs {
-  totalPeriod: number;
-  monthlyAverage: number;
-  bestMonth: {
-    month: string;
-    value: number;
-  };
-}
-
-interface PieChartKPIs {
-  topMethod: {
-    name: string;
-    percentage: number;
-  };
-  totalTransactions: number;
-  averagePerMethod: {
-    [key: string]: number;
-  };
-}
-
-
-
-interface TopExpenseKPIs {
-  highestAmount: number;
-  averageTop5: number;
-  totalTop5: number;
-}
-
+import { MetricUser, RedirectKpis, TopUser, UtilizationRate } from '../../../../models/access-metric/metris';
+import { AccessUserReportService } from '../../../../services/access_report/access-user-report.service';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -46,10 +16,10 @@ interface TopExpenseKPIs {
   styleUrl: './metrics.component.css'
 })
 
-export class MetricsComponent implements OnInit{
+export class MetricsComponent implements OnInit {
 
 
-  constructor(private metricsService: AccessMetricsService) {
+  constructor(private metricsService: AccessMetricsService, private userService: AccessUserReportService, private router: Router) {
     const now = new Date();
     this.periodTo = this.formatYearMonth(now);
     
@@ -87,6 +57,48 @@ export class MetricsComponent implements OnInit{
   aplyFilters(): void {
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
+
+    this.metricsService.getNeighborWithMostAuthorizations(
+      fromDate.year, 
+      fromDate.month, 
+      toDate.year, 
+      toDate.month).subscribe(data => {
+        this.userService.getUserById(data?.[0]).subscribe(userData => {
+          this.redirectKpis.neighborAuthorizations = {
+            name: userData,
+            id: data?.[0] ?? null,
+            count: data?.[1] ?? 0
+          }
+        });
+    });
+
+    this.metricsService.getGuardWithMostEntries(
+      fromDate.year, 
+      fromDate.month, 
+      toDate.year, 
+      toDate.month).subscribe(data => {
+        this.userService.getUserById(data?.[0]).subscribe(userData => {
+          this.redirectKpis.guardEntries = {
+            name: userData,
+            id: data?.[0] ?? null,
+            count: data?.[1] ?? 0
+          }
+        });
+    });
+
+    this.metricsService.getGuardWithMostExits(
+      fromDate.year, 
+      fromDate.month, 
+      toDate.year, 
+      toDate.month).subscribe(data => {
+        this.userService.getUserById(data?.[0]).subscribe(userData => {
+          this.redirectKpis.guardExits = {
+            name: userData,
+            id: data?.[0] ?? null,
+            count: data?.[1] ?? 0
+          }
+        });
+    });
 
     this.metricsService.getMovementCountsFilter(
       fromDate.year,
@@ -137,6 +149,18 @@ export class MetricsComponent implements OnInit{
 
   }
 
+  redirect(metricUser: MetricUser, redirectType: string) {
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
+    this.router.navigate(['reports'], { state: {
+      data: metricUser,
+      type: redirectType,
+      startMonth: fromDate.month,
+      startYear: fromDate.year,
+      endMonth: toDate.month,
+      endYear: toDate.year
+    }});
+  }
 
   private formatYearMonth(date: Date): string {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -155,8 +179,26 @@ export class MetricsComponent implements OnInit{
   totalAccesCount: number = 0;
   totalExitCount: number = 0;
 
+  redirectKpis: RedirectKpis = {
+    neighborAuthorizations: {
+      name: null,
+      id: null,
+      count: 0
+    },
+    guardEntries: {
+      name: null,
+      id: null,
+      count: 0
+    },
+    guardExits: {
+      name: null,
+      id: null,
+      count: 0
+    }
+  };
+
   today = new Date();
- 
+
   dayWithMostAccesses: string = '';
   accessCount= 0;
 
@@ -180,7 +222,6 @@ export class MetricsComponent implements OnInit{
   minDateFrom: string = '2020-01';
   topMethodName: string = "";
 
-
   ngOnInit() {
     this.fetchTodayAccessCount();
     this.loadAccessCounts();
@@ -196,11 +237,7 @@ export class MetricsComponent implements OnInit{
     this.getPeakDayExit();
     this.aplyFilters()
     this.loadUtilizationData();
-
   }
-
-
-
 
   getPeakDayExit(): void {
     this.metricsService.getExitCountByWeekAndDayOfWeek().subscribe((data) => {
