@@ -132,7 +132,6 @@ initForm(): void {
           Validators.pattern('^[A-Za-z0-9]{8,15}$')
       ]],
       documentType:['', [Validators.required]],
-      email: [''],
       hasVehicle: [false],
       licensePlate: [''],
       vehicleType: [''],
@@ -199,18 +198,6 @@ onAuthorizedTypeChange(event: Event): void {
     this.indexUserType = parseInt(selectedValue, 10);
     console.log(this.indexUserType);
 
-    // Obtén la referencia al control `email`
-    const emailControl = this.visitorForm.get('email');
-
-    // Aplica la validación de `required` solo si `indexUserType` es `1`
-    if (this.indexUserType === 1) {
-      emailControl?.setValidators([Validators.required, Validators.email, Validators.maxLength(70)]);
-    } else {
-      // Elimina la validación de `required` si `indexUserType` no es `1`
-      emailControl?.setValidators([Validators.email, Validators.maxLength(70)]);
-    }
-    // Actualiza el estado de validación del control
-    emailControl?.updateValueAndValidity();
   }
 }
 
@@ -225,7 +212,6 @@ sendVisitor(): void {
       lastName: formData.lastName,
       document: formData.document,
       documentType: parseInt(formData.documentType),
-      email: formData.email,
       userType: this.indexUserType
     };
 

@@ -47,19 +47,19 @@ export class AccessesNavbarComponent {
 
          {
            icon: "bi bi-person-lines-fill",
-           title: "Informe de ingresos/egresos",
+           title: "Informe de Ingresos/Egresos",
            route: "reports",
            roles: ["SuperAdmin", "Gerente"]
          },
          {
            icon: "bi bi-door-open-fill",
-           title: "Añadir visitante",
+           title: "Añadir Visitante",
            route: "visitor/register",
            roles: ["SuperAdmin", "Gerente","Propietario","Security"]
          },
          {
           icon: "bi bi-car-front-fill",
-          title: "Registro de vehículos",
+          title: "Registro de Vehículos",
           route: "vehicleAdd",
           roles: ["SuperAdmin", "Gerente","Security"]
          },

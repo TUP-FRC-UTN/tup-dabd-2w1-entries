@@ -113,20 +113,20 @@ export class ExportService {
               return 'Desconocido';
             }
             
-            // Para la columna con los guiones
-            if (column === 9) {
-              // Si incluye el div con clase text-center
-              if (strData.includes('text-center')) {
-                return '------';
-              }
-              // Si es directamente los guiones
-              if (strData === '------') {
-                return '------';
-              }
-              // Para cualquier otro caso, retornar el dato original
-              return strData;
+          // Para la columna con los guiones
+          if (column === 8) {
+            // Si incluye el div con clase text-center
+            if (strData.includes('text-column-8')) {
+              return '------';
             }
-
+            // Si es directamente los guiones
+            if (strData === '------') {
+              return '------';
+            }
+            // Para cualquier otro caso, retornar el dato original
+            return strData;
+          }
+          
             // Para cualquier otra columna, retornar el dato sin modificar
             return strData;
           }
@@ -179,7 +179,7 @@ export class ExportService {
             // Para la columna con los guiones
             if (column === 8) {
               // Si incluye el div con clase text-center
-              if (strData.includes('text-center')) {
+              if (strData.includes('text-column-8')) {
                 return '------';
               }
               // Si es directamente los guiones

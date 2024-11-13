@@ -178,7 +178,6 @@ export interface AccessVisitor3 {
   lastName: string;
   document: string;
   documentType:number;
-  email: string;
   vehicle?: AccessVehicle2 | null;
   userType?: number;
 }

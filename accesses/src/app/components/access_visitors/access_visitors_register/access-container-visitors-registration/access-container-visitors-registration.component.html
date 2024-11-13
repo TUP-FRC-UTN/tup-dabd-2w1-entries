@@ -112,29 +112,27 @@
                         </div>
 
                     </div>
-
-                    <div class="col-12 col-md-6">
-                        <div class="d-flex align-items-center">
-                            <label for="email" class="form-label me-3">Email</label>
-                            <div class="flex-grow-1">
-                                <input type="email" class="form-control flex-grow-1" id="email" formControlName="email"
-                                    [class.is-valid]="visitorForm.get('email')?.valid && visitorForm.get('email')?.touched"
-                                    [class.is-invalid]="visitorForm.get('email')?.invalid && visitorForm.get('email')?.touched">
-
-                                <div class="invalid-feedback"
-                                    *ngIf="visitorForm.get('email')?.errors && visitorForm.get('email')?.touched">
-                                    <div *ngIf="visitorForm.get('email')?.errors?.['required']">El email es requerido.
+                    @if (this.indexUserType===1) {
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center">
+                                <label for="email" class="form-label me-3">Email</label>
+                                <div class="flex-grow-1">
+                                    <input type="email" class="form-control flex-grow-1" id="email" formControlName="email"
+                                        [class.is-valid]="visitorForm.get('email')?.valid && visitorForm.get('email')?.touched"
+                                        [class.is-invalid]="visitorForm.get('email')?.invalid && visitorForm.get('email')?.touched">
+                                    <div class="invalid-feedback"
+                                        *ngIf="visitorForm.get('email')?.errors && visitorForm.get('email')?.touched">
+                                        <div *ngIf="visitorForm.get('email')?.errors?.['required']">El email es requerido.
+                                        </div>
+                                        <div *ngIf="visitorForm.get('email')?.errors?.['email']">Por favor, ingrese un email
+                                            válido.</div>
+                                        <div *ngIf="visitorForm.get('email')?.errors?.['maxlength']">El email no puede
+                                            exceder 70 caracteres.</div>
                                     </div>
-                                    <div *ngIf="visitorForm.get('email')?.errors?.['email']">Por favor, ingrese un email
-                                        válido.</div>
-                                    <div *ngIf="visitorForm.get('email')?.errors?.['maxlength']">El email no puede
-                                        exceder 70 caracteres.</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-
+                    }
                     <div class="col-12 col-md-6 col-lg-6">
                         <div class="input-group-text">
                             <input class="form-check-input w-10" type="checkbox" role="switch" id="hasVehicle"
@@ -251,7 +249,7 @@
         <app-access-time-range-visitors-registration (selectedUser)="handleSelectedUser($event)">
         </app-access-time-range-visitors-registration>
 
-        <div class="col-12 mt-5">
+        <div class="col-12 mt-3">
             <div class="d-flex justify-content-end gap-3">
                 <button class="btn btn-outline-success btn-sm" type="button"
                     *ngIf="isQRCodeAvailable && indexUserType === 1" (click)="downloadQRCode()"

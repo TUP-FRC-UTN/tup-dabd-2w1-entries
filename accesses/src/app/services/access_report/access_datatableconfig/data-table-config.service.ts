@@ -57,7 +57,7 @@ export class DataTableConfigService {
         {
           targets: 8,
           render: (data: any) => {
-            return data === '------' ? '<div class="text-center">------</div>' : data;
+            return data === '------' ? '<div class="text-column-8">------</div>' : data;
           }
         },
         {

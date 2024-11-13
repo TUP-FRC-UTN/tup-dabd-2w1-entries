@@ -322,6 +322,7 @@ disableDateInputs: boolean = false;
     }
   }
   agregarDiasPermitidos(): void {
+   
     if (!this.validateHours()) return;
     if (!this.validateDates()) return;
   
@@ -362,6 +363,7 @@ disableDateInputs: boolean = false;
     this.form.get('endHour')?.updateValueAndValidity();
     
     this.updateDaysSelected();
+    this.agregarAuthRange();
   }
   isAllowedDay(day: AccessDay): boolean {
   
