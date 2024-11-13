@@ -53,3 +53,10 @@ export interface AccessMetricsDTO {
     };
     timestamp: number[];
   }
+
+  export interface AccessCount {
+    month: number;       
+    userType: string;    
+    count: number;      
+  }
+  

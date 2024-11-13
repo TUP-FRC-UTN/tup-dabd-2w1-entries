@@ -5,39 +5,6 @@ import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TopUser, UtilizationRate } from '../../../../models/access-metric/metris';
 
-
-
-// Interfaces para los KPIs
-interface ColumnChartKPIs {
-  totalPeriod: number;
-  monthlyAverage: number;
-  bestMonth: {
-    month: string;
-    value: number;
-  };
-}
-
-interface PieChartKPIs {
-  topMethod: {
-    name: string;
-    percentage: number;
-  };
-  totalTransactions: number;
-  averagePerMethod: {
-    [key: string]: number;
-  };
-}
-
-
-
-interface TopExpenseKPIs {
-  highestAmount: number;
-  averageTop5: number;
-  totalTop5: number;
-}
-
-
-
 @Component({
   selector: 'app-metrics',
   standalone: true,
@@ -115,7 +82,6 @@ export class MetricsComponent implements OnInit{
           ];
         })
       ];
-
       console.log('Datos del gráfico filtrados:', this.columnChartData);
     });
 
@@ -198,6 +164,25 @@ export class MetricsComponent implements OnInit{
     this.loadUtilizationData();
 
   }
+
+
+
+  private getMonthsRange(start: number, end: number): number[] {
+    const months = [];
+    for (let i = start; i <= end; i++) {
+      months.push(i);
+    }
+    return months;
+  }
+
+  private getMonthName(month: number): string {
+    const months = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    return months[month - 1];
+  }
+
 
 
 
@@ -345,21 +330,196 @@ export class MetricsComponent implements OnInit{
   }
 
   
-
   private loadAccessCounts(): void {
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
-
+  
     this.metricsService.getAccessCountByUserTypeFilter(
-        fromDate.year,
-        fromDate.month,
-        toDate.month
+      fromDate.year,
+      fromDate.month,
+      toDate.month
     ).subscribe(data => {
-        this.pieChartData = [
-            ...data.map(item => [this.translateRole(item.userType), item.count])
-        ];
+      console.log(data, "DATA FILTRADA DE GRAFICO DE COLUMNAS");
+  
+      const chartData: any[] = [];
+  
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  
+      const userTypesData: { [key: string]: number[] } = {};
+      const userTypes: string[] = [];  
+      const tooltips: string[][] = []; 
+  
+      data.forEach(item => {
+        const month = item.month - 1; 
+        const userType = item.userType;  
+  
+        if (!userTypesData[userType]) {
+          userTypesData[userType] = new Array(12).fill(0); 
+          userTypes.push(userType); 
+        }
+  
+        userTypesData[userType][month] = item.count;
+      });
+  
+      const filteredMonths = months.slice(fromDate.month - 1, toDate.month); 
+      filteredMonths.forEach((month, i) => {
+        const row: (string | number)[] = [month]; 
+  
+        userTypes.forEach(userType => {
+          const count = userTypesData[userType][fromDate.month - 1 + i] || 0; 
+          row.push(count);
+        });
+  
+        chartData.push(row);
+      });
+  
+      this.barChartData = chartData;
+  
+      console.log('Datos del gráfico de columnas:', this.barChartData);
+  
+      const series: { [key: number]: { labelInLegend: string, type: string } } = userTypes.reduce((acc: { [key: number]: { labelInLegend: string, type: string } }, userType, index) => {
+        acc[index] = {
+          labelInLegend: this.translateRole(userType), 
+          type: 'column', 
+        };
+        return acc;
+      }, {} as { [key: number]: { labelInLegend: string, type: string } });
+  
+      this.barChartOptions = {
+        title: 'Comparación de Ingresos por Tipo de Usuario',
+        legend: {
+          position: 'bottom',
+          textStyle: { color: '#6c757d', fontSize: 14 }
+        },
+        colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
+        hAxis: {
+          title: 'Meses',  
+          textStyle: { color: '#6c757d' },
+          slantedText: true, 
+        },
+        vAxis: {
+          title: 'Cantidad de Ingresos', 
+          textStyle: { color: '#6c757d' },
+          minValue: 0,
+          format: '', 
+        },
+        animation: {
+          duration: 1000,
+          easing: 'out',
+          startup: true
+        },
+        series, 
+
+      };
     });
-}
+  }
+  
+  chartType: 'ingresos' | 'egresos' = 'ingresos';
+  barChartType = ChartType.ColumnChart;  
+  barChartData: any[] = [];
+  barChartOptions: any = {};
+  
+  onChartTypeChange() {
+    this.loadData();
+    this.loadEntryExit();
+  }
+  
+  
+  private loadData(): void {
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
+
+    // Seleccionar el servicio según el tipo
+    const service = this.chartType === 'ingresos' 
+      ? this.metricsService.getAccessCountByUserTypeFilter(fromDate.year, fromDate.month, toDate.month)
+      : this.metricsService.getExitCountByUserTypeFilter(fromDate.year, fromDate.month, toDate.month);
+
+    service.subscribe(data => {
+      console.log(data, `DATA FILTRADA DE GRAFICO DE ${this.chartType.toUpperCase()}`);
+
+      const chartData: any[] = [];
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const userTypesData: { [key: string]: number[] } = {};
+      const userTypes: string[] = [];
+
+      data.forEach(item => {
+        const month = item.month - 1;
+        const userType = item.userType;
+
+        if (!userTypesData[userType]) {
+          userTypesData[userType] = new Array(12).fill(0);
+          userTypes.push(userType);
+        }
+
+        userTypesData[userType][month] = item.count;
+      });
+
+      const filteredMonths = months.slice(fromDate.month - 1, toDate.month);
+      filteredMonths.forEach((month, i) => {
+        const row: (string | number)[] = [month];
+
+        userTypes.forEach(userType => {
+          const count = userTypesData[userType][fromDate.month - 1 + i] || 0;
+          row.push(count);
+        });
+
+        chartData.push(row);
+      });
+
+      this.barChartData = chartData;
+
+      const series: { [key: number]: { labelInLegend: string, type: string } } = 
+        userTypes.reduce((acc: { [key: number]: { labelInLegend: string, type: string } }, userType, index) => {
+          acc[index] = {
+            labelInLegend: this.translateRole(userType),
+            type: 'column',
+          };
+          return acc;
+        }, {});
+
+      this.barChartOptions = {
+        title: `Comparación de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'} por Tipo de Usuario`,
+        legend: {
+          position: 'bottom',
+          textStyle: { color: '#6c757d', fontSize: 14 }
+        },
+        colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
+        hAxis: {
+          title: 'Meses',
+          textStyle: { color: '#6c757d' },
+          slantedText: true,
+        },
+        vAxis: {
+          title: `Cantidad de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'}`,
+          textStyle: { color: '#6c757d' },
+          minValue: 0,
+          format: '',
+        },
+        animation: {
+          duration: 1000,
+          easing: 'out',
+          startup: true
+        },
+        series,
+      };
+    });
+  }
+  
+  
+  
+  getCurrentYearMonth(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  getDefaultFromDate(): string {
+    const now = new Date();
+    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+    return `${threeMonthsAgo.getFullYear()}-${String(threeMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+
+
 
 
   pieChartType = ChartType.PieChart;
@@ -390,8 +550,7 @@ export class MetricsComponent implements OnInit{
       maxLines: 2
     },
     bar: { groupWidth: '100%' },
-    height: 600,
-    width: '100%',
+
     colors: ['#4caf50', '#f44336'],
     hAxis: {
       title: 'Días de la semana',
@@ -400,7 +559,8 @@ export class MetricsComponent implements OnInit{
     vAxis: {
       title: 'Cantidad',
       textStyle: { color: '#6c757d' },
-      minValue: 0
+      minValue: 0,
+      format: ''
     },
     animation: {
       duration: 1000,
@@ -412,19 +572,6 @@ export class MetricsComponent implements OnInit{
       1: { labelInLegend: 'Egresos' }
     }
   };
-
-
-  getCurrentYearMonth(): string {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  }
-
-  getDefaultFromDate(): string {
-    const now = new Date();
-    const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-    return `${threeMonthsAgo.getFullYear()}-${String(threeMonthsAgo.getMonth() + 1).padStart(2, '0')}`;
-  }
-
 
 
   private loadEntryExit(): void {
