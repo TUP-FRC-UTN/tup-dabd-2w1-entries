@@ -15,35 +15,35 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
    */
       export const USER_TYPE_MAPPINGS: { [key: string]: UserTypeMapping } = {
         Empleado: {
-          icon: 'bi bi-briefcase',
-          color: '#6F4F37 ',
+          icon: 'bi bi-briefcase text-dark', 
+          color: '#FFDAB9 ',
           title: 'Empleado',
           filterValue: 'employee',
           columnValue: 'empleado'
         },
         Proveedor: {
-          icon: 'bi bi-truck',
-          color: '#6c757d ',
+          icon: 'bi bi-truck text-dark',
+          color: '#FFCECE  ',
           title: 'Proveedor',
           filterValue: 'suplier',
           columnValue: 'proveedor'
         },
         Visitante: {
-          icon: 'bi bi-person-raised-hand',
-          color: '#006400  ',
+          icon: 'bi bi-person-raised-hand text-dark',
+          color: '#B0E0E6  ',
           title: 'Visitante',
           filterValue: 'visitor',
           columnValue: 'visitante'
         },
         Vecino: {
-          icon: 'bi-house',
-          color: '#003366  ',
+          icon: 'bi-house text-dark',
+          color: '#9FD8AB  ',
           title: 'Vecino',
           filterValue: 'neighbour',
           columnValue: 'vecino'
         },
         Worker: {
-          icon: 'bi bi-tools',
+          icon: 'bi bi-tools text-dark',
           color: '#FFDAB9',
           title: 'Obrero',
           filterValue: 'worker',
@@ -64,7 +64,7 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
           columnValue: 'P. de Limpieza'
         },
         Gardener: {
-          icon: 'bi bi-gear-wide-connected',
+          icon: 'bi bi-gear-wide-connected text-dark',
           color: '#FFDAB9',
           title: 'Jardinero',
           filterValue: 'gardener',
