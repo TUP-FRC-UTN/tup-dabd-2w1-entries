@@ -40,8 +40,8 @@ export interface AccessMetricsDTO {
 
   export interface UtilizationRate {
     userType: string;
-    accessCount: number;
-    utilizationPercentage: number;
+    count: number;
+    percentage?: number; 
   }
   
   export interface UtilizationRateResponse {
@@ -53,3 +53,13 @@ export interface AccessMetricsDTO {
     };
     timestamp: number[];
   }
+
+  export interface AccessCount {
+    month: number;       
+    userType: string;    
+    count: number;      
+  }
+  
+
+
+  

@@ -40,3 +40,15 @@ google-chart {
     background-color: white; 
   }
 
+
+  /* ESTILOS PARA CARDS DEL TIPO DE USUARIO KPI */
+  .bg-success {
+    background-color: #d4edda !important; /* Verde para ingresos */
+  }
+  
+  .bg-danger {
+    background-color: #f8d7da !important; /* Rojo para egresos */
+    opacity: 0.8
+
+  }
+  

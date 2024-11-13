@@ -10,23 +10,31 @@
            <div class="col d-flex gap-3">
                 <div class="col">
                     <input type="month" class="form-control border-1 bg-light" [(ngModel)]="periodFrom"
-                        (ngModelChange)="aplyFilters()" [max]="periodTo" [min]="minDateFrom">
+                        (ngModelChange)="applyFilters()" [max]="periodTo" [min]="minDateFrom">
                 </div>
                 <div class="col">
                     <input type="month" class="form-control border-1 bg-light" [(ngModel)]="periodTo"
-                        (ngModelChange)="aplyFilters()" [min]="periodFrom">
+                        (ngModelChange)="applyFilters()" [min]="periodFrom">
                 </div>
-
+                <div>
+                    <label for="chartType">Selecciona el tipo de gráfico:</label>
+                    <select id="chartType" [(ngModel)]="chartType" (change)="onChartTypeChange()">
+                      <option value="ingresos">Ingresos</option>
+                      <option value="egresos">Egresos</option>
+                      <option value="total">Total</option>
+                    </select>
+                  </div>
+                  
             </div> 
             <!-- Botones de exportar -->
-<!--            <div class="col-auto d-flex gap-1 ms-auto">
+            <div class="col-auto d-flex gap-1 ms-auto">
                 <button class="btn btn-primary filterbutton" data-bs-toggle="modal" title="Filtros Avanzados"
                     data-bs-target="#filtrosAvanzados">
                     <i class="bi bi-funnel-fill"></i>
                 </button>
                 <button type="button" class="btn btn-secondary bi bi-trash filterbutton"
                     title="Limpiar Filtros"></button>
-            </div> -->
+            </div> 
         </div>
 
     </div> 
@@ -57,11 +65,12 @@
                             <div>
                                 <h5 class="card-title text-secondary mb-1  d-flex justify-content-center">Cantidad de ingresos-egresos</h5>
                                 <small class="text-secondary d-flex justify-content-center">Rendimiento por
-                                    periodo</small>
+                                    día de semana</small>
                             </div>
                         </div>
+                        <!-- Importante dejar el height en 70% para que no se vaya agrandando sin sentido -->
                         <google-chart [type]="columnChartType" [data]="columnChartData" [options]="columnChartOptions"
-                            class="w-100 expanded-chart-content">
+                            class="expanded-chart-content" style="width: 100%; height: 70%;">
                         </google-chart>
                     </div>
                 </div>
@@ -165,21 +174,29 @@
             <div class="col-md-3" *ngIf="status === 2">
                 <!-- Método más usado -->
                 <div class="row">
-                    <div class="col mb-3" *ngFor="let data of utilizationData">
-                      <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100">
+                    <div class="col mb-3" *ngFor="let data of uniqueData">
+                        <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
+                        [ngClass]="{
+                          'bg-success': chartType === 'ingresos', 
+                          'bg-danger': chartType === 'egresos'   
+                        }">
                         <div class="card-body position-relative">
                           <div class="pe-5">
                             <h6 class="text-secondary mb-2">{{ translateRole(data.userType) }}</h6>
-                            <h3 class="mb-0">{{ data.accessCount }}</h3>
-                            <small class="text-muted">{{ data.utilizationPercentage }}% de utilización</small>
+                            <h3 class="mb-0">{{ data.percentage }}%</h3> <!-- Mostrar el porcentaje calculado -->
+                            <small class="text-muted">Total: {{ data.count }}</small> 
                           </div>
                         </div>
                       </div>
+                      
                     </div>
-                </div>
+                  </div>
+                  
             </div>
 
-            
+
+
+
             <!-- Grafico de pie -->
             <div class="col-9" *ngIf="status === 2">
                 <div class="card border-0 shadow-lg  rounded-4 h-100">
@@ -196,9 +213,16 @@
                                 <h5 class="card-title text-secondary mb-1 d-flex justify-content-center">Tipos de usuarios</h5>
                             </div>
                         </div>
-                        <google-chart [type]="pieChartType" [data]="pieChartData" [options]="pieChartOptions"
-                            class="w-100 " style="height:80%">
-                        </google-chart>
+                            <!-- ACA VA EL GRAFICO DE LINEA DE TIPO DE USUARIOS -->
+                            <div id="chartContainer">
+                                <google-chart style="width: 900px; height: 800px;"
+                                [type]="barChartType"
+                                [data]="barChartData"
+                                [options]="barChartOptions"
+                                >
+                            </google-chart>
+                            </div>
+                          
                     </div>
                 </div>
             </div>
@@ -291,10 +315,12 @@
                 <div class="card-body ">
                     <div class="d-flex justify-content-center align-items-center ">
                         <div class="text-center">
-                            <h5 class="card-title  text-secondary mb-1">Comparacion de Ingresos/Egresos</h5>
+                            <h5 class="card-title  text-secondary mb-1">Comparacion  {{chartType}} </h5>
+                            <small class="text-secondary">Cantidad total por dia de semana</small>
+
                         </div>
                     </div>
-                    <google-chart
+                    <google-chart style="width: 100%; height: 70%;"
                     [type]="columnChartType"
                     [data]="columnChartData"
                     [options]="columnChartOptions">
@@ -315,13 +341,14 @@
                         <h5 class="card-title text-secondary mb-1 text-">Tipos de ingresantes</h5>
                       </div>
                     </div>
-                    <google-chart 
-                      [type]="pieChartType" 
-                      [data]="pieChartData" 
-                      [options]="pieChartOptions" 
-                      class="w-100" style="height:80%">
-                    </google-chart>
-                  </div>
+                    <!-- ACA VA EL GRAFICO DE LINEA DE TIPOS DE USUARIOS -->
+                    <google-chart style="width: 100%; height: 100%;"
+                    [type]="barChartType"
+                    [data]="barChartData"
+                    [options]="barChartOptions"
+                    
+                    [height]="barChartOptions.height">
+                  </google-chart>
                 </div>
               </div>
               
@@ -362,6 +389,7 @@
         </div>
 
     </div>
+</div>
 </div>
 
 
