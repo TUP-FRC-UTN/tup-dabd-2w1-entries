@@ -72,7 +72,7 @@ export class AccessVisitorsRegisterServiceHttpClientService {
       map(response => {
         if (Array.isArray(response)) {
           return response.map(item => ({
-            id: item.id, // Preserve the original ID
+            id: item.id, 
             description: this.userTypeMapping[item.description] || item.description
           }));
         } else {
