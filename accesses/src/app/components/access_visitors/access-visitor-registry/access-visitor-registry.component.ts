@@ -626,33 +626,33 @@ loadUsersAllowedData(): Observable<boolean> {
       }
 
       case "Worker" : {   //rojo (red) <i class="bi bi-tools"></i> 
-        return  `<button style="background-color: #FFDAB9;border: bisque;" class="btn btn-primary" title="Obrero">
+        return  `<button style="background-color: #FFB0B0;border: bisque;" class="btn btn-primary" title="Obrero">
                     <i class='bi bi-tools text-dark'></i> 
                   </button>`
       }
       case "Delivery" : {   //violeta (indigo) <i class="bi bi-box-seam"></i> 
-        return  `<button style="background-color: #FFDAB9;border: bisque;" class="btn btn-primary" title="Delivery">
+        return  `<button style="background-color: #FFB0B0;border: bisque;" class="btn btn-primary" title="Delivery">
                     <i class='bi bi-box-seam text-dark'></i> 
                   </button>`
       }
       case "Cleaning" : {   //rosa (pink) <i class="bi bi-stars"></i>
-        return  `<button style="background-color: #FDFD96;border: bisque;" class="btn btn-primary" title="P. de Limpieza">
+        return  `<button style="background-color: #FFB0B0;border: bisque;" class="btn btn-primary" title="P. de Limpieza">
                     <i class='bi-droplet text-dark'></i> 
                   </button>`
       }
       case "Gardener" : { //celeste (cyan) <i class="bi bi-flower1"></i>
-        return  `<button style="background-color: #FFDAB9;border: bisque;" class="btn btn-primary" title="Jardinero">
+        return  `<button style="background-color: #FFB0B0;border: bisque;" class="btn btn-primary" title="Jardinero">
                     <i class='bi-scissors text-dark'></i> 
                   </button>`
       }
       case "Taxi" : { //
-        return  `<button style="background-color: #FFDAB9;border: bisque;" class="btn btn-primary" title="Taxi">
+        return  `<button style="background-color: #FFB0B0;border: bisque;" class="btn btn-primary" title="Taxi">
                    <i class="bi bi-taxi-front-fill text-dark"></i>
                   </button>`
       }
 
       default : {
-      return  `<button style="background-color: #dc3545;border: bisque;" class="btn btn-primary" title="???">
+      return  `<button style="background-color: #FFB0B0;border: bisque;" class="btn btn-primary" title="???">
                   <i class="bi bi-question-lg"></i>
                 </button> `
       }

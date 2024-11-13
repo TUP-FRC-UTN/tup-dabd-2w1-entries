@@ -51,28 +51,28 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
         },
         Delivery: {
           icon: 'bi bi-box-seam text-dark',
-          color: '#FFDAB9',
+          color: '#FFB0B0',
           title: 'Delivery',
           filterValue: 'delivery',
           columnValue: 'delivery'
         },
         Cleaning: {
           icon: 'bi-droplet text-dark',
-          color: '#FDFD96',
+          color: '#FFB0B0',
           title: 'P. de Limpieza',
           filterValue: 'cleaning',
           columnValue: 'P. de Limpieza'
         },
         Gardener: {
           icon: 'bi-scissors text-dark',
-          color: '#FFDAB9',
+          color: '#FFB0B0',
           title: 'Jardinero',
           filterValue: 'gardener',
           columnValue: 'jardinero'
         },        
         Taxi: {
           icon: 'bi bi-taxi-front-fill text-dark',
-          color: '#FFDAB9',
+          color: '#FFB0B0',
           title: 'Taxi',
           filterValue: 'taxi',
           columnValue: 'taxi'
