@@ -81,18 +81,25 @@ export class AccessMetricsService {
 
   /* filtro */
 //CAMBIAR EN EL BACK Y EN EL FRONT SI O SI
-  getMovementCountsFilter(year: number, startMonth: number, endMonth: number): Observable<any> {
+  getMovementCountsFilter(
+    year: number, 
+    startMonth: number, 
+    endMonth: number, 
+    filterType: 'ingresos' | 'egresos'
+  ): Observable<any> {
     return this.http.get(
       `${this.baseUrl}/access-exit-count-by-day-filter`,
       {
         params: {
           year: year.toString(),
           startMonth: startMonth.toString(),
-          endMonth: endMonth.toString()
+          endMonth: endMonth.toString(),
+          filterType: filterType // Parámetro para filtrar ingresos o egresos
         }
       }
     );
   }
+
 
 
   
@@ -166,16 +173,24 @@ export class AccessMetricsService {
 
 
 
-  getUtilizationRate(startMonth?: number, endMonth?: number, year?: number): Observable<UtilizationRateResponse> {
+  getUtilizationRateEntries(startMonth?: number, endMonth?: number, year?: number): Observable<UtilizationRateResponse> {
     let params = new HttpParams();
     
     if (startMonth) params = params.set('startMonth', startMonth.toString());
     if (endMonth) params = params.set('endMonth', endMonth.toString());
     if (year) params = params.set('year', year.toString());
 
-    return this.http.get<UtilizationRateResponse>(this.baseUrl+'/utilization-rate', { params });
+    return this.http.get<UtilizationRateResponse>(this.baseUrl+'/utilization-rate-entries', { params });
   }
 
+  getUtilizationRateExit(startMonth?: number, endMonth?: number, year?: number): Observable<UtilizationRateResponse> {
+    let params = new HttpParams();
+    
+    if (startMonth) params = params.set('startMonth', startMonth.toString());
+    if (endMonth) params = params.set('endMonth', endMonth.toString());
+    if (year) params = params.set('year', year.toString());
 
+    return this.http.get<UtilizationRateResponse>(this.baseUrl+'/utilization-rate-exits', { params });
+  }
 
 }

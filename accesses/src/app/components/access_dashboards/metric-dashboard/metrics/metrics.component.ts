@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { AccessMetricsService } from '../../../../services/access-metric/access-metrics.service';
 import { CommonModule, NgIf } from '@angular/common';
@@ -16,7 +16,7 @@ import { TopUser, UtilizationRate } from '../../../../models/access-metric/metri
 export class MetricsComponent implements OnInit{
 
 
-  constructor(private metricsService: AccessMetricsService) {
+  constructor(private metricsService: AccessMetricsService, private cdr: ChangeDetectorRef) {
     const now = new Date();
     this.periodTo = this.formatYearMonth(now);
     
@@ -51,57 +51,62 @@ export class MetricsComponent implements OnInit{
     return this.roleTranslations[role] || role; 
   }
 
-  aplyFilters(): void {
+  applyFilters(): void {
+    // Obtener los valores de año y mes de los filtros
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
-
+  
+    // Primero, aplicar el filtro de movimiento (ingresos o egresos)
     this.metricsService.getMovementCountsFilter(
       fromDate.year,
       fromDate.month,
-      toDate.month
+      toDate.month,
+      this.chartType // Pasamos el tipo de filtro ('ingresos' o 'egresos')
     ).subscribe(data => {
       console.log("Data filtrada recibida de la API:", data);
-
+  
       // Array con los nombres de los días de la semana, comenzando desde Lunes
       const diasOrdenados = [
         'Lunes', 'Martes', 'Miércoles', 'Jueves', 
         'Viernes', 'Sábado', 'Domingo'
       ];
-
+  
       // Crear el array de datos para el gráfico con cabeceras
       this.columnChartData = [
         ...diasOrdenados.map((dia, index) => {
           const dayIndex = index === 6 ? 7 : index + 1;
-          const ingresos = data[dayIndex]?.entries || 0;
-          const egresos = data[dayIndex]?.exits || 0;
-
+          const cantidad = data[dayIndex]?.[this.chartType === 'ingresos' ? 'entries' : 'exits'] || 0;
+  
           return [
             dia,
-            ingresos,
-            egresos
+            cantidad // Muestra solo los ingresos o egresos según el filtro
           ];
         })
       ];
       console.log('Datos del gráfico filtrados:', this.columnChartData);
     });
-
-
+  
+    // Obtener los datos de los usuarios top
     const fromDateObj = this.parseYearMonth(this.periodFrom);
     const toDateObj = this.parseYearMonth(this.periodTo);
     
-    // Supongamos que quieres obtener los top 5 usuarios entre el mes de inicio y el mes final
     this.metricsService.getTopUsers(fromDateObj.month, toDateObj.month, fromDateObj.year).subscribe(topUsers => {
       console.log('Top 5 usuarios:', topUsers);
       this.topUser = topUsers.slice(0, 5); // Limita a los primeros 5 usuarios
       console.log('TOP USUARIO ARRAY', this.topUser);
     });
     
-
-    this.loadUtilizationData(fromDate.month, toDate.month, fromDate.year);
-
+    // Cargar los datos de utilización dependiendo de si es ingresos o egresos
+    if (this.chartType === 'ingresos') {
+      this.loadUtilizationData(fromDate.year, fromDate.month, toDate.month);
+    } else {
+      this.loadUtilizationExitData(fromDate.year, fromDate.month, toDate.month);
+    }
+  
+    // Cargar la cuenta de accesos
     this.loadAccessCounts();
-
   }
+  
 
 
   private formatYearMonth(date: Date): string {
@@ -160,8 +165,7 @@ export class MetricsComponent implements OnInit{
     this.fetchTodayExitCount();
     this.getThisMonthCountExit();
     this.getPeakDayExit();
-    this.aplyFilters()
-    this.loadUtilizationData();
+    this.applyFilters()
 
   }
 
@@ -305,29 +309,106 @@ export class MetricsComponent implements OnInit{
     })
   }
 
-  utilizationData: UtilizationRate[] = [];
+  utilizationData: any;
   loading = true;
   error: string | null = null;
 
-  loadUtilizationData(startMonth?: number, endMonth?: number, year?: number): void {
+  loadUtilizationData(year: number, startMonth: number, endMonth: number): void {
     this.loading = true;
     this.error = null;
-
-    this.metricsService.getUtilizationRate(startMonth, endMonth, year)
+  
+    this.metricsService.getAccessCountByUserTypeFilter(year, startMonth, endMonth)
       .subscribe({
         next: (response) => {
-          this.utilizationData = response.data;
+          this.utilizationData = response;
+          this.calculatePercentages(this.utilizationData, 'ingresos');
           this.loading = false;
-          console.log(this.utilizationData, 'KPIS');
-          
         },
         error: (err) => {
-          this.error = 'Error al cargar los datos de utilización';
+          this.error = 'Error al cargar los datos de ingresos';
           this.loading = false;
           console.error('Error:', err);
         }
       });
   }
+  
+
+
+  loadUtilizationExitData(year: number, startMonth: number, endMonth: number): void {
+    this.loading = true;
+    this.error = null;
+  
+    this.metricsService.getExitCountByUserTypeFilter(year, startMonth, endMonth)
+      .subscribe({
+        next: (response) => {
+          this.utilizationData = response;
+          this.calculatePercentages(this.utilizationData, 'egresos');
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = 'Error al cargar los datos de egresos';
+          this.loading = false;
+          console.error('Error:', err);
+        }
+      });
+  }
+
+  uniqueData: UtilizationRate[] = [];
+
+  calculatePercentages(data: UtilizationRate[], type: 'ingresos' | 'egresos'): void {
+    // Agrupar los datos por tipo de usuario
+    const groupedData = data.reduce<{ [key: string]: UtilizationRate }>((acc, item) => {
+      // Aquí le decimos a TypeScript que 'acc' es un objeto con claves de tipo string y valores de tipo 'UtilizationRate'
+      if (acc[item.userType]) {
+        acc[item.userType].count += item.count;
+      } else {
+        acc[item.userType] = { userType: item.userType, count: item.count };
+      }
+      return acc;
+    }, {}); // El objeto vacío se tipa como un acumulador de tipo { [key: string]: UtilizationRate }
+  
+    // Convertir el objeto agrupado en un array
+    const uniqueData = Object.values(groupedData);
+  
+    // Calcular el total de accesos (o salidas)
+    const totalCount = uniqueData.reduce((sum, item) => sum + item.count, 0);
+  
+    // Calcular el porcentaje por tipo de usuario
+    uniqueData.forEach(item => {
+      item.percentage = parseFloat(((item.count / totalCount) * 100).toFixed(2)); // Formatear a dos decimales
+    });
+
+    this.uniqueData = Object.values(groupedData);
+
+    console.log(`${type.charAt(0).toUpperCase() + type.slice(1)} por usuario:`, uniqueData);
+  }
+  
+  
+
+  
+  groupByUserType(data: any[]): any[] {
+    const groupedData: { [key: string]: { userType: string, accessCount: number, utilizationPercentage: number } } = {};
+  
+    // Agrupar los datos por "userType"
+    data.forEach(item => {
+      if (groupedData[item.userType]) {
+        // Si el tipo de usuario ya existe, sumamos los accesos
+        groupedData[item.userType].accessCount += item.accessCount;
+      } else {
+        // Si es un tipo de usuario nuevo, lo agregamos
+        groupedData[item.userType] = { 
+          userType: item.userType,
+          accessCount: item.accessCount,
+          utilizationPercentage: item.utilizationPercentage 
+        };
+      }
+    });
+  
+    // Convertimos el objeto agrupado de vuelta a un array
+    return Object.values(groupedData);
+  }
+  
+
 
   
   private loadAccessCounts(): void {
@@ -418,12 +499,22 @@ export class MetricsComponent implements OnInit{
   barChartType = ChartType.ColumnChart;  
   barChartData: any[] = [];
   barChartOptions: any = {};
+
   
   onChartTypeChange() {
-    this.loadData();
-    this.loadEntryExit();
-  }
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
   
+    this.loadData();
+    this.loadEntryExit();  
+
+  
+    if (this.chartType === 'ingresos') {
+      this.loadUtilizationData(fromDate.year, fromDate.month, toDate.month);
+    } else {
+      this.loadUtilizationExitData(fromDate.year, fromDate.month, toDate.month);
+    }
+  }
   
   private loadData(): void {
     const fromDate = this.parseYearMonth(this.periodFrom);
@@ -540,7 +631,7 @@ export class MetricsComponent implements OnInit{
 
 
   columnChartType = ChartType.ColumnChart;
-  columnChartData: any[] = ['Día', 'Ingresos', 'Egresos']; 
+  columnChartData: any[] = [];  
   columnChartOptions = {
     title: '',
     legend: {
@@ -549,9 +640,8 @@ export class MetricsComponent implements OnInit{
       alignment: 'center',
       maxLines: 2
     },
-    bar: { groupWidth: '100%' },
-
-    colors: ['#4caf50', '#f44336'],
+    
+    bar: { groupWidth: 900 },
     hAxis: {
       title: 'Días de la semana',
       textStyle: { color: '#6c757d' }
@@ -568,9 +658,11 @@ export class MetricsComponent implements OnInit{
       startup: true
     },
     series: {
-      0: { labelInLegend: 'Ingresos' },
-      1: { labelInLegend: 'Egresos' }
-    }
+      0: { labelInLegend: '' },
+      1: { labelInLegend: '' },
+
+    },
+     colors: ['','']
   };
 
 
@@ -578,12 +670,13 @@ export class MetricsComponent implements OnInit{
     // Obtener los valores de año y mes de los filtros
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
-
-    // Usar el nuevo método con filtros en lugar del original
+  
+    // Usar el filtro seleccionado (ingresos o egresos) en la llamada al servicio
     this.metricsService.getMovementCountsFilter(
       fromDate.year,
       fromDate.month,
-      toDate.month
+      toDate.month,
+      this.chartType // 'ingresos' o 'egresos'
     ).subscribe(data => {
       console.log("Data recibida de la API:", data);
   
@@ -594,26 +687,68 @@ export class MetricsComponent implements OnInit{
       ];
   
       // Crear el array de datos para el gráfico con cabeceras
-      this.columnChartData = [
-        ...diasOrdenados.map((dia, index) => {
-          // Calcular el índice correcto para la API
-          const dayIndex = index === 6 ? 7 : index + 1;
+      if (this.chartType === 'ingresos') {
+        // Mostrar solo ingresos
+        this.columnChartOptions.series[0].labelInLegend = "ingresos"
+        this.columnChartOptions.colors[0] = '#4caf50'
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+            const ingresos = data[dayIndex]?.entries || 0;
   
-          // Obtener los valores de ingresos y egresos para ese día desde la API
-          const ingresos = data[dayIndex]?.entries || 0;
-          const egresos = data[dayIndex]?.exits || 0;
+            return [
+              dia,            // Día de la semana
+              ingresos        // Solo ingresos
+            ];
+          })
+        ];
+      } else if (this.chartType === 'egresos') {
+        // Mostrar solo egresos
+          this.columnChartOptions.series[0].labelInLegend = "egresos"
+          this.columnChartOptions.colors[0] = '#f44336'
+
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+            const egresos = data[dayIndex]?.exits || 0;
   
-          return [
-            dia,        // Nombre del día
-            ingresos,   // Ingresos
-            egresos     // Egresos
-          ];
-        })
-      ];
+            return [
+              dia,            // Día de la semana
+              egresos         // Solo egresos
+            ];
+          })
+        ];
+      } else{
+
+          this.columnChartOptions.series[0].labelInLegend = "egresos"
+          this.columnChartOptions.series[1].labelInLegend = "ingresos"
+
+          this.columnChartOptions.colors[0] = '#f44336'
+          this.columnChartOptions.colors[1] = '#4caf50'
+
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+    
+            const ingresos = data[dayIndex]?.entries || 0;
+            const egresos = data[dayIndex]?.exits || 0;
+    
+            return [
+              dia,        // Nombre del día
+              ingresos,   // Ingresos
+              egresos     // Egresos
+            ];
+          })
+        ];
+      }
   
+     
       console.log('Datos del gráfico formateados:', this.columnChartData);
     });
-}
+  }
+  
+  
+
 
   makeBig(nro: number) {
     this.status = nro;
