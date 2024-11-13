@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 import { AccessUser } from '../../models/access-visitors/access-visitors-models';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { AccessUserReportService } from '../../services/access_report/access-user-report.service';
+import { AccessUserReportService } from '../../services/access_report/access_httpclient/access_usersApi/access-user-report.service';
 
 @Component({
   selector: 'access-app-register-emergency',

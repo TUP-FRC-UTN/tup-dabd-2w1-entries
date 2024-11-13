@@ -50,21 +50,21 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
           columnValue: 'Obrero'
         },
         Delivery: {
-          icon: 'bi bi-box-seam',
+          icon: 'bi bi-box-seam text-dark',
           color: '#FFDAB9',
           title: 'Delivery',
           filterValue: 'delivery',
           columnValue: 'delivery'
         },
         Cleaning: {
-          icon: 'bi bi-stars',
-          color: '#FFDAB9',
+          icon: 'bi-droplet text-dark',
+          color: '#FDFD96',
           title: 'P. de Limpieza',
           filterValue: 'cleaning',
           columnValue: 'P. de Limpieza'
         },
         Gardener: {
-          icon: 'bi bi-gear-wide-connected text-dark',
+          icon: 'bi-scissors text-dark',
           color: '#FFDAB9',
           title: 'Jardinero',
           filterValue: 'gardener',
@@ -82,7 +82,7 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
           color: '#dc3545',
           title: 'Emergencias',
           filterValue: 'services',
-          columnValue: 'emergencias'
+          columnValue: 'Emergencias'
         }
       };
 /**
@@ -101,7 +101,7 @@ export const TIPOS_INGRESANTE: SelectOption[] = [
 
   { value: 'delivery', label: 'Delivery' },
   { value: 'worker', label: 'Obrero' },
-  
+  { value: 'services', label: 'Emergencias' },
    { value: 'taxi', label: 'Taxi'},
 
   { value: 'cleaning', label: 'P. de Limpieza' },

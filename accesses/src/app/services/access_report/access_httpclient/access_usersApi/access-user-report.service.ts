@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { User } from '../../models/access-report/User';
+import { User } from '../../../../models/access-report/User';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, Observable, of, from } from 'rxjs';
 

@@ -4,7 +4,7 @@ import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
 import { DataTablesModule } from 'angular-datatables';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule } from '@angular/forms';
-import { AccessUserReportService } from '../../../../services/access_report/access-user-report.service';
+import { AccessUserReportService } from '../../../../services/access_report/access_httpclient/access_usersApi/access-user-report.service';
 import { forkJoin, Observable, of, firstValueFrom } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import Swal from 'sweetalert2';
@@ -22,6 +22,7 @@ import { AccessUserAllowedInfoDto } from '../../../../models/access-visitors/acc
 import { AccessOwnerRenterserviceService } from '../../../../services/access-owner/access-owner-renterservice.service';
 import { NgxScannerQrcodeComponent, NgxScannerQrcodeModule } from 'ngx-scanner-qrcode';
 import { QRData } from '../../../../models/access-visitors/access-VisitorsModels';
+import { MovementsService } from '../../../../services/access_report/access_httpclient/access_getMovementsByDate/movements.service';
 declare var bootstrap: any;
 
 @Component({
@@ -76,7 +77,8 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     private http: HttpClient,
     private userService: AccessUserReportService,
     private dataTableConfig: DataTableConfigService,
-    private exportService: ExportService
+    private exportService: ExportService,
+    private movementsService: MovementsService,
   ) {
     this.initializeDates();
   }
@@ -232,7 +234,7 @@ export class AccessTableComponent implements OnInit, AfterViewInit, OnDestroy {
     this.endDate = today;
     
     // Calcular la fecha de inicio (un mes antes)
-    this.startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+    this.startDate = new Date(today.getFullYear(), 0, 1);
   }
 /**
    * Manejadores para los cambios de fecha
@@ -356,47 +358,13 @@ onEndDateChange(date: string): void {
    */
   fetchData(): void {
     if (!this.startDate || !this.endDate) return;
-
-    const startDateTime = new Date(this.startDate);
-    startDateTime.setHours(0, 0, 0, 0);
-
-    const endDateTime = new Date(this.endDate);
-    endDateTime.setHours(23, 59, 59, 999);
-
-    const formatDateTime = (date: Date) => {
-        return `${date.getFullYear()}-${
-            String(date.getMonth() + 1).padStart(2, '0')}-${
-            String(date.getDate()).padStart(2, '0')}T${
-            String(date.getHours()).padStart(2, '0')}:${
-            String(date.getMinutes()).padStart(2, '0')}:${
-            String(date.getSeconds()).padStart(2, '0')}`;
-    };
-
-    const formattedStartDate = formatDateTime(startDateTime);
-    const formattedEndDate = formatDateTime(endDateTime);
-
-    const url = `http://localhost:8090/movements_entryToNeighbor/ByMonth`;
-    
-    const params = new HttpParams()
-      .set('startDate', formattedStartDate)
-      .set('endDate', formattedEndDate);
-
-    this.http.get<any>(url, { params }).pipe(
-      catchError(error => {
-        console.error('Error en la petición:', error);
-        Swal.fire({
-          icon: 'error',
-          title: '¡Error!',
-          text: 'Ocurrió un error al intentar cargar los datos. Por favor, intente nuevamente.',
-        });
-        return of({ data: [] });
-      })
-    ).subscribe(response => {
-      this.movements = response.data;
-      this.loadDataIntoTable();
-    });
+  
+    this.movementsService.getMovementsByDateRange(this.startDate, this.endDate)
+      .subscribe(response => {
+        this.movements = response.data;
+        this.loadDataIntoTable();
+      });
   }
-
   /**
    * Carga los datos en la tabla DataTable
    * Procesa los movimientos y actualiza la visualización
