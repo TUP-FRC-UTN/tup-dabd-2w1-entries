@@ -4,11 +4,12 @@ import { AccessMetricsService } from '../../../../services/access-metric/access-
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TopUser, UtilizationRate } from '../../../../models/access-metric/metris';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
   selector: 'app-metrics',
   standalone: true,
-  imports: [GoogleChartsModule, NgIf,CommonModule,FormsModule],
+  imports: [GoogleChartsModule, NgIf,CommonModule,FormsModule,NgSelectModule],
   templateUrl: './metrics.component.html',
   styleUrl: './metrics.component.css'
 })
@@ -544,7 +545,15 @@ export class MetricsComponent implements OnInit{
   barChartData: any[] = [];
   barChartOptions: any = {};
 
-  
+  selectedUserTypes: string[] = [];
+  availableUserTypes = [
+    { label: 'Empleado', value: 'Employeed' },
+    { label: 'Proveedor', value: 'Supplier' },
+    { label: 'Vecino', value: 'Owner' },
+    { label: 'Inquilino', value: 'Tenant' },
+    { label: 'Visitante', value: 'Visitor' }
+  ];
+
   onChartTypeChange() {
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
@@ -560,24 +569,27 @@ export class MetricsComponent implements OnInit{
     }
   }
   
+
   private loadData(): void {
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
 
-    // Seleccionar el servicio según el tipo
-    const service = this.chartType === 'ingresos' 
+    const service = this.chartType === 'ingresos'
       ? this.metricsService.getAccessCountByUserTypeFilter(fromDate.year, fromDate.month, toDate.month)
       : this.metricsService.getExitCountByUserTypeFilter(fromDate.year, fromDate.month, toDate.month);
 
     service.subscribe(data => {
-      console.log(data, `DATA FILTRADA DE GRAFICO DE ${this.chartType.toUpperCase()}`);
+      // Filtrar por los tipos seleccionados o mostrar todos si no hay selección
+      const filteredData = this.selectedUserTypes.length > 0
+        ? data.filter(item => this.selectedUserTypes.includes(item.userType))
+        : data;
 
-      const chartData: any[] = [];
-      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      console.log('Datos filtrados:', filteredData);
+
       const userTypesData: { [key: string]: number[] } = {};
       const userTypes: string[] = [];
 
-      data.forEach(item => {
+      filteredData.forEach(item => {
         const month = item.month - 1;
         const userType = item.userType;
 
@@ -589,57 +601,46 @@ export class MetricsComponent implements OnInit{
         userTypesData[userType][month] = item.count;
       });
 
-      const filteredMonths = months.slice(fromDate.month - 1, toDate.month);
-      filteredMonths.forEach((month, i) => {
-        const row: (string | number)[] = [month];
-
-        userTypes.forEach(userType => {
-          const count = userTypesData[userType][fromDate.month - 1 + i] || 0;
-          row.push(count);
-        });
-
-        chartData.push(row);
-      });
-
-      this.barChartData = chartData;
-
-      const series: { [key: number]: { labelInLegend: string, type: string } } = 
-        userTypes.reduce((acc: { [key: number]: { labelInLegend: string, type: string } }, userType, index) => {
-          acc[index] = {
-            labelInLegend: this.translateRole(userType),
-            type: 'column',
-          };
-          return acc;
-        }, {});
-
-      this.barChartOptions = {
-        title: `Comparación de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'} por Tipo de Usuario`,
-        legend: {
-          position: 'bottom',
-          textStyle: { color: '#6c757d', fontSize: 14 }
-        },
-        colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
-        hAxis: {
-          title: 'Meses',
-          textStyle: { color: '#6c757d' },
-          slantedText: true,
-        },
-        vAxis: {
-          title: `Cantidad de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'}`,
-          textStyle: { color: '#6c757d' },
-          minValue: 0,
-          format: '',
-        },
-        animation: {
-          duration: 1000,
-          easing: 'out',
-          startup: true
-        },
-        series,
-      };
+      this.updateChartData(userTypesData, userTypes, fromDate, toDate);
     });
   }
+  private updateChartData(userTypesData: any, userTypes: string[], fromDate: any, toDate: any): void {
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const chartData: any[] = [];
+    const filteredMonths = months.slice(fromDate.month - 1, toDate.month);
   
+    filteredMonths.forEach((month, i) => {
+      const row: (string | number)[] = [month];
+      userTypes.forEach(userType => {
+        const count = userTypesData[userType][fromDate.month - 1 + i] || 0;
+        row.push(count);
+      });
+      chartData.push(row);
+    });
+  
+    this.barChartData = chartData;
+    this.updateChartOptions(userTypes);
+  }
+  
+  private updateChartOptions(userTypes: string[]): void {
+    this.barChartOptions = {
+      title: `Comparación de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'} por Tipo de Usuario`,
+      legend: { position: 'bottom', textStyle: { color: '#6c757d', fontSize: 14 } },
+      colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
+      hAxis: { title: 'Meses', textStyle: { color: '#6c757d' }, slantedText: true },
+      vAxis: { title: `Cantidad de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'}`, textStyle: { color: '#6c757d' }, minValue: 0, format: '' },
+      animation: { duration: 1000, easing: 'out', startup: true },
+      series: userTypes.reduce((acc: any, userType: string, index: number) => {
+        acc[index] = { labelInLegend: this.translateRole(userType), type: 'column' };
+        return acc;
+      }, {})
+    };
+  }
+  onUserTypeChange(): void {
+    console.log('Tipos seleccionados:', this.selectedUserTypes);
+    this.loadData();
+  }
+
   
   
   getCurrentYearMonth(): string {

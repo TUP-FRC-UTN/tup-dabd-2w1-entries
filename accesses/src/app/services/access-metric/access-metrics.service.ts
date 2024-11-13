@@ -72,8 +72,22 @@ export class AccessMetricsService {
   }
   
 
-
-  
+getTotalCountsMovementsByFilter(   
+  year: number,
+  startMonth: number,
+  endMonth: number
+): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.baseUrl}/total-access-and-exit-counts`,
+    {
+      params: {
+        year: year.toString(),
+        startMonth: startMonth.toString(),
+        endMonth: endMonth.toString()
+      }
+    }
+  );
+}
   /* aca */
   getAccessAndExitByDayOfWeek(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/access-exit-count-by-day`);

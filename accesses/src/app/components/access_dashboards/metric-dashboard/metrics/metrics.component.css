@@ -1,4 +1,3 @@
-
 .min-vh-75 {
     min-height: 75vh;
 }
@@ -50,5 +49,27 @@ google-chart {
     background-color: #f8d7da !important; /* Rojo para egresos */
     opacity: 0.8
 
+  }
+  ::ng-deep .ng-select {
+    width: 100%;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+  
+  ::ng-deep .ng-select .ng-select-container {
+    padding: 10px;
+  }
+  
+  ::ng-deep .ng-select .ng-select-search {
+    border-color: #ced4da;
+  }
+  
+  ::ng-deep .ng-select .ng-option {
+    font-size: 14px;
+  }
+  
+  ::ng-deep .ng-select .ng-option.selected {
+    background-color: #007bff;
+    color: white;
   }
   
