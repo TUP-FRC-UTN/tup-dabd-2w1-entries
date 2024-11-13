@@ -56,36 +56,80 @@ export class MetricsComponent implements OnInit{
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
   
-    // Primero, aplicar el filtro de movimiento (ingresos o egresos)
+    // Primero, aplicar el filtro de movimiento (ingresos o egresos) y QUE SE MANTENGA SEGUN LO SELECCIONADO -- ARREGLAR CODIGO PARA NO REPETIR MISMAS LINEAS DE CODIGO A LA HORA DE RENDERIZAR 
+    // ANDA TODO EL FILTRO POR LAS DUDAS ACLARO
     this.metricsService.getMovementCountsFilter(
       fromDate.year,
       fromDate.month,
       toDate.month,
-      this.chartType // Pasamos el tipo de filtro ('ingresos' o 'egresos')
+      this.chartType // 'ingresos' o 'egresos'
     ).subscribe(data => {
-      console.log("Data filtrada recibida de la API:", data);
+      console.log("Data recibida de la API:", data);
   
-      // Array con los nombres de los días de la semana, comenzando desde Lunes
       const diasOrdenados = [
         'Lunes', 'Martes', 'Miércoles', 'Jueves', 
         'Viernes', 'Sábado', 'Domingo'
       ];
   
       // Crear el array de datos para el gráfico con cabeceras
-      this.columnChartData = [
-        ...diasOrdenados.map((dia, index) => {
-          const dayIndex = index === 6 ? 7 : index + 1;
-          const cantidad = data[dayIndex]?.[this.chartType === 'ingresos' ? 'entries' : 'exits'] || 0;
+      if (this.chartType === 'ingresos') {
+        // Mostrar solo ingresos
+        this.columnChartOptions.series[0].labelInLegend = "ingresos"
+        this.columnChartOptions.colors[0] = '#4caf50'
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+            const ingresos = data[dayIndex]?.entries || 0;
   
-          return [
-            dia,
-            cantidad // Muestra solo los ingresos o egresos según el filtro
-          ];
-        })
-      ];
-      console.log('Datos del gráfico filtrados:', this.columnChartData);
+            return [
+              dia,            // Día de la semana
+              ingresos        // Solo ingresos
+            ];
+          })
+        ];
+      } else if (this.chartType === 'egresos') {
+        // Mostrar solo egresos
+          this.columnChartOptions.series[0].labelInLegend = "egresos"
+          this.columnChartOptions.colors[0] = '#f44336'
+
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+            const egresos = data[dayIndex]?.exits || 0;
+  
+            return [
+              dia,            // Día de la semana
+              egresos         // Solo egresos
+            ];
+          })
+        ];
+      } else{
+
+          this.columnChartOptions.series[0].labelInLegend = "egresos"
+          this.columnChartOptions.series[1].labelInLegend = "ingresos"
+
+          this.columnChartOptions.colors[0] = '#f44336'
+          this.columnChartOptions.colors[1] = '#4caf50'
+
+        this.columnChartData = [
+          ...diasOrdenados.map((dia, index) => {
+            const dayIndex = index === 6 ? 7 : index + 1;
+    
+            const ingresos = data[dayIndex]?.entries || 0;
+            const egresos = data[dayIndex]?.exits || 0;
+    
+            return [
+              dia,        // Nombre del día
+              ingresos,   // Ingresos
+              egresos     // Egresos
+            ];
+          })
+        ];
+      }
+  
+     
+      console.log('Datos del gráfico formateados:', this.columnChartData);
     });
-  
     // Obtener los datos de los usuarios top
     const fromDateObj = this.parseYearMonth(this.periodFrom);
     const toDateObj = this.parseYearMonth(this.periodTo);
@@ -646,11 +690,9 @@ export class MetricsComponent implements OnInit{
 
 
   private loadEntryExit(): void {
-    // Obtener los valores de año y mes de los filtros
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
   
-    // Usar el filtro seleccionado (ingresos o egresos) en la llamada al servicio
     this.metricsService.getMovementCountsFilter(
       fromDate.year,
       fromDate.month,
@@ -659,7 +701,6 @@ export class MetricsComponent implements OnInit{
     ).subscribe(data => {
       console.log("Data recibida de la API:", data);
   
-      // Array con los nombres de los días de la semana, comenzando desde Lunes
       const diasOrdenados = [
         'Lunes', 'Martes', 'Miércoles', 'Jueves', 
         'Viernes', 'Sábado', 'Domingo'

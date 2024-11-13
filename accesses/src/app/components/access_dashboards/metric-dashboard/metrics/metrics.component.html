@@ -21,7 +21,7 @@
                     <select id="chartType" [(ngModel)]="chartType" (change)="onChartTypeChange()">
                       <option value="ingresos">Ingresos</option>
                       <option value="egresos">Egresos</option>
-                      <option value="">Total</option>
+                      <option value="total">Total</option>
                     </select>
                   </div>
                   
@@ -315,7 +315,9 @@
                 <div class="card-body ">
                     <div class="d-flex justify-content-center align-items-center ">
                         <div class="text-center">
-                            <h5 class="card-title  text-secondary mb-1">Comparacion de Ingresos/Egresos</h5>
+                            <h5 class="card-title  text-secondary mb-1">Comparacion  {{chartType}} </h5>
+                            <small class="text-secondary">Cantidad total por dia de semana</small>
+
                         </div>
                     </div>
                     <google-chart style="width: 100%; height: 70%;"
