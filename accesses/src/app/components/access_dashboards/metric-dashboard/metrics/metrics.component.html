@@ -103,19 +103,15 @@
         <div class="card border-0 shadow-lg rounded-4 h-90 w-100">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
-              <!-- Flecha de regreso -->
-              <div class="back-arrow" (click)="makeBig(0)">
-                <i class="bi bi-arrow-left"></i>
+              <!-- Left-aligned titles -->
+              <div>
+                <h4 class="fw-semibold card-title mb-2">Cantidad de {{capitalizeFirstLetter(chartType)}}</h4>
+                <h6 class="text-secondary mb-0">Rendimiento por cada día de la semana</h6>
               </div>
-      
-              <!-- Contenedor de títulos centrados -->
-              <div class="text-center flex-grow-1 mb-0">
-                <h4 class="fw-semibold card-title mb-2">
-                  Cantidad de {{capitalizeFirstLetter(chartType)}}
-                </h4>
-                <h6 class="text-secondary mb-0">
-                  Rendimiento por cada día de la semana
-                </h6>
+              
+              <!-- Centered arrow -->
+              <div class="back-arrow ms-auto d-flex align-items-center" (click)="makeBig(0)">
+                <i class="bi bi-arrow-left"></i>
               </div>
             </div>
             <hr class="m-0">
@@ -278,29 +274,21 @@
         <div class="card border-0 shadow-lg rounded-4">
           <div class="card-body">
             <div class="d-flex align-items-center mb-0">
-              <!-- Flecha de regreso -->
-              <div class="back-arrow pb-2" (click)="makeBig(0)">
+              <!-- Título alineado a la izquierda -->
+              <h5 class="card-title mb-2 fw-semibold">Comparación de {{ capitalizeFirstLetter(chartType) }} según Tipos de Ingresante</h5>
+              <!-- Flecha de regreso alineada a la derecha -->
+              <div class="back-arrow pb-2 ms-auto" (click)="makeBig(0)">
                 <i class="bi bi-arrow-left"></i>
-              </div>
-        
-              <!-- Título centrado -->
-              <div class="flex-grow-1 text-center">
-                <h5 class="card-title mb-2">
-                  Comparación de {{ capitalizeFirstLetter(chartType) }} según Tipos de Ingresante
-                </h5>
               </div>
             </div>
             <hr class="mt-1 mb-0">
             <div id="chartContainer mt-0">
-              <google-chart class="mt-0"
-                style="width: 800px; height: 370px"
-                [type]="barChartType"
-                [data]="barChartData"
-                [options]="barChartOptions">
+              <google-chart class="mt-0" style="width: 800px; height: 370px" [type]="barChartType" [data]="barChartData" [options]="barChartOptions">
               </google-chart>
             </div>
           </div>
         </div>
+
       </div>
     </div>
 
