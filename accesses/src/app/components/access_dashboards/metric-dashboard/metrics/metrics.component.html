@@ -1,6 +1,6 @@
-<div class="container">
+<div class="container pt-0">
   <!-- Filtors -->
-  <div class="row sticky-section border-0 rounded-4 p-3 shadow mb-4">
+  <div class="row mt-0 sticky-section border-0 rounded-4 p-2 mt-0 shadow mb-3">
     <div class="row">
       <!-- Filtro de fechas -->
       <div class="col d-flex gap-3">
@@ -120,31 +120,7 @@
                 <h6 class="text-secondary mb-2">
                   Cantidad de Ingresos del Mes Actual
                 </h6>
-                <h3 class="mb-0">{{ currentMonthAccessCount }}</h3>
-                <small class="text-muted">Mes Actual</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Total Recaudado/Morosos -->
-        <div class="row">
-          <div class="col mb-3">
-            <div
-              class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
-              style="background-color: #d8ffedde"
-            >
-              <div class="card-body position-relative">
-                <i
-                  class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4"
-                  style="font-size: 2.5rem; color: #198754; opacity: 0.8"
-                ></i>
-                <div class="pe-5">
-                  <h6 class="text-secondary mb-2">Total de ingresos anuales</h6>
-                  <h3 class="mb-0 text-muted">
-                    Cantidad: {{ totalAccesCount }}
-                  </h3>
-                </div>
+                <h3 class="mb-0">{{this.showCurrentMonth()}} - {{ currentMonthAccessCount }}</h3>
               </div>
             </div>
           </div>
@@ -164,34 +140,9 @@
                 ></i>
 
                 <div class="pe-5">
-                  <h6 class="text-secondary mb-2">Mes con mayor ingresos</h6>
+                  <h6 class="text-secondary mb-2">Mes con más Ingresos</h6>
                   <h3 class="mb-0">
-                    {{ monthEntry }}
-                    <small class="text-muted"
-                      >Cantidad: {{ entriesCount }}</small
-                    >
-                  </h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col mb-3">
-            <div
-              class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
-              style="background-color: #f8d7da"
-            >
-              <div class="card-body position-relative">
-                <i
-                  class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4"
-                  style="font-size: 2.5rem; color: #721c24; opacity: 0.8"
-                ></i>
-                <div class="pe-5">
-                  <h6 class="text-secondary mb-2">Total de egresos anuales</h6>
-                  <h3 class="mb-0 text-muted">
-                    Cantidad: {{ totalExitCount }}
+                    {{ monthEntry }} - {{ entriesCount }}
                   </h3>
                 </div>
               </div>
@@ -212,16 +163,62 @@
                 ></i>
 
                 <div class="pe-5">
-                  <h6 class="text-secondary mb-2">Mes con mayor egresos</h6>
+                  <h6 class="text-secondary mb-2">Mes con más Egresos</h6>
                   <h3 class="mb-0">
-                    {{ monthExit }}
-                    <small class="text-muted">Cantidad: {{ exitCount }}</small>
+                    {{ monthExit }} - {{ exitCount }}
                   </h3>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Total Ingresos anuales -->
+        <div class="row">
+          <div class="col mb-3">
+            <div
+              class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
+              style="background-color: #d8ffedde"
+            >
+              <div class="card-body position-relative">
+                <i
+                  class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4"
+                  style="font-size: 2.5rem; color: #198754; opacity: 0.8"
+                ></i>
+                <div class="pe-5">
+                  <h6 class="text-secondary mb-2">Total de Ingresos Anuales</h6>
+                  <h3 class="mb-0">
+                    {{ totalAccesCount }}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row">
+          <div class="col mb-3">
+            <div
+              class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
+              style="background-color: #f8d7da"
+            >
+              <div class="card-body position-relative">
+                <i
+                  class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4"
+                  style="font-size: 2.5rem; color: #721c24; opacity: 0.8"
+                ></i>
+                <div class="pe-5">
+                  <h6 class="text-secondary mb-2">Total de Egresos Anuales</h6>
+                  <h3 class="mb-0">
+                    {{ totalExitCount }}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- KPIs para el gráfico de pie cuando el grafico es grande -->
@@ -333,7 +330,7 @@
     <!-- --------------------------------------------------------------------------------------------------- -->
 
     <!-- KPIs generales, cuando se ven todos los graficos juntos -->
-    <div class="col-md-3" *ngIf="status === 0">
+    <div class="col-md-2" *ngIf="status === 0">
       <!-- KPI General para Columnas -->
       <div class="row">
         <div class="col">
@@ -401,7 +398,7 @@
           >
             <div class="card-body">
               <h6 class="text-secondary mb-2">
-                Pico de ingresos de esta Semana
+                Pico de Ingresos de esta Semana
               </h6>
               <h3 class="mb-0">{{ accessCount }}</h3>
               <small class="text-muted">Día de la semana: </small>
@@ -418,7 +415,7 @@
           >
             <div class="card-body">
               <h6 class="text-secondary mb-2">
-                Pico de egresos de esta Semana
+                Pico de Egresos de esta Semana
               </h6>
               <h3 class="mb-0">{{ exitsCountPeak }}</h3>
               <small class="text-muted">Día de la semana: </small>
@@ -432,7 +429,7 @@
         <div class="col">
             <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardEntries, 'guardEntries')">
               <div class="card-body">
-                <h6 class="text-secondary mb-2">Guardia con mayor cantidad de ingresos</h6>
+                <h6 class="text-secondary mb-2">Guardia con mayor registro de Ingresos</h6>
                 <h3 class="mb-0">{{ redirectKpis.guardEntries.name }}</h3>
                 <small class="text-muted">Cantidad: {{ redirectKpis.guardEntries.count }} </small>
                 <span>{{ dayWithMostAccesses }}</span>
@@ -445,7 +442,7 @@
         <div class="col">
             <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardExits, 'guardExits')">
               <div class="card-body">
-                <h6 class="text-secondary mb-2">Guardia con mayor cantidad de egresos</h6>
+                <h6 class="text-secondary mb-2">Guardia con mayor registro de Egresos</h6>
                 <h3 class="mb-0">{{ redirectKpis.guardExits.name }}</h3>
                 <small class="text-muted">Cantidad: {{ redirectKpis.guardExits.count }} </small>
                 <span>{{ dayWithMostAccesses }}</span>
@@ -458,10 +455,10 @@
         <div class="col">
             <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.neighborAuthorizations, 'neighborAuthorizations')">
               <div class="card-body">
-                <h6 class="text-secondary mb-2">Vecino con mayor cantidad de autorizados</h6>
+                <h6 class="text-secondary mb-2">Vecino con más personas autorizadas</h6>
                 <h3 class="mb-0">{{ redirectKpis.neighborAuthorizations.name }}</h3>
                 <small class="text-muted">Cantidad: {{ redirectKpis.neighborAuthorizations.count }} </small>
-                <span>{{ dayWithMostAccesses }}</span>
+                <!-- <span>{{ dayWithMostAccesses }}</span> -->
               </div>
             </div>
           </div>
@@ -471,53 +468,53 @@
 
     <!-- Grafico de columnas  -->
     <div
-      class="col-12 col-lg-5 mb-4"
+      class="col-12 col-lg-5"
       *ngIf="status === 0"
-      style="height: 785px"
+      style="height: 100%"
     >
-      <div
-        class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale"
-        (click)="makeBig(1)"
-      >
+      <div class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale" (click)="makeBig(1)">
         <div class="card-body">
-          <div class="d-flex justify-content-center align-items-center">
-            <div class="text-center">
-              <h5 class="card-title text-secondary mb-1">
-                Comparacion {{ chartType }}
-              </h5>
-              <small class="text-secondary"
-                >Cantidad total por dia de semana</small
-              >
-            </div>
+          <div class="d-flex justify-content-between align-items-center mb-0"> <!-- Cambiado a justify-content-between -->
+            <h4 class="card-title m-0 fw-semibold">Comparación de {{ capitalizeFirstLetter(chartType) }}</h4> <!-- Simplificado -->
+            <button type="button"
+                class="btn btn-sm btn-link text-muted bi bi-arrows-angle-expand fs-5" 
+                title="Expandir" 
+                (click)="makeBig(1)">
+            </button>
           </div>
-          <google-chart
-            style="width: 100%; height: 70%"
+          <hr class="mt-1 mb-0">
+          <google-chart class="mt-0"
+            style="width: 100%; height: 400px"
             [type]="columnChartType"
             [data]="columnChartData"
-            [options]="columnChartOptions"
-          >
+            [options]="columnChartOptions">
           </google-chart>
         </div>
       </div>
     </div>
 
-    <!-- Graficos de torta y top 5 -->
-    <div class="col-12 col-lg-4" *ngIf="status === 0">
+    <!-- Grafico top 5 -->
+    <div class="col-12 col-lg-5" *ngIf="status === 0">
       <div class="mb-4">
         <div
           class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale"
           (click)="makeBig(2)"
         >
           <div class="card-body">
-            <div class="d-flex justify-content-center align-items-center mb-4">
-              <div>
-                <h5 class="card-title text-secondary mb-1 text-">
-                Cantidad {{chartType}}
-                </h5>
-              </div>
+            <div class="d-flex justify-content-between align-items-center mb-0"> <!-- Cambiado a justify-content-between -->
+              <h4 class="card-title m-0 fw-semibold">Cantidad de {{ capitalizeFirstLetter(chartType) }}</h4> <!-- Simplificado -->
+              <button type="button"
+                  class="btn btn-sm btn-link text-muted bi bi-arrows-angle-expand fs-5" 
+                  title="Expandir" 
+                  (click)="makeBig(2)">
+              </button>
             </div>
+            <div class="d-flex justify-content-left align-items-center mb-0">
+              <h6 class="text-secondary">Según Tipo de Ingresante</h6>
+            </div>
+            <hr class="mt-1 mb-3">
             <!-- ACA VA EL GRAFICO DE LINEA DE TIPOS DE USUARIOS -->
-            <google-chart
+            <google-chart 
               style="width: 100%; height: 100%"
               [type]="barChartType"
               [data]="barChartData"
@@ -528,22 +525,18 @@
           </div>
         </div>
 
-        <div>
+        <div class="mt-4">
           <div
             class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale"
             (click)="makeBig(2)"
           >
             <div class="card-body">
               <div
-                class="d-flex justify-content-center align-items-center mb-4"
+                class="d-flex justify-content-center align-items-center mb-0"
               >
                 <div>
-                  <h5 class="card-title text-secondary mb-1 text-center">
-                    TOP 5
-                  </h5>
-                  <small class="text-secondary"
-                    >Usuarios con mayor ingreso/egreso</small
-                  >
+                  <h4 class="card-title fw-semibold mb-1 text-center"> TOP 5</h4>
+                  <h6 class="fw-medium">Usuarios con más Ingresos/Egresos</h6>
                 </div>
               </div>
 
@@ -572,8 +565,15 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
+    <!-- Grafico top 5 -->
+
+    <div class="col-12 col-lg-10" *ngIf="status === 0">
+
+    </div>
+
   </div>
 </div>
 
@@ -593,17 +593,17 @@
       </div>
       <div class="modal-body">
         <p>
-          Bienvenido al Dashboard de accesos ingresos. Este panel te permite:
+          Bienvenido al Dashboard de Accesos. Este panel te permite:
         </p>
         <ul>
           <li>
-            Visualizar estadísticas de ingresos egresos en tiempo real,
+            Visualizar estadísticas de Ingresos/Egresos en tiempo real,
             incluyendo gráficos y tablas detalladas.
           </li>
           <li>Generar reportes personalizados basados en fechas y años.</li>
           <li>
-            Acceder a un historial completo de tipos de usuarios que ingresan y
-            mas.
+            Acceder a un historial completo de tipos de personas que ingresan y
+            más.
           </li>
         </ul>
       </div>

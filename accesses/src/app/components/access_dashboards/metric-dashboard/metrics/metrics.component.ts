@@ -19,6 +19,29 @@ import { Router } from '@angular/router';
 
 export class MetricsComponent implements OnInit {
 
+  //metodos para mejorar estetica
+  //mostrar mes actual
+  showCurrentMonth(): string {
+    const months = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    const today = new Date();
+    const currentMonth = today.getMonth(); // Devuelve un nro de 0 (enero) a 11 (diciembre)
+    
+    return months[currentMonth];
+  }
+
+  capitalizeFirstLetter(text: string): string {
+    if (!text) return text; // Verifica que el texto no este vacio
+
+    if(text === 'total'){
+      return 'Movimientos';
+    }
+
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  }
+  //FIN metodos para mejorar estetica
 
   constructor(private metricsService: AccessMetricsService, private userService: AccessUserReportService, private router: Router, private cdr: ChangeDetectorRef) {
     const now = new Date();
@@ -146,7 +169,7 @@ export class MetricsComponent implements OnInit {
   
     if (this.chartType === 'ingresos') {
       // Mostrar solo ingresos
-      this.columnChartOptions.series[0].labelInLegend = "ingresos";
+      this.columnChartOptions.series[0].labelInLegend = "Ingresos";
       this.columnChartOptions.colors[0] = '#4caf50';
       this.columnChartData = diasOrdenados.map((dia, index) => {
         const dayIndex = index === 6 ? 7 : index + 1;
@@ -155,7 +178,7 @@ export class MetricsComponent implements OnInit {
       });
     } else if (this.chartType === 'egresos') {
       // Mostrar solo egresos
-      this.columnChartOptions.series[0].labelInLegend = "egresos";
+      this.columnChartOptions.series[0].labelInLegend = "Egresos";
       this.columnChartOptions.colors[0] = '#f44336';
       this.columnChartData = diasOrdenados.map((dia, index) => {
         const dayIndex = index === 6 ? 7 : index + 1;
@@ -164,8 +187,8 @@ export class MetricsComponent implements OnInit {
       });
     } else {
       // Mostrar ingresos y egresos juntos
-      this.columnChartOptions.series[0].labelInLegend = "ingresos";
-      this.columnChartOptions.series[1].labelInLegend = "egresos";
+      this.columnChartOptions.series[0].labelInLegend = "Ingresos";
+      this.columnChartOptions.series[1].labelInLegend = "Egresos";
       this.columnChartOptions.colors[0] = '#4caf50';
       this.columnChartOptions.colors[1] = '#f44336';
       this.columnChartData = diasOrdenados.map((dia, index) => {
@@ -368,7 +391,7 @@ export class MetricsComponent implements OnInit {
   getTotalExits(){
     this.metricsService.getTotalExitsForCurrentYear().subscribe((data) =>{
       this.totalExitCount = data
-      console.log(data, 'Cantidad toaaaal');
+      console.log(data, 'Cantidad totaaaal');
     })
   }
 
@@ -377,7 +400,7 @@ export class MetricsComponent implements OnInit {
   getTotalEntries(){
     this.metricsService.getTotalEntriesForCurrentYear().subscribe((data) =>{
       this.totalAccesCount = data
-      console.log(data, 'Cantidad toaaaal');
+      console.log(data, 'Cantidad totaaaal');
     })
   }
 
@@ -711,13 +734,13 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
     
 
     this.barChartOptions = {
-      title: `${
-        this.chartType === 'ingresos' 
-          ? 'Ingresos' 
-          : this.chartType === 'egresos' 
-            ? 'Egresos'
-            : 'Total de Movimientos'
-      } por Tipo de Usuario`,
+      // title: `${
+      //   this.chartType === 'ingresos' 
+      //     ? 'Ingresos' 
+      //     : this.chartType === 'egresos' 
+      //       ? 'Egresos'
+      //       : 'Total de Movimientos'
+      // } por Tipo de Usuario`,
       legend: { position: 'bottom', textStyle: { color: '#6c757d', fontSize: 14 } },
       colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
       hAxis: { title: 'Meses', textStyle: { color: '#6c757d' }, slantedText: true },
@@ -810,7 +833,7 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
       // Crear el array de datos para el gráfico con cabeceras
       if (this.chartType === 'ingresos') {
         // Mostrar solo ingresos
-        this.columnChartOptions.series[0].labelInLegend = "ingresos"
+        this.columnChartOptions.series[0].labelInLegend = "Ingresos"
         this.columnChartOptions.colors[0] = '#4caf50'
         this.columnChartData = [
           ...diasOrdenados.map((dia, index) => {
@@ -825,7 +848,7 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
         ];
       } else if (this.chartType === 'egresos') {
         // Mostrar solo egresos
-          this.columnChartOptions.series[0].labelInLegend = "egresos"
+          this.columnChartOptions.series[0].labelInLegend = "Egresos"
           this.columnChartOptions.colors[0] = '#f44336'
 
         this.columnChartData = [
@@ -841,8 +864,8 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
         ];
       } else{
 
-          this.columnChartOptions.series[0].labelInLegend = "egresos"
-          this.columnChartOptions.series[1].labelInLegend = "ingresos"
+          this.columnChartOptions.series[0].labelInLegend = "Egresos"
+          this.columnChartOptions.series[1].labelInLegend = "Ingresos"
 
           this.columnChartOptions.colors[0] = '#f44336'
           this.columnChartOptions.colors[1] = '#4caf50'
