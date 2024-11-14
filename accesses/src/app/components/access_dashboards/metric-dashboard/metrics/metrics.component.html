@@ -48,6 +48,7 @@
           type="button"
           class="btn btn-secondary bi bi-trash filterbutton"
           title="Limpiar Filtros"
+          (click)="resetFilters()"
         ></button>
       </div>
     </div>
@@ -470,7 +471,7 @@
             <div class="d-flex justify-content-center align-items-center mb-4">
               <div>
                 <h5 class="card-title text-secondary mb-1 text-">
-                  Tipos de ingresantes
+                Cantidad {{chartType}}
                 </h5>
               </div>
             </div>

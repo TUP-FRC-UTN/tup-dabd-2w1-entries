@@ -94,12 +94,11 @@ getTotalCountsMovementsByFilter(
   }
 
   /* filtro */
-//CAMBIAR EN EL BACK Y EN EL FRONT SI O SI
   getMovementCountsFilter(
     year: number, 
     startMonth: number, 
     endMonth: number, 
-    filterType: 'ingresos' | 'egresos'
+    filterType: 'ingresos' | 'egresos' | 'total'
   ): Observable<any> {
     return this.http.get(
       `${this.baseUrl}/access-exit-count-by-day-filter`,
