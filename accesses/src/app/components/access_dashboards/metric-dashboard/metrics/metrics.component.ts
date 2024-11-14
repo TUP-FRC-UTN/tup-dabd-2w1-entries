@@ -488,9 +488,18 @@ export class MetricsComponent implements OnInit {
     console.log(`${type.charAt(0).toUpperCase() + type.slice(1)} por usuario:`, uniqueData);
   }
   
-  
-
-  
+  redirect(metricUser: MetricUser, redirectType: string) {
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
+    this.router.navigate(['reports'], { state: {
+      data: metricUser,
+      type: redirectType,
+      startMonth: fromDate.month,
+      startYear: fromDate.year,
+      endMonth: toDate.month,
+      endYear: toDate.year
+    }});
+  }  
   groupByUserType(data: any[]): any[] {
     const groupedData: { [key: string]: { userType: string, accessCount: number, utilizationPercentage: number } } = {};
   

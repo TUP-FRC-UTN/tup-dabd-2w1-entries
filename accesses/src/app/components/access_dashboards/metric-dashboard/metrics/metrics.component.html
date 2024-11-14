@@ -426,7 +426,7 @@
         </div>
       </div>
       <!-- KPI General para ingresos pico por día de la semana -->
-      <div class="row">
+      <div class="row" *ngIf="chartType !== 'egresos'">
         <div class="col">
             <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardEntries, 'guardEntries')">
               <div class="card-body">
@@ -439,7 +439,7 @@
           </div>
           
     </div>
-    <div class="row">
+    <div class="row" *ngIf="chartType !== 'ingresos'">
         <div class="col">
             <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardExits, 'guardExits')">
               <div class="card-body">
