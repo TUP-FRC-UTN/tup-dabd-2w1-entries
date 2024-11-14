@@ -99,42 +99,32 @@
     <!-- Contenedor para cuando un grafico es grande -->
     <div class="container d-flex gap-3" *ngIf="status !== 0">
       <!-- Grafico de columnas -->
-      <div class="col-md-9" *ngIf="status === 1">
-        <div class="card border-0 shadow-lg rounded-4 h-100 w-100">
+      <div class="col-md-8" *ngIf="status === 1">
+        <div class="card border-0 shadow-lg rounded-4 h-90 w-100">
           <div class="card-body">
-            <div class="align-items-center mb-4">
-              <div
-                class="back-arrow d-flex justify-content-start"
-                (click)="makeBig(0)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="35"
-                  height="35"
-                  fill="gray"
-                  class="bi bi-arrow-left-circle-fill"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"
-                  />
-                </svg>
+            <div class="d-flex align-items-center mb-3">
+              <!-- Flecha de regreso -->
+              <div class="back-arrow" (click)="makeBig(0)">
+                <i class="bi bi-arrow-left"></i>
               </div>
-              <div>
-                <h5 class="card-title text-secondary mb-1 d-flex justify-content-center">
-                  Cantidad {{chartType}}
-                </h5>
-                <small class="text-secondary d-flex justify-content-center">
-                  Rendimiento por día de semana
-                </small>
+      
+              <!-- Contenedor de títulos centrados -->
+              <div class="text-center flex-grow-1 mb-0">
+                <h4 class="fw-semibold card-title mb-2">
+                  Cantidad de {{capitalizeFirstLetter(chartType)}}
+                </h4>
+                <h6 class="text-secondary mb-0">
+                  Rendimiento por cada día de la semana
+                </h6>
               </div>
             </div>
+            <hr class="m-0">
             <google-chart
               [type]="columnChartType"
               [data]="columnChartData"
               [options]="columnChartOptions"
               class="expanded-chart-content"
-              style="width: 100%; height: 70%"
+              style="width: 100%; height: 350px"
             >
             </google-chart>
           </div>
@@ -194,10 +184,10 @@
           <div class="col mb-3">
             <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100" style="background-color: #d8ffedde">
               <div class="card-body position-relative">
-                <i class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4" style="font-size: 2.5rem; color: #198754; opacity: 0.8"></i>
+                <i class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4 pe-1" style="font-size: 2.5rem; color: #198754; opacity: 0.8"></i>
                 <div class="pe-5">
                   <h6 class="text-secondary mb-2">Total de Ingresos Anuales</h6>
-                  <h3 class="mb-0">
+                  <h3 class="mb-0 ps-2">
                     {{ totalAccesCount }}
                   </h3>
                 </div>
@@ -210,10 +200,10 @@
           <div class="col mb-3">
             <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100" style="background-color: #f8d7da">
               <div class="card-body position-relative">
-                <i class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4" style="font-size: 2.5rem; color: #721c24; opacity: 0.8"></i>
+                <i class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4 pe-1" style="font-size: 2.5rem; color: #721c24; opacity: 0.8"></i>
                 <div class="pe-5">
                   <h6 class="text-secondary mb-2">Total de Egresos Anuales</h6>
-                  <h3 class="mb-0">
+                  <h3 class="mb-0 ps-2">
                     {{ totalExitCount }}
                   </h3>
                 </div>
@@ -224,11 +214,11 @@
       </div>
 
       <!-- KPIs para el gráfico de pie cuando el grafico es grande -->
-      <div class="col-md-3" *ngIf="status === 2">
+      <div class="col-md-4" *ngIf="status === 2">
         <!-- Método más usado -->
         <div class="row">
           <div class="col mb-3" *ngFor="let data of uniqueData">
-            <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100"
+            <div class="card border-0 shadow-lg mb-2 rounded-4 h-100 w-100"
               [ngClass]="{
                 'bg-success': chartType === 'ingresos',
                 'bg-danger': chartType === 'egresos'
@@ -248,8 +238,8 @@
       </div>
 
       <!-- Grafico de pie -->
-      <div class="col-9" *ngIf="status === 2">
-        <div class="card border-0 shadow-lg">
+      <div class="col-8" *ngIf="status === 2">
+        <!-- <div class="card border-0 shadow-lg">
           <ng-select
             [items]="availableUserTypes"
             [multiple]="true"
@@ -273,34 +263,27 @@
               <span class="ms-2">{{ item.label }}</span>
             </ng-template>
           </ng-select>
-        </div>
+        </div> -->
 
-        <div class="card border-0 shadow-lg rounded-4 h-100">
+        <div class="card border-0 shadow-lg rounded-4">
           <div class="card-body">
-            <div class="align-items-center mb-4">
-              <div class="back-arrow d-flex justify-content-start" (click)="makeBig(0)">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="35"
-                  height="35"
-                  fill="gray"
-                  class="bi bi-arrow-left-circle-fill"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"
-                  />
-                </svg>
+            <div class="d-flex align-items-center mb-0">
+              <!-- Flecha de regreso -->
+              <div class="back-arrow pb-2" (click)="makeBig(0)">
+                <i class="bi bi-arrow-left"></i>
               </div>
-              <div>
-                <h5 class="card-title text-secondary mb-1 d-flex justify-content-center">
-                  Tipos de usuarios
+        
+              <!-- Título centrado -->
+              <div class="flex-grow-1 text-center">
+                <h5 class="card-title mb-2">
+                  Comparación de {{ capitalizeFirstLetter(chartType) }} según Tipos de Ingresante
                 </h5>
               </div>
             </div>
-            <div id="chartContainer">
-              <google-chart
-                style="width: 900px; height: 800px"
+            <hr class="mt-1 mb-0">
+            <div id="chartContainer mt-0">
+              <google-chart class="mt-0"
+                style="width: 800px; height: 370px"
                 [type]="barChartType"
                 [data]="barChartData"
                 [options]="barChartOptions">
@@ -410,25 +393,31 @@
 
     <!-- Gráfico de columnas -->
     <div class="col-12 col-lg-5" *ngIf="status === 0" style="height: 100%">
-      <div class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale" (click)="makeBig(1)">
+
+      <div class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale" (click)="makeBig(2)">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-0">
-            <h4 class="card-title m-0 fw-semibold">Comparación de {{ capitalizeFirstLetter(chartType) }}</h4>
+            <h4 class="card-title m-0 fw-semibold">Cantidad de {{ capitalizeFirstLetter(chartType) }}</h4>
             <button type="button"
                 class="btn btn-sm btn-link text-muted bi bi-arrows-angle-expand fs-5" 
                 title="Expandir" 
-                (click)="makeBig(1)">
+                (click)="makeBig(2)">
             </button>
           </div>
-          <hr class="mt-1 mb-0">
-          <google-chart class="mt-0"
-            style="width: 100%; height: 472px"
-            [type]="columnChartType"
-            [data]="columnChartData"
-            [options]="columnChartOptions">
+          <div class="d-flex justify-content-left align-items-center mb-0">
+            <h6 class="text-secondary">Según Tipo de Ingresante</h6>
+          </div>
+          <hr class="mt-1 mb-3">
+          <google-chart 
+            style="width: 100%; height: 460px"
+            [type]="barChartType"
+            [data]="barChartData"
+            [options]="barChartOptions"
+            [height]="barChartOptions.height">
           </google-chart>
         </div>
       </div>
+
          <!-- KPIs de guardias movidos aquí -->
         <div class="row mt-3">
           <!-- KPI para guardia con más ingresos -->
@@ -463,30 +452,27 @@
     <!-- Gráfico top 5 -->
     <div class="col-12 col-lg-5" *ngIf="status === 0">
       <div class="mb-3">
-        <div class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale" (click)="makeBig(2)">
+        <!--  -->
+        <div class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale" (click)="makeBig(1)">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-0">
-              <h4 class="card-title m-0 fw-semibold">Cantidad de {{ capitalizeFirstLetter(chartType) }}</h4>
+              <h4 class="card-title m-0 fw-semibold">Comparación de {{ capitalizeFirstLetter(chartType) }}</h4>
               <button type="button"
                   class="btn btn-sm btn-link text-muted bi bi-arrows-angle-expand fs-5" 
                   title="Expandir" 
-                  (click)="makeBig(2)">
+                  (click)="makeBig(1)">
               </button>
             </div>
-            <div class="d-flex justify-content-left align-items-center mb-0">
-              <h6 class="text-secondary">Según Tipo de Ingresante</h6>
-            </div>
-            <hr class="mt-1 mb-3">
-            <google-chart 
-              style="width: 100%; height: 270px"
-              [type]="barChartType"
-              [data]="barChartData"
-              [options]="barChartOptions"
-              [height]="barChartOptions.height">
+            <hr class="mt-1 mb-0">
+            <google-chart class="mt-0"
+              style="width: 100%; height: 300px"
+              [type]="columnChartType"
+              [data]="columnChartData"
+              [options]="columnChartOptions">
             </google-chart>
           </div>
         </div>
-
+        <!--  -->
         <div class="mt-3">
           <div class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale" (click)="makeBig(2)">
             <div class="card-body">
