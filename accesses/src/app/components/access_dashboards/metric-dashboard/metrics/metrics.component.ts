@@ -116,13 +116,21 @@ export class MetricsComponent implements OnInit {
       this.createChartData(data, fromDate, toDate);
     });
   
-    // Obtener los datos de los usuarios top
-    this.metricsService.getTopUsers(fromDate.month, toDate.month, fromDate.year).subscribe(topUsers => {
-      console.log('Top 5 usuarios:', topUsers);
-      this.topUser = topUsers.slice(0, 5); // Limita a los primeros 5 usuarios
-      console.log('TOP USUARIO ARRAY', this.topUser);
-    });
+// Obtener los datos de los usuarios top
+this.metricsService.getTopUsers(fromDate.month, toDate.month, fromDate.year).subscribe(topUsers => {
+  console.log('Top 5 usuarios:', topUsers);
   
+  // Filtrar usuarios para excluir los tipos "Visitor", "Tenant" y "Neighbor"
+  const filteredTopUsers = topUsers.filter((user:any) => 
+    user[1] !== 'Visitor' && user[1] !== 'Tenant' && user[1] !== 'Owner'
+  );
+  
+  // Limitar a los primeros 5 usuarios después del filtrado
+  this.topUser = filteredTopUsers.slice(0, 5); 
+  
+  console.log('TOP USUARIO FILTRADO', this.topUser);
+});
+
     // Cargar los datos de utilización dependiendo de si es ingresos, egresos o total
     if (this.chartType === 'ingresos') {
       this.loadUtilizationData(fromDate.year, fromDate.month, toDate.month);
@@ -634,6 +642,7 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
   onChartTypeChange() {
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
+    this.loadEntryExit()
     if (this.chartType === 'ingresos') {
       this.onUserTypeChange()
       this.loadUtilizationData(fromDate.year, fromDate.month, toDate.month);
