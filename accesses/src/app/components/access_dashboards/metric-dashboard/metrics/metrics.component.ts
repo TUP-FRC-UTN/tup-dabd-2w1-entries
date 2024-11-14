@@ -659,7 +659,11 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
     { label: 'Proveedor', value: 'Supplier' },
     { label: 'Vecino', value: 'Owner' },
     { label: 'Inquilino', value: 'Tenant' },
-    { label: 'Visitante', value: 'Visitor' }
+    { label: 'Visitante', value: 'Visitor' },
+    { label: 'Jardinero', value: 'Gardener' },
+    { label: 'Servicios', value: 'Service' },
+    { label: 'Limpieza', value: 'Cleaning' },
+    { label: 'Trabajador', value: 'Worker' }
   ];
 
   onChartTypeChange() {
@@ -676,6 +680,7 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
         this.onUserTypeChange()
       this.loadUtilizationTotalData(fromDate.year, fromDate.month, toDate.month);
     }
+    this.loadEntryExit()
   }
   
 
