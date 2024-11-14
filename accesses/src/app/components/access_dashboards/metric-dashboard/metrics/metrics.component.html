@@ -27,7 +27,7 @@
    
       </div>
       <!-- Botones de exportar -->
-      <div class="col-auto d-flex gap-1 ms-auto">
+      <div class="col-auto d-flex gap-2 ms-auto">
         <button
           class="btn btn-primary filterbutton"
           data-bs-toggle="modal"
@@ -60,7 +60,7 @@
           <select id="chartType" class="form-select" [(ngModel)]="chartType" (change)="onChartTypeChange()">
             <option value="ingresos">Ingresos</option>
             <option value="egresos">Egresos</option>
-            <option value="total">Total</option>
+            <option value="total">Ambos</option>
           </select>
           
         </div>
@@ -150,7 +150,7 @@
                 <h6 class="text-secondary mb-2">
                   Cantidad de Ingresos del Mes Actual
                 </h6>
-                <h3 class="mb-0">{{this.showCurrentMonth()}} - {{ currentMonthAccessCount }}</h3>
+                <h3 class="mb-0">{{this.showCurrentMonth()}} | {{ currentMonthAccessCount }}</h3>
               </div>
             </div>
           </div>
@@ -165,7 +165,7 @@
                 <div class="pe-5">
                   <h6 class="text-secondary mb-2">Mes con más Ingresos</h6>
                   <h3 class="mb-0">
-                    {{ monthEntry }} - {{ entriesCount }}
+                    {{ monthEntry }} | {{ entriesCount }}
                   </h3>
                 </div>
               </div>
@@ -181,7 +181,7 @@
                 <div class="pe-5">
                   <h6 class="text-secondary mb-2">Mes con más Egresos</h6>
                   <h3 class="mb-0">
-                    {{ monthExit }} - {{ exitCount }}
+                    {{ monthExit }} | {{ exitCount }}
                   </h3>
                 </div>
               </div>
@@ -316,14 +316,17 @@
       <!-- KPI General para Columnas -->
       <div class="row">
         <div class="col">
-          <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(1)" style="background-color: #d4edda">
-            <div class="card-body position-relative">
-              <i class="bi bi-arrow-right-circle-fill position-absolute top-50 end-0 translate-middle-y me-4" style="font-size: 2.5rem; color: #155724; opacity: 0.8"></i>
-              <div class="pe-5">
-                <h6 class="text-secondary mb-2">Ingresos diarios</h6>
+          <div class="card border-0 shadow-lg rounded-4 mb-3 p-0 hover-scale" (click)="makeBig(1)" style="background-color: #d4edda">
+            <div class="card-body">
+              <!-- Título en la primera fila -->
+              <h6 class="text-secondary mb-1">Ingresos diarios</h6>
+              
+              <!-- Contenedor para variable e ícono -->
+              <div class="d-flex justify-content-between align-items-center">
                 <h3 class="mb-0">
                   {{ currentMonthAccessCount }}
                 </h3>
+                <i class="bi bi-box-arrow-right" style="font-size: 2.5rem; color: #155724; opacity: 0.8"></i>
               </div>
             </div>
           </div>
@@ -333,14 +336,17 @@
       <!-- KPI General para Columnas -->
       <div class="row">
         <div class="col">
-          <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(1)" style="background-color: #f8d7da">
-            <div class="card-body position-relative">
-              <i class="bi bi-arrow-left-circle-fill position-absolute top-50 end-0 translate-middle-y me-4" style="font-size: 2.5rem; color: #721c24; opacity: 0.8"></i>
-              <div class="pe-5">
-                <h6 class="text-secondary mb-2">Egresos diarios</h6>
+          <div class="card border-0 shadow-lg rounded-4 mb-3 hover-scale" (click)="makeBig(1)" style="background-color: #f8d7da">
+            <div class="card-body">
+              <!-- Título en la primera fila -->
+              <h6 class="text-secondary mb-3">Egresos diarios</h6>
+              
+              <!-- Contenedor para variable e ícono -->
+              <div class="d-flex justify-content-between align-items-center">
                 <h3 class="mb-0">
                   {{ currentMonthExitCount }}
                 </h3>
+                <i class="bi bi-box-arrow-left" style="font-size: 2.5rem; color: #721c24; opacity: 0.8"></i>
               </div>
             </div>
           </div>
@@ -350,14 +356,17 @@
       <!-- KPI General para ingresos pico por día de la semana -->
       <div class="row">
         <div class="col">
-          <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(1)">
+          <div class="card border-0 shadow-lg rounded-4 mb-3 hover-scale" (click)="makeBig(1)">
             <div class="card-body">
               <h6 class="text-secondary mb-2">
-                Pico de Ingresos de esta Semana
+                Día con más Ingresos esta Semana
               </h6>
-              <h3 class="mb-0">{{ accessCount }}</h3>
-              <small class="text-muted">Día de la semana: </small>
-              <span>{{ dayWithMostAccesses }}</span>
+              @if(accessCount > 0){
+                <h3 class="mb-0">{{ capitalizeFirstLetter(dayWithMostAccesses) }} | {{ accessCount }}</h3>
+
+              } @else {
+                <h3 class="mb-0"></h3>
+              }
             </div>
           </div>
         </div>
@@ -365,14 +374,17 @@
 
       <div class="row">
         <div class="col">
-          <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(1)">
+          <div class="card border-0 shadow-lg rounded-4 mb-3 hover-scale" (click)="makeBig(1)">
             <div class="card-body">
               <h6 class="text-secondary mb-2">
-                Pico de Egresos de esta Semana
+                Día con más Egresos esta Semana
               </h6>
-              <h3 class="mb-0">{{ exitsCountPeak }}</h3>
-              <small class="text-muted">Día de la semana: </small>
-              <span>{{ dayWithMostExits }}</span>
+              @if(exitsCountPeak > 0){
+                <h3 class="mb-0">{{ capitalizeFirstLetter(dayWithMostExits) }} | {{ exitsCountPeak }}</h3>
+
+              } @else {
+                <h3 class="mb-0"></h3>
+              }
             </div>
           </div>
         </div>
@@ -383,11 +395,10 @@
       <!-- KPI para vecino con más autorizaciones -->
       <div class="row">
         <div class="col">
-          <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.neighborAuthorizations, 'neighborAuthorizations')">
+          <div class="card border-0 shadow-lg rounded-4 mb-3 hover-scale" (click)="redirect(redirectKpis.neighborAuthorizations, 'neighborAuthorizations')">
             <div class="card-body">
               <h6 class="text-secondary mb-2">Vecino con más personas autorizadas</h6>
-              <h3 class="mb-0">{{ redirectKpis.neighborAuthorizations.name }}</h3>
-              <small class="text-muted">Cantidad: {{ redirectKpis.neighborAuthorizations.count }} </small>
+              <h3 class="mb-0">{{ redirectKpis.neighborAuthorizations.name }} | {{ redirectKpis.neighborAuthorizations.count }}</h3>
             </div>
           </div>
         </div>
@@ -411,7 +422,7 @@
           </div>
           <hr class="mt-1 mb-0">
           <google-chart class="mt-0"
-            style="width: 100%; height: 400px"
+            style="width: 100%; height: 472px"
             [type]="columnChartType"
             [data]="columnChartData"
             [options]="columnChartOptions">
@@ -419,33 +430,39 @@
         </div>
       </div>
          <!-- KPIs de guardias movidos aquí -->
-  <div class="row mt-4">
-    <!-- KPI para guardia con más ingresos -->
-    <div class="col-6 mt-5" *ngIf="chartType !== 'egresos'">
-      <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardEntries, 'guardEntries')">
-        <div class="card-body">
-          <h6 class="text-secondary mb-2">Guardia con mayor registro de Ingresos</h6>
-          <h3 class="mb-0">{{ redirectKpis.guardEntries.name }}</h3>
-          <small class="text-muted">Cantidad: {{ redirectKpis.guardEntries.count }}</small>
+        <div class="row mt-3">
+          <!-- KPI para guardia con más ingresos -->
+          <div class="col-6 mt-0" *ngIf="chartType !== 'egresos'">
+            <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardEntries, 'guardEntries')">
+              <div class="card-body">
+                <h6 class="text-secondary mb-2">Guardia con mayor registro de Ingresos</h6>
+                <div class="row align-items-center">
+                  <div class="col">
+                    <h3 class="mb-0">{{ redirectKpis.guardEntries.name }} | {{ redirectKpis.guardEntries.count }}</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!--* KPI para guardia con más egresos *-->
+          <div class="col-6 mt-0" *ngIf="chartType !== 'ingresos'">
+            <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardExits, 'guardExits')">
+              <div class="card-body">
+                <h6 class="text-secondary mb-2">Guardia con mayor registro de Egresos</h6>
+                <div class="row align-items-center">
+                  <div class="col">
+                    <h3 class="mb-0">{{ redirectKpis.guardExits.name }} | {{ redirectKpis.guardExits.count }}</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
     </div>
-
-    <!-- KPI para guardia con más egresos -->
-    <div class="col-6 mt-5" *ngIf="chartType !== 'ingresos'">
-      <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardExits, 'guardExits')">
-        <div class="card-body">
-          <h6 class="text-secondary mb-2">Guardia con mayor registro de Egresos</h6>
-          <h3 class="mb-0">{{ redirectKpis.guardExits.name }}</h3>
-          <small class="text-muted">Cantidad: {{ redirectKpis.guardExits.count }}</small>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
     <!-- Gráfico top 5 -->
     <div class="col-12 col-lg-5" *ngIf="status === 0">
-      <div class="mb-4">
+      <div class="mb-3">
         <div class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale" (click)="makeBig(2)">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-0">
@@ -470,7 +487,7 @@
           </div>
         </div>
 
-        <div class="mt-4">
+        <div class="mt-3">
           <div class="card border-0 shadow-lg rounded-4 h-100 transition-all hover-scale" (click)="makeBig(2)">
             <div class="card-body">
               <div class="d-flex justify-content-center align-items-center mb-0">
