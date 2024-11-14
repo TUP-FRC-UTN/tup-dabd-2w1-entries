@@ -38,6 +38,29 @@ google-chart {
     z-index: 10;
     background-color: white; 
   }
+  /* Asegurar que todos los inputs y ng-select tengan la misma altura y apariencia */
+.form-control,
+.input-group,
+.input-group .ng-select .ng-select-container,
+.action-buttons-container {
+    min-height: 38px;
+    height: 38px;
+}
+
+.input-group {
+    width: 100%;
+    display: flex;
+}
+
+.input-group > * {
+    flex: 1 1 auto;
+    width: auto;
+}
+
+.input-group .ng-select {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+}
 
 
   /* ESTILOS PARA CARDS DEL TIPO DE USUARIO KPI */
@@ -50,26 +73,7 @@ google-chart {
     opacity: 0.8
 
   }
-  ::ng-deep .ng-select {
-    width: 100%;
-    font-size: 14px;
-    border-radius: 4px;
-  }
-  
-  ::ng-deep .ng-select .ng-select-container {
-    padding: 10px;
-  }
-  
-  ::ng-deep .ng-select .ng-select-search {
-    border-color: #ced4da;
-  }
-  
-  ::ng-deep .ng-select .ng-option {
-    font-size: 14px;
-  }
-  
-  ::ng-deep .ng-select .ng-option.selected {
-    background-color: #007bff;
-    color: white;
-  }
+
+
+
   

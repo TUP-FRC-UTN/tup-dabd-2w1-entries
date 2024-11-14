@@ -77,10 +77,10 @@ export interface AccessMetricsDTO {
   }
 
   export interface RedirectInfo {
-    data: MetricUser;
-    type: string;
-    startMonth: number;
-    startYear: number;
-    endMonth: number;
-    endYear: number;
+    data: MetricUser | null;
+    type: string | null;
+    startMonth: number | null;
+    startYear: number | null;
+    endMonth: number | null; 
+    endYear: number | null;
   }

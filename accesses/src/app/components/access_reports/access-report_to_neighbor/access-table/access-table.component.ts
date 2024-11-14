@@ -735,6 +735,7 @@ onEndDateChange(date: string): void {
   applyFilters(): void {
     if (this.table) {
       this.table.draw();
+  
     }
   }
 
@@ -745,6 +746,7 @@ onEndDateChange(date: string): void {
   clearFilters(): void {
     // Reiniciar todos los valores de filtro
     this.activeFilter = null; 
+    this.redirectInfo = {	data: null, type: null, startMonth: null, startYear: null, endMonth: null, endYear: null };
     this.activeUserTypeFilters.clear();
     this.filterValues = {
       entryOrExit: [],
@@ -754,6 +756,8 @@ onEndDateChange(date: string): void {
       selectedGuardia: [],
       selectedPropietario: []
     };
+  this.initializeDates();
+  this.fetchData();
 
     // Limpiar el campo de búsqueda unificada
     $('#unifiedSearchFilter').val('');
