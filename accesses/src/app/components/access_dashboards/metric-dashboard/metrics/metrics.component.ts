@@ -623,8 +623,10 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
       this.barChartOptions = {
         title: 'Comparación de Ingresos por Tipo de Usuario',
         legend: {
-          position: 'bottom',
-          textStyle: { color: '#6c757d', fontSize: 14 }
+          position: 'top',
+          textStyle: { color: '#6c757d', fontSize: 14 },
+          maxLines: 3,
+          alignment: 'center'
         },
         colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
         hAxis: {
@@ -755,7 +757,7 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
       //       ? 'Egresos'
       //       : 'Total de Movimientos'
       // } por Tipo de Usuario`,
-      legend: { position: 'bottom', textStyle: { color: '#6c757d', fontSize: 14 } },
+      legend: { position: 'top', textStyle: { color: '#6c757d', fontSize: 14 }, maxLines: 3,alignment: 'center' },
       colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
       hAxis: { title: 'Meses', textStyle: { color: '#6c757d' }, slantedText: true },
       vAxis: { title: `Cantidad de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'}`, textStyle: { color: '#6c757d' }, minValue: 0, format: '' },
