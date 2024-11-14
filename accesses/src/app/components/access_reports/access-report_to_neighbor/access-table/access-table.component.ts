@@ -491,7 +491,7 @@ onEndDateChange(date: string): void {
           ? this.userService.getUserById(parseInt(movement.neighborId, 10)) // Parsear a número
           : of(movement.neighborId || ''), // Si es una cadena de texto
 
-        this.userService.getUserById(movement.securityId)
+        this.userService.getUserById(9)
       ];
   
 
