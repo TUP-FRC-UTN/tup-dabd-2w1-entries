@@ -63,3 +63,24 @@ export interface AccessMetricsDTO {
 
 
   
+
+  export interface MetricUser {
+    name: string | null;
+    id: number | null;
+    count: number;
+  }
+
+  export interface RedirectKpis {
+    neighborAuthorizations: MetricUser;
+    guardEntries: MetricUser;
+    guardExits: MetricUser;
+  }
+
+  export interface RedirectInfo {
+    data: MetricUser;
+    type: string;
+    startMonth: number;
+    startYear: number;
+    endMonth: number;
+    endYear: number;
+  }

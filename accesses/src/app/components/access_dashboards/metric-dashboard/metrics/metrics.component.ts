@@ -3,8 +3,11 @@ import { ChartType, GoogleChartsModule } from 'angular-google-charts';
 import { AccessMetricsService } from '../../../../services/access-metric/access-metrics.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TopUser, UtilizationRate } from '../../../../models/access-metric/metris';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { MetricUser, RedirectKpis, TopUser, UtilizationRate } from '../../../../models/access-metric/metris';
+import { AccessUserReportService } from '../../../../services/access_report/access_httpclient/access_usersApi/access-user-report.service';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-metrics',
@@ -14,10 +17,10 @@ import { NgSelectModule } from '@ng-select/ng-select';
   styleUrl: './metrics.component.css'
 })
 
-export class MetricsComponent implements OnInit{
+export class MetricsComponent implements OnInit {
 
 
-  constructor(private metricsService: AccessMetricsService, private cdr: ChangeDetectorRef) {
+  constructor(private metricsService: AccessMetricsService, private userService: AccessUserReportService, private router: Router, private cdr: ChangeDetectorRef) {
     const now = new Date();
     this.periodTo = this.formatYearMonth(now);
     
@@ -56,6 +59,49 @@ export class MetricsComponent implements OnInit{
     // Obtener los valores de año y mes de los filtros
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
+
+    this.metricsService.getNeighborWithMostAuthorizations(
+      fromDate.year, 
+      fromDate.month, 
+      toDate.year, 
+      toDate.month).subscribe(data => {
+        this.userService.getUserById(data?.[0]).subscribe(userData => {
+          this.redirectKpis.neighborAuthorizations = {
+            name: userData,
+            id: data?.[0] ?? null,
+            count: data?.[1] ?? 0
+          }
+        });
+    });
+
+    this.metricsService.getGuardWithMostEntries(
+      fromDate.year, 
+      fromDate.month, 
+      toDate.year, 
+      toDate.month).subscribe(data => {
+        this.userService.getUserById(data?.[0]).subscribe(userData => {
+          this.redirectKpis.guardEntries = {
+            name: userData,
+            id: data?.[0] ?? null,
+            count: data?.[1] ?? 0
+          }
+        });
+    });
+
+    this.metricsService.getGuardWithMostExits(
+      fromDate.year, 
+      fromDate.month, 
+      toDate.year, 
+      toDate.month).subscribe(data => {
+        this.userService.getUserById(data?.[0]).subscribe(userData => {
+          this.redirectKpis.guardExits = {
+            name: userData,
+            id: data?.[0] ?? null,
+            count: data?.[1] ?? 0
+          }
+        });
+    });
+
   
     // Aplicar el filtro de movimiento (ingresos, egresos o total) y mantener el tipo seleccionado
     this.metricsService.getMovementCountsFilter(
@@ -89,6 +135,7 @@ export class MetricsComponent implements OnInit{
   
     this.loadData();
     this.loadAccessCounts();
+
   }
   
   private createChartData(data: any, fromDate: any, toDate: any) {
@@ -152,8 +199,26 @@ export class MetricsComponent implements OnInit{
   totalAccesCount: number = 0;
   totalExitCount: number = 0;
 
+  redirectKpis: RedirectKpis = {
+    neighborAuthorizations: {
+      name: null,
+      id: null,
+      count: 0
+    },
+    guardEntries: {
+      name: null,
+      id: null,
+      count: 0
+    },
+    guardExits: {
+      name: null,
+      id: null,
+      count: 0
+    }
+  };
+
   today = new Date();
- 
+
   dayWithMostAccesses: string = '';
   accessCount= 0;
 
@@ -178,7 +243,6 @@ export class MetricsComponent implements OnInit{
   minDateFrom: string = '2020-01';
   topMethodName: string = "";
 
-
   ngOnInit() {
     this.fetchTodayAccessCount();
     this.loadAccessCounts();
@@ -193,10 +257,7 @@ export class MetricsComponent implements OnInit{
     this.getThisMonthCountExit();
     this.getPeakDayExit();
     this.applyFilters()
-
   }
-
-
 
   private getMonthsRange(start: number, end: number): number[] {
     const months = [];
@@ -436,12 +497,18 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
     console.log(`${type.charAt(0).toUpperCase() + type.slice(1)} por usuario:`, uniqueData);
   }
   
-  
-  
-  
-  
-
-  
+  redirect(metricUser: MetricUser, redirectType: string) {
+    const fromDate = this.parseYearMonth(this.periodFrom);
+    const toDate = this.parseYearMonth(this.periodTo);
+    this.router.navigate(['reports'], { state: {
+      data: metricUser,
+      type: redirectType,
+      startMonth: fromDate.month,
+      startYear: fromDate.year,
+      endMonth: toDate.month,
+      endYear: toDate.year
+    }});
+  }  
   groupByUserType(data: any[]): any[] {
     const groupedData: { [key: string]: { userType: string, accessCount: number, utilizationPercentage: number } } = {};
   
