@@ -6,8 +6,8 @@ export interface FilterValues {
     tipoIngresante: string[];       // Tipo de persona que ingresa
     unifiedSearch: string;          // Búsqueda unificada
     typeCar: string[];             // Tipo de vehículo
-                // Estado del horario
-                // Días seleccionados
+                                  // Estado del horario
+                        // Días seleccionados
     selectedGuardia: number[];     // IDs de guardias seleccionados
     selectedPropietario: number[]; // IDs de propietarios seleccionados
   }

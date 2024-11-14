@@ -758,7 +758,7 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
       //       : 'Total de Movimientos'
       // } por Tipo de Usuario`,
       legend: { position: 'top', textStyle: { color: '#6c757d', fontSize: 14 }, maxLines: 3,alignment: 'left' },
-      colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'],
+      colors: ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0', '#A9A9A9', '#000000', '#0000FF', '#FF0000'],
       hAxis: { title: 'Meses', textStyle: { color: '#6c757d' }, slantedText: true },
       vAxis: { title: `Cantidad de ${this.chartType === 'ingresos' ? 'Ingresos' : 'Egresos'}`, textStyle: { color: '#6c757d' }, minValue: 0, format: '' },
       animation: { duration: 1000, easing: 'out', startup: true },
