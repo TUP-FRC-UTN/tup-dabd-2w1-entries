@@ -426,6 +426,46 @@
           </div>
         </div>
       </div>
+      <!-- KPI General para ingresos pico por día de la semana -->
+      <div class="row" *ngIf="chartType !== 'egresos'">
+        <div class="col">
+            <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardEntries, 'guardEntries')">
+              <div class="card-body">
+                <h6 class="text-secondary mb-2">Guardia con mayor cantidad de ingresos</h6>
+                <h3 class="mb-0">{{ redirectKpis.guardEntries.name }}</h3>
+                <small class="text-muted">Cantidad: {{ redirectKpis.guardEntries.count }} </small>
+                <span>{{ dayWithMostAccesses }}</span>
+              </div>
+            </div>
+          </div>
+          
+    </div>
+    <div class="row" *ngIf="chartType !== 'ingresos'">
+        <div class="col">
+            <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.guardExits, 'guardExits')">
+              <div class="card-body">
+                <h6 class="text-secondary mb-2">Guardia con mayor cantidad de egresos</h6>
+                <h3 class="mb-0">{{ redirectKpis.guardExits.name }}</h3>
+                <small class="text-muted">Cantidad: {{ redirectKpis.guardExits.count }} </small>
+                <span>{{ dayWithMostAccesses }}</span>
+              </div>
+            </div>
+          </div>
+          
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="redirect(redirectKpis.neighborAuthorizations, 'neighborAuthorizations')">
+              <div class="card-body">
+                <h6 class="text-secondary mb-2">Vecino con mayor cantidad de autorizados</h6>
+                <h3 class="mb-0">{{ redirectKpis.neighborAuthorizations.name }}</h3>
+                <small class="text-muted">Cantidad: {{ redirectKpis.neighborAuthorizations.count }} </small>
+                <span>{{ dayWithMostAccesses }}</span>
+              </div>
+            </div>
+          </div>
+          
+    </div>
     </div>
 
     <!-- Grafico de columnas  -->

@@ -184,8 +184,6 @@ getTotalCountsMovementsByFilter(
     return this.http.get<TopUser[]>(this.baseUrl + '/top-users-entries-exits', { params });
   }
 
-
-
   getUtilizationRateEntries(startMonth?: number, endMonth?: number, year?: number): Observable<UtilizationRateResponse> {
     let params = new HttpParams();
     
@@ -204,6 +202,36 @@ getTotalCountsMovementsByFilter(
     if (year) params = params.set('year', year.toString());
 
     return this.http.get<UtilizationRateResponse>(this.baseUrl+'/utilization-rate-exits', { params });
+  }  getGuardWithMostExits(startYear: number, startMonth: number, endYear: number, endMonth: number): Observable<any> {
+    return this.http.get<any>(this.baseUrl + '/guard-with-most-exits', {
+      params: {
+        startYear: startYear.toString(),
+        startMonth: startMonth.toString(),
+        endYear: endYear.toString(),
+        endMonth: endMonth.toString()
+      }
+    });
   }
 
+  getGuardWithMostEntries(startYear: number, startMonth: number, endYear: number, endMonth: number): Observable<any> {
+    return this.http.get<any>(this.baseUrl + '/guard-with-most-entries', {
+      params: {
+        startYear: startYear.toString(),
+        startMonth: startMonth.toString(),
+        endYear: endYear.toString(),
+        endMonth: endMonth.toString()
+      }
+    });
+  }
+
+  getNeighborWithMostAuthorizations(startYear: number, startMonth: number, endYear: number, endMonth: number): Observable<any> {
+    return this.http.get<any>(this.baseUrl + '/neighbor-with-most-invitations', {
+      params: {
+        startYear: startYear.toString(),
+        startMonth: startMonth.toString(),
+        endYear: endYear.toString(),
+        endMonth: endMonth.toString()
+      }
+    });
+  }
 }

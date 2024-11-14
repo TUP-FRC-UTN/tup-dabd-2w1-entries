@@ -17,7 +17,7 @@ export type VehicleType = 'Car' | 'Motorbike' | 'Truck' | 'Bike' | 'Van' | 'Walk
 @Component({
   selector: 'access-app-daily-fetch',
   standalone: true,
-  imports: [FormsModule, CommonModule, HttpClientModule, AccessRegisterEmergencyComponent],
+  imports: [FormsModule],
   templateUrl: './access-daily-fetch.component.html',
   styleUrl: './access-daily-fetch.component.css',
   providers: [DatePipe],
