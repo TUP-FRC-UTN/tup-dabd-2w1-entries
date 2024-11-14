@@ -21,6 +21,7 @@
             [(ngModel)]="periodTo"
             (ngModelChange)="applyFilters()"
             [min]="periodFrom"
+            [max]="getCurrentYearMonth()" 
             
           />
         </div>

@@ -174,6 +174,7 @@ export class MetricsComponent implements OnInit{
 
   periodFrom: string = this.getDefaultFromDate();
   periodTo: string = this.getCurrentYearMonth();
+  thisPeriod: string = new Date().getFullYear().toString();
   minDateFrom: string = '2020-01';
   topMethodName: string = "";
 
@@ -566,14 +567,14 @@ loadUtilizationTotalData(year: number, startMonth: number, endMonth: number): vo
   onChartTypeChange() {
     const fromDate = this.parseYearMonth(this.periodFrom);
     const toDate = this.parseYearMonth(this.periodTo);
-  
-    this.applyFilters();
-    this.onUserTypeChange()
     if (this.chartType === 'ingresos') {
+      this.onUserTypeChange()
       this.loadUtilizationData(fromDate.year, fromDate.month, toDate.month);
     } else if (this.chartType === 'egresos') {
+      this.onUserTypeChange()
       this.loadUtilizationExitData(fromDate.year, fromDate.month, toDate.month);
     } else if(this.chartType === 'total'){
+        this.onUserTypeChange()
       this.loadUtilizationTotalData(fromDate.year, fromDate.month, toDate.month);
     }
   }
