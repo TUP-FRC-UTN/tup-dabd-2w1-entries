@@ -99,7 +99,7 @@
     <!-- Contenedor para cuando un grafico es grande -->
     <div class="container d-flex gap-3" *ngIf="status !== 0">
       <!-- Grafico de columnas -->
-      <div class="col-md-8" *ngIf="status === 1">
+      <div class="col-md-8 mb-2" *ngIf="status === 1">
         <div class="card border-0 shadow-lg rounded-4 h-90 w-100">
           <div class="card-body">
             <div class="d-flex align-items-center mb-3">
@@ -124,7 +124,7 @@
               [data]="columnChartData"
               [options]="columnChartOptions"
               class="expanded-chart-content"
-              style="width: 100%; height: 350px"
+              style="width: 100%; height: 330px"
             >
             </google-chart>
           </div>
@@ -132,10 +132,10 @@
       </div>
 
       <!-- KPIs para el gráfico de columnas cuando es grande-->
-      <div class="col-md-3" *ngIf="status === 1">
+      <div class="col-md-4" *ngIf="status === 1">
         <div class="row">
           <div class="col">
-            <div class="card border-0 shadow-lg rounded-4 mb-4 hover-scale" (click)="makeBig(1)">
+            <div class="card border-0 shadow-lg rounded-4 mb-2 hover-scale" (click)="makeBig(1)">
               <div class="card-body">
                 <h6 class="text-secondary mb-2">
                   Cantidad de Ingresos del Mes Actual
@@ -147,9 +147,9 @@
         </div>
 
         <!-- Promedio Mensual -->
-        <div class="row">
-          <div class="col mb-3">
-            <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100" style="background-color: #e8f5e9">
+         <div class="row">
+          <div class="col mb-2">
+            <div class="card border-0 shadow-lg mb-2 rounded-4 h-100 w-98" style="background-color: #e8f5e9">
               <div class="card-body position-relative">
                 <i class="bi bi-star position-absolute top-50 end-0 translate-middle-y me-4" style="font-size: 2.5rem; color: #2e7d32; opacity: 0.8"></i>
                 <div class="pe-5">
@@ -161,11 +161,9 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="row">
-          <div class="col mb-3">
-            <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100" style="background-color: #f8d7da">
+ 
+          <div class="col mb-2">
+            <div class="card border-0 shadow-lg mb-2 rounded-4 h-100 w-98" style="background-color: #f8d7da">
               <div class="card-body position-relative">
                 <i class="bi bi-star position-absolute top-50 end-0 translate-middle-y me-4" style="font-size: 2.5rem; color: #721c24; opacity: 0.8"></i>
                 <div class="pe-5">
@@ -178,39 +176,51 @@
             </div>
           </div>
         </div>
+        <!-- FIN Promedio Mensual -->
 
         <!-- Total Ingresos anuales -->
         <div class="row">
-          <div class="col mb-3">
-            <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100" style="background-color: #d8ffedde">
-              <div class="card-body position-relative">
-                <i class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4 pe-1" style="font-size: 2.5rem; color: #198754; opacity: 0.8"></i>
-                <div class="pe-5">
-                  <h6 class="text-secondary mb-2">Total de Ingresos Anuales</h6>
-                  <h3 class="mb-0 ps-2">
-                    {{ totalAccesCount }}
-                  </h3>
+          <div class="col mb-2">
+            <div class="card border-0 shadow-lg mb-2 rounded-4 w-100" style="background-color: #d8ffedde">
+              <div class="card-body py-1">
+                <div class="row">
+                  <div class="col-12">
+                    <h6 class="text-secondary mb-2">Total de Ingresos Anuales</h6>
+                  </div>
+                </div>
+                <div class="row align-items-center">
+                  <div class="col">
+                    <h3 class="mb-0 ps-2">{{ totalAccesCount }}</h3>
+                  </div>
+                  <div class="col-auto">
+                    <i class="bi bi-house-door" style="font-size: 2.5rem; color: #198754; opacity: 0.8"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="col mb-2">
+            <div class="card border-0 shadow-lg mb-2 rounded-4 w-100" style="background-color: #f8d7da">
+              <div class="card-body py-1">
+                <div class="row">
+                  <div class="col-12">
+                    <h6 class="text-secondary mb-2">Total de Egresos Anuales</h6>
+                  </div>
+                </div>
+                <div class="row align-items-center">
+                  <div class="col">
+                    <h3 class="mb-0 ps-2">{{ totalExitCount }}</h3>
+                  </div>
+                  <div class="col-auto">
+                    <i class="bi bi-house-door" style="font-size: 2.5rem; color: #721c24; opacity: 0.8"></i>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        <div class="row">
-          <div class="col mb-3">
-            <div class="card border-0 shadow-lg mb-3 rounded-4 h-100 w-100" style="background-color: #f8d7da">
-              <div class="card-body position-relative">
-                <i class="bi bi-house-door position-absolute top-50 end-0 translate-middle-y me-4 pe-1" style="font-size: 2.5rem; color: #721c24; opacity: 0.8"></i>
-                <div class="pe-5">
-                  <h6 class="text-secondary mb-2">Total de Egresos Anuales</h6>
-                  <h3 class="mb-0 ps-2">
-                    {{ totalExitCount }}
-                  </h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
 
       <!-- KPIs para el gráfico de pie cuando el grafico es grande -->
