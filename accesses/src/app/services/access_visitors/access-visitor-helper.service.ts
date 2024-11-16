@@ -20,23 +20,6 @@ export class AccessVisitorHelperService {
     // mapeo de User_AllowedInfoDto a NewUserAllowedDto:
     mapUser_AllowedInfoDtoToNewUserAllowedDto(visitorInfoDto: AccessUserAllowedInfoDto, plate: string): AccessNewUserAllowedDto {
 
-      // //NewVehicleDto vacio
-      // const emptyVehicleTypeDto: VehicleTypeDto = { description : "Car" };
-      // const emptyVehicleDto: AccessNewVehicleDto = { plate: "", vehicle_Type: emptyVehicleTypeDto, insurance: ""}
-
-      // let visitorVehicle: AccessNewVehicleDto | undefined ;
-
-      // //MOMENTANEO (en el futuro, el guardia debe poder seleccionar el vehiculo con el q entra el Visitor)
-      // //se verifica si el Visitor tiene un vehiculo
-      // if(visitorInfoDto.vehicles?.length > 0){
-      //   //si lo tiene se asigna
-      //   visitorVehicle = visitorInfoDto.vehicles.at(0);
-      // } else {
-      //   //si no se le asigna uno vacio
-      //   visitorVehicle = emptyVehicleDto;
-      // }
-      // //MOMENTANEO 
-
       //mapeo de los datos
       let newUserAllowedDto: AccessNewUserAllowedDto = {
         document : visitorInfoDto.document,

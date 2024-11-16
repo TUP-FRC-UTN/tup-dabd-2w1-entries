@@ -26,7 +26,7 @@ export class AccessOwnerRenterserviceService {
   openModal(visitorDocument: string) {
     console.log(visitorDocument)
     const cleanedDocument = visitorDocument
-    .replace(/^[DP]-/, "")  // Elimina "D-" o "P-" al principio
+    .replace(/^[CDP]-/, "")  // Elimina "C-" o "D-" o "P-" al principio
     .replace(/-/g, "")       // Elimina todos los guiones
     .trim(); 
 
@@ -39,7 +39,7 @@ console.log(cleanedDocument);
     console.log('Tipo de movimiento:', movement);
     console.log('plaquita',plate)
     const cleanedDocument = visitorDocument
-    .replace(/^[DP]-/, "")  // Elimina "D-" o "P-" al principio
+    .replace(/^[CDP]-/, "")  // Elimina "C-" o "D-" o "P-" al principio
     .replace(/-/g, "")       // Elimina todos los guiones
     .trim(); 
 
