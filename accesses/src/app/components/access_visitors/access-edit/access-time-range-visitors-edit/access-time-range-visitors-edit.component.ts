@@ -15,7 +15,7 @@ import { VisitorsService } from '../../../../services/access_visitors/access-vis
 @Component({
   selector: 'app-access-time-range-visitors-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule,DatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './access-time-range-visitors-edit.component.html',
   styleUrl: './access-time-range-visitors-edit.component.css'
 })

@@ -339,10 +339,6 @@ export class AccessVisitorRegistryComponent
   //Estado del visitante
   visitorStatus: { [document: string]: string } = {}; // Estado de cada visitante
 
-/*   uploadQrImage() {
-    this.qrInput.nativeElement.click();
-  }
- */
 
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
@@ -470,9 +466,7 @@ loadUsersAllowedData(): Observable<boolean> {
                 ${userTypeIcon}
               </span> 
               </div>`;
-              //console.log('Generando ícono con documento:', visitor.document, userTypeIconWithClick);
               return [
-                // statusButton, //no se muestra mas el Estado (ej: "En espera")
                 `${visitor.last_name}, ${visitor.name}`,
                 userTypeIconWithClick,
                 `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
@@ -489,29 +483,12 @@ loadUsersAllowedData(): Observable<boolean> {
                     <option value="sin_vehiculo">Sin vehículo</option>
                 </select>
             </div>`,
-            //`<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
                 `<div class="text-center">
                 <button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
                   Ingreso
                 </button>
                 </div>
                 `,
-                // `<div class="d-flex justify-content-center">
-                //   <div class="dropdown">
-                //     <button class="btn btn-light border border-2" 
-                //             type="button" 
-                //             data-bs-toggle="dropdown" 
-                //             aria-expanded="false">
-                //       <i class="bi bi-three-dots-vertical"></i> <!-- Tres puntos verticales -->
-                //     </button>
-                //     <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-                //       <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-
-                //       <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-                //       <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-                //     </ul>
-                //   </div>
-                // </div>`,
                 actionButtons,
               ];
             });
@@ -552,35 +529,10 @@ loadUsersAllowedData(): Observable<boolean> {
            
             let selectedOwner =  this.filteredAllPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
 
-            // if(this.allEmployersChecked){
-            //   selectedOwner = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
-            // }
-            // if(this.allVisitorsChecked){
-            //   selectedOwner = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
-            // }
-            // if(this.allOwnersChecked){
-            //   let selectedOwnerr = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
-            //   let selectedOwnerWithNeighborId: AccessUserAllowedInfoDto = {
-            //     ...selectedOwnerr,
-            //     neighbor_id: 0, // Agregar el neighbor_id
-            //   };
-            //   selectedOwner = selectedOwnerWithNeighborId;
-            // }
-
             // Aquí se maneja la opción "Ver más"
             if (value === 'verMas') {
               this.MoreInfo(selectedOwner);
             } else {
-/*               // Manejar otras acciones (Ingreso/Egreso)
-              const textareaElement = document.getElementById(
-                'observations' + index
-              ) as HTMLTextAreaElement;
-
-              selectedOwner.observations = textareaElement?.value || '';
-
-              if (this.observations===''){
-                this.observations=textareaElement?.value ?? ''
-              } */
               selectedOwner.observations = '';
               
               const mockEvent = {
@@ -800,11 +752,7 @@ loadUsersAllowedData(): Observable<boolean> {
         });
         this.subscription.add(sub);
       }
-
     } 
-    // else {
-    //   this.visitorStatus[visitor.document] = 'En espera';
-    // }
 
     selectElement.value = '';
 }
@@ -868,8 +816,21 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
   selectedVisitor: AccessUserAllowedInfoDto | null = null; // Información del visitante seleccionado
 
   getDocumentType(visitor: AccessUserAllowedInfoDto): string {
-    return visitor.documentTypeDto?.description === 'PASSPORT'
-      ? 'Pasaporte' : 'DNI';
+    let response = '';
+
+    if(visitor.documentTypeDto?.description === 'PASSPORT'){
+      response = 'Pasaporte';
+    } 
+    else if(visitor.documentTypeDto?.description === 'DNI'){
+      response = 'DNI';
+
+    } else if(visitor.documentTypeDto?.description === 'CUIT'){
+      response = 'CUIT'
+    } else {
+      response = visitor.documentTypeDto?.description || '';
+    }
+
+    return response;
   }
 
   getVehicles(visitor: AccessUserAllowedInfoDto): AccessNewVehicleDto[] {
@@ -886,19 +847,19 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
   }
   
   ModalDocument(documentData:string){
-    console.log("me han llamado")
+    //console.log("me han llamado")
     
-    console.log("people",this.userAllowedGetAll)
+    //console.log("people",this.userAllowedGetAll)
     const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(documentData)
     )
-    console.log(user)
+    //console.log(user)
     this.selectedVisitor=user||null;
 
     const modalElement = document.getElementById('visitorInfoModal')!;
     const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
     modal.show();
     
-    console.log(this.selectedVisitor)
+    //console.log(this.selectedVisitor)
   }
 
   // Función para actualizar el estado del visitante
@@ -911,15 +872,6 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     } else if (action === 'egreso') {
       this.visitorStatus[visitor.document] = 'Egresado';
     }
-
-    // Cambia a "En espera" si no egresa después de un tiempo
-    //  setTimeout(
-    //    () => {
-    //      if (this.visitorStatus[visitor.document] === 'Ingresado') {
-    //        this.visitorStatus[visitor.document] = 'En espera';
-    //      }
-    //    } /* tiempo en ms */
-    //  );
   }
 
   // Datos de escaneo
