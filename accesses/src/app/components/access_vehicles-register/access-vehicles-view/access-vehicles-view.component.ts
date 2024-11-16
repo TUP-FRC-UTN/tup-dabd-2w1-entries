@@ -12,6 +12,7 @@ import { valHooks } from 'jquery';
 import { HttpErrorResponse } from '@angular/common/http';
 import { translateMessage, translations } from '../../../models/access-visitors/interface/access_api-response-tranasalted';
 import Swal from 'sweetalert2';
+import { AuthOwnerService } from '../../../services/TEMPORAL/auth-owner.service';
 declare var bootstrap: any;
 @Component({
   selector: 'app-access-vehicles-view',
@@ -23,7 +24,8 @@ declare var bootstrap: any;
 
 export class AccessVehiclesViewComponent implements OnDestroy,OnInit  {
   constructor(
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private authService: AuthOwnerService
   ) {}
 
   @ViewChild('confirmModal') confirmModal: any;
@@ -43,8 +45,15 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit  {
     this.formVehicle.get('documentType')?.valueChanges.subscribe(() => {
       this.formVehicle.get('document')?.updateValueAndValidity();
     });
+
+    const authSubscription = this.authService.getUser().subscribe({
+      next: (v) => {
+        this.userId = v.id;
+      }
+    });
+    this.suscription.add(authSubscription);
   }
-  private suscription=new Subscription();
+  private suscription = new Subscription();
   patentePlate = '^[A-Z]{1,3}\\d{3}[A-Z]{0,3}$';
   ngOnDestroy(): void {
     this.suscription.unsubscribe();
@@ -67,7 +76,7 @@ export class AccessVehiclesViewComponent implements OnDestroy,OnInit  {
   isUserFound: boolean = false;
   selectedVehicle: any;
   userAllowed:UserAllowedDto|null=null;
-  userId=1
+  private userId=0;
   private readonly httpUserAllowedVehicle=inject(Access_userDocumentService)
   private readonly httpVehicleService=inject(Access_vehicleService)
   private readonly visitorHttpService: AccessVisitorsRegisterServiceHttpClientService=inject(AccessVisitorsRegisterServiceHttpClientService)
