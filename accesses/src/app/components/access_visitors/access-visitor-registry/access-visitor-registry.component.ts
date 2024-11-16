@@ -29,7 +29,6 @@ import 'datatables.net';
 import 'datatables.net-bs5';
 //import { AlertDirective } from '../alert.directive';
 import { RouterModule } from '@angular/router';
-import { AccessAutosizeTextareaDirective } from '../../../directives/access-autosize-textarea.directive';
 import {
   NgxScannerQrcodeComponent,
   NgxScannerQrcodeModule,
@@ -50,6 +49,7 @@ import { AccessNewEmergencyDto } from '../../../models/access-emergencies/access
 import { AccessRegistryUpdateService } from '../../../services/access-registry-update/access-registry-update.service';
 declare var bootstrap: any;
 import { AccesesVisitorsTempComponent } from '../acceses-visitors-temp/acceses-visitors-temp.component';
+import { AuthGuardService } from '../../../services/TEMPORAL/auth-guard.service';
 @Component({
   selector: 'access-app-visitor-registry',
   standalone: true,
@@ -79,7 +79,8 @@ export class AccessVisitorRegistryComponent
   );
   private readonly registryUpdateService = inject(AccessRegistryUpdateService);
   private observations: string = '';
-  constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService) {}
+  private userId: number = 0;
+  constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService, private authService : AuthGuardService) {}
   selectedVehiclePlate: string ='';
   dataTable: any;
   plateVehicle:string='';
@@ -106,6 +107,11 @@ export class AccessVisitorRegistryComponent
         this.subscription.add(sub);          
         }
       });
+    const userAuthSubscription = this.authService.getUser().subscribe({
+      next: v => {
+        this.userId = v.id;
+      }
+    });
 
     //DATOS
     //lo siguiente carga a TODOS en la lista "comun" (donde estan todos los userAllowed)
@@ -136,7 +142,7 @@ export class AccessVisitorRegistryComponent
       }
     )
     this.subscription.add(ub)
-
+    this.subscription.add(userAuthSubscription);
     this.subscription.add(registryUpdated);
   }
 
@@ -1004,6 +1010,7 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
       end_date: new Date(),
       allowedDaysDtos: [],
     },
+    userId: this.userId
   };
   vehiclee: AccessVehicleOwner = {
     plate: '',
@@ -1047,7 +1054,8 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
             user_allowed_Type: visitor.userType,
             documentType: visitor.documentTypeDto,
             vehicle: vehicless,
-          }
+          },
+          userId: this.userId
         };
   
         console.log('Observaciones:', this.movement.observations);
@@ -1165,7 +1173,8 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           user_allowed_Type: visitor.userType,
           documentType: visitor.documentTypeDto,
           vehicle: vehicless,
-        }
+        },
+        userId: this.userId
       };
 
       console.log('Observaciones:', this.movement.observations);
@@ -1271,7 +1280,8 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
-          documentType: visitor.documentTypeDto.description
+          documentType: visitor.documentTypeDto.description,
+          userId: this.userId
         };
   
         // Preparar mensaje del modal
@@ -1374,7 +1384,8 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
-          documentType: visitor.documentTypeDto.description
+          documentType: visitor.documentTypeDto.description,
+          userId: this.userId
         };
   
         // Preparar mensaje del modal
@@ -1500,7 +1511,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
         // Configurar el botón de confirmación
         const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
         confirmButton.onclick = () => {
-          const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate).subscribe({
+          const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate, this.userId).subscribe({
             next: (response) => {
               console.log("respuesta: ", response);
               modal.hide();
@@ -1566,7 +1577,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
         // Configurar el botón de confirmación
         const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
         confirmButton.onclick = () => {
-          const sub = this.visitorService.RegisterExit(visitor, vehiclePlate).subscribe({
+          const sub = this.visitorService.RegisterExit(visitor, vehiclePlate, this.userId).subscribe({
             next: (response) => {
               console.log("respuesta: ", response);
               modal.hide();

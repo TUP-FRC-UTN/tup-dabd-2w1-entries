@@ -21,6 +21,7 @@ export interface AccessNewMovementsEntryDtoOwner {
   newUserAllowedDto: AccessNewUserAllowedDtoOwner; 
   authRangesDto: AccessNewAuthRangeDtoOwner; 
   vehiclesId?: number;
+  userId: number;
 }
 export interface AccessNewAuthRangeDtoOwner {
   neighbor_id: number;

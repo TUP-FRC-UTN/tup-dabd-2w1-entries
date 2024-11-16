@@ -106,7 +106,6 @@ export class DataTableConfigService {
           color: 'grey',
           title: 'Desconocido'
         };
-        console.log(data);
         const visitorDocument = row[5];
         return `
           <button style="background-color: ${typeConfig.color}; border: none;" 
