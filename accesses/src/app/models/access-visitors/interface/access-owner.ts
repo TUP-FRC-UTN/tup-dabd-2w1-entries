@@ -71,3 +71,9 @@ export interface AccessNewUserAllowedDtoOwner {
   message: string;
   data: T;
 }
+export interface MovementBodyEmployee{
+  movementType: string;
+  movementDatetime: string;
+  document: string;
+  typeUser: string;
+}

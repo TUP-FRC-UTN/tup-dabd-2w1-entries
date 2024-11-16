@@ -38,6 +38,7 @@ import {
   AccessNewMovementsEntryDtoOwner,
   AccessUserAllowedInfoDtoOwner,
   AccessVehicleOwner,
+  MovementBodyEmployee,
 } from '../../../models/access-visitors/interface/access-owner';
 import {
   AccessMovementEntryDto,
@@ -74,9 +75,7 @@ export class AccessVisitorRegistryComponent
 
   protected readonly helperService = inject(AccessVisitorHelperService);
   private readonly visitorService = inject(VisitorsService);
-  private readonly ownerService: AccessOwnerRenterserviceService = inject(
-    AccessOwnerRenterserviceService
-  );
+  private readonly ownerService: AccessOwnerRenterserviceService = inject(AccessOwnerRenterserviceService);
   private readonly registryUpdateService = inject(AccessRegistryUpdateService);
   private observations: string = '';
   constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService) {}
@@ -155,7 +154,11 @@ export class AccessVisitorRegistryComponent
   
     console.log(this.selectedVehiclePlate);
   }
+  
   onChangeMovement(doc:string,mov:string,plate:string){
+    
+    let employeeMovement:MovementBodyEmployee;
+
     console.log(mov)
     console.log(plate)
     plate=this.selectedVehiclePlate
@@ -190,6 +193,28 @@ export class AccessVisitorRegistryComponent
       this.prepareExitMovementEmp(this.selectedVisitor,plate).subscribe({
         next: (result) => {
           console.log('Resultado de prepareExitMovementEmp:', result);
+
+          if(result){
+
+            const now = new Date(); // Fecha actual
+            const movementDatetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+            
+            
+            employeeMovement = {
+              movementType: 'SALIDA',
+              movementDatetime: movementDatetime,
+              document: this.selectedVisitor!.document,
+              typeUser: 'EMPLEADO'
+            };
+
+            this.userService.registerExitEmployeers(employeeMovement).subscribe(data =>{
+              console.log(employeeMovement, 'PUT EMPLEADO DATA');
+
+              console.log(data,"respuesta api empleados");
+            })
+          }
+
+
         },
         error: (err) => {
           console.error('Error en prepareExitMovementEmp:', err);
@@ -197,9 +222,32 @@ export class AccessVisitorRegistryComponent
       });
     }
     else if((this.selectedVisitor?.userType.description==='Employeed' || this.selectedVisitor?.userType.description==='Supplier') && mov==='salida'){
+
       this.prepareEntryMovementEmp(this.selectedVisitor,plate).subscribe({
         next: (result) => {
           console.log('Resultado de prepareEntryMovementEmp:', result);
+          
+          if(result){
+
+            const now = new Date(); // Fecha actual
+            const movementDatetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+    
+            
+          employeeMovement = {
+            movementType: 'ENTRADA',
+            movementDatetime: movementDatetime,
+            document: this.selectedVisitor!.document,
+            typeUser: 'EMPLEADO'
+          };
+    
+            this.userService.registerEntryEmployeers(employeeMovement).subscribe(data =>{
+              console.log(employeeMovement, 'POST EMPLEADO DATA');
+
+              console.log(data,"respuesta api empleados");
+            })
+          }
+
+
         },
         error: (err) => {
           console.error('Error en prepareEntryMovementEmp:', err);
