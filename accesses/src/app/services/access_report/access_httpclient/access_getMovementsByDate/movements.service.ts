@@ -3,17 +3,19 @@ import { catchError, Observable, of } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Movement } from '../../../../models/access-report/Types';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { API_ENDPOINTS, environment } from '../../../../environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MovementsService {
 
-  private readonly API_URL = 'http://localhost:8090/movements_entryToNeighbor';
+  private readonly API_URL = API_ENDPOINTS.MOVEMENTS;
 
   constructor(private http: HttpClient) {}
 
   getMovementsByDateRange(startDate: Date, endDate: Date): Observable<{ data: Movement[] }> {
+
     const startDateTime = new Date(startDate);
     startDateTime.setHours(0, 0, 0, 0);
 
@@ -50,4 +52,5 @@ export class MovementsService {
       text: 'Ocurrió un error al intentar cargar los datos. Por favor, intente nuevamente.',
     });
   }
+
 }

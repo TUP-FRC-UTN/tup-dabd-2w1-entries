@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { User } from '../../../../models/access-report/User';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, Observable, of, from } from 'rxjs';
+import { API_ENDPOINTS } from '../../../../environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccessUserReportService {
-  private apiUrl = 'https://my-json-server.typicode.com/405786MoroBenjamin/users-responses/users';
+  private apiUrl = API_ENDPOINTS.USERS;
   private userCache: Map<number, User> = new Map();
   private cacheInitialized = false;
   private cacheInitialization: Promise<void> | null = null;

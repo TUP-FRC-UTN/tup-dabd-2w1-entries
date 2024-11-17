@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { AccessNewVehicleDto, AccessUserAllowedInfoDto } from '../../models/access-visitors/access-visitors-models';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../models/access-visitors/interface/access-owner';
+import { API_ENDPOINTS } from '../../environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,9 +11,8 @@ import { ApiResponse } from '../../models/access-visitors/interface/access-owner
 export class Access_vehicleService {
 
 constructor() { }
-private BASE_URL="http://localhost:8090";
-private POST_ADD_VEHICLES=`${this.BASE_URL}/addVehicleToUser`;
-private PATCH_LOGIC_DOWN=`${this.BASE_URL}/logicDown`
+private readonly POST_ADD_VEHICLES = API_ENDPOINTS.ADD_VEHICLE;
+private readonly PATCH_LOGIC_DOWN = API_ENDPOINTS.LOGIC_DOWN;
 private http=inject(HttpClient)
 
 addVehicle(vehicles:AccessNewVehicleDto[],dni:string,documentType:string):Observable<ApiResponse<AccessUserAllowedInfoDto>>{
