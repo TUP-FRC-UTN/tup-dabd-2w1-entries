@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@ng-select/ng-select": "^13.9.1",
     "jsqr": "^1.4.0",
     "ngx-scanner-qrcode": "^1.6.9",
     "sweetalert2": "^11.14.2"

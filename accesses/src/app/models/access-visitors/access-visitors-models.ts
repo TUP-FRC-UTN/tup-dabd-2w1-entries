@@ -37,6 +37,7 @@ export interface AccessVisitor {
   visitDate?: Date;
   neighborName?:string;
   neighborLastName?:string;
+  userType?:number;
 }
 export interface AccessVehicle {
   licensePlate: string; 
@@ -48,7 +49,11 @@ export interface AccessVisitorRecord {
   authRange: AccessAuthRange | null;
 }
 
-
+export interface AccessDay2 {
+  name: string;      
+  displayName: string; 
+  value: boolean;
+}
 export interface AccessUser{
   id:number;
   name:string;
@@ -63,6 +68,10 @@ export interface AccessUser{
   roles:string[];
 }
 
+export interface UserType{
+  id:number;
+  description:string;
+}
 
 // FIN cosas front de fede
 
@@ -146,6 +155,34 @@ export interface AccessUser{
       allowedDays: AccessAllowedDaysDto[]; //List<Allowed_DaysDto> 
     }
     //FIN Clase necesaria (para recibir la data): User_AllowedInfoDto
-
+    export interface AccessVisitorEdit {
+      firstName: string;
+      lastName: string;
+      document: string;
+      documentType:number;
+      email: string;
+      hasVehicle: boolean;
+      vehicle?: AccessVehicle; 
+      authRange: AccessAuthRange;
+    }
 
 // FIN CLASES del back necesarias para ciertos METODOS
+export interface accessTempRegist {
+  visitor: AccessVisitor3
+  guard_Id: number
+  neighbor_Id: number
+}
+
+export interface AccessVisitor3 {
+  firstName: string;
+  lastName: string;
+  document: string;
+  documentType:number;
+  vehicle?: AccessVehicle2 | null;
+  userType?: number;
+}
+export interface AccessVehicle2 {
+  plate: string; 
+  vehicle_Type: AccessVehicleType; 
+  insurance: string;
+}

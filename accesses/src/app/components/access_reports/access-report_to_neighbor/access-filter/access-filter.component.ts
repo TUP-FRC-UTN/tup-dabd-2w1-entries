@@ -17,7 +17,6 @@ export class AccessFilterComponent implements OnInit {
 
   selectedAnio: number | null = null;
   selectedMes: number | null = null;
-  formSubmitted: boolean = false; 
 
   ngOnInit() {
     this.initializeYears();
@@ -33,17 +32,16 @@ export class AccessFilterComponent implements OnInit {
     this.meses = Array.from({ length: 12 }, (_, i) => i + 1);
   }
 
-  onSubmit() {
-    this.formSubmitted = true; 
+  onValueChange() {
     if (this.selectedAnio && this.selectedMes) {
-      this.filterSubmitted.emit({ year: this.selectedAnio, month: this.selectedMes });
-      this.formSubmitted = false; 
-    } else {
-      console.log('Faltan valores de año o mes');
+      this.filterSubmitted.emit({ 
+        year: this.selectedAnio, 
+        month: this.selectedMes 
+      });
+      console.log('Valores actualizados', {
+        anio: this.selectedAnio,
+        mes: this.selectedMes
+      });
     }
-    console.log('Form submitted', {
-      anio: this.selectedAnio,
-      mes: this.selectedMes
-    });
   }
 }
