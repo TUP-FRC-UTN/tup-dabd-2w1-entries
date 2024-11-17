@@ -61,11 +61,11 @@ export class AccessUserServiceService {
   /* Para pegarle al proyecto de empleados por el tema de asistencias */
 
   registerEntryEmployeers(body: any): Observable<any> {
-    return this.http.post(`${this.apiEmployees}/attendances/post`, body);
+    return this.http.post(API_ENDPOINTS.REGISTER_ENTRY_EMPLOYEERS, body);
   }
 
   registerExitEmployeers(body: any): Observable<any> {
-    return this.http.put(`${this.apiEmployees}/attendances/putArrivalTime`, body);
+    return this.http.put(API_ENDPOINTS.REGISTER_EXIT_EMPLOYEERS, body);
   }
 
  loadSuppEmpData(): void {
