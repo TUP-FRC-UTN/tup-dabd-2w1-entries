@@ -24,7 +24,14 @@ export const environment = {
         movementsEntry: '/movements_entry/register',
         movementsExit: '/movements_exit/register',
         emergencyEntry: '/emergency/register_entry',
-        emergencyExit: '/emergency/register_exit'
+        emergencyExit: '/emergency/register_exit',
+        ownerRenterEntry: '/movements_entry/register',
+        ownerRenterList: '/user_Allowed/ownersAndTenants/',
+        ownerExit: '/movements_exit/registerOwnerExit',
+        registerEmpSuppEntry: '/movements_entry/registerEmpSupp',
+        registerEmpSuppExit: '/movements_exit/registerEmpSupp',
+        getSuppliesAndEmployers: '/GetSuppliesAndEmployeers',
+        getAuthRangeByDoc: '/GetAuthRangeByDoc'
     }
 };
 
@@ -51,5 +58,12 @@ export const API_ENDPOINTS = {
     MOVEMENTS_ENTRY: `${environment.movementsApi}${environment.endpoints.movementsEntry}`,
     MOVEMENTS_EXIT: `${environment.movementsApi}${environment.endpoints.movementsExit}`,
     EMERGENCY_ENTRY: `${environment.movementsApi}${environment.endpoints.emergencyEntry}`,
-    EMERGENCY_EXIT: `${environment.movementsApi}${environment.endpoints.emergencyExit}`
+    EMERGENCY_EXIT: `${environment.movementsApi}${environment.endpoints.emergencyExit}`,
+    OWNER_RENTER_ENTRY: `${environment.movementsApi}${environment.endpoints.ownerRenterEntry}`,
+    OWNER_RENTER_LIST: `${environment.movementsApi}${environment.endpoints.ownerRenterList}`,
+    OWNER_EXIT: `${environment.movementsApi}${environment.endpoints.ownerExit}`,
+    REGISTER_EMP_SUPP_ENTRY: `${environment.movementsApi}${environment.endpoints.registerEmpSuppEntry}`,
+    REGISTER_EMP_SUPP_EXIT: `${environment.movementsApi}${environment.endpoints.registerEmpSuppExit}`,
+    GET_SUPPLIES_AND_EMPLOYERS: `${environment.movementsApi}${environment.endpoints.getSuppliesAndEmployers}`,
+    GET_AUTH_RANGE_BY_DOC: `${environment.movementsApi}${environment.endpoints.getAuthRangeByDoc}`
 };
