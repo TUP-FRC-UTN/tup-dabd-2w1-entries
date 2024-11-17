@@ -76,16 +76,19 @@ export class AccessVisitorHelperService {
     // FIN mapeo de AuthRangeInfoDto a NewAuthRangeDto
 
     // creacion de NewMovements_EntryDto 
-    createNewMovements_EntryDto(visitorInfo :AccessUserAllowedInfoDto, 
+    createNewMovements_EntryDto(
+      visitorInfo :AccessUserAllowedInfoDto, 
       newUserAllowedDto: AccessNewUserAllowedDto, 
-      newAuthRangedto: AccessNewAuthRangeDto): AccessNewMovementsEntryDto{
+      newAuthRangedto: AccessNewAuthRangeDto,
+      userId: number): AccessNewMovementsEntryDto {
 
         let newMovements_EntryDto: AccessNewMovementsEntryDto = {
           movementDatetime: new Date, // LocalDateTime (EJ: "2024-10-11T04:58:43.536Z"
           observations: visitorInfo.observations || "",
           newUserAllowedDto: newUserAllowedDto, //interface declarada mas abajo
           authRangesDto: newAuthRangedto, //interface declarada mas abajo
-          vehiclesId: 0
+          vehiclesId: 0,
+          userId
         }
 
         return newMovements_EntryDto;

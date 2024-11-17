@@ -1,14 +1,13 @@
-
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators, ReactiveFormsModule, FormBuilder, FormsModule } from '@angular/forms';
+import { FormGroup, Validators, ReactiveFormsModule, FormBuilder, FormsModule } from '@angular/forms';
 import { AccessVisitorsRegisterServiceHttpClientService } from '../../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
-import { AccessVisitorsRegisterServiceService } from '../../../services/access_visitors/access-visitors-register/access-visitors-register-service/access-visitors-register-service.service';
 import { Subject, takeUntil } from 'rxjs';
-import { accessTempRegist, AccessUser, AccessVisitor3, AccessVisitorRecord, UserType } from '../../../models/access-visitors/access-visitors-models';
+import { accessTempRegist, AccessUser, AccessVisitor3, UserType } from '../../../models/access-visitors/access-visitors-models';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AccessUserReportService } from '../../../services/access_report/access_httpclient/access_usersApi/access-user-report.service';
 import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
+import { AuthGuardService } from '../../../services/TEMPORAL/auth-guard.service';
 declare var bootstrap: any; 
 
 @Component({
@@ -52,6 +51,7 @@ export class AccesesVisitorsTempComponent implements OnInit {
     private fb: FormBuilder,
     private userService: AccessUserReportService,
     private visitorHttpService: AccessVisitorsRegisterServiceHttpClientService,
+    private authService: AuthGuardService
 ) { 
     // Inicializa las opciones de vehículos con su traducción
     this.vehicleOptions = this.vehicleTypes.map(type => ({
@@ -80,27 +80,16 @@ ngOnInit(): void {
       this.resetForm()
     });
     this.loadSelectOptions();
-    this.visitorHttpService.getUsers().subscribe({
-      next: (users) => {
-        this.userId = this.handleUsers(users);
+    this.authService.getUser().pipe(takeUntil(this.unsubscribe$)).subscribe({
+      next: (user) => {
+        this.userId = user.id;
       },
       error: (error) => {
-        console.error('Error loading users:', error);
-      },
-  });
-}
-handleUsers(users: AccessUser[]): number {
-  console.log(users);
-  for (const user of users) {
-    for (const role of user.roles) {
-      if (role === "Seguridad") {
-        return user.id; 
+        console.error('Error loading user:', error);
       }
-    }
-  }
-
-  return 0; 
+    });
 }
+
 resetForm() {
   this.visitorForm.reset();
 
@@ -253,9 +242,5 @@ sendVisitor(): void {
           console.error('Error sending visitor record', error);
       }
   });
-  
   }
-    
-  
-  
 }
