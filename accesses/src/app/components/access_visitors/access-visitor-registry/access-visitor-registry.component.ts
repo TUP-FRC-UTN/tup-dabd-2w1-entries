@@ -29,7 +29,6 @@ import 'datatables.net';
 import 'datatables.net-bs5';
 //import { AlertDirective } from '../alert.directive';
 import { RouterModule } from '@angular/router';
-import { AccessAutosizeTextareaDirective } from '../../../directives/access-autosize-textarea.directive';
 import {
   NgxScannerQrcodeComponent,
   NgxScannerQrcodeModule,
@@ -38,6 +37,7 @@ import {
   AccessNewMovementsEntryDtoOwner,
   AccessUserAllowedInfoDtoOwner,
   AccessVehicleOwner,
+  MovementBodyEmployee,
 } from '../../../models/access-visitors/interface/access-owner';
 import {
   AccessMovementEntryDto,
@@ -50,6 +50,7 @@ import { AccessNewEmergencyDto } from '../../../models/access-emergencies/access
 import { AccessRegistryUpdateService } from '../../../services/access-registry-update/access-registry-update.service';
 declare var bootstrap: any;
 import { AccesesVisitorsTempComponent } from '../acceses-visitors-temp/acceses-visitors-temp.component';
+import { AuthGuardService } from '../../../services/TEMPORAL/auth-guard.service';
 @Component({
   selector: 'access-app-visitor-registry',
   standalone: true,
@@ -74,12 +75,11 @@ export class AccessVisitorRegistryComponent
 
   protected readonly helperService = inject(AccessVisitorHelperService);
   private readonly visitorService = inject(VisitorsService);
-  private readonly ownerService: AccessOwnerRenterserviceService = inject(
-    AccessOwnerRenterserviceService
-  );
+  private readonly ownerService: AccessOwnerRenterserviceService = inject(AccessOwnerRenterserviceService);
   private readonly registryUpdateService = inject(AccessRegistryUpdateService);
   private observations: string = '';
-  constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService) {}
+  private userId: number = 0;
+  constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService, private authService : AuthGuardService) {}
   selectedVehiclePlate: string ='';
   dataTable: any;
   plateVehicle:string='';
@@ -106,6 +106,11 @@ export class AccessVisitorRegistryComponent
         this.subscription.add(sub);          
         }
       });
+    const userAuthSubscription = this.authService.getUser().subscribe({
+      next: v => {
+        this.userId = v.id;
+      }
+    });
 
     //DATOS
     //lo siguiente carga a TODOS en la lista "comun" (donde estan todos los userAllowed)
@@ -136,7 +141,7 @@ export class AccessVisitorRegistryComponent
       }
     )
     this.subscription.add(ub)
-
+    this.subscription.add(userAuthSubscription);
     this.subscription.add(registryUpdated);
   }
 
@@ -155,7 +160,11 @@ export class AccessVisitorRegistryComponent
   
     console.log(this.selectedVehiclePlate);
   }
+  
   onChangeMovement(doc:string,mov:string,plate:string){
+    
+    let employeeMovement:MovementBodyEmployee;
+
     console.log(mov)
     console.log(plate)
     plate=this.selectedVehiclePlate
@@ -190,6 +199,28 @@ export class AccessVisitorRegistryComponent
       this.prepareExitMovementEmp(this.selectedVisitor,plate).subscribe({
         next: (result) => {
           console.log('Resultado de prepareExitMovementEmp:', result);
+
+          if(result){
+
+            const now = new Date(); // Fecha actual
+            const movementDatetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+            
+            
+            employeeMovement = {
+              movementType: 'SALIDA',
+              movementDatetime: movementDatetime,
+              document: this.selectedVisitor!.document,
+              typeUser: 'EMPLEADO'
+            };
+
+            this.userService.registerExitEmployeers(employeeMovement).subscribe(data =>{
+              console.log(employeeMovement, 'PUT EMPLEADO DATA');
+
+              console.log(data,"respuesta api empleados");
+            })
+          }
+
+
         },
         error: (err) => {
           console.error('Error en prepareExitMovementEmp:', err);
@@ -197,9 +228,32 @@ export class AccessVisitorRegistryComponent
       });
     }
     else if((this.selectedVisitor?.userType.description==='Employeed' || this.selectedVisitor?.userType.description==='Supplier') && mov==='salida'){
+
       this.prepareEntryMovementEmp(this.selectedVisitor,plate).subscribe({
         next: (result) => {
           console.log('Resultado de prepareEntryMovementEmp:', result);
+          
+          if(result){
+
+            const now = new Date(); // Fecha actual
+            const movementDatetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+    
+            
+          employeeMovement = {
+            movementType: 'ENTRADA',
+            movementDatetime: movementDatetime,
+            document: this.selectedVisitor!.document,
+            typeUser: 'EMPLEADO'
+          };
+    
+            this.userService.registerEntryEmployeers(employeeMovement).subscribe(data =>{
+              console.log(employeeMovement, 'POST EMPLEADO DATA');
+
+              console.log(data,"respuesta api empleados");
+            })
+          }
+
+
         },
         error: (err) => {
           console.error('Error en prepareEntryMovementEmp:', err);
@@ -1004,6 +1058,7 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
       end_date: new Date(),
       allowedDaysDtos: [],
     },
+    userId: this.userId
   };
   vehiclee: AccessVehicleOwner = {
     plate: '',
@@ -1047,7 +1102,8 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
             user_allowed_Type: visitor.userType,
             documentType: visitor.documentTypeDto,
             vehicle: vehicless,
-          }
+          },
+          userId: this.userId
         };
   
         console.log('Observaciones:', this.movement.observations);
@@ -1165,7 +1221,8 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           user_allowed_Type: visitor.userType,
           documentType: visitor.documentTypeDto,
           vehicle: vehicless,
-        }
+        },
+        userId: this.userId
       };
 
       console.log('Observaciones:', this.movement.observations);
@@ -1271,7 +1328,8 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
-          documentType: visitor.documentTypeDto.description
+          documentType: visitor.documentTypeDto.description,
+          userId: this.userId
         };
   
         // Preparar mensaje del modal
@@ -1374,7 +1432,8 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
-          documentType: visitor.documentTypeDto.description
+          documentType: visitor.documentTypeDto.description,
+          userId: this.userId
         };
   
         // Preparar mensaje del modal
@@ -1500,7 +1559,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
         // Configurar el botón de confirmación
         const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
         confirmButton.onclick = () => {
-          const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate).subscribe({
+          const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate, this.userId).subscribe({
             next: (response) => {
               console.log("respuesta: ", response);
               modal.hide();
@@ -1566,7 +1625,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
         // Configurar el botón de confirmación
         const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
         confirmButton.onclick = () => {
-          const sub = this.visitorService.RegisterExit(visitor, vehiclePlate).subscribe({
+          const sub = this.visitorService.RegisterExit(visitor, vehiclePlate, this.userId).subscribe({
             next: (response) => {
               console.log("respuesta: ", response);
               modal.hide();

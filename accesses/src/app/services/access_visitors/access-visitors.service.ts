@@ -49,17 +49,17 @@ export class VisitorsService {
    return this.http.post<any>(API_ENDPOINTS.MOVEMENTS_EXIT, movement, { headers });
  }
 
- //METODOS (para registrar Ingresos y Egresos)
- RegisterExit(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
-   return new Observable<boolean>((observer) => {
+  //METODOS (para registrar Ingresos y Egresos)
+  RegisterExit(visitor: AccessUserAllowedInfoDto, vehiclePlate: string, userId: number): Observable<boolean> {
+    return new Observable<boolean>((observer) => {
 
-         // proceso de registro
-         if (visitor.observations == undefined) {
-           visitor.observations = "";
-         }
-         const newUserAllowedDto = this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor, vehiclePlate);
-         const newAuthRangeDto = this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
-         const newMovement_ExitDto = this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+          // proceso de registro
+          if (visitor.observations == undefined) {
+            visitor.observations = "";
+          }
+          const newUserAllowedDto = this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor, vehiclePlate);
+          const newAuthRangeDto = this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
+          const newMovement_ExitDto = this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto, userId);
 
 
          let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
@@ -137,51 +137,57 @@ export class VisitorsService {
              });
            }
 
-         } else {
-             //Egreso en rangos NO autorizados (fecha y hora)
-             this.postVisitorExit(newMovement_ExitDto).subscribe({
-               next: (response) => {
-                 console.log("RegisterExit response: ", response);
-                 if(response.status !== 409){
-                   this.helperService.dateLateExitRegistered(visitor);
-                   //return true;
-                   observer.next(true);
-                   observer.complete();
-                 } else {
-                   this.helperService.exitNotAllowed();
-                   //return false;
-                   observer.next(false);
-                   observer.complete();
-                 }
-                 
-               },
-               error: (error) => {
-                 console.log("RegisterExit error: ", error);
-                 if(error.status != 409){
-                   this.helperService.registerExitError();
-                   //return false;
-                   observer.next(false);
-                   observer.complete();
-                   
-                 } else {
-                   this.helperService.exitNotAllowed();
-                   //return false;
-                   observer.next(false);
-                   observer.complete();
-                 }
-               }
-             });
-         }
-   })
-   .pipe(
-     tap(() => {
-       this.registryUpdate.updateTable(true);
-     })
-   );
- }
+          } else {
+              //Egreso en rangos NO autorizados (fecha y hora)
+              this.postVisitorExit(newMovement_ExitDto).subscribe({
+                next: (response) => {
+                  console.log("RegisterExit response: ", response);
+                  if(response.status !== 409){
+                    this.helperService.dateLateExitRegistered(visitor);
+                    //return true;
+                    observer.next(true);
+                    observer.complete();
+                  } else {
+                    this.helperService.exitNotAllowed();
+                    //return false;
+                    observer.next(false);
+                    observer.complete();
+                  }
+                  
+                },
+                error: (error) => {
+                  console.log("RegisterExit error: ", error);
+                  if(error.status != 409){
+                    this.helperService.registerExitError();
+                    //return false;
+                    observer.next(false);
+                    observer.complete();
+                    
+                  } else {
+                    this.helperService.exitNotAllowed();
+                    //return false;
+                    observer.next(false);
+                    observer.complete();
+                  }
+                }
+              });
+          }
+    })
+    .pipe(
+      tap(() => {
+        this.registryUpdate.updateTable(true);
+      })
+    );
+  }
+  
 
- RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
-   return new Observable<boolean>((observer) => {
+
+
+
+
+  
+RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string, userId: number): Observable<boolean> {
+  return new Observable<boolean>((observer) => {
 
            // proceso de registro
            //verifica observations
@@ -202,9 +208,9 @@ export class VisitorsService {
                const newAuthRangeDto: AccessNewAuthRangeDto = 
                  this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
 
-               //se crea el objeto (q se va a pasar por el body en el post)
-               const newMovements_EntryDto: AccessNewMovementsEntryDto = 
-                 this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+              //se crea el objeto (q se va a pasar por el body en el post)
+              const newMovements_EntryDto: AccessNewMovementsEntryDto = 
+                this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto, userId);
 
                //post en la URL
                this.postVisitorEntry(newMovements_EntryDto).subscribe({

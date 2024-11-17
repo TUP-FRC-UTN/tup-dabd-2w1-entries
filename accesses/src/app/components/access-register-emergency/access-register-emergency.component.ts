@@ -6,10 +6,9 @@ import { AccessNewEmergencyDto, AccessNewEmergencyPerson } from '../../models/ac
 import { Subject, Subscription } from 'rxjs';
 import { AccessEmergencyPersonDto } from '../../models/access-emergencies/access-emergency-person-dto';
 import Swal from 'sweetalert2';
-import { AccessUser } from '../../models/access-visitors/access-visitors-models';
-import { AccessVisitorsRegisterServiceHttpClientService } from '../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AccessUserReportService } from '../../services/access_report/access_httpclient/access_usersApi/access-user-report.service';
+import { AuthGuardService } from '../../services/TEMPORAL/auth-guard.service';
 
 @Component({
   selector: 'access-app-register-emergency',
@@ -20,8 +19,8 @@ import { AccessUserReportService } from '../../services/access_report/access_htt
 })
 export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, AfterViewChecked {
   private readonly emergenciesService: AccessEmergenciesService = inject(AccessEmergenciesService);
-  private readonly visitorService: AccessVisitorsRegisterServiceHttpClientService = inject(AccessVisitorsRegisterServiceHttpClientService);
   private readonly userService: AccessUserReportService = inject(AccessUserReportService);
+  private readonly authService: AuthGuardService = inject(AuthGuardService);
 
   private readonly subscription = new Subscription();
   private readonly personUpdated = new Subject<void>();
@@ -48,16 +47,16 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
       options => this.ownersOptions = options
     );
 
-    let usersSubscription = this.visitorService.getUsers().subscribe({
-        next: (users) => {
-          this.userId = this.handleUsers(users);
+    let userAuthSubscription = this.authService.getUser().subscribe({
+        next: (user) => {
+          this.userId = user.id;
         },
         error: (error) => {
           console.error('Error loading users:', error);
         },
     });
 
-    this.subscription.add(usersSubscription);
+    this.subscription.add(userAuthSubscription);
     this.subscription.add(this.personUpdated);
     this.subscription.add(ownersSubscription);
     const modal = document.getElementById('emergencyModal');
@@ -66,18 +65,6 @@ export class AccessRegisterEmergencyComponent implements OnInit, OnDestroy, Afte
     });
   }
 
-  handleUsers(users: AccessUser[]): number {
-    console.log(users);
-    for (const user of users) {
-      for (const role of user.roles) {
-        if (role === "Seguridad") {
-          return user.id; 
-        }
-      }
-    }
-
-    return 0; 
-  }
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }

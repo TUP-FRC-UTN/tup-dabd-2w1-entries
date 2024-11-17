@@ -32,6 +32,7 @@ export interface AccessMovementEntryDto {
   vehiclesId?: string;
   document: string;
   documentType: string;
+  userId: number;
 }
 
 export interface AccessMovementExitDto {
@@ -40,4 +41,5 @@ export interface AccessMovementExitDto {
   vehiclesId?: string;
   document: string;
   documentType: string;
+  userId: number;
 }

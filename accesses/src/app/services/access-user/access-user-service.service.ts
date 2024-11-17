@@ -58,6 +58,16 @@ export class AccessUserServiceService {
    );
  }
 
+  /* Para pegarle al proyecto de empleados por el tema de asistencias */
+
+  registerEntryEmployeers(body: any): Observable<any> {
+    return this.http.post(`${this.apiEmployees}/attendances/post`, body);
+  }
+
+  registerExitEmployeers(body: any): Observable<any> {
+    return this.http.put(`${this.apiEmployees}/attendances/putArrivalTime`, body);
+  }
+
  loadSuppEmpData(): void {
    this.getSuppEmpData().subscribe({
      next: (data: AccessUserAllowedInfoDto[]) => {
