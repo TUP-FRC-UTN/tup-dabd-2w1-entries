@@ -59,7 +59,7 @@ export class VisitorsService {
 
 
   //METODOS (para registrar Ingresos y Egresos)
-  RegisterExit(visitor: AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
+  RegisterExit(visitor: AccessUserAllowedInfoDto, vehiclePlate: string, userId: number): Observable<boolean> {
     return new Observable<boolean>((observer) => {
 
           // proceso de registro
@@ -68,7 +68,7 @@ export class VisitorsService {
           }
           const newUserAllowedDto = this.helperService.mapUser_AllowedInfoDtoToNewUserAllowedDto(visitor, vehiclePlate);
           const newAuthRangeDto = this.helperService.mapAuthRangeInfoDtoToNewAuthRangeDto(visitor.authRanges, visitor.neighbor_id);
-          const newMovement_ExitDto = this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+          const newMovement_ExitDto = this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto, userId);
 
 
           let indexAuthRange = this.helperService.todayIsInDateRange(visitor.authRanges);
@@ -195,7 +195,7 @@ export class VisitorsService {
 
 
   
-RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observable<boolean> {
+RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string, userId: number): Observable<boolean> {
   return new Observable<boolean>((observer) => {
 
           // proceso de registro
@@ -219,7 +219,7 @@ RegisterAccess(visitor :AccessUserAllowedInfoDto, vehiclePlate: string): Observa
 
               //se crea el objeto (q se va a pasar por el body en el post)
               const newMovements_EntryDto: AccessNewMovementsEntryDto = 
-                this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto);
+                this.helperService.createNewMovements_EntryDto(visitor, newUserAllowedDto, newAuthRangeDto, userId);
 
               //post en la URL
               this.postVisitorEntry(newMovements_EntryDto).subscribe({

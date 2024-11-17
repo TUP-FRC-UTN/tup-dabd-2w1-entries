@@ -29,7 +29,6 @@ import 'datatables.net';
 import 'datatables.net-bs5';
 //import { AlertDirective } from '../alert.directive';
 import { RouterModule } from '@angular/router';
-import { AccessAutosizeTextareaDirective } from '../../../directives/access-autosize-textarea.directive';
 import {
   NgxScannerQrcodeComponent,
   NgxScannerQrcodeModule,
@@ -38,6 +37,7 @@ import {
   AccessNewMovementsEntryDtoOwner,
   AccessUserAllowedInfoDtoOwner,
   AccessVehicleOwner,
+  MovementBodyEmployee,
 } from '../../../models/access-visitors/interface/access-owner';
 import {
   AccessMovementEntryDto,
@@ -50,6 +50,7 @@ import { AccessNewEmergencyDto } from '../../../models/access-emergencies/access
 import { AccessRegistryUpdateService } from '../../../services/access-registry-update/access-registry-update.service';
 declare var bootstrap: any;
 import { AccesesVisitorsTempComponent } from '../acceses-visitors-temp/acceses-visitors-temp.component';
+import { AuthGuardService } from '../../../services/TEMPORAL/auth-guard.service';
 @Component({
   selector: 'access-app-visitor-registry',
   standalone: true,
@@ -74,12 +75,11 @@ export class AccessVisitorRegistryComponent
 
   protected readonly helperService = inject(AccessVisitorHelperService);
   private readonly visitorService = inject(VisitorsService);
-  private readonly ownerService: AccessOwnerRenterserviceService = inject(
-    AccessOwnerRenterserviceService
-  );
+  private readonly ownerService: AccessOwnerRenterserviceService = inject(AccessOwnerRenterserviceService);
   private readonly registryUpdateService = inject(AccessRegistryUpdateService);
   private observations: string = '';
-  constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService) {}
+  private userId: number = 0;
+  constructor(private userService: AccessUserServiceService, private emergencyService : AccessEmergenciesService, private authService : AuthGuardService) {}
   selectedVehiclePlate: string ='';
   dataTable: any;
   plateVehicle:string='';
@@ -106,6 +106,11 @@ export class AccessVisitorRegistryComponent
         this.subscription.add(sub);          
         }
       });
+    const userAuthSubscription = this.authService.getUser().subscribe({
+      next: v => {
+        this.userId = v.id;
+      }
+    });
 
     //DATOS
     //lo siguiente carga a TODOS en la lista "comun" (donde estan todos los userAllowed)
@@ -136,7 +141,7 @@ export class AccessVisitorRegistryComponent
       }
     )
     this.subscription.add(ub)
-
+    this.subscription.add(userAuthSubscription);
     this.subscription.add(registryUpdated);
   }
 
@@ -155,7 +160,11 @@ export class AccessVisitorRegistryComponent
   
     console.log(this.selectedVehiclePlate);
   }
+  
   onChangeMovement(doc:string,mov:string,plate:string){
+    
+    let employeeMovement:MovementBodyEmployee;
+
     console.log(mov)
     console.log(plate)
     plate=this.selectedVehiclePlate
@@ -190,6 +199,28 @@ export class AccessVisitorRegistryComponent
       this.prepareExitMovementEmp(this.selectedVisitor,plate).subscribe({
         next: (result) => {
           console.log('Resultado de prepareExitMovementEmp:', result);
+
+          if(result && this.selectedVisitor?.userType.description == 'Employeed'){
+
+            const now = new Date(); // Fecha actual
+            const movementDatetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+            
+            
+            employeeMovement = {
+              movementType: 'SALIDA',
+              movementDatetime: movementDatetime,
+              document: this.selectedVisitor!.document,
+              typeUser: 'EMPLEADO'
+            };
+
+            this.userService.registerExitEmployeers(employeeMovement).subscribe(data =>{
+              console.log(employeeMovement, 'PUT EMPLEADO DATA');
+
+              console.log(data,"respuesta api empleados");
+            })
+          }
+
+
         },
         error: (err) => {
           console.error('Error en prepareExitMovementEmp:', err);
@@ -197,9 +228,32 @@ export class AccessVisitorRegistryComponent
       });
     }
     else if((this.selectedVisitor?.userType.description==='Employeed' || this.selectedVisitor?.userType.description==='Supplier') && mov==='salida'){
+
       this.prepareEntryMovementEmp(this.selectedVisitor,plate).subscribe({
         next: (result) => {
           console.log('Resultado de prepareEntryMovementEmp:', result);
+          
+          if(result && this.selectedVisitor?.userType.description == 'Employeed'){
+
+            const now = new Date(); // Fecha actual
+            const movementDatetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+    
+            
+          employeeMovement = {
+            movementType: 'ENTRADA',
+            movementDatetime: movementDatetime,
+            document: this.selectedVisitor!.document,
+            typeUser: 'EMPLEADO'
+          };
+    
+            this.userService.registerEntryEmployeers(employeeMovement).subscribe(data =>{
+              console.log(employeeMovement, 'POST EMPLEADO DATA');
+
+              console.log(data,"respuesta api empleados");
+            })
+          }
+
+
         },
         error: (err) => {
           console.error('Error en prepareEntryMovementEmp:', err);
@@ -339,10 +393,6 @@ export class AccessVisitorRegistryComponent
   //Estado del visitante
   visitorStatus: { [document: string]: string } = {}; // Estado de cada visitante
 
-/*   uploadQrImage() {
-    this.qrInput.nativeElement.click();
-  }
- */
 
   initializeDataTable(): void {
     this.ngZone.runOutsideAngular(() => {
@@ -470,9 +520,7 @@ loadUsersAllowedData(): Observable<boolean> {
                 ${userTypeIcon}
               </span> 
               </div>`;
-              //console.log('Generando ícono con documento:', visitor.document, userTypeIconWithClick);
               return [
-                // statusButton, //no se muestra mas el Estado (ej: "En espera")
                 `${visitor.last_name}, ${visitor.name}`,
                 userTypeIconWithClick,
                 `<div class="text-start">${this.getDocumentType(visitor).substring(0,1) + " - " +visitor.document}</div>`,
@@ -489,29 +537,12 @@ loadUsersAllowedData(): Observable<boolean> {
                     <option value="sin_vehiculo">Sin vehículo</option>
                 </select>
             </div>`,
-            //`<textarea class="form-control" name="observations${index}" id="observations${index}"></textarea>`,
                 `<div class="text-center">
                 <button style="background-color: #2bad49; color: white;" class="btn select-action" data-value="ingreso" data-index="${index}">
                   Ingreso
                 </button>
                 </div>
                 `,
-                // `<div class="d-flex justify-content-center">
-                //   <div class="dropdown">
-                //     <button class="btn btn-light border border-2" 
-                //             type="button" 
-                //             data-bs-toggle="dropdown" 
-                //             aria-expanded="false">
-                //       <i class="bi bi-three-dots-vertical"></i> <!-- Tres puntos verticales -->
-                //     </button>
-                //     <ul class="dropdown-menu dropdown-menu-end" data-index="${index}">
-                //       <li><button class="dropdown-item select-action" data-value="verMas" data-index="${index}">Ver más</button></li> <!-- Opción Ver más -->
-
-                //       <li><button class="dropdown-item select-action" data-value="ingreso" data-index="${index}">Ingreso</button></li>
-                //       <li><button class="dropdown-item select-action" data-value="egreso" data-index="${index}">Egreso</button></li>
-                //     </ul>
-                //   </div>
-                // </div>`,
                 actionButtons,
               ];
             });
@@ -552,35 +583,10 @@ loadUsersAllowedData(): Observable<boolean> {
            
             let selectedOwner =  this.filteredAllPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
 
-            // if(this.allEmployersChecked){
-            //   selectedOwner = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
-            // }
-            // if(this.allVisitorsChecked){
-            //   selectedOwner = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
-            // }
-            // if(this.allOwnersChecked){
-            //   let selectedOwnerr = this.allPeopleAllowed[parseInt(index, 10)]; //antes era this.visitors
-            //   let selectedOwnerWithNeighborId: AccessUserAllowedInfoDto = {
-            //     ...selectedOwnerr,
-            //     neighbor_id: 0, // Agregar el neighbor_id
-            //   };
-            //   selectedOwner = selectedOwnerWithNeighborId;
-            // }
-
             // Aquí se maneja la opción "Ver más"
             if (value === 'verMas') {
               this.MoreInfo(selectedOwner);
             } else {
-/*               // Manejar otras acciones (Ingreso/Egreso)
-              const textareaElement = document.getElementById(
-                'observations' + index
-              ) as HTMLTextAreaElement;
-
-              selectedOwner.observations = textareaElement?.value || '';
-
-              if (this.observations===''){
-                this.observations=textareaElement?.value ?? ''
-              } */
               selectedOwner.observations = '';
               
               const mockEvent = {
@@ -800,11 +806,7 @@ loadUsersAllowedData(): Observable<boolean> {
         });
         this.subscription.add(sub);
       }
-
     } 
-    // else {
-    //   this.visitorStatus[visitor.document] = 'En espera';
-    // }
 
     selectElement.value = '';
 }
@@ -868,8 +870,21 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
   selectedVisitor: AccessUserAllowedInfoDto | null = null; // Información del visitante seleccionado
 
   getDocumentType(visitor: AccessUserAllowedInfoDto): string {
-    return visitor.documentTypeDto?.description === 'PASSPORT'
-      ? 'Pasaporte' : 'DNI';
+    let response = '';
+
+    if(visitor.documentTypeDto?.description === 'PASSPORT'){
+      response = 'Pasaporte';
+    } 
+    else if(visitor.documentTypeDto?.description === 'DNI'){
+      response = 'DNI';
+
+    } else if(visitor.documentTypeDto?.description === 'CUIT'){
+      response = 'CUIT'
+    } else {
+      response = visitor.documentTypeDto?.description || '';
+    }
+
+    return response;
   }
 
   getVehicles(visitor: AccessUserAllowedInfoDto): AccessNewVehicleDto[] {
@@ -886,19 +901,19 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
   }
   
   ModalDocument(documentData:string){
-    console.log("me han llamado")
+    //console.log("me han llamado")
     
-    console.log("people",this.userAllowedGetAll)
+    //console.log("people",this.userAllowedGetAll)
     const user=this.userAllowedGetAll.find(userallowed => String(userallowed.document) === String(documentData)
     )
-    console.log(user)
+    //console.log(user)
     this.selectedVisitor=user||null;
 
     const modalElement = document.getElementById('visitorInfoModal')!;
     const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
     modal.show();
     
-    console.log(this.selectedVisitor)
+    //console.log(this.selectedVisitor)
   }
 
   // Función para actualizar el estado del visitante
@@ -911,15 +926,6 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
     } else if (action === 'egreso') {
       this.visitorStatus[visitor.document] = 'Egresado';
     }
-
-    // Cambia a "En espera" si no egresa después de un tiempo
-    //  setTimeout(
-    //    () => {
-    //      if (this.visitorStatus[visitor.document] === 'Ingresado') {
-    //        this.visitorStatus[visitor.document] = 'En espera';
-    //      }
-    //    } /* tiempo en ms */
-    //  );
   }
 
   // Datos de escaneo
@@ -1052,6 +1058,7 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
       end_date: new Date(),
       allowedDaysDtos: [],
     },
+    userId: this.userId
   };
   vehiclee: AccessVehicleOwner = {
     plate: '',
@@ -1095,7 +1102,8 @@ loadUsersAllowedAfterRegistrationData(): Observable<boolean> {
             user_allowed_Type: visitor.userType,
             documentType: visitor.documentTypeDto,
             vehicle: vehicless,
-          }
+          },
+          userId: this.userId
         };
   
         console.log('Observaciones:', this.movement.observations);
@@ -1213,7 +1221,8 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           user_allowed_Type: visitor.userType,
           documentType: visitor.documentTypeDto,
           vehicle: vehicless,
-        }
+        },
+        userId: this.userId
       };
 
       console.log('Observaciones:', this.movement.observations);
@@ -1319,7 +1328,8 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
-          documentType: visitor.documentTypeDto.description
+          documentType: visitor.documentTypeDto.description,
+          userId: this.userId
         };
   
         // Preparar mensaje del modal
@@ -1422,7 +1432,8 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
           movementDatetime: new Date().toISOString(),
           vehiclesId: visitor.vehicles.find(x => x.plate === platee)?.plate,
           document: visitor.document,
-          documentType: visitor.documentTypeDto.description
+          documentType: visitor.documentTypeDto.description,
+          userId: this.userId
         };
   
         // Preparar mensaje del modal
@@ -1548,7 +1559,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
         // Configurar el botón de confirmación
         const confirmButton = document.getElementById('confirmIngresoEmpButton')!;
         confirmButton.onclick = () => {
-          const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate).subscribe({
+          const sub = this.visitorService.RegisterAccess(visitor, vehiclePlate, this.userId).subscribe({
             next: (response) => {
               console.log("respuesta: ", response);
               modal.hide();
@@ -1614,7 +1625,7 @@ private prepareExitMovement(visitor: AccessUserAllowedInfoDtoOwner, plate: strin
         // Configurar el botón de confirmación
         const confirmButton = document.getElementById('confirmEgresoEmpButton')!;
         confirmButton.onclick = () => {
-          const sub = this.visitorService.RegisterExit(visitor, vehiclePlate).subscribe({
+          const sub = this.visitorService.RegisterExit(visitor, vehiclePlate, this.userId).subscribe({
             next: (response) => {
               console.log("respuesta: ", response);
               modal.hide();

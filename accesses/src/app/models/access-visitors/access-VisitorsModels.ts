@@ -8,6 +8,7 @@
     newUserAllowedDto: AccessNewUserAllowedDto; //interface declarada mas abajo
     authRangesDto: AccessNewAuthRangeDto; //interface declarada mas abajo
     vehiclesId: number;
+    userId: number;
   }
 
     // todo lo necesario para NewAuthRangeDto

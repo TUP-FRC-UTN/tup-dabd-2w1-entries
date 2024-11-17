@@ -42,9 +42,9 @@ import { ColumnDef, LanguageConfig, SelectOption } from './Types';
           filterValue: 'neighbour',
           columnValue: 'vecino'
         },
-        Worker: {
+        Obrero: {
           icon: 'bi bi-tools text-dark',
-          color: '#FFDAB9',
+          color: '#FFB0B0',
           title: 'Obrero',
           filterValue: 'worker',
           columnValue: 'Obrero'
@@ -103,10 +103,25 @@ export const TIPOS_INGRESANTE: SelectOption[] = [
   { value: 'worker', label: 'Obrero' },
   { value: 'services', label: 'Emergencias' },
    { value: 'taxi', label: 'Taxi'},
-
   { value: 'cleaning', label: 'P. de Limpieza' },
   { value: 'gardener', label: 'Jardinero' }
 ];
+
+export const TIPOS_INGRESANTE_DASHBOARD: SelectOption[] = [
+
+
+  { value: 'delivery', label: 'Delivery' },
+  { value: 'worker', label: 'Obrero' },
+  { value: 'services', label: 'Emergencias' },
+  { value: 'taxi', label: 'Taxi'},
+  { value: 'neighbour', label: 'Vecino' },
+  { value: 'visitor', label: 'Visitante' },
+  { value: 'employee', label: 'Empleado' },
+  { value: 'suplier', label: 'Proveedor' },
+  { value: 'cleaning', label: 'P. de Limpieza' },
+  { value: 'gardener', label: 'Jardinero' }
+];
+
 
 /**
  * Opciones para el tipo de vehículo

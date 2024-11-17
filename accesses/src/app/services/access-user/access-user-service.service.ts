@@ -14,6 +14,9 @@ export class AccessUserServiceService {
   private apiUrlPostEntry = 'http://localhost:8090/movements_entry/registerEmpSupp';
   private apiUrlPostExit = 'http://localhost:8090/movements_exit/registerEmpSupp'
   private apiUrl = 'http://localhost:8090/GetSuppliesAndEmployeers';
+
+  private apiEmployees = 'http://localhost:8080';
+  
   private apiUrlGeneric = 'http://localhost:8090';
 
   constructor(private http: HttpClient, private  accesRegisterUpdate: AccessRegistryUpdateService) {
@@ -49,10 +52,22 @@ export class AccessUserServiceService {
     return this.http.get<AccessAuthRangeInfoDtoOwner[]>(url);
   }
 
+  /* Para pegarle al proyecto de empleados por el tema de asistencias */
+
+  registerEntryEmployeers(body: any): Observable<any> {
+    return this.http.post(`${this.apiEmployees}/attendances/post`, body);
+  }
+
+  registerExitEmployeers(body: any): Observable<any> {
+    return this.http.put(`${this.apiEmployees}/attendances/putArrivalTime`, body);
+  }
+
   loadSuppEmpData(): void {
     this.getSuppEmpData().subscribe({
       next: (data: AccessUserAllowedInfoDto[]) => {
         this.userList = data; // Asigna los datos una vez que se reciban
+        console.log(data, 'INFORMACION DE LOS EMPLEADOSSSSSSSSSSSSSSSSSSSSSS');
+        
       },
       error: (error) => {
         console.error('Error al cargar los datos:', error);

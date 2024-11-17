@@ -5,9 +5,9 @@ import { AccessAllowedDay, AccessDay, AccessAuthRange,AccessUser } from '../../.
 import { AccessVisitorsRegisterServiceService } from '../../../../services/access_visitors/access-visitors-register/access-visitors-register-service/access-visitors-register-service.service';
 import Swal from 'sweetalert2';
 import { Subject } from 'rxjs';
-import { AccessVisitorsRegisterServiceHttpClientService } from '../../../../services/access_visitors/access-visitors-register/access-visitors-register-service-http-client/access-visitors-register-service-http-client.service';
 import { takeUntil } from 'rxjs';
 import { EventEmitter } from '@angular/core';
+import { AuthOwnerService } from '../../../../services/TEMPORAL/auth-owner.service';
 @Component({
   selector: 'app-access-time-range-visitors-registration',
   standalone: true,
@@ -17,7 +17,8 @@ import { EventEmitter } from '@angular/core';
 })
 export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
   private unsubscribe$ = new Subject<void>();
-  users: AccessUser[] = [];
+  private userId = 0;
+
   @Output() selectedUser = new EventEmitter<AccessUser>();
   ngOnInit(): void {
     this.visitorService.getAllowedDays().subscribe(days => {
@@ -25,20 +26,17 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
       this.updateDaysSelected();
     });
     this.updateDateFieldsState();
-    this.loadUsers(); // This will handle emitting the selected user now
+    this.loadAuthUser(); // This will handle emitting the selected user now
   }
   
-  loadUsers(): void {
-    this.httpService.getUsers()
+  loadAuthUser() {
+    this.authService.getUser()
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe({
-        next: (users) => {
-          console.log('Users loaded:', users.length);
-          this.users = users;
-        
-          const selectedUserId = this.handleUsers();
+        next: (user) => {
+          const selectedUserId = user.id;
           if (selectedUserId) {
-            const selectedUser = this.users.find(user => user.id === selectedUserId);
+            const selectedUser = user;
             if (selectedUser) {
               this.selectedUser.emit(selectedUser);
               console.log(selectedUser); 
@@ -46,11 +44,10 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
           }
         },
         error: (error) => {
-          console.error('Error loading users:', error);
+          console.error('Error loading user:', error);
         },
       });
   }
-  
 
   days: AccessDay[] = [
     { name: 'Lun', value: false },
@@ -71,7 +68,7 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
   constructor(
     private visitorService: AccessVisitorsRegisterServiceService, 
     private fb: FormBuilder,
-    private httpService: AccessVisitorsRegisterServiceHttpClientService
+    private authService: AuthOwnerService
   ) {
     const today = new Date();
     // Ajustar al formato YYYY-MM-DD considerando la zona horaria local
@@ -223,17 +220,6 @@ get areDatesReadonly(): boolean {
 }
 disableDateInputs: boolean = false;
 
-  handleUsers(): number {
-    for (const user of this.users) {
-      for (const role of user.roles) {
-        if (role === "Familiar Mayor") {
-          return user.id; 
-        }
-      }
-    }
-    return 0; 
-  }
-
   agregarAuthRange(): void {
     console.log('Iniciando agregarAuthRange');
     console.log('Valores del formulario:', this.form.value);
@@ -267,7 +253,7 @@ disableDateInputs: boolean = false;
       initDate: startDate,
       endDate: endDate,
       allowedDays: this._allowedDays,
-      neighbourId:this.handleUsers(),
+      neighbourId: this.userId,
     };
 
     try {

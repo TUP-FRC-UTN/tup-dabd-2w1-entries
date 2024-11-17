@@ -21,6 +21,7 @@ export interface AccessNewMovementsEntryDtoOwner {
   newUserAllowedDto: AccessNewUserAllowedDtoOwner; 
   authRangesDto: AccessNewAuthRangeDtoOwner; 
   vehiclesId?: number;
+  userId: number;
 }
 export interface AccessNewAuthRangeDtoOwner {
   neighbor_id: number;
@@ -70,4 +71,10 @@ export interface AccessNewUserAllowedDtoOwner {
   success: boolean;
   message: string;
   data: T;
+}
+export interface MovementBodyEmployee{
+  movementType: string;
+  movementDatetime: string;
+  document: string;
+  typeUser: string;
 }
