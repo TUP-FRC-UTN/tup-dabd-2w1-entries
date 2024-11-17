@@ -31,7 +31,9 @@ export const environment = {
         registerEmpSuppEntry: '/movements_entry/registerEmpSupp',
         registerEmpSuppExit: '/movements_exit/registerEmpSupp',
         getSuppliesAndEmployers: '/GetSuppliesAndEmployeers',
-        getAuthRangeByDoc: '/GetAuthRangeByDoc'
+        getAuthRangeByDoc: '/GetAuthRangeByDoc',
+        registerEntryEmployeers: '/attendances/post',
+        registerExitEmployeers: '/attendances/putArrivalTime'
     }
 };
 
@@ -65,5 +67,7 @@ export const API_ENDPOINTS = {
     REGISTER_EMP_SUPP_ENTRY: `${environment.movementsApi}${environment.endpoints.registerEmpSuppEntry}`,
     REGISTER_EMP_SUPP_EXIT: `${environment.movementsApi}${environment.endpoints.registerEmpSuppExit}`,
     GET_SUPPLIES_AND_EMPLOYERS: `${environment.movementsApi}${environment.endpoints.getSuppliesAndEmployers}`,
-    GET_AUTH_RANGE_BY_DOC: `${environment.movementsApi}${environment.endpoints.getAuthRangeByDoc}`
+    GET_AUTH_RANGE_BY_DOC: `${environment.movementsApi}${environment.endpoints.getAuthRangeByDoc}`,
+    REGISTER_ENTRY_EMPLOYEERS: `${environment.movementsApi}${environment.endpoints.registerEntryEmployeers}`,
+    REGISTER_EXIT_EMPLOYEERS: `${environment.movementsApi}${environment.endpoints.registerExitEmployeers}`
 };
