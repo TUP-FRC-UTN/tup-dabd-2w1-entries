@@ -194,7 +194,7 @@ export class AccessVisitorRegistryComponent
         next: (result) => {
           console.log('Resultado de prepareExitMovementEmp:', result);
 
-          if(result){
+          if(result && this.selectedVisitor?.userType.description == 'Employeed'){
 
             const now = new Date(); // Fecha actual
             const movementDatetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
@@ -227,7 +227,7 @@ export class AccessVisitorRegistryComponent
         next: (result) => {
           console.log('Resultado de prepareEntryMovementEmp:', result);
           
-          if(result){
+          if(result && this.selectedVisitor?.userType.description == 'Employeed'){
 
             const now = new Date(); // Fecha actual
             const movementDatetime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
