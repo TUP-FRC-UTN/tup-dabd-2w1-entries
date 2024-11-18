@@ -9,6 +9,7 @@ import { AccessContainerVisitorsEditComponent } from './components/access_visito
 import { AccessVehiclesViewComponent } from './components/access_vehicles-register/access-vehicles-view/access-vehicles-view.component';
 import { DashboardComponent } from 'angular-google-charts';
 import { MetricsComponent } from './components/access_dashboards/metric-dashboard/metrics/metrics.component';
+import { AccessEditComponent } from './components/visitors/edit/access-edit.component';
 
 
 export const routes: Routes = [
@@ -20,6 +21,7 @@ export const routes: Routes = [
     { path: 'entry', component: AccessDailyFetchComponent },
     { path: 'edit', component: AccessContainerVisitorsEditComponent },
     { path: 'visitor/register', component: AccessContainerVisitorsRegistrationComponent },
-    {path: 'vehicleAdd', component: AccessVehiclesViewComponent}
+    {path: 'vehicleAdd', component: AccessVehiclesViewComponent},
+    {path: 'edit_viejito', component: AccessEditComponent}
 
 ];
