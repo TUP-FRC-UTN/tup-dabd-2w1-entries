@@ -39,7 +39,8 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit {
             const selectedUser = user;
             if (selectedUser) {
               this.selectedUser.emit(selectedUser);
-              console.log(selectedUser); 
+              this.userId=selectedUser.id;
+              console.log(this.userId);
             }
           }
         },
@@ -255,7 +256,7 @@ disableDateInputs: boolean = false;
       allowedDays: this._allowedDays,
       neighbourId: this.userId,
     };
-
+    console.log(authRange,'iddelvecino')
     try {
       this.visitorService.setAuthRange(authRange);
       Swal.fire({
