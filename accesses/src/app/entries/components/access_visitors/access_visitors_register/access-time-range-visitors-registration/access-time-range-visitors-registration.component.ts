@@ -330,7 +330,7 @@ export class AccessTimeRangeVisitorsRegistrationComponent implements OnInit, OnD
       allowedDays: this._allowedDays,
       neighbourId: this.userId,
     };
-
+    console.log(authRange,'iddelvecino')
     try {
       this.visitorService.setAuthRange(authRange);
       // Swal.fire({
