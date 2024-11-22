@@ -1,0 +1,26 @@
+.nav-link:hover {
+    background-color: #6c757d;
+}
+
+.side-compressed {
+    width: 55px;
+}
+
+.side-expanded {
+    width: 210px;
+}
+
+.animation {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+
+.custom-scroll {
+    overflow: auto;
+    scrollbar-width: none;
+}
+
+.custom-scroll::-webkit-scrollbar {
+    display: none;
+}
